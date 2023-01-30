@@ -9,12 +9,18 @@ class DevEnv:
 		"deployer",
 		"test_environment",
 	)
-	def __init__(self, name, tools):
-		self.name = name
-		self.tools = tools
+	def __init__(self, descriptor):
+		self.descriptor = descriptor
 
-	def print_info(self):
-		print("Dev Env name: " + self.name )
+	def debug_print(self):
+		print("Dev Env name: " + self.descriptor["name"] )
+		print("Available tools: ")
+
+		for tool in self.descriptor["tools"]:
+			print("\tType\t\t\t: " + tool["type"])
+			print("\tToolinfo\t\t: " + tool["tool_info"])
+			print("\tImage name\t\t: " + tool["image_name"])
+			print("\tImage version\t\t: " + tool["image_version"])
 
 if __name__ == "__main__":
 	#Get the raw json file.
@@ -24,8 +30,9 @@ if __name__ == "__main__":
 	#Parse the json file.
 	dev_env_json_deserialized = json.load(dev_env_json)
 
-	print(dev_env_json_deserialized["version"])
+	print("dev_env.json version: " + dev_env_json_deserialized["version"])
+	print("\r\n")
 
 	for dev_env_descriptor in dev_env_json_deserialized["development_environments"]:
-		dev_env = DevEnv(dev_env_descriptor["name"], dev_env_descriptor["tools"])
-		dev_env.print_info()
+		dev_env = DevEnv(dev_env_descriptor)
+		dev_env.debug_print()
