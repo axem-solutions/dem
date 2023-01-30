@@ -7,9 +7,16 @@ class DevEnv:
 		"toolchain",
 		"debugger",
 		"deployer",
-		"test_environment",
+		"test_framework",
 	)
+
+	def _check_tool_type_support(self, descriptor):
+		for tool in descriptor["tools"]:
+			if tool["type"] not in self.supported_tool_types:
+				raise LookupError("The following tool type is not supported: " + tool["type"])
+
 	def __init__(self, descriptor):
+		self._check_tool_type_support(descriptor)
 		self.descriptor = descriptor
 
 	def debug_print(self):
