@@ -1,5 +1,5 @@
-import os
-import json
+"""This module represents the Development Environments."""
+# dem/dev_env.py
 
 class DevEnv:
 	supported_tool_types = ( 
@@ -19,6 +19,9 @@ class DevEnv:
 		self._check_tool_type_support(descriptor)
 		self.descriptor = descriptor
 
+	def validate(self, images):
+		pass
+
 	def debug_print(self):
 		print("Dev Env name: " + self.descriptor["name"] )
 		print("Available tools: ")
@@ -29,17 +32,10 @@ class DevEnv:
 			print("\tImage name\t\t: " + tool["image_name"])
 			print("\tImage version\t\t: " + tool["image_version"])
 
-if __name__ == "__main__":
-	#Get the raw json file.
-	dev_env_json_path = os.path.expanduser('~') + "/.config/axem/dev_env.json"
-	dev_env_json = open(dev_env_json_path, "r")
+class DevEnvSetup:
+	def __init__(self, dev_env_json_deserialized):
+		self.version = dev_env_json_deserialized["version"]
+		self.dev_envs = []
 
-	#Parse the json file.
-	dev_env_json_deserialized = json.load(dev_env_json)
-
-	print("dev_env.json version: " + dev_env_json_deserialized["version"])
-	print("\r\n")
-
-	for dev_env_descriptor in dev_env_json_deserialized["development_environments"]:
-		dev_env = DevEnv(dev_env_descriptor)
-		dev_env.debug_print()
+		for dev_env_descriptor in dev_env_json_deserialized["development_environments"]:
+			self.dev_envs.append(DevEnv(dev_env_descriptor))
