@@ -17,20 +17,17 @@ class DevEnv:
 
 	def __init__(self, descriptor):
 		self._check_tool_type_support(descriptor)
-		self.descriptor = descriptor
+		self.name = descriptor["name"]
+		self.tools = descriptor["tools"]
 
 	def validate(self, images):
-		pass
-
-	def debug_print(self):
-		print("Dev Env name: " + self.descriptor["name"] )
-		print("Available tools: ")
-
-		for tool in self.descriptor["tools"]:
-			print("\tType\t\t\t: " + tool["type"])
-			print("\tToolinfo\t\t: " + tool["tool_info"])
-			print("\tImage name\t\t: " + tool["image_name"])
-			print("\tImage version\t\t: " + tool["image_version"])
+		checked_images = {}
+		for tool in self.tools:
+			if tool["image_name"] in images:
+				checked_images[tool["image_name"]] = "present"
+			else:
+				checked_images[tool["image_name"]] = "missing"
+		return checked_images
 
 class DevEnvSetup:
 	def __init__(self, dev_env_json_deserialized):

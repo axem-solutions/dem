@@ -7,6 +7,7 @@ from dem import __app_name__, __version__, dev_env_setup
 import os
 import json
 from pathlib import Path
+import docker
 
 typer_app = typer.Typer()
 
@@ -21,8 +22,25 @@ def list():
 
 	dev_env_setup_instance = dev_env_setup.DevEnvSetup(dev_env_json_deserialized)
 
+	client = docker.from_env()
+
+	columns = (
+		"Development Environment\t",
+		"| Status",
+	)
+	header = "".join(columns)
+	typer.secho( header, bold=True)
+	typer.echo( "-" * len(header))
+
 	for dev_env in dev_env_setup_instance.dev_envs:
-		dev_env.debug_print()
+		checked_images = dev_env.validate(client.images.list())
+		typer.secho(f"{dev_env.name}{(len(columns[0]) - len(dev_env.name) - 2) * ' '}| ")
+		if "missing" in checked_images.values():
+			typer.secho(f"✗{(len(columns[1]) - 3) * ' '}", fg=typer.colors.RED)
+		else:
+			typer.secho(f"✓{(len(columns[1]) - 3) * ' '}", fg=typer.colors.GREEN)
+
+	typer.echo( "-" * len(header))
 
 def _version_callback(value: bool) -> None:
 	if value:
