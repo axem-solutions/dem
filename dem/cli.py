@@ -8,8 +8,11 @@ import os
 import json
 from pathlib import Path
 import docker
+from rich.console import Console
+from rich.table import Table
 
 typer_app = typer.Typer()
+console = Console()
 
 @typer_app.command()
 def list():
@@ -19,28 +22,29 @@ def list():
 
 	#Parse the json file.
 	dev_env_json_deserialized = json.load(dev_env_json)
-
 	dev_env_setup_instance = dev_env_setup.DevEnvSetup(dev_env_json_deserialized)
 
 	client = docker.from_env()
 
-	columns = (
-		"Development Environment\t",
-		"| Status",
-	)
-	header = "".join(columns)
-	typer.secho( header, bold=True)
-	typer.echo( "-" * len(header))
+	table = Table()
+	table.add_column("Development Environment")
+	table.add_column("Status")
+
+	local_image_tags = []
+
+	for image in client.images.list():
+		for tag in image.tags:
+			local_image_tags.append(tag)
 
 	for dev_env in dev_env_setup_instance.dev_envs:
-		checked_images = dev_env.validate(client.images.list())
-		typer.secho(f"{dev_env.name}{(len(columns[0]) - len(dev_env.name) - 2) * ' '}| ")
+		checked_images = dev_env.validate(local_image_tags)
 		if "missing" in checked_images.values():
-			typer.secho(f"✗{(len(columns[1]) - 3) * ' '}", fg=typer.colors.RED)
+			print_validation_result = "[red]✗ Missing images[/]"
 		else:
-			typer.secho(f"✓{(len(columns[1]) - 3) * ' '}", fg=typer.colors.GREEN)
+			print_validation_result = "[green]✓[/]"
+		table.add_row(dev_env.name, print_validation_result)
 
-	typer.echo( "-" * len(header))
+	console.print(table)
 
 def _version_callback(value: bool) -> None:
 	if value:

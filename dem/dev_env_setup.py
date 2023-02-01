@@ -20,10 +20,11 @@ class DevEnv:
 		self.name = descriptor["name"]
 		self.tools = descriptor["tools"]
 
-	def validate(self, images):
+	def validate(self, local_images):
 		checked_images = {}
 		for tool in self.tools:
-			if tool["image_name"] in images:
+			tool_image = tool["image_name"] + ':' + tool["image_version"]
+			if tool_image in local_images:
 				checked_images[tool["image_name"]] = "present"
 			else:
 				checked_images[tool["image_name"]] = "missing"
