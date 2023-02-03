@@ -1,27 +1,22 @@
 """This module provides the CLI."""
-# dem/cli.py
+# dem/main.py
 
 from typing import Optional
 import typer
-from dem import __app_name__, __version__, dev_env_setup
-import os
-import json
-from pathlib import Path
-import docker
+from dem import __app_name__, __version__
+from typing import Optional
 from rich.console import Console
 from rich.table import Table
+import dem.core.dev_env_setup as dev_env_setup
+import docker
+import dem.core.data_management as data_management
 
-typer_app = typer.Typer()
+dem_typer_cli = typer.Typer()
 console = Console()
 
-@typer_app.command()
+@dem_typer_cli.command()
 def list():
-	#Get the raw json file.
-	dev_env_json_path = Path(os.path.expanduser('~') + "/.config/axem/dev_env.json")
-	dev_env_json = open(dev_env_json_path, "r")
-
-	#Parse the json file.
-	dev_env_json_deserialized = json.load(dev_env_json)
+	dev_env_json_deserialized = data_management.get_deserialized_dev_env_json()
 	dev_env_setup_instance = dev_env_setup.DevEnvSetup(dev_env_json_deserialized)
 
 	client = docker.from_env()
@@ -46,12 +41,13 @@ def list():
 
 	console.print(table)
 
+
 def _version_callback(value: bool) -> None:
 	if value:
 		typer.echo(f"{__app_name__} v{__version__}")
 		raise typer.Exit()
 
-@typer_app.callback()
+@dem_typer_cli.callback()
 def main(
 	version: Optional[bool] = typer.Option(
 		None,
