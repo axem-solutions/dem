@@ -86,19 +86,36 @@ test_dev_env_json = """{
 }
 """
 
+test_empty_dev_env_json = """{
+	"version": "0.1",
+	"development_environments": []
+}
+"""
 @patch("dem.cli.main.data_management.get_deserialized_dev_env_json")
-def test_list(mock_get_deserialized_dev_env_json):
-
+def test_list_with_valid_dev_env_json(mock_get_deserialized_dev_env_json):
 	expected_table = Table()
 	expected_table.add_column("Development Environment")
 	expected_table.add_column("Status")
 	expected_table.add_row("demo", "[green]✓[/]")
 	expected_table.add_row("nagy_cica_project", "[red]✗ Missing images[/]")
-	console = Console(file=io.StringIO(), width=120)
+	console = Console(file=io.StringIO())
 	console.print(expected_table)
 	expected_output = console.file.getvalue()
 
 	mock_get_deserialized_dev_env_json.return_value = json.loads(test_dev_env_json)
+
+	result = runner.invoke(main.dem_typer_cli, "list")
+
+	assert result.exit_code == 0
+	assert result.stdout == expected_output 
+
+@patch("dem.cli.main.data_management.get_deserialized_dev_env_json")
+def test_list_with_empty_dev_env_json(mock_get_deserialized_dev_env_json):
+	console = Console(file=io.StringIO())
+	console.print("[yellow]No installed Development Environments.[/]")
+	expected_output = console.file.getvalue()
+
+	mock_get_deserialized_dev_env_json.return_value = json.loads(test_empty_dev_env_json)
 
 	result = runner.invoke(main.dem_typer_cli, "list")
 
