@@ -14,9 +14,8 @@ def list() -> None:
     list_command.execute()
 
 @dem_typer_cli.command()
-def info() -> None:
-    print("cicaaa")
-    info_command.execute()
+def info(dev_env_name: str) -> None:
+    info_command.execute(dev_env_name)
 
 def _version_callback(value: bool) -> None:
     if value:

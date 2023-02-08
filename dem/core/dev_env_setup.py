@@ -3,35 +3,33 @@
 
 class DevEnv:
 	supported_tool_types = ( 
-		"build_system",
+		"build system",
 		"toolchain",
 		"debugger",
 		"deployer",
-		"test_framework",
+		"test framework",
 	)
 
-	def _check_tool_type_support(self, descriptor):
+	def _check_tool_type_support(self, descriptor: dict):
 		for tool in descriptor["tools"]:
 			if tool["type"] not in self.supported_tool_types:
-				raise LookupError("The following tool type is not supported: " + tool["type"])
+				raise LookupError("Error in dev_env.json. The following tool type is not supported: " + tool["type"])
 
-	def __init__(self, descriptor):
+	def __init__(self, descriptor: dict):
 		self._check_tool_type_support(descriptor)
 		self.name = descriptor["name"]
 		self.tools = descriptor["tools"]
 
-	def validate(self, local_images):
-		checked_images = {}
+	def validate(self, local_images: list):
 		for tool in self.tools:
 			tool_image = tool["image_name"] + ':' + tool["image_version"]
 			if tool_image in local_images:
-				checked_images[tool["image_name"]] = "present"
+				tool["is_image_available"] = True
 			else:
-				checked_images[tool["image_name"]] = "missing"
-		return checked_images
+				tool["is_image_available"] = False
 
 class DevEnvSetup:
-	def __init__(self, dev_env_json_deserialized):
+	def __init__(self, dev_env_json_deserialized: dict):
 		self.version = dev_env_json_deserialized["version"]
 		self.dev_envs = []
 

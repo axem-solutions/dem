@@ -8,88 +8,10 @@ from rich.console import Console
 from rich.table import Table
 from unittest.mock import patch
 import json
+import tests.cli.test_data as test_data
 
 runner = CliRunner()
 
-test_dev_env_json = """{
-    "version": "0.1",
-    "development_environments": [{
-            "name": "demo",
-            "tools": [{
-                    "type": "build_system",
-                    "tool_info": "gcc-arm-none-eabi 10.3-2021.10",
-                    "image_name": "make_gnu_arm",
-                    "image_version": "latest"
-                },
-                {
-                    "type": "toolchain",
-                    "tool_info": "gcc-arm-none-eabi 10.3-2021.10",
-                    "image_name": "make_gnu_arm",
-                    "image_version": "latest"
-                },
-                {
-                    "type": "debugger",
-                    "tool_info": "",
-                    "image_name": "stlink_org",
-                    "image_version": "latest"
-                },
-                {
-                    "type": "deployer",
-                    "tool_info": "",
-                    "image_name": "stlink_org",
-                    "image_version": "latest"
-                },
-                {
-                    "type": "test_framework",
-                    "tool_info": "",
-                    "image_name": "cpputest",
-                    "image_version": "latest"
-                }
-            ]
-        },
-        {
-            "name": "nagy_cica_project",
-            "tools": [{
-                    "type": "build_system",
-                    "tool_info": "",
-                    "image_name": "bazel",
-                    "image_version": "latest"
-                },
-                {
-                    "type": "toolchain",
-                    "tool_info": "gcc-arm-none-eabi 10.3-2021.10",
-                    "image_name": "gnu_arm",
-                    "image_version": "latest"
-                },
-                {
-                    "type": "debugger",
-                    "tool_info": "",
-                    "image_name": "jlink",
-                    "image_version": "latest"
-                },
-                {
-                    "type": "deployer",
-                    "tool_info": "",
-                    "image_name": "jlink",
-                    "image_version": "latest"
-                },
-                {
-                    "type": "test_framework",
-                    "tool_info": "",
-                    "image_name": "cpputest",
-                    "image_version": "latest"
-                }
-            ]
-        }
-    ]
-}
-"""
-
-test_empty_dev_env_json = """{
-    "version": "0.1",
-    "development_environments": []
-}
-"""
 @patch("dem.cli.list_command.data_management.get_deserialized_dev_env_json")
 def test_list_with_valid_dev_env_json(mock_get_deserialized_dev_env_json):
     expected_table = Table()
@@ -101,7 +23,7 @@ def test_list_with_valid_dev_env_json(mock_get_deserialized_dev_env_json):
     console.print(expected_table)
     expected_output = console.file.getvalue()
 
-    mock_get_deserialized_dev_env_json.return_value = json.loads(test_dev_env_json)
+    mock_get_deserialized_dev_env_json.return_value = json.loads(test_data.dev_env_json)
 
     result = runner.invoke(main.dem_typer_cli, "list")
 
@@ -117,7 +39,7 @@ def test_list_with_empty_dev_env_json(mock_get_deserialized_dev_env_json):
     console.print("[yellow]No installed Development Environments.[/]")
     expected_output = console.file.getvalue()
 
-    mock_get_deserialized_dev_env_json.return_value = json.loads(test_empty_dev_env_json)
+    mock_get_deserialized_dev_env_json.return_value = json.loads(test_data.empty_dev_env_json)
 
     result = runner.invoke(main.dem_typer_cli, "list")
 
