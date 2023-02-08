@@ -7,7 +7,7 @@ import docker
 from rich.console import Console
 from rich.table import Table
 import io
-import tests.cli.test_data as test_data
+import tests.test_data as test_data
 import json
 
 runner = CliRunner()
@@ -33,18 +33,29 @@ def get_test_image_list() -> list[mockImage]:
 test_docker_client = docker.from_env()
 
 @patch("dem.cli.info_command.data_management.get_deserialized_dev_env_json")
-@patch("docker.from_env")
-def test_info_arg_demo(mock_docker_from_env, mock_get_deserialized_dev_env_json):
+@patch("dem.cli.info_command.image_management.get_local_image_tags")
+def test_info_arg_demo(mock_get_local_image_tags, 
+                        mock_get_deserialized_dev_env_json):
+    test_image_tags = [
+    "alpine:latest",
+    "make_gnu_arm:v1.0.0",
+    "stlink_org:latest", 
+    "stlink_org:v1.0.0",
+    "cpputest:latest",
+    "make_gnu_arm:latest", 
+    "make_gnu_arm:v0.1.0", 
+    "make_gnu_arm:v1.1.0",
+    "debian:latest",
+    "ubuntu:latest",
+    "hello-world:latest",
+    ]
     #Mocks
     mock_get_deserialized_dev_env_json.return_value = json.loads(test_data.dev_env_json)
-    test_docker_client = MagicMock()
-    mock_docker_from_env.return_value = test_docker_client
-    test_docker_client.images.list.return_value = get_test_image_list()
+    mock_get_local_image_tags.return_value = test_image_tags
 
     runner_result = runner.invoke(main.dem_typer_cli, ["info", "demo"], color=True)
 
     mock_get_deserialized_dev_env_json.assert_called_once()
-    test_docker_client.images.list.assert_called_once()
 
     expected_table = Table()
     expected_table.add_column("Type")
@@ -64,18 +75,29 @@ def test_info_arg_demo(mock_docker_from_env, mock_get_deserialized_dev_env_json)
 
 
 @patch("dem.cli.info_command.data_management.get_deserialized_dev_env_json")
-@patch("docker.from_env")
-def test_info_arg_nagy_cica_project(mock_docker_from_env, mock_get_deserialized_dev_env_json):
+@patch("dem.cli.info_command.image_management.get_local_image_tags")
+def test_info_arg_nagy_cica_project(mock_get_local_image_tags, 
+                                    mock_get_deserialized_dev_env_json):
+    test_image_tags = [
+    "alpine:latest",
+    "make_gnu_arm:v1.0.0",
+    "stlink_org:latest", 
+    "stlink_org:v1.0.0",
+    "cpputest:latest",
+    "make_gnu_arm:latest", 
+    "make_gnu_arm:v0.1.0", 
+    "make_gnu_arm:v1.1.0",
+    "debian:latest",
+    "ubuntu:latest",
+    "hello-world:latest",
+    ]
     #Mocks
     mock_get_deserialized_dev_env_json.return_value = json.loads(test_data.dev_env_json)
-    test_docker_client = MagicMock()
-    mock_docker_from_env.return_value = test_docker_client
-    test_docker_client.images.list.return_value = get_test_image_list()
+    mock_get_local_image_tags.return_value = test_image_tags
 
     runner_result = runner.invoke(main.dem_typer_cli, ["info", "nagy_cica_project"], color=True)
 
     mock_get_deserialized_dev_env_json.assert_called_once()
-    test_docker_client.images.list.assert_called_once()
 
     expected_table = Table()
     expected_table.add_column("Type")

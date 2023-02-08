@@ -1,8 +1,6 @@
+from dem.core import data_management, dev_env_setup, image_management
 from rich.console import Console
 from rich.table import Table
-import dem.core.dev_env_setup as dev_env_setup
-import docker
-import dem.core.data_management as data_management
 
 console = Console()
 
@@ -26,14 +24,7 @@ def print_list_table(dev_envs: list, local_image_tags: list) -> None:
 def execute() -> None:
     dev_env_json_deserialized = data_management.get_deserialized_dev_env_json()
     dev_env_setup_instance = dev_env_setup.DevEnvSetup(dev_env_json_deserialized)
-
-    client = docker.from_env()
-
-    local_image_tags = []
-
-    for image in client.images.list():
-        for tag in image.tags:
-            local_image_tags.append(tag)
+    local_image_tags = image_management.get_local_image_tags()
 
     if dev_env_setup_instance.dev_envs:
         print_list_table(dev_env_setup_instance.dev_envs, local_image_tags)

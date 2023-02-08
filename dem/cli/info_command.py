@@ -1,6 +1,4 @@
-import dem.core.data_management as data_management
-import dem.core.dev_env_setup as dev_env_setup
-import docker 
+from dem.core import data_management, dev_env_setup, image_management
 from rich.console import Console
 from rich.table import Table
 
@@ -23,14 +21,7 @@ def print_info(dev_env: dev_env_setup.DevEnv, local_image_tags: list):
 def execute(dev_env_name: str) -> None:
     dev_env_json_deserialized = data_management.get_deserialized_dev_env_json()
     dev_env_setup_instance = dev_env_setup.DevEnvSetup(dev_env_json_deserialized)
-
-    docker_client = docker.from_env()
-
-    local_image_tags = []
-
-    for image in docker_client.images.list():
-        for tag in image.tags:
-            local_image_tags.append(tag)
+    local_image_tags = image_management.get_local_image_tags()
 
     for dev_env in dev_env_setup_instance.dev_envs:
         if dev_env.name == dev_env_name:

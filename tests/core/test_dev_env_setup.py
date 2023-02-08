@@ -3,7 +3,7 @@
 
 import pytest
 import dem.core.dev_env_setup as dev_env_setup
-import tests.cli.test_data as test_data
+import tests.test_data as test_data
 import json
 
 def test_invalid_dev_env_json_expect_error():
