@@ -62,6 +62,7 @@ def test_info_arg_demo(mock_docker_from_env, mock_get_deserialized_dev_env_json)
 
     assert expected_output == runner_result.stdout
 
+
 @patch("dem.cli.info_command.data_management.get_deserialized_dev_env_json")
 @patch("docker.from_env")
 def test_info_arg_nagy_cica_project(mock_docker_from_env, mock_get_deserialized_dev_env_json):
