@@ -10,7 +10,7 @@ import io
 import tests.test_data as test_data
 import json
 
-runner = CliRunner()
+runner = CliRunner(mix_stderr=False)
 
 class mockImage:
     def __init__(self, tags: list[str]):
@@ -114,3 +114,13 @@ def test_info_arg_nagy_cica_project(mock_get_local_image_tags,
     assert 0 == runner_result.exit_code
 
     assert expected_output == runner_result.stdout
+
+def test_info_arg_invalid():
+    runner_result = runner.invoke(main.dem_typer_cli, ["info", "not_existing_environment"])
+
+    assert 0 == runner_result.exit_code
+
+    console = Console(file=io.StringIO())
+    console.print("[red]Error: Unknown Development Environment.[/]")
+    expected_output = console.file.getvalue()
+    assert expected_output == runner_result.stderr

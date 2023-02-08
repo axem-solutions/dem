@@ -26,3 +26,6 @@ def execute(dev_env_name: str) -> None:
     for dev_env in dev_env_setup_instance.dev_envs:
         if dev_env.name == dev_env_name:
             print_info(dev_env, local_image_tags)
+    else:
+        stderr = Console(stderr=True)
+        stderr.print("[red]Error: Unknown Development Environment.[/]")
