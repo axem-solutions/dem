@@ -1,3 +1,6 @@
+"""info CLI command implementation."""
+# dem/cli/info_command.py
+
 from dem.core import data_management, dev_env_setup, image_management
 from rich.console import Console
 from rich.table import Table

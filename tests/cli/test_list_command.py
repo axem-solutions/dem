@@ -1,5 +1,5 @@
-
-# tests/test_dem.py
+"""Unit tests for the list CLI command."""
+# tests/cli/test_list_command.py
 
 import io
 import dem.cli.main as main

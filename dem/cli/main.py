@@ -1,5 +1,5 @@
 """This module provides the CLI."""
-# dem/main.py
+# dem/cli/main.py
 
 from typing import Optional
 import typer

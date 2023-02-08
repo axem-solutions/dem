@@ -1,3 +1,4 @@
+"""Unit tests for the info CLI command."""
 # tests/cli/test_info_command.py
 
 from typer.testing import CliRunner

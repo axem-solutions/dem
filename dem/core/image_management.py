@@ -1,3 +1,6 @@
+"""Docker image management."""
+# dem/core/image_management.py
+
 import docker
 
 def get_local_image_tags() -> list[str]:

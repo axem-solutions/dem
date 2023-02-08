@@ -1,3 +1,6 @@
+"""Unit test for the image_management."""
+# tests/core/test_image_management.py
+
 import dem.core.image_management as image_management
 from unittest.mock import patch, MagicMock
 
