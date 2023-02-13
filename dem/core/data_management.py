@@ -1,3 +1,6 @@
+"""dev_env.json handling."""
+# dem/core/data_management.py
+
 from pathlib import Path
 import os
 import json
