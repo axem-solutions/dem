@@ -8,4 +8,6 @@
 *.hex
 *.map
 *.lst
+*__pycache__
 build/
+.vscode/
