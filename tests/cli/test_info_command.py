@@ -122,6 +122,6 @@ def test_info_arg_invalid():
     assert 0 == runner_result.exit_code
 
     console = Console(file=io.StringIO())
-    console.print("[red]Error: Unknown Development Environment.[/]")
+    console.print("[red]Error: Unknown Development Environment: not_existing_environment[/]")
     expected_output = console.file.getvalue()
     assert expected_output == runner_result.stderr
