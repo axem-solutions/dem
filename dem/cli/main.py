@@ -1,30 +1,22 @@
 """This module provides the CLI."""
 # dem/cli/main.py
 
-from typing import Optional
 import typer
 from dem import __app_name__, __version__
-import dem.cli.list_command as list_command
-import dem.cli.info_command as info_command
 
-dem_typer_cli = typer.Typer()
+import dem.cli.dev_env.command_group as dev_env_command_group
 
-@dem_typer_cli.command()
-def list() -> None:
-    list_command.execute()
-
-@dem_typer_cli.command()
-def info(dev_env_name: str) -> None:
-    info_command.execute(dev_env_name)
+typer_cli = typer.Typer()
+typer_cli.add_typer(dev_env_command_group.typer_cli, name="dev_env")
 
 def _version_callback(value: bool) -> None:
     if value:
         typer.echo(f"{__app_name__} v{__version__}")
         raise typer.Exit()
 
-@dem_typer_cli.callback()
+@typer_cli.callback()
 def main(
-    version: Optional[bool] = typer.Option(
+    version: bool = typer.Option(
         None,
         "--version",
         "-v",

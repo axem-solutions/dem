@@ -1,4 +1,3 @@
-"""Unit tests for running the dem in CLI mode without commands."""
 from dem import __app_name__, __version__
 from typer.testing import CliRunner
 import dem.cli.main as main

@@ -6,7 +6,7 @@ from dem.cli.console import stdout
 import dem.cli.main 
 
 def main():
-    dem.cli.main.dem_typer_cli(prog_name=__app_name__)
+    dem.cli.main.typer_cli(prog_name=__app_name__)
 
 if __name__ == "__main__":
     try:
