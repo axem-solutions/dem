@@ -1,4 +1,4 @@
-"""dev_env command group."""
+"""dev_env command group: manage the Dev Envs."""
 # dem/cli/dev_env/command_group.py
 
 import typer
