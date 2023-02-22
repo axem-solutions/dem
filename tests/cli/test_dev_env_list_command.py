@@ -8,7 +8,7 @@ from rich.console import Console
 from rich.table import Table
 from unittest.mock import patch
 import json
-import tests.test_data as test_data
+import tests.fake_data as fake_data
 
 runner = CliRunner()
 
@@ -29,7 +29,7 @@ def test_list_with_valid_dev_env_json(mock_get_local_image_tags,
     "ubuntu:latest",
     "hello-world:latest",
     ]
-    mock_get_deserialized_dev_env_json.return_value = json.loads(test_data.dev_env_json)
+    mock_get_deserialized_dev_env_json.return_value = json.loads(fake_data.dev_env_json)
     mock_get_local_image_tags.return_value = test_image_tags
 
     result = runner.invoke(main.typer_cli, ["dev_env", "list"])
@@ -67,7 +67,7 @@ def test_list_with_empty_dev_env_json(mock_get_local_image_tags,
     "hello-world:latest",
     ]
 
-    mock_get_deserialized_dev_env_json.return_value = json.loads(test_data.empty_dev_env_json)
+    mock_get_deserialized_dev_env_json.return_value = json.loads(fake_data.empty_dev_env_json)
     mock_get_local_image_tags.return_value = test_image_tags
 
     result = runner.invoke(main.typer_cli, ["dev_env", "list"])

@@ -8,7 +8,7 @@ import docker
 from rich.console import Console
 from rich.table import Table
 import io
-import tests.test_data as test_data
+import tests.fake_data as fake_data
 import json
 
 runner = CliRunner(mix_stderr=False)
@@ -51,7 +51,7 @@ def test_info_arg_demo(mock_get_local_image_tags,
     "hello-world:latest",
     ]
     #Mocks
-    mock_get_deserialized_dev_env_json.return_value = json.loads(test_data.dev_env_json)
+    mock_get_deserialized_dev_env_json.return_value = json.loads(fake_data.dev_env_json)
     mock_get_local_image_tags.return_value = test_image_tags
 
     runner_result = runner.invoke(main.typer_cli, ["dev_env", "info", "demo"], color=True)
@@ -93,7 +93,7 @@ def test_info_arg_nagy_cica_project(mock_get_local_image_tags,
     "hello-world:latest",
     ]
     #Mocks
-    mock_get_deserialized_dev_env_json.return_value = json.loads(test_data.dev_env_json)
+    mock_get_deserialized_dev_env_json.return_value = json.loads(fake_data.dev_env_json)
     mock_get_local_image_tags.return_value = test_image_tags
 
     runner_result = runner.invoke(main.typer_cli, ["dev_env", "info", "nagy_cica_project"], color=True)
