@@ -12,8 +12,8 @@ import tests.fake_data as fake_data
 
 runner = CliRunner()
 
-@patch("dem.cli.dev_env.list_command.data_management.get_deserialized_dev_env_json")
-@patch("dem.cli.dev_env.list_command.image_management.get_local_image_tags")
+@patch("dem.cli.command.list_command.data_management.get_deserialized_dev_env_json")
+@patch("dem.cli.command.list_command.image_management.get_local_image_tags")
 def test_list_with_valid_dev_env_json(mock_get_local_image_tags,
                                         mock_get_deserialized_dev_env_json):
     test_image_tags = [
@@ -32,7 +32,7 @@ def test_list_with_valid_dev_env_json(mock_get_local_image_tags,
     mock_get_deserialized_dev_env_json.return_value = json.loads(fake_data.dev_env_json)
     mock_get_local_image_tags.return_value = test_image_tags
 
-    result = runner.invoke(main.typer_cli, ["dev_env", "list"])
+    result = runner.invoke(main.typer_cli, ["list"])
 
     mock_get_deserialized_dev_env_json.assert_called_once()
     mock_get_local_image_tags.assert_called_once()
@@ -49,8 +49,8 @@ def test_list_with_valid_dev_env_json(mock_get_local_image_tags,
     expected_output = console.file.getvalue()
     assert expected_output == result.stdout
 
-@patch("dem.cli.dev_env.list_command.data_management.get_deserialized_dev_env_json")
-@patch("dem.cli.dev_env.list_command.image_management.get_local_image_tags")
+@patch("dem.cli.command.list_command.data_management.get_deserialized_dev_env_json")
+@patch("dem.cli.command.list_command.image_management.get_local_image_tags")
 def test_list_with_empty_dev_env_json(mock_get_local_image_tags,
                                         mock_get_deserialized_dev_env_json):
     test_image_tags = [
@@ -70,7 +70,7 @@ def test_list_with_empty_dev_env_json(mock_get_local_image_tags,
     mock_get_deserialized_dev_env_json.return_value = json.loads(fake_data.empty_dev_env_json)
     mock_get_local_image_tags.return_value = test_image_tags
 
-    result = runner.invoke(main.typer_cli, ["dev_env", "list"])
+    result = runner.invoke(main.typer_cli, ["list"])
 
     mock_get_deserialized_dev_env_json.assert_called_once()
 

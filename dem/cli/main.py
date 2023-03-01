@@ -4,10 +4,17 @@
 import typer
 from dem import __app_name__, __version__
 
-import dem.cli.dev_env.command_group as dev_env_command_group
+from dem.cli.command import info_command, list_command
 
 typer_cli = typer.Typer()
-typer_cli.add_typer(dev_env_command_group.typer_cli, name="dev_env")
+
+@typer_cli.command()
+def list() -> None:
+    list_command.execute()
+
+@typer_cli.command()
+def info(dev_env_name: str) -> None:
+    info_command.execute(dev_env_name)
 
 def _version_callback(value: bool) -> None:
     if value:
