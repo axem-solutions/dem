@@ -22,7 +22,7 @@ class DevEnv:
     def _check_tool_type_support(self, descriptor: dict):
         for tool in descriptor["tools"]:
             if tool["type"] not in self.supported_tool_types:
-                raise LookupError("Error in dev_env.json. The following tool type is not supported: " + tool["type"])
+                raise InvalidDevEnvJson("The following tool type is not supported: " + tool["type"])
 
     def __init__(self, descriptor: dict):
         self._check_tool_type_support(descriptor)
@@ -48,7 +48,7 @@ class DevEnvSetup:
     def __dev_env_json_version_check(self):
         dev_env_json_major_version = int(self.version.split('.', 1)[0])
         if dev_env_json_major_version != __supported_dev_env_major_version__:
-            raise InvalidDevEnvJson("Error in dev_env.json: The dev_env.json version v1.0 is not supported.")
+            raise InvalidDevEnvJson("The dev_env.json version v1.0 is not supported.")
 
     def __init__(self, dev_env_json_deserialized: dict):
         self.version = dev_env_json_deserialized["version"]
