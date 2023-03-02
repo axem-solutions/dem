@@ -9,8 +9,9 @@ from dem.cli.command import info_command, list_command
 typer_cli = typer.Typer()
 
 @typer_cli.command()
-def list() -> None:
-    list_command.execute()
+def list(local: bool = typer.Option(False, help="Scope is the local host."),
+         env: bool = typer.Option(False, help="List the environments.")) -> None:
+    list_command.execute(local, env)
 
 @typer_cli.command()
 def info(dev_env_name: str) -> None:

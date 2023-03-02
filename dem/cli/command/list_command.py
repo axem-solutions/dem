@@ -2,7 +2,7 @@
 # dem/cli/list_command.py
 
 from dem.core import data_management, dev_env_setup, image_management
-from dem.cli.console import stdout
+from dem.cli.console import stdout, stderr
 from rich.table import Table
 
 def print_list_table(dev_envs: list, local_image_tags: list) -> None:
@@ -22,12 +22,19 @@ def print_list_table(dev_envs: list, local_image_tags: list) -> None:
 
     stdout.print(table)
 
-def execute() -> None:
-    dev_env_json_deserialized = data_management.get_deserialized_dev_env_json()
-    dev_env_setup_instance = dev_env_setup.DevEnvSetup(dev_env_json_deserialized)
-    local_image_tags = image_management.get_local_image_tags()
+def execute(local: bool, env: bool) -> None:
+    if (local == True) and (env == True):
+        dev_env_json_deserialized = data_management.get_deserialized_dev_env_json()
+        dev_env_setup_instance = dev_env_setup.DevEnvSetup(dev_env_json_deserialized)
+        local_image_tags = image_management.get_local_image_tags()
 
-    if dev_env_setup_instance.dev_envs:
-        print_list_table(dev_env_setup_instance.dev_envs, local_image_tags)
+        if dev_env_setup_instance.dev_envs:
+            print_list_table(dev_env_setup_instance.dev_envs, local_image_tags)
+        else:
+            stdout.print("[yellow]No installed Development Environments.[/]")
     else:
-        stdout.print("[yellow]No installed Development Environments.[/]")
+        stderr.print(\
+"""Usage: dem list [OPTIONS]
+Try 'dem list --help' for help.
+
+Error: You need to set the scope and what to list!""")
