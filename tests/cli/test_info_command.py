@@ -35,8 +35,8 @@ def get_test_image_list() -> list[mockImage]:
 
 test_docker_client = docker.from_env()
 
-@patch("dem.cli.dev_env.info_command.data_management.get_deserialized_dev_env_json")
-@patch("dem.cli.dev_env.info_command.image_management.get_local_image_tags")
+@patch("dem.cli.command.info_command.data_management.get_deserialized_dev_env_json")
+@patch("dem.cli.command.info_command.image_management.get_local_image_tags")
 def test_info_arg_demo(mock_get_local_image_tags, 
                         mock_get_deserialized_dev_env_json):
     test_image_tags = [
@@ -56,7 +56,7 @@ def test_info_arg_demo(mock_get_local_image_tags,
     mock_get_deserialized_dev_env_json.return_value = json.loads(fake_data.dev_env_json)
     mock_get_local_image_tags.return_value = test_image_tags
 
-    runner_result = runner.invoke(main.typer_cli, ["dev_env", "info", "demo"], color=True)
+    runner_result = runner.invoke(main.typer_cli, ["info", "demo"], color=True)
     mock_get_deserialized_dev_env_json.assert_called_once()
 
     expected_table = Table()
@@ -76,8 +76,8 @@ def test_info_arg_demo(mock_get_local_image_tags,
     assert expected_output == runner_result.stdout
 
 
-@patch("dem.cli.dev_env.info_command.data_management.get_deserialized_dev_env_json")
-@patch("dem.cli.dev_env.info_command.image_management.get_local_image_tags")
+@patch("dem.cli.command.info_command.data_management.get_deserialized_dev_env_json")
+@patch("dem.cli.command.info_command.image_management.get_local_image_tags")
 def test_info_arg_nagy_cica_project(mock_get_local_image_tags, 
                                     mock_get_deserialized_dev_env_json):
     test_image_tags = [
@@ -97,7 +97,7 @@ def test_info_arg_nagy_cica_project(mock_get_local_image_tags,
     mock_get_deserialized_dev_env_json.return_value = json.loads(fake_data.dev_env_json)
     mock_get_local_image_tags.return_value = test_image_tags
 
-    runner_result = runner.invoke(main.typer_cli, ["dev_env", "info", "nagy_cica_project"], color=True)
+    runner_result = runner.invoke(main.typer_cli, ["info", "nagy_cica_project"], color=True)
 
     mock_get_deserialized_dev_env_json.assert_called_once()
 
@@ -118,7 +118,7 @@ def test_info_arg_nagy_cica_project(mock_get_local_image_tags,
     assert expected_output == runner_result.stdout
 
 def test_info_arg_invalid():
-    runner_result = runner.invoke(main.typer_cli, ["dev_env", "info", "not_existing_environment"])
+    runner_result = runner.invoke(main.typer_cli, ["info", "not_existing_environment"])
 
     assert 0 == runner_result.exit_code
 
