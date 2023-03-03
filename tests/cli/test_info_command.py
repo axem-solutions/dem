@@ -11,6 +11,8 @@ import io
 import tests.fake_data as fake_data
 import json
 
+# In order to test stdout and stderr separately, the stderr can't be mixed into 
+# the stdout.
 runner = CliRunner(mix_stderr=False)
 
 class mockImage:
@@ -55,7 +57,6 @@ def test_info_arg_demo(mock_get_local_image_tags,
     mock_get_local_image_tags.return_value = test_image_tags
 
     runner_result = runner.invoke(main.typer_cli, ["dev_env", "info", "demo"], color=True)
-
     mock_get_deserialized_dev_env_json.assert_called_once()
 
     expected_table = Table()

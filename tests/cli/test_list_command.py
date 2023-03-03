@@ -10,11 +10,13 @@ from unittest.mock import patch
 import json
 import tests.fake_data as fake_data
 
-runner = CliRunner()
+# In order to test stdout and stderr separately, the stderr can't be mixed into 
+# the stdout.
+runner = CliRunner(mix_stderr=False)
 
-@patch("dem.cli.dev_env.list_command.data_management.get_deserialized_dev_env_json")
-@patch("dem.cli.dev_env.list_command.image_management.get_local_image_tags")
-def test_list_with_valid_dev_env_json(mock_get_local_image_tags,
+@patch("dem.cli.command.list_command.data_management.get_deserialized_dev_env_json")
+@patch("dem.cli.command.list_command.image_management.get_local_image_tags")
+def test_with_valid_dev_env_json(mock_get_local_image_tags,
                                         mock_get_deserialized_dev_env_json):
     test_image_tags = [
     "alpine:latest",
@@ -32,12 +34,12 @@ def test_list_with_valid_dev_env_json(mock_get_local_image_tags,
     mock_get_deserialized_dev_env_json.return_value = json.loads(fake_data.dev_env_json)
     mock_get_local_image_tags.return_value = test_image_tags
 
-    result = runner.invoke(main.typer_cli, ["dev_env", "list"])
+    runner_result = runner.invoke(main.typer_cli, ["list", "--local", "--env"])
 
     mock_get_deserialized_dev_env_json.assert_called_once()
     mock_get_local_image_tags.assert_called_once()
 
-    assert 0 == result.exit_code
+    assert 0 == runner_result.exit_code
 
     expected_table = Table()
     expected_table.add_column("Development Environment")
@@ -47,11 +49,11 @@ def test_list_with_valid_dev_env_json(mock_get_local_image_tags,
     console = Console(file=io.StringIO())
     console.print(expected_table)
     expected_output = console.file.getvalue()
-    assert expected_output == result.stdout
+    assert expected_output == runner_result.stdout
 
-@patch("dem.cli.dev_env.list_command.data_management.get_deserialized_dev_env_json")
-@patch("dem.cli.dev_env.list_command.image_management.get_local_image_tags")
-def test_list_with_empty_dev_env_json(mock_get_local_image_tags,
+@patch("dem.cli.command.list_command.data_management.get_deserialized_dev_env_json")
+@patch("dem.cli.command.list_command.image_management.get_local_image_tags")
+def test_with_empty_dev_env_json(mock_get_local_image_tags,
                                         mock_get_deserialized_dev_env_json):
     test_image_tags = [
     "alpine:latest",
@@ -70,13 +72,27 @@ def test_list_with_empty_dev_env_json(mock_get_local_image_tags,
     mock_get_deserialized_dev_env_json.return_value = json.loads(fake_data.empty_dev_env_json)
     mock_get_local_image_tags.return_value = test_image_tags
 
-    result = runner.invoke(main.typer_cli, ["dev_env", "list"])
+    runner_result = runner.invoke(main.typer_cli, ["list", "--local", "--env"])
 
     mock_get_deserialized_dev_env_json.assert_called_once()
 
-    assert 0 == result.exit_code
+    assert 0 == runner_result.exit_code
 
     console = Console(file=io.StringIO())
     console.print("[yellow]No installed Development Environments.[/]")
     expected_output = console.file.getvalue()
-    assert expected_output == result.stdout
+    assert expected_output == runner_result.stdout
+
+def test_without_options():
+    runner_result = runner.invoke(main.typer_cli, ["list"], color=True)
+    
+    assert 0 == runner_result.exit_code
+
+    console = Console(file=io.StringIO())
+    console.print(\
+"""Usage: dem list [OPTIONS]
+Try 'dem list --help' for help.
+
+Error: You need to set the scope and what to list!""")
+    expected_output = console.file.getvalue()
+    assert expected_output == runner_result.stderr
