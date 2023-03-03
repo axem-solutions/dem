@@ -2,10 +2,8 @@
 # dem/cli/list_command.py
 
 from dem.core import data_management, dev_env_setup, image_management
-from rich.console import Console
+from dem.cli.console import stdout
 from rich.table import Table
-
-console = Console()
 
 def print_list_table(dev_envs: list, local_image_tags: list) -> None:
     table = Table()
@@ -22,7 +20,7 @@ def print_list_table(dev_envs: list, local_image_tags: list) -> None:
             print_validation_result = "[green]✓[/]"
         table.add_row(dev_env.name, print_validation_result)
 
-    console.print(table)
+    stdout.print(table)
 
 def execute() -> None:
     dev_env_json_deserialized = data_management.get_deserialized_dev_env_json()
@@ -32,4 +30,4 @@ def execute() -> None:
     if dev_env_setup_instance.dev_envs:
         print_list_table(dev_env_setup_instance.dev_envs, local_image_tags)
     else:
-        console.print("[yellow]No installed Development Environments.[/]")
+        stdout.print("[yellow]No installed Development Environments.[/]")

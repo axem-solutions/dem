@@ -102,3 +102,6 @@ invalid_dev_env_json = """{
 	]
 }
 """
+invalid_version_dev_env_json = """{
+    "version": "1.0"
+}"""

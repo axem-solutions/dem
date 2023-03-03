@@ -3,12 +3,12 @@
 
 from typer.testing import CliRunner
 import dem.cli.main as main
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 import docker 
 from rich.console import Console
 from rich.table import Table
 import io
-import tests.test_data as test_data
+import tests.fake_data as fake_data
 import json
 
 runner = CliRunner(mix_stderr=False)
@@ -33,8 +33,8 @@ def get_test_image_list() -> list[mockImage]:
 
 test_docker_client = docker.from_env()
 
-@patch("dem.cli.info_command.data_management.get_deserialized_dev_env_json")
-@patch("dem.cli.info_command.image_management.get_local_image_tags")
+@patch("dem.cli.dev_env.info_command.data_management.get_deserialized_dev_env_json")
+@patch("dem.cli.dev_env.info_command.image_management.get_local_image_tags")
 def test_info_arg_demo(mock_get_local_image_tags, 
                         mock_get_deserialized_dev_env_json):
     test_image_tags = [
@@ -51,10 +51,10 @@ def test_info_arg_demo(mock_get_local_image_tags,
     "hello-world:latest",
     ]
     #Mocks
-    mock_get_deserialized_dev_env_json.return_value = json.loads(test_data.dev_env_json)
+    mock_get_deserialized_dev_env_json.return_value = json.loads(fake_data.dev_env_json)
     mock_get_local_image_tags.return_value = test_image_tags
 
-    runner_result = runner.invoke(main.dem_typer_cli, ["info", "demo"], color=True)
+    runner_result = runner.invoke(main.typer_cli, ["dev_env", "info", "demo"], color=True)
 
     mock_get_deserialized_dev_env_json.assert_called_once()
 
@@ -75,8 +75,8 @@ def test_info_arg_demo(mock_get_local_image_tags,
     assert expected_output == runner_result.stdout
 
 
-@patch("dem.cli.info_command.data_management.get_deserialized_dev_env_json")
-@patch("dem.cli.info_command.image_management.get_local_image_tags")
+@patch("dem.cli.dev_env.info_command.data_management.get_deserialized_dev_env_json")
+@patch("dem.cli.dev_env.info_command.image_management.get_local_image_tags")
 def test_info_arg_nagy_cica_project(mock_get_local_image_tags, 
                                     mock_get_deserialized_dev_env_json):
     test_image_tags = [
@@ -93,10 +93,10 @@ def test_info_arg_nagy_cica_project(mock_get_local_image_tags,
     "hello-world:latest",
     ]
     #Mocks
-    mock_get_deserialized_dev_env_json.return_value = json.loads(test_data.dev_env_json)
+    mock_get_deserialized_dev_env_json.return_value = json.loads(fake_data.dev_env_json)
     mock_get_local_image_tags.return_value = test_image_tags
 
-    runner_result = runner.invoke(main.dem_typer_cli, ["info", "nagy_cica_project"], color=True)
+    runner_result = runner.invoke(main.typer_cli, ["dev_env", "info", "nagy_cica_project"], color=True)
 
     mock_get_deserialized_dev_env_json.assert_called_once()
 
@@ -117,11 +117,11 @@ def test_info_arg_nagy_cica_project(mock_get_local_image_tags,
     assert expected_output == runner_result.stdout
 
 def test_info_arg_invalid():
-    runner_result = runner.invoke(main.dem_typer_cli, ["info", "not_existing_environment"])
+    runner_result = runner.invoke(main.typer_cli, ["dev_env", "info", "not_existing_environment"])
 
     assert 0 == runner_result.exit_code
 
     console = Console(file=io.StringIO())
-    console.print("[red]Error: Unknown Development Environment.[/]")
+    console.print("[red]Error: Unknown Development Environment: not_existing_environment[/]")
     expected_output = console.file.getvalue()
     assert expected_output == runner_result.stderr
