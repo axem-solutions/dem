@@ -25,5 +25,8 @@ def list_repos():
             print("\ttool name: " + description[0] + "\ttool version: " + description[1])
         print("")
 
+def pull_image():
+    pass
+
 if __name__ == "__main__":
     list_repos()

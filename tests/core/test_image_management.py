@@ -1,7 +1,7 @@
 """Unit test for the image_management."""
 # tests/core/test_image_management.py
 
-import dem.core.image_management as image_management
+import dem.core.container_engine as container_engine
 from unittest.mock import patch, MagicMock
 
 import docker
@@ -47,7 +47,7 @@ def test_get_local_image_tags(mock_docker_from_env):
     mock_docker_client.images.list.return_value = _get_test_image_tags_as_images(test_image_tags)
     mock_docker_from_env.return_value = mock_docker_client
 
-    assert expected_image_tags == image_management.get_local_image_tags()
+    assert expected_image_tags == container_engine.get_local_image_tags()
 
     mock_docker_from_env.assert_called_once()
     mock_docker_client.images.list.assert_called_once()
@@ -60,7 +60,7 @@ def test_get_local_image_tags_no_image_available(mock_docker_from_env):
     mock_docker_from_env.return_value = mock_docker_client
     mock_docker_client.images.list.return_value = _get_test_image_tags_as_images(test_image_tags)
 
-    assert expected_image_tags == image_management.get_local_image_tags()
+    assert expected_image_tags == container_engine.get_local_image_tags()
 
     mock_docker_from_env.assert_called_once()
     mock_docker_client.images.list.assert_called_once()
