@@ -1,18 +1,8 @@
 """Docker registry management."""
 # dem/core/registry.py
 
-import dxf
 import requests
 import json
-
-# def auth(registry_obj: dxf.DXFBase, response: requests.Response):
-#     registry_obj.authenticate(username="axemsolutions", password="",
-#                               response=response)
-
-# registry_obj = dxf.DXFBase("registry-1.docker.io/axemsolutions", auth)
-# for name in registry_obj.list_repos():
-#     print(name)
-
 
 def list_repos():
     r = requests.get("https://hub.docker.com/v2/repositories/axemsolutions")
@@ -24,9 +14,6 @@ def list_repos():
             description = description.split(':')
             print("\ttool name: " + description[0] + "\ttool version: " + description[1])
         print("")
-
-def pull_image():
-    pass
 
 if __name__ == "__main__":
     list_repos()
