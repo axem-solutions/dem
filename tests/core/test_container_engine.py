@@ -47,7 +47,8 @@ def test_get_local_image_tags(mock_docker_from_env):
     mock_docker_client.images.list.return_value = _get_test_image_tags_as_images(test_image_tags)
     mock_docker_from_env.return_value = mock_docker_client
 
-    assert expected_image_tags == container_engine.get_local_image_tags()
+    container_engine_obj = container_engine.ContainerEngine()
+    assert expected_image_tags == container_engine_obj.get_local_image_tags()
 
     mock_docker_from_env.assert_called_once()
     mock_docker_client.images.list.assert_called_once()
@@ -60,7 +61,8 @@ def test_get_local_image_tags_no_image_available(mock_docker_from_env):
     mock_docker_from_env.return_value = mock_docker_client
     mock_docker_client.images.list.return_value = _get_test_image_tags_as_images(test_image_tags)
 
-    assert expected_image_tags == container_engine.get_local_image_tags()
+    container_engine_obj = container_engine.ContainerEngine()
+    assert expected_image_tags == container_engine_obj.get_local_image_tags()
 
     mock_docker_from_env.assert_called_once()
     mock_docker_client.images.list.assert_called_once()

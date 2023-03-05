@@ -26,7 +26,8 @@ def execute(local: bool, env: bool) -> None:
     if (local == True) and (env == True):
         dev_env_json_deserialized = data_management.get_deserialized_dev_env_json()
         dev_env_setup_instance = dev_env_setup.DevEnvSetup(dev_env_json_deserialized)
-        local_image_tags = container_engine.get_local_image_tags()
+        container_engine_obj = container_engine.ContainerEngine()
+        local_image_tags = container_engine_obj.get_local_image_tags()
 
         if dev_env_setup_instance.dev_envs:
             print_list_table(dev_env_setup_instance.dev_envs, local_image_tags)

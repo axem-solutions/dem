@@ -3,7 +3,7 @@
 
 from typer.testing import CliRunner
 import dem.cli.main as main
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 import docker 
 from rich.console import Console
 from rich.table import Table
@@ -36,9 +36,8 @@ def get_test_image_list() -> list[mockImage]:
 test_docker_client = docker.from_env()
 
 @patch("dem.cli.command.info_command.data_management.get_deserialized_dev_env_json")
-@patch("dem.cli.command.info_command.image_management.get_local_image_tags")
-def test_info_arg_demo(mock_get_local_image_tags, 
-                        mock_get_deserialized_dev_env_json):
+@patch("dem.cli.command.info_command.container_engine.ContainerEngine")
+def test_info_arg_demo(mock_ContainerEngine, mock_get_deserialized_dev_env_json):
     test_image_tags = [
     "alpine:latest",
     "make_gnu_arm:v1.0.0",
@@ -54,7 +53,9 @@ def test_info_arg_demo(mock_get_local_image_tags,
     ]
     #Mocks
     mock_get_deserialized_dev_env_json.return_value = json.loads(fake_data.dev_env_json)
-    mock_get_local_image_tags.return_value = test_image_tags
+    mock_container_engine = MagicMock()
+    mock_container_engine.get_local_image_tags.return_value = test_image_tags
+    mock_ContainerEngine.return_value = mock_container_engine
 
     runner_result = runner.invoke(main.typer_cli, ["info", "demo"], color=True)
     mock_get_deserialized_dev_env_json.assert_called_once()
@@ -77,8 +78,8 @@ def test_info_arg_demo(mock_get_local_image_tags,
 
 
 @patch("dem.cli.command.info_command.data_management.get_deserialized_dev_env_json")
-@patch("dem.cli.command.info_command.image_management.get_local_image_tags")
-def test_info_arg_nagy_cica_project(mock_get_local_image_tags, 
+@patch("dem.cli.command.info_command.container_engine.ContainerEngine")
+def test_info_arg_nagy_cica_project(mock_ContainerEngine, 
                                     mock_get_deserialized_dev_env_json):
     test_image_tags = [
     "alpine:latest",
@@ -95,7 +96,9 @@ def test_info_arg_nagy_cica_project(mock_get_local_image_tags,
     ]
     #Mocks
     mock_get_deserialized_dev_env_json.return_value = json.loads(fake_data.dev_env_json)
-    mock_get_local_image_tags.return_value = test_image_tags
+    mock_container_engine = MagicMock()
+    mock_container_engine.get_local_image_tags.return_value = test_image_tags
+    mock_ContainerEngine.return_value = mock_container_engine
 
     runner_result = runner.invoke(main.typer_cli, ["info", "nagy_cica_project"], color=True)
 
