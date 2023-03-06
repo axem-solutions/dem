@@ -37,6 +37,7 @@ class DevEnv:
             else:
                 tool["is_image_available"] = False
 
+
 class DevEnvSetup:
     """The Development Environment setup. Contains all the Development Environments
         available on this computer
@@ -45,15 +46,35 @@ class DevEnvSetup:
         dev_env_json_deserialized (dict): A deserialized representation of the 
             dev_env.json file.
     """
-    def __dev_env_json_version_check(self):
+    def dev_env_json_version_check(self):
         dev_env_json_major_version = int(self.version.split('.', 1)[0])
         if dev_env_json_major_version != __supported_dev_env_major_version__:
             raise InvalidDevEnvJson("The dev_env.json version v1.0 is not supported.")
 
     def __init__(self, dev_env_json_deserialized: dict):
         self.version = dev_env_json_deserialized["version"]
-        self.__dev_env_json_version_check()
+        self.dev_env_json_version_check()
 
         self.dev_envs = []
         for dev_env_descriptor in dev_env_json_deserialized["development_environments"]:
             self.dev_envs.append(DevEnv(dev_env_descriptor))
+
+class DevEnvOrg(DevEnv):
+    def is_installed_locally(self, dev_env_setup_local: DevEnvSetup):
+        for dev_env_local in dev_env_setup_local.dev_envs:
+            if self.name == dev_env_local.name:
+                return True
+        return False
+
+
+class DevEnvOrgSetup(DevEnvSetup):
+    def dev_env_json_version_check(self):
+        return super().dev_env_json_version_check()
+
+    def __init__(self, dev_env_org_json_deserialized: dict):
+        self.version = dev_env_org_json_deserialized["version"]
+        self.dev_env_json_version_check()
+
+        self.dev_envs_in_org = []
+        for org_dev_env_descriptor in dev_env_org_json_deserialized["development_environments"]:
+            self.dev_envs_in_org.append(DevEnvOrg(org_dev_env_descriptor))
