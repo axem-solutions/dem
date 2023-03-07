@@ -37,37 +37,46 @@ test_docker_client = docker.from_env()
 
 @patch("dem.cli.command.info_command.data_management.get_deserialized_dev_env_json")
 @patch("dem.cli.command.info_command.container_engine.ContainerEngine")
-def test_info_arg_demo(mock_ContainerEngine, mock_get_deserialized_dev_env_json):
-    test_image_tags = [
-    "alpine:latest",
-    "make_gnu_arm:v1.0.0",
-    "stlink_org:latest", 
-    "stlink_org:v1.0.0",
-    "cpputest:latest",
-    "make_gnu_arm:latest", 
-    "make_gnu_arm:v0.1.0", 
-    "make_gnu_arm:v1.1.0",
-    "debian:latest",
-    "ubuntu:latest",
-    "hello-world:latest",
+@patch("dem.cli.command.info_command.registry.list_repos")
+def test_info_arg_demo(mock_list_repos, mock_ContainerEngine, mock_get_deserialized_dev_env_json):
+    test_local_images = [
+        "alpine:latest",
+        "make_gnu_arm:v1.0.0",
+        "stlink_org:latest", 
+        "stlink_org:v1.0.0",
+        "cpputest:latest",
+        "make_gnu_arm:latest", 
+        "make_gnu_arm:v0.1.0", 
+        "make_gnu_arm:v1.1.0",
+        "debian:latest",
+        "ubuntu:latest",
+        "hello-world:latest",
+    ]
+    test_registry_images = [
+        "make_gnu_arm:latest", 
+        "cpputest:latest",
+        "stlink_org:latest", 
     ]
     #Mocks
     mock_get_deserialized_dev_env_json.return_value = json.loads(fake_data.dev_env_json)
     mock_container_engine = MagicMock()
-    mock_container_engine.get_local_image_tags.return_value = test_image_tags
+    mock_container_engine.get_local_image_tags.return_value = test_local_images
     mock_ContainerEngine.return_value = mock_container_engine
+    mock_list_repos.return_value = test_registry_images
 
     runner_result = runner.invoke(main.typer_cli, ["info", "demo"], color=True)
     mock_get_deserialized_dev_env_json.assert_called_once()
+    mock_list_repos.assert_called_once()
 
     expected_table = Table()
     expected_table.add_column("Type")
     expected_table.add_column("Image")
-    expected_table.add_row("build system", "make_gnu_arm:latest")
-    expected_table.add_row("toolchain", "make_gnu_arm:latest")
-    expected_table.add_row("debugger", "stlink_org:latest")
-    expected_table.add_row("deployer", "stlink_org:latest")
-    expected_table.add_row("test framework", "cpputest:latest")
+    expected_table.add_column("Status")
+    expected_table.add_row("build system", "make_gnu_arm:latest", "Image is available locally and in the registry.")
+    expected_table.add_row("toolchain", "make_gnu_arm:latest", "Image is available locally and in the registry.")
+    expected_table.add_row("debugger", "stlink_org:latest", "Image is available locally and in the registry.")
+    expected_table.add_row("deployer", "stlink_org:latest", "Image is available locally and in the registry.")
+    expected_table.add_row("test framework", "cpputest:latest", "Image is available locally and in the registry.")
     console = Console(file=io.StringIO())
     console.print(expected_table)
     expected_output = console.file.getvalue()
@@ -79,39 +88,48 @@ def test_info_arg_demo(mock_ContainerEngine, mock_get_deserialized_dev_env_json)
 
 @patch("dem.cli.command.info_command.data_management.get_deserialized_dev_env_json")
 @patch("dem.cli.command.info_command.container_engine.ContainerEngine")
-def test_info_arg_nagy_cica_project(mock_ContainerEngine, 
+@patch("dem.cli.command.info_command.registry.list_repos")
+def test_info_arg_nagy_cica_project(mock_list_repos, mock_ContainerEngine, 
                                     mock_get_deserialized_dev_env_json):
-    test_image_tags = [
-    "alpine:latest",
-    "make_gnu_arm:v1.0.0",
-    "stlink_org:latest", 
-    "stlink_org:v1.0.0",
-    "cpputest:latest",
-    "make_gnu_arm:latest", 
-    "make_gnu_arm:v0.1.0", 
-    "make_gnu_arm:v1.1.0",
-    "debian:latest",
-    "ubuntu:latest",
-    "hello-world:latest",
+    test_local_images = [
+        "alpine:latest",
+        "make_gnu_arm:v1.0.0",
+        "stlink_org:latest", 
+        "stlink_org:v1.0.0",
+        "cpputest:latest",
+        "make_gnu_arm:latest", 
+        "make_gnu_arm:v0.1.0", 
+        "make_gnu_arm:v1.1.0",
+        "debian:latest",
+        "ubuntu:latest",
+        "hello-world:latest",
+    ]
+    test_registry_images = [
+        "make_gnu_arm:latest", 
+        "cpputest:latest",
+        "stlink_org:latest", 
     ]
     #Mocks
     mock_get_deserialized_dev_env_json.return_value = json.loads(fake_data.dev_env_json)
     mock_container_engine = MagicMock()
-    mock_container_engine.get_local_image_tags.return_value = test_image_tags
+    mock_container_engine.get_local_image_tags.return_value = test_local_images
     mock_ContainerEngine.return_value = mock_container_engine
+    mock_list_repos.return_value = test_registry_images
 
     runner_result = runner.invoke(main.typer_cli, ["info", "nagy_cica_project"], color=True)
 
     mock_get_deserialized_dev_env_json.assert_called_once()
+    mock_list_repos.assert_called_once()
 
     expected_table = Table()
     expected_table.add_column("Type")
     expected_table.add_column("Image")
-    expected_table.add_row("build system", "[red]Error: missing image![/]")
-    expected_table.add_row("toolchain", "[red]Error: missing image![/]")
-    expected_table.add_row("debugger", "[red]Error: missing image![/]")
-    expected_table.add_row("deployer", "[red]Error: missing image![/]")
-    expected_table.add_row("test framework", "cpputest:latest")
+    expected_table.add_column("Status")
+    expected_table.add_row("build system", "bazel:latest", "[red]Error: Image is not available.[/]")
+    expected_table.add_row("toolchain", "gnu_arm:latest", "[red]Error: Image is not available.[/]")
+    expected_table.add_row("debugger", "jlink:latest", "[red]Error: Image is not available.[/]")
+    expected_table.add_row("deployer", "jlink:latest", "[red]Error: Image is not available.[/]")
+    expected_table.add_row("test framework", "cpputest:latest", "Image is available locally and in the registry.")
     console = Console(file=io.StringIO())
     console.print(expected_table)
     expected_output = console.file.getvalue()
