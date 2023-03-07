@@ -4,6 +4,13 @@
 from dem.core.exceptions import InvalidDevEnvJson
 from dem.core.properties import __supported_dev_env_major_version__
 
+(
+    IMAGE_LOCAL_ONLY,
+    IMAGE_REGISTRY_ONLY,
+    IMAGE_LOCAL_AND_REGISTRY,
+    IMAGE_NOT_AVAILABLE,
+) = range(4)
+
 class DevEnv:
     """A Development Environment.
     
@@ -36,7 +43,21 @@ class DevEnv:
                 tool["is_image_available"] = True
             else:
                 tool["is_image_available"] = False
-
+    
+    def check_image_availability(self, local_images: list, registry_images: list) -> list:
+        image_statuses = []
+        for tool in self.tools:
+            image_status = IMAGE_NOT_AVAILABLE
+            tool_image = tool["image_name"] + ':' + tool["image_version"]
+            if tool_image in local_images:
+                image_status = IMAGE_LOCAL_ONLY
+            if tool_image in registry_images:
+                if image_status == IMAGE_LOCAL_ONLY:
+                    image_status = IMAGE_LOCAL_AND_REGISTRY
+                else:
+                    image_status = IAMGE_REGISTRY_ONLY
+            image_statuses.append(image_status)
+        return image_statuses
 
 class DevEnvSetup:
     """The Development Environment setup. Contains all the Development Environments
@@ -54,13 +75,20 @@ class DevEnvSetup:
     def __init__(self, dev_env_json_deserialized: dict):
         self.version = dev_env_json_deserialized["version"]
         self.dev_env_json_version_check()
-
         self.dev_envs = []
+
+class DevEnvLocal(DevEnv):
+    pass
+
+class DevEnvLocalSetup(DevEnvSetup):
+    def __init__(self, dev_env_json_deserialized: dict):
+        super().__init__(dev_env_json_deserialized)
+
         for dev_env_descriptor in dev_env_json_deserialized["development_environments"]:
-            self.dev_envs.append(DevEnv(dev_env_descriptor))
+            self.dev_envs.append(DevEnvLocal(dev_env_descriptor))
 
 class DevEnvOrg(DevEnv):
-    def is_installed_locally(self, dev_env_setup_local: DevEnvSetup):
+    def is_installed_locally(self, dev_env_setup_local: DevEnvLocalSetup):
         for dev_env_local in dev_env_setup_local.dev_envs:
             if self.name == dev_env_local.name:
                 return True
@@ -71,10 +99,8 @@ class DevEnvOrgSetup(DevEnvSetup):
     def dev_env_json_version_check(self):
         return super().dev_env_json_version_check()
 
-    def __init__(self, dev_env_org_json_deserialized: dict):
-        self.version = dev_env_org_json_deserialized["version"]
-        self.dev_env_json_version_check()
+    def __init__(self, dev_env_json_deserialized: dict):
+        super().__init__(dev_env_json_deserialized)
 
-        self.dev_envs_in_org = []
-        for org_dev_env_descriptor in dev_env_org_json_deserialized["development_environments"]:
-            self.dev_envs_in_org.append(DevEnvOrg(org_dev_env_descriptor))
+        for dev_env_descriptor in dev_env_json_deserialized["development_environments"]:
+            self.dev_envs.append(DevEnvOrg(dev_env_descriptor))

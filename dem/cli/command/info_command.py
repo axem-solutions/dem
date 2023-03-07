@@ -22,7 +22,7 @@ def print_info(dev_env: dev_env_setup.DevEnv, local_image_tags: list):
 
 def execute(arg_dev_env_name: str) -> None:
     dev_env_json_deserialized = data_management.get_deserialized_dev_env_json()
-    dev_env_setup_instance = dev_env_setup.DevEnvSetup(dev_env_json_deserialized)
+    dev_env_setup_instance = dev_env_setup.DevEnvLocalSetup(dev_env_json_deserialized)
     container_engine_obj = container_engine.ContainerEngine()
     local_image_tags = container_engine_obj.get_local_image_tags()
 
