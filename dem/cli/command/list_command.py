@@ -53,13 +53,10 @@ def get_dev_env_status(dev_env: dev_env_setup.DevEnvLocal | dev_env_setup.DevEnv
                 dev_env_status = dev_env_org_status_messages[DEV_ENV_ORG_READY]
     else:
         if (dev_env_setup.IMAGE_NOT_AVAILABLE in image_statuses):
-            dev_env_status = "[red]Error: Required image is not available![/]"
             dev_env_status = dev_env_local_status_messages[DEV_ENV_LOCAL_NOT_AVAILABLE]
         elif (dev_env_setup.IMAGE_REGISTRY_ONLY in image_statuses):
-            dev_env_status = "Incopmlete local install. Reinstall needed."
             dev_env_status = dev_env_local_status_messages[DEV_ENV_LOCAL_REINSTALL]
         else:
-            dev_env_status = "Installed."
             dev_env_status = dev_env_local_status_messages[DEV_ENV_LOCAL_INSTALLED]
     return dev_env_status
 
