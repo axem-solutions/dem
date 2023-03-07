@@ -5,30 +5,6 @@ from dem.core import container_engine, data_management, dev_env_setup, registry
 from dem.cli.console import stdout, stderr
 from rich.table import Table
 
-def print_list_table(dev_envs: list, local_image_tags: list) -> None:
-    table = Table()
-    table.add_column("Development Environment")
-    table.add_column("Status")
-
-    for dev_env in dev_envs:
-        dev_env.validate(local_image_tags)
-        for tool in dev_env.tools:
-            if tool["is_image_available"] == False:
-                print_validation_result = "[red]✗ Missing images[/]"
-                break
-        else:
-            print_validation_result = "[green]✓[/]"
-        table.add_row(dev_env.name, print_validation_result)
-
-    stdout.print(table)
-
-(
-    LOCAL_ONLY,
-    REGISTRY_ONLY,
-    LOCAL_AND_REGISTRY,
-    NOT_AVAILABLE,
-) = range(4)
-
 def check_image_availability(tool: dict, local_images: list = [], registry_images: list = []):
     image_status = NOT_AVAILABLE
     tool_image = tool["image_name"] + ':' + tool["image_version"]
@@ -40,6 +16,37 @@ def check_image_availability(tool: dict, local_images: list = [], registry_image
         else:
             image_status = REGISTRY_ONLY
     return image_status
+
+def print_list_table(dev_envs: list, local_images: list) -> None:
+    registry_images = registry.list_repos()
+    table = Table()
+    table.add_column("Development Environment")
+    table.add_column("Status")
+
+    for dev_env in dev_envs:
+        image_statuses = []
+        for tool in dev_env.tools:
+            image_statuses.append(check_image_availability(tool, local_images, registry_images))
+
+        dev_env_status = ""
+        if (NOT_AVAILABLE in image_statuses):
+            dev_env_status = "[red]Error: Required image is not available![/]"
+        elif (REGISTRY_ONLY in image_statuses):
+            dev_env_status = "Incopmlete local install. Reinstall needed."
+        else:
+            dev_env_status = "Installed."
+
+        table.add_row(dev_env.name, dev_env_status)
+
+    stdout.print(table)
+
+(
+    LOCAL_ONLY,
+    REGISTRY_ONLY,
+    LOCAL_AND_REGISTRY,
+    NOT_AVAILABLE,
+) = range(4)
+
 
 
 def execute(local: bool, all: bool, env: bool) -> None:
