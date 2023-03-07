@@ -36,14 +36,6 @@ class DevEnv:
         self.name = descriptor["name"]
         self.tools = descriptor["tools"]
 
-    def validate(self, local_images: list):
-        for tool in self.tools:
-            tool_image = tool["image_name"] + ':' + tool["image_version"]
-            if tool_image in local_images:
-                tool["is_image_available"] = True
-            else:
-                tool["is_image_available"] = False
-    
     def check_image_availability(self, local_images: list, registry_images: list) -> list:
         image_statuses = []
         for tool in self.tools:
@@ -55,8 +47,9 @@ class DevEnv:
                 if image_status == IMAGE_LOCAL_ONLY:
                     image_status = IMAGE_LOCAL_AND_REGISTRY
                 else:
-                    image_status = IAMGE_REGISTRY_ONLY
+                    image_status = IMAGE_REGISTRY_ONLY
             image_statuses.append(image_status)
+            tool["image_status"] = image_status
         return image_statuses
 
 class DevEnvSetup:
