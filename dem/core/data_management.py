@@ -18,3 +18,6 @@ def get_deserialized_dev_env_org_json():
     dev_env_org_json = open(dev_env_org_json_path, "r")
 
     return json.load(dev_env_org_json)
+
+def write_dev_env_json(dev_env_json_deserialized: dict) -> None:
+    pass
