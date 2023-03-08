@@ -5,10 +5,14 @@ import typer
 from dem import __app_name__, __version__
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 from dem.cli.command import info_cmd, list_cmd, pull_cmd, create_cmd
 =======
 from dem.cli.command import info_cmd, list_cmd
 >>>>>>> e9e0578 (The 'command' in module and function names got shortened to cmd.)
+=======
+from dem.cli.command import info_cmd, list_cmd, pull_cmd
+>>>>>>> 9ea2523 ('dem pull DEV_ENV_NAME' implemented. Only tested with already installed Dev Env.)
 
 typer_cli = typer.Typer()
 
@@ -62,9 +66,15 @@ def info(dev_env_name: str) -> None:
     info_cmd.execute(dev_env_name)
 
 @typer_cli.command()
+<<<<<<< HEAD
 def pull(dev_env_name: str) -> None:
     pass
 >>>>>>> e9e0578 (The 'command' in module and function names got shortened to cmd.)
+=======
+def pull(dev_env_name: str = typer.Argument(..., 
+                                            help="Name of the Development Environment to install.")) -> None:
+    pull_cmd.execute(dev_env_name)
+>>>>>>> 9ea2523 ('dem pull DEV_ENV_NAME' implemented. Only tested with already installed Dev Env.)
 
 def _version_callback(value: bool) -> None:
     if value:

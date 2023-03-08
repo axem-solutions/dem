@@ -26,6 +26,14 @@ def read_deserialized_dev_env_org_json():
     #Get the raw json file.
     dev_env_org_json_path = PurePath("example_json/dev_env_org.json")
     dev_env_org_json = open(dev_env_org_json_path, "r")
+<<<<<<< HEAD
     deserialized_dev_env_org_json = json.load(dev_env_org_json)
     dev_env_org_json.close()
     return deserialized_dev_env_org_json
+=======
+
+    return json.load(dev_env_org_json)
+
+def write_dev_env_json(dev_env_json_deserialized: dict) -> None:
+    pass
+>>>>>>> 9ea2523 ('dem pull DEV_ENV_NAME' implemented. Only tested with already installed Dev Env.)

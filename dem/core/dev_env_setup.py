@@ -114,7 +114,11 @@ class DevEnvSetup:
             dev_env_descriptor["name"] = dev_env.name
             dev_env_descriptor["tools"] = dev_env.tools
             dev_env_descriptors.append(dev_env_descriptor)
+<<<<<<< HEAD
         dev_env_json_deserialized["development_environments"] = dev_env_descriptors
+=======
+        dev_env_json_deserialized["development_environemnts"] = dev_env_descriptors
+>>>>>>> 9ea2523 ('dem pull DEV_ENV_NAME' implemented. Only tested with already installed Dev Env.)
         return dev_env_json_deserialized
 
 
@@ -150,7 +154,11 @@ class DevEnvLocalSetup(DevEnvSetup):
 
 class DevEnvOrg(DevEnv):
     """A Development Environment available for the organization."""
+<<<<<<< HEAD
     def get_local_instance(self, dev_env_setup_local: DevEnvLocalSetup) -> (DevEnvLocal | None):
+=======
+    def get_local_instance(self, dev_env_setup_local: DevEnvLocalSetup) -> DevEnvLocal | None:
+>>>>>>> 9ea2523 ('dem pull DEV_ENV_NAME' implemented. Only tested with already installed Dev Env.)
         """Check if this Development Enviroment already installed locally.
 
         Args:
@@ -160,6 +168,10 @@ class DevEnvOrg(DevEnv):
         for dev_env_local in dev_env_setup_local.dev_envs:
             if self.name == dev_env_local.name:
                 return dev_env_local
+<<<<<<< HEAD
+=======
+        return None
+>>>>>>> 9ea2523 ('dem pull DEV_ENV_NAME' implemented. Only tested with already installed Dev Env.)
 
 class DevEnvOrgSetup(DevEnvSetup):
     def __init__(self, dev_env_json_deserialized: dict) -> None:
@@ -173,6 +185,7 @@ class DevEnvOrgSetup(DevEnvSetup):
         super().__init__(dev_env_json_deserialized)
 
         for dev_env_descriptor in dev_env_json_deserialized["development_environments"]:
+<<<<<<< HEAD
             self.dev_envs.append(DevEnvOrg(descriptor=dev_env_descriptor))
     
     def get_dev_env(self, dev_env_name: str) -> (DevEnvOrg | None):
@@ -186,3 +199,6 @@ class DevEnvOrgSetup(DevEnvSetup):
         for dev_env in self.dev_envs:
             if dev_env.name == dev_env_name:
                 return dev_env
+=======
+            self.dev_envs.append(DevEnvOrg(descriptor=dev_env_descriptor))
+>>>>>>> 9ea2523 ('dem pull DEV_ENV_NAME' implemented. Only tested with already installed Dev Env.)
