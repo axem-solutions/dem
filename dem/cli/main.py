@@ -4,13 +4,18 @@
 import typer
 from dem import __app_name__, __version__
 
+<<<<<<< HEAD
 from dem.cli.command import info_cmd, list_cmd, pull_cmd, create_cmd
+=======
+from dem.cli.command import info_cmd, list_cmd
+>>>>>>> e9e0578 (The 'command' in module and function names got shortened to cmd.)
 
 typer_cli = typer.Typer()
 
 @typer_cli.command()
 def list(local: bool = typer.Option(False, help="Scope is the local host."),
          all: bool = typer.Option(False, help="Scope is the organization."),
+<<<<<<< HEAD
          env: bool = typer.Option(False, help="List the environments."),
          tool: bool = typer.Option(False, help="List the tool images.")) -> None:
     """
@@ -48,6 +53,18 @@ def pull(dev_env_name: str = typer.Argument(...,
 @typer_cli.command()
 def create(dev_env_name: str = typer.Argument(None, help="Name of the Development Environment to create.")) -> None:
     create_cmd.execute()
+=======
+         env: bool = typer.Option(False, help="List the environments.")) -> None:
+    list_cmd.execute(local, all, env)
+
+@typer_cli.command()
+def info(dev_env_name: str) -> None:
+    info_cmd.execute(dev_env_name)
+
+@typer_cli.command()
+def pull(dev_env_name: str) -> None:
+    pass
+>>>>>>> e9e0578 (The 'command' in module and function names got shortened to cmd.)
 
 def _version_callback(value: bool) -> None:
     if value:
