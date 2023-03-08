@@ -4,7 +4,7 @@
 import typer
 from dem import __app_name__, __version__
 
-from dem.cli.command import info_command, list_command
+from dem.cli.command import info_cmd, list_cmd
 
 typer_cli = typer.Typer()
 
@@ -12,11 +12,15 @@ typer_cli = typer.Typer()
 def list(local: bool = typer.Option(False, help="Scope is the local host."),
          all: bool = typer.Option(False, help="Scope is the organization."),
          env: bool = typer.Option(False, help="List the environments.")) -> None:
-    list_command.execute(local, all, env)
+    list_cmd.execute(local, all, env)
 
 @typer_cli.command()
 def info(dev_env_name: str) -> None:
-    info_command.execute(dev_env_name)
+    info_cmd.execute(dev_env_name)
+
+@typer_cli.command()
+def pull(dev_env_name: str) -> None:
+    pass
 
 def _version_callback(value: bool) -> None:
     if value:
