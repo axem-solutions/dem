@@ -21,8 +21,13 @@ from rich.table import Table
 dev_env_org_status_messages = {
     DEV_ENV_ORG_NOT_IN_REGISTRY: "[red]Error: Required image is not available in the registry![/]",
     DEV_ENV_ORG_INSTALLED_LOCALLY: "Installed locally.",
+<<<<<<< HEAD
     DEV_ENV_ORG_REAINSTALL: "Incomplete local install. Reinstall needed.",
     DEV_ENV_ORG_READY: "Ready to be installed.",
+=======
+    DEV_ENV_ORG_REAINSTALL: "Incopmlete local install. Reinstall needed.",
+    DEV_ENV_ORG_READY: "Ready to install.",
+>>>>>>> 6c652d7 (The 'command' in module and function names got shortened to cmd.)
 }
 
 dev_env_local_status_messages = {
@@ -32,11 +37,19 @@ dev_env_local_status_messages = {
 }
 
 def is_dev_env_org_installed_locally(dev_env_org: dev_env_setup.DevEnvOrg) -> bool:
+<<<<<<< HEAD
     dev_env_json_deserialized = data_management.read_deserialized_dev_env_json()
     dev_env_local_setup_obj = dev_env_setup.DevEnvLocalSetup(dev_env_json_deserialized)
     return isinstance(dev_env_org.get_local_instance(dev_env_local_setup_obj), dev_env_setup.DevEnvLocal)
 
 def get_dev_env_status(dev_env: (dev_env_setup.DevEnvLocal | dev_env_setup.DevEnvOrg),
+=======
+    dev_env_json_deserialized = data_management.get_deserialized_dev_env_json()
+    dev_env_local_setup_obj = dev_env_setup.DevEnvLocalSetup(dev_env_json_deserialized)
+    return dev_env_org.is_installed_locally(dev_env_local_setup_obj)
+
+def get_dev_env_status(dev_env: dev_env_setup.DevEnvLocal | dev_env_setup.DevEnvOrg,
+>>>>>>> 6c652d7 (The 'command' in module and function names got shortened to cmd.)
                        local_images: list, registry_images: list) -> str:
     image_statuses = dev_env.check_image_availability(local_images, registry_images)
     dev_env_status = ""
@@ -60,6 +73,7 @@ def get_dev_env_status(dev_env: (dev_env_setup.DevEnvLocal | dev_env_setup.DevEn
             dev_env_status = dev_env_local_status_messages[DEV_ENV_LOCAL_INSTALLED]
     return dev_env_status
 
+<<<<<<< HEAD
 def list_dev_envs(local: bool, org: bool)-> None:
     dev_env_setup_obj = None
     if ((local == True) and (org == False)):
@@ -113,6 +127,36 @@ def execute(local: bool, org: bool, env: bool, tool: bool) -> None:
         list_dev_envs(local, org)
     elif ((local == True) or (org == True)) and (env == False) and (tool == True):
         list_tool_images(local, org)
+=======
+def execute(local: bool, all: bool, env: bool) -> None:
+    if ((local == True) or (all == True)) and (env == True):
+        dev_env_setup_obj = None
+        if ((local == True) and (all == False)):
+            dev_env_json_deserialized = data_management.get_deserialized_dev_env_json()
+            dev_env_setup_obj = dev_env_setup.DevEnvLocalSetup(dev_env_json_deserialized)
+            if not dev_env_setup_obj.dev_envs:
+                stdout.print("[yellow]No installed Development Environments.[/]")
+                return
+        elif((local == False) and (all==True)):
+            dev_env_org_json_deserialized = data_management.get_deserialized_dev_env_org_json()
+            dev_env_setup_obj = dev_env_setup.DevEnvOrgSetup(dev_env_org_json_deserialized)
+        else:
+            stderr.print("Error: This command is not yet supported.")
+            return
+        
+        container_engine_obj = container_engine.ContainerEngine()
+        local_images = container_engine_obj.get_local_image_tags()
+        registry_images = registry.list_repos()
+
+        table = Table()
+        table.add_column("Development Environment")
+        table.add_column("Status")
+        for dev_env_org in dev_env_setup_obj.dev_envs:
+            table.add_row(dev_env_org.name, get_dev_env_status(dev_env_org, 
+                                                               local_images,
+                                                               registry_images))
+        stdout.print(table)
+>>>>>>> 6c652d7 (The 'command' in module and function names got shortened to cmd.)
     else:
         stderr.print(\
 """Usage: dem list [OPTIONS]

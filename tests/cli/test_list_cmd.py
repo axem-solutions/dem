@@ -1,6 +1,7 @@
 """Unit tests for the list CLI command."""
 # tests/cli/test_list_cmd.py
 
+<<<<<<< HEAD
 # Unit under test:
 import dem.cli.main as main
 
@@ -16,11 +17,22 @@ import tests.fake_data as fake_data
 import dem.core.dev_env_setup as dev_env_setup
 
 ## Global test variables
+=======
+import io
+import dem.cli.main as main
+from typer.testing import CliRunner
+from rich.console import Console
+from rich.table import Table
+from unittest.mock import patch, MagicMock
+import json
+import tests.fake_data as fake_data
+>>>>>>> 6c652d7 (The 'command' in module and function names got shortened to cmd.)
 
 # In order to test stdout and stderr separately, the stderr can't be mixed into 
 # the stdout.
 runner = CliRunner(mix_stderr=False)
 
+<<<<<<< HEAD
 ## Test cases
 
 ## Test listing the local dev envs.
@@ -68,6 +80,41 @@ def test_with_valid_dev_env_json(mock_list_repos, mock_ContainerEngine,
     mock_DevEnvLocalSetup.assert_called_once_with(fake_dev_env_json_deserialized)
     mock_ContainerEngine.assert_called_once()
     fake_container_engine.get_local_tool_images.assert_called_once()
+=======
+@patch("dem.cli.command.list_cmd.data_management.get_deserialized_dev_env_json")
+@patch("dem.cli.command.list_cmd.container_engine.ContainerEngine")
+@patch("dem.cli.command.list_cmd.registry.list_repos")
+def test_with_valid_dev_env_json(mock_list_repos, mock_ContainerEngine,
+                                 mock_get_deserialized_dev_env_json):
+    test_local_images = [
+        "alpine:latest",
+        "make_gnu_arm:v1.0.0",
+        "stlink_org:latest", 
+        "stlink_org:v1.0.0",
+        "cpputest:latest",
+        "make_gnu_arm:latest", 
+        "make_gnu_arm:v0.1.0", 
+        "make_gnu_arm:v1.1.0",
+        "debian:latest",
+        "ubuntu:latest",
+        "hello-world:latest",
+    ]
+    test_registry_images = [
+        "make_gnu_arm:latest", 
+        "cpputest:latest",
+        "stlink_org:latest", 
+    ]
+    mock_get_deserialized_dev_env_json.return_value = json.loads(fake_data.dev_env_json)
+    mock_container_engine = MagicMock()
+    mock_container_engine.get_local_image_tags.return_value = test_local_images
+    mock_ContainerEngine.return_value = mock_container_engine
+    mock_list_repos.return_value = test_registry_images
+
+    runner_result = runner.invoke(main.typer_cli, ["list", "--local", "--env"])
+
+    mock_get_deserialized_dev_env_json.assert_called_once()
+    mock_container_engine.get_local_image_tags.assert_called_once()
+>>>>>>> 6c652d7 (The 'command' in module and function names got shortened to cmd.)
     mock_list_repos.assert_called_once()
 
     assert 0 == runner_result.exit_code
@@ -82,6 +129,7 @@ def test_with_valid_dev_env_json(mock_list_repos, mock_ContainerEngine,
     expected_output = console.file.getvalue()
     assert expected_output == runner_result.stdout
 
+<<<<<<< HEAD
 @patch("dem.cli.command.list_cmd.data_management.read_deserialized_dev_env_json")
 def test_with_empty_dev_env_json(mock_read_deserialized_dev_env_json):
     # Test setup
@@ -92,6 +140,15 @@ def test_with_empty_dev_env_json(mock_read_deserialized_dev_env_json):
 
     # Check expectations
     mock_read_deserialized_dev_env_json.assert_called_once()
+=======
+@patch("dem.cli.command.list_cmd.data_management.get_deserialized_dev_env_json")
+def test_with_empty_dev_env_json(mock_get_deserialized_dev_env_json):
+    mock_get_deserialized_dev_env_json.return_value = json.loads(fake_data.empty_dev_env_json)
+
+    runner_result = runner.invoke(main.typer_cli, ["list", "--local", "--env"])
+
+    mock_get_deserialized_dev_env_json.assert_called_once()
+>>>>>>> 6c652d7 (The 'command' in module and function names got shortened to cmd.)
 
     assert 0 == runner_result.exit_code
 
@@ -100,6 +157,7 @@ def test_with_empty_dev_env_json(mock_read_deserialized_dev_env_json):
     expected_output = console.file.getvalue()
     assert expected_output == runner_result.stdout
 
+<<<<<<< HEAD
 ## Test listing the org dev envs.
 
 @patch("dem.cli.command.list_cmd.data_management.read_deserialized_dev_env_org_json")
@@ -204,6 +262,11 @@ def test_without_options():
     runner_result = runner.invoke(main.typer_cli, ["list"], color=True)
     
     # Check expectations
+=======
+def test_without_options():
+    runner_result = runner.invoke(main.typer_cli, ["list"], color=True)
+    
+>>>>>>> 6c652d7 (The 'command' in module and function names got shortened to cmd.)
     assert 0 == runner_result.exit_code
 
     console = Console(file=io.StringIO())
@@ -213,6 +276,7 @@ Try 'dem list --help' for help.
 
 Error: You need to set the scope and what to list!""")
     expected_output = console.file.getvalue()
+<<<<<<< HEAD
     assert expected_output == runner_result.stderr
 
 def test_with_invalid_option():
@@ -329,3 +393,6 @@ def test_empty_repository(mock_list_repos):
     console = Console(file=io.StringIO())
     console.print(expected_table)
     assert console.file.getvalue() == runner_result.stdout
+=======
+    assert expected_output == runner_result.stderr
+>>>>>>> 6c652d7 (The 'command' in module and function names got shortened to cmd.)
