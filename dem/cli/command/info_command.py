@@ -37,7 +37,7 @@ def update_image_status(dev_env: dev_env_setup.DevEnvLocal | dev_env_setup.DevEn
     local_images = container_engine_obj.get_local_image_tags()
     registry_images = registry.list_repos()
 
-    #This functions must be called, so the tools in the dev env get updated.
+    # This functions must be called, so the tools in the dev env get updated.
     dev_env.check_image_availability(local_images, registry_images)
 
 def execute(arg_dev_env_name: str) -> None:
