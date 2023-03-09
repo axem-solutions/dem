@@ -115,10 +115,14 @@ class DevEnvSetup:
             dev_env_descriptor["tools"] = dev_env.tools
             dev_env_descriptors.append(dev_env_descriptor)
 <<<<<<< HEAD
+<<<<<<< HEAD
         dev_env_json_deserialized["development_environments"] = dev_env_descriptors
 =======
         dev_env_json_deserialized["development_environemnts"] = dev_env_descriptors
 >>>>>>> 9ea2523 ('dem pull DEV_ENV_NAME' implemented. Only tested with already installed Dev Env.)
+=======
+        dev_env_json_deserialized["development_environments"] = dev_env_descriptors
+>>>>>>> c36cb35 (Writing the updated local Dev Env into the dev_env.json file. Minor fix in the deserialization member function. The images are now used with the axemsolution Docker Hub registry in their name.)
         return dev_env_json_deserialized
 
 

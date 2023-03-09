@@ -35,5 +35,11 @@ def read_deserialized_dev_env_org_json():
     return json.load(dev_env_org_json)
 
 def write_dev_env_json(dev_env_json_deserialized: dict) -> None:
+<<<<<<< HEAD
     pass
 >>>>>>> 9ea2523 ('dem pull DEV_ENV_NAME' implemented. Only tested with already installed Dev Env.)
+=======
+    dev_env_json_path = PurePath(os.path.expanduser('~') + "/.config/axem/dev_env.json")
+    dev_env_json = open(dev_env_json_path, "w")
+    json.dump(dev_env_json_deserialized, dev_env_json, indent=4)
+>>>>>>> c36cb35 (Writing the updated local Dev Env into the dev_env.json file. Minor fix in the deserialization member function. The images are now used with the axemsolution Docker Hub registry in their name.)
