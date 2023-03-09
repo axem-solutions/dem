@@ -113,7 +113,7 @@ class DevEnvSetup:
             dev_env_descriptor["name"] = dev_env.name
             dev_env_descriptor["tools"] = dev_env.tools
             dev_env_descriptors.append(dev_env_descriptor)
-        dev_env_json_deserialized["development_environemnts"] = dev_env_descriptors
+        dev_env_json_deserialized["development_environments"] = dev_env_descriptors
         return dev_env_json_deserialized
 
 

@@ -48,17 +48,12 @@ def execute(dev_env_name: str) -> None:
     registry_images = registry.list_repos()
     image_statuses = dev_env_local.check_image_availability(local_images, registry_images)
 
-    if image_statuses.count(dev_env_setup.IMAGE_LOCAL_AND_REGISTRY) == len(image_statuses):
-        # If the Dev Env is already present in the dev_env.json and all the required tools are
-        # installed, then nothing to do.
-        stdout.print("The " + dev_env_org.name + " Devolopment Environment is already installed.")
-        return
-    else:
-        # Pull the registry only images.
-        for tool in dev_env_local.tools:
-            if tool["image_status"] == dev_env_setup.IMAGE_REGISTRY_ONLY:
-                image_to_pull = tool["image_name" ] + ':' + tool["image_version"]
-                container_engine_obj.pull(image_to_pull)
+    # Pull the registry only images.
+    for tool in dev_env_local.tools:
+        if tool["image_status"] == dev_env_setup.IMAGE_REGISTRY_ONLY:
+            image_to_pull = tool["image_name" ] + ':' + tool["image_version"]
+            stdout.print("Pulling image: " + image_to_pull)
+            container_engine_obj.pull(image_to_pull)
 
 
     #Tmp validation:
@@ -66,6 +61,6 @@ def execute(dev_env_name: str) -> None:
     image_statuses = dev_env_local.check_image_availability(local_images, registry_images)
 
     if image_statuses.count(dev_env_setup.IMAGE_LOCAL_AND_REGISTRY) == len(image_statuses):
-        stdout.print("Succesfull install!")
+        stdout.print("The [yellow]" + dev_env_local.name + "[/] Development Environment is ready!")
     else:
         stderr.print("The istallation failed.")
