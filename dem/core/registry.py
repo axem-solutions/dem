@@ -25,7 +25,7 @@ def list_repos():
         dxf_obj = dxf.DXF("registry-1.docker.io", repo_path, auth=auth)
 
         for tag in dxf_obj.list_aliases():
-            images.append(repo["name"] + ':' + tag)
+            images.append(repo_path + ':' + tag)
 
     return images
 
