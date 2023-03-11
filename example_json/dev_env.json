@@ -23,26 +23,7 @@
                     "image_version": "latest"
                 },
                 {
-                    "type": "test framework",
-                    "image_name": "cpputest",
-                    "image_version": "latest"
-                }
-            ]
-        },
-        {
-            "name": "nagy_cica_project",
-            "tools": [{
-                    "type": "build system",
-                    "image_name": "bazel",
-                    "image_version": "latest"
-                },
-                {
-                    "type": "toolchain",
-                    "image_name": "gnu_arm",
-                    "image_version": "latest"
-                },
-                {
-                    "type": "debugger",
+                   
                     "image_name": "jlink",
                     "image_version": "latest"
                 },
