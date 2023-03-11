@@ -10,8 +10,9 @@ typer_cli = typer.Typer()
 
 @typer_cli.command()
 def list(local: bool = typer.Option(False, help="Scope is the local host."),
+         all: bool = typer.Option(False, help="Scope is the organization."),
          env: bool = typer.Option(False, help="List the environments.")) -> None:
-    list_command.execute(local, env)
+    list_command.execute(local, all, env)
 
 @typer_cli.command()
 def info(dev_env_name: str) -> None:
