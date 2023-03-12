@@ -36,7 +36,7 @@ def is_dev_env_org_installed_locally(dev_env_org: dev_env_setup.DevEnvOrg) -> bo
     dev_env_local_setup_obj = dev_env_setup.DevEnvLocalSetup(dev_env_json_deserialized)
     return dev_env_org.is_installed_locally(dev_env_local_setup_obj)
 
-def get_dev_env_status(dev_env: dev_env_setup.DevEnvLocal | dev_env_setup.DevEnvOrg,
+def get_dev_env_status(dev_env: [dev_env_setup.DevEnvLocal, dev_env_setup.DevEnvOrg],
                        local_images: list, registry_images: list) -> str:
     image_statuses = dev_env.check_image_availability(local_images, registry_images)
     dev_env_status = ""
