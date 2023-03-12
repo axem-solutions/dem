@@ -1,5 +1,5 @@
 """Unit tests for the list CLI command."""
-# tests/cli/test_list_command.py
+# tests/cli/test_list_cmd.py
 
 import io
 import dem.cli.main as main
@@ -14,9 +14,9 @@ import tests.fake_data as fake_data
 # the stdout.
 runner = CliRunner(mix_stderr=False)
 
-@patch("dem.cli.command.list_command.data_management.get_deserialized_dev_env_json")
-@patch("dem.cli.command.list_command.container_engine.ContainerEngine")
-@patch("dem.cli.command.list_command.registry.list_repos")
+@patch("dem.cli.command.list_cmd.data_management.get_deserialized_dev_env_json")
+@patch("dem.cli.command.list_cmd.container_engine.ContainerEngine")
+@patch("dem.cli.command.list_cmd.registry.list_repos")
 def test_with_valid_dev_env_json(mock_list_repos, mock_ContainerEngine,
                                  mock_get_deserialized_dev_env_json):
     test_local_images = [
@@ -61,7 +61,7 @@ def test_with_valid_dev_env_json(mock_list_repos, mock_ContainerEngine,
     expected_output = console.file.getvalue()
     assert expected_output == runner_result.stdout
 
-@patch("dem.cli.command.list_command.data_management.get_deserialized_dev_env_json")
+@patch("dem.cli.command.list_cmd.data_management.get_deserialized_dev_env_json")
 def test_with_empty_dev_env_json(mock_get_deserialized_dev_env_json):
     mock_get_deserialized_dev_env_json.return_value = json.loads(fake_data.empty_dev_env_json)
 

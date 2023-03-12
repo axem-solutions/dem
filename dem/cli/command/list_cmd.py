@@ -1,5 +1,5 @@
 """list CLI command implementation."""
-# dem/cli/list_command.py
+# dem/cli/list_cmd.py
 
 from dem.core import container_engine, data_management, dev_env_setup, registry
 from dem.cli.console import stdout, stderr
@@ -34,7 +34,7 @@ dev_env_local_status_messages = {
 def is_dev_env_org_installed_locally(dev_env_org: dev_env_setup.DevEnvOrg) -> bool:
     dev_env_json_deserialized = data_management.get_deserialized_dev_env_json()
     dev_env_local_setup_obj = dev_env_setup.DevEnvLocalSetup(dev_env_json_deserialized)
-    return dev_env_org.is_installed_locally(dev_env_local_setup_obj)
+    return isinstance(dev_env_org.get_local_instance(dev_env_local_setup_obj), dev_env_setup.DevEnvLocal)
 
 def get_dev_env_status(dev_env: dev_env_setup.DevEnvLocal | dev_env_setup.DevEnvOrg,
                        local_images: list, registry_images: list) -> str:

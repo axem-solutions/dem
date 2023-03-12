@@ -1,5 +1,5 @@
 """info CLI command implementation."""
-# dem/cli/command/info_command.py
+# dem/cli/command/info_cmd.py
 
 from dem.core import container_engine, data_management, dev_env_setup, registry
 from dem.cli.console import stdout, stderr

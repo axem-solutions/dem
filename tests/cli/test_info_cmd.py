@@ -1,5 +1,5 @@
 """Unit tests for the info CLI command."""
-# tests/cli/test_info_command.py
+# tests/cli/test_info_cmd.py
 
 from typer.testing import CliRunner
 import dem.cli.main as main
@@ -35,9 +35,9 @@ def get_test_image_list() -> list[mockImage]:
 
 test_docker_client = docker.from_env()
 
-@patch("dem.cli.command.info_command.data_management.get_deserialized_dev_env_json")
-@patch("dem.cli.command.info_command.container_engine.ContainerEngine")
-@patch("dem.cli.command.info_command.registry.list_repos")
+@patch("dem.cli.command.info_cmd.data_management.get_deserialized_dev_env_json")
+@patch("dem.cli.command.info_cmd.container_engine.ContainerEngine")
+@patch("dem.cli.command.info_cmd.registry.list_repos")
 def test_info_arg_demo(mock_list_repos, mock_ContainerEngine, mock_get_deserialized_dev_env_json):
     test_local_images = [
         "alpine:latest",
@@ -86,9 +86,9 @@ def test_info_arg_demo(mock_list_repos, mock_ContainerEngine, mock_get_deseriali
     assert expected_output == runner_result.stdout
 
 
-@patch("dem.cli.command.info_command.data_management.get_deserialized_dev_env_json")
-@patch("dem.cli.command.info_command.container_engine.ContainerEngine")
-@patch("dem.cli.command.info_command.registry.list_repos")
+@patch("dem.cli.command.info_cmd.data_management.get_deserialized_dev_env_json")
+@patch("dem.cli.command.info_cmd.container_engine.ContainerEngine")
+@patch("dem.cli.command.info_cmd.registry.list_repos")
 def test_info_arg_nagy_cica_project(mock_list_repos, mock_ContainerEngine, 
                                     mock_get_deserialized_dev_env_json):
     test_local_images = [
