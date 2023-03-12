@@ -12,7 +12,7 @@ image_status_messages = {
     dev_env_setup.IMAGE_LOCAL_AND_REGISTRY: "Image is available locally and in the registry.",
 }
 
-def print_info(dev_env: dev_env_setup.DevEnvLocal | dev_env_setup.DevEnvOrg) -> None:
+def print_info(dev_env: [dev_env_setup.DevEnvLocal , dev_env_setup.DevEnvOrg]) -> None:
     tool_info_table = Table()
     tool_info_table.add_column("Type")
     tool_info_table.add_column("Image")
@@ -22,7 +22,7 @@ def print_info(dev_env: dev_env_setup.DevEnvLocal | dev_env_setup.DevEnvOrg) -> 
                                 image_status_messages[tool["image_status"]])
     stdout.print(tool_info_table)
 
-def find_dev_env(dev_envs: list, dev_env_name_to_find: str) -> dev_env_setup.DevEnvLocal | dev_env_setup.DevEnvOrg | None:
+def find_dev_env(dev_envs: list, dev_env_name_to_find: str) -> [dev_env_setup.DevEnvLocal , dev_env_setup.DevEnvOrg , None]:
     dev_env = None
     for dev_env in dev_envs:
         if dev_env.name == dev_env_name_to_find:
@@ -32,7 +32,7 @@ def find_dev_env(dev_envs: list, dev_env_name_to_find: str) -> dev_env_setup.Dev
 
     return dev_env
 
-def update_image_status(dev_env: dev_env_setup.DevEnvLocal | dev_env_setup.DevEnvOrg) -> None:
+def update_image_status(dev_env: [dev_env_setup.DevEnvLocal , dev_env_setup.DevEnvOrg]) -> None:
     container_engine_obj = container_engine.ContainerEngine()
     local_images = container_engine_obj.get_local_image_tags()
     registry_images = registry.list_repos()
