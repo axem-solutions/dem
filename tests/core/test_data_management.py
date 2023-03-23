@@ -5,3 +5,24 @@
 import dem.core.data_management as data_management
 
 # Test framework
+from unittest.mock import patch, MagicMock
+
+## Test cases
+
+@patch("dem.core.data_management.PurePath")
+@patch("dem.core.data_management.open")
+@patch("dem.core.data_management.json.load")
+def test_deserialize_valid_dev_env_json(mock_json_load, mock_open, mock_PurePath):
+    mock_PurePath.return_value = "test_path"
+    fake_opened_file = MagicMock()
+    mock_open.return_value = fake_opened_file
+    expected_deserialized_dev_env_json = MagicMock()
+    mock_json_load.return_value = expected_deserialized_dev_env_json
+
+    deserialized_dev_env_json = data_management.get_deserialized_dev_env_json()
+
+    mock_open.assert_called_once_with(mock_PurePath.return_value, "r")
+    mock_json_load.assert_called_once_with(fake_opened_file)
+    fake_opened_file.close.assert_called_once_with()
+
+    assert deserialized_dev_env_json is expected_deserialized_dev_env_json
