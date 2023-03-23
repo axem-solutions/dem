@@ -1,14 +1,20 @@
 """Unit tests for the list CLI command."""
 # tests/cli/test_list_cmd.py
 
-import io
+# Unit under test:
 import dem.cli.main as main
+
+# Test framework
 from typer.testing import CliRunner
+from unittest.mock import patch, MagicMock
+
+import io
 from rich.console import Console
 from rich.table import Table
-from unittest.mock import patch, MagicMock
 import json
 import tests.fake_data as fake_data
+
+## Global test variables
 
 # In order to test stdout and stderr separately, the stderr can't be mixed into 
 # the stdout.
@@ -23,6 +29,7 @@ runner = CliRunner(mix_stderr=False)
 @patch("dem.cli.command.list_cmd.registry.list_repos")
 def test_with_valid_dev_env_json(mock_list_repos, mock_ContainerEngine,
                                  mock_get_deserialized_dev_env_json):
+    # Test setup
     test_local_images = [
         "alpine:latest",
         "make_gnu_arm:v1.0.0",
@@ -47,8 +54,10 @@ def test_with_valid_dev_env_json(mock_list_repos, mock_ContainerEngine,
     mock_ContainerEngine.return_value = mock_container_engine
     mock_list_repos.return_value = test_registry_images
 
+    # Run unit under test
     runner_result = runner.invoke(main.typer_cli, ["list", "--local", "--env"])
 
+    # Check expectations
     mock_get_deserialized_dev_env_json.assert_called_once()
     mock_container_engine.get_local_image_tags.assert_called_once()
     mock_list_repos.assert_called_once()
@@ -67,10 +76,13 @@ def test_with_valid_dev_env_json(mock_list_repos, mock_ContainerEngine,
 
 @patch("dem.cli.command.list_cmd.data_management.get_deserialized_dev_env_json")
 def test_with_empty_dev_env_json(mock_get_deserialized_dev_env_json):
+    # Test setup
     mock_get_deserialized_dev_env_json.return_value = json.loads(fake_data.empty_dev_env_json)
 
+    # Run unit under test
     runner_result = runner.invoke(main.typer_cli, ["list", "--local", "--env"])
 
+    # Check expectations
     mock_get_deserialized_dev_env_json.assert_called_once()
 
     assert 0 == runner_result.exit_code
@@ -84,10 +96,13 @@ def test_with_empty_dev_env_json(mock_get_deserialized_dev_env_json):
 
 @patch("dem.cli.command.list_cmd.data_management.get_deserialized_dev_env_org_json")
 def test_with_empty_dev_env_org_json(mock_get_deserialized_dev_env_org_json):
+    # Test setup
     mock_get_deserialized_dev_env_org_json.return_value = json.loads(fake_data.empty_dev_env_org_json)
 
+    # Run unit under test
     runner_result = runner.invoke(main.typer_cli, ["list", "--all", "--env"])
 
+    # Check expectations
     mock_get_deserialized_dev_env_org_json.assert_called_once()
 
     assert 0 == runner_result.exit_code
@@ -103,6 +118,7 @@ def test_with_empty_dev_env_org_json(mock_get_deserialized_dev_env_org_json):
 def test_with_valid_dev_env_org_json(mock_list_repos, mock_ContainerEngine, 
                                      mock_get_deserialized_dev_env_org_json,
                                      mock_get_deserialized_dev_env_json):
+    # Test setup
     test_local_images = [
         "alpine:latest",
         "make_gnu_arm:v1.0.0",
@@ -135,8 +151,10 @@ def test_with_valid_dev_env_org_json(mock_list_repos, mock_ContainerEngine,
     mock_list_repos.return_value = test_registry_images
     mock_get_deserialized_dev_env_json.return_value = json.loads(fake_data.dev_env_json)
 
+    # Run unit under test
     runner_result = runner.invoke(main.typer_cli, ["list", "--all", "--env"])
 
+    # Check expectations
     mock_get_deserialized_dev_env_org_json.assert_called_once()
 
     expected_table = Table()
@@ -151,8 +169,10 @@ def test_with_valid_dev_env_org_json(mock_list_repos, mock_ContainerEngine,
     assert console.file.getvalue() == runner_result.stdout
 
 def test_without_options():
+    # Run unit under test
     runner_result = runner.invoke(main.typer_cli, ["list"], color=True)
     
+    # Check expectations
     assert 0 == runner_result.exit_code
 
     console = Console(file=io.StringIO())
@@ -165,8 +185,10 @@ Error: You need to set the scope and what to list!""")
     assert expected_output == runner_result.stderr
 
 def test_with_invalid_option():
+    # Run unit under test
     runner_result = runner.invoke(main.typer_cli, ["list", "--local", "--all", "--env"], color=True)
 
+    # Check expectations
     assert 0 == runner_result.exit_code
 
     console = Console(file=io.StringIO())

@@ -1,9 +1,13 @@
 """Unit tests for the info CLI command."""
 # tests/cli/test_info_cmd.py
 
-from typer.testing import CliRunner
+# Unit under test:
 import dem.cli.main as main
+
+# Test framework
+from typer.testing import CliRunner
 from unittest.mock import patch, MagicMock
+
 import docker 
 from rich.console import Console
 from rich.table import Table
