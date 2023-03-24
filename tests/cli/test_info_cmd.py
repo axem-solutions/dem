@@ -54,10 +54,10 @@ def get_expected_table(expected_tools: list[list[str]]) ->str:
 
 ## Test cases
 
-@patch("dem.cli.command.info_cmd.data_management.get_deserialized_dev_env_json")
+@patch("dem.cli.command.info_cmd.data_management.read_deserialized_dev_env_json")
 @patch("dem.cli.command.info_cmd.container_engine.ContainerEngine")
 @patch("dem.cli.command.info_cmd.registry.list_repos")
-def test_info_arg_demo(mock_list_repos, mock_ContainerEngine, mock_get_deserialized_dev_env_json):
+def test_info_arg_demo(mock_list_repos, mock_ContainerEngine, mock_read_deserialized_dev_env_json):
     # Test setup
     test_local_images = [
         "alpine:latest",
@@ -77,7 +77,7 @@ def test_info_arg_demo(mock_list_repos, mock_ContainerEngine, mock_get_deseriali
         "cpputest:latest",
         "stlink_org:latest", 
     ]
-    mock_get_deserialized_dev_env_json.return_value = json.loads(fake_data.dev_env_json)
+    mock_read_deserialized_dev_env_json.return_value = json.loads(fake_data.dev_env_json)
     mock_container_engine = MagicMock()
     mock_container_engine.get_local_image_tags.return_value = test_local_images
     mock_ContainerEngine.return_value = mock_container_engine
@@ -87,7 +87,7 @@ def test_info_arg_demo(mock_list_repos, mock_ContainerEngine, mock_get_deseriali
     runner_result = runner.invoke(main.typer_cli, ["info", "demo"], color=True)
 
     # Check expectations
-    mock_get_deserialized_dev_env_json.assert_called_once()
+    mock_read_deserialized_dev_env_json.assert_called_once()
     mock_list_repos.assert_called_once()
 
     assert 0 == runner_result.exit_code
@@ -102,11 +102,11 @@ def test_info_arg_demo(mock_list_repos, mock_ContainerEngine, mock_get_deseriali
     assert get_expected_table(expected_tools)  == runner_result.stdout
 
 
-@patch("dem.cli.command.info_cmd.data_management.get_deserialized_dev_env_json")
+@patch("dem.cli.command.info_cmd.data_management.read_deserialized_dev_env_json")
 @patch("dem.cli.command.info_cmd.container_engine.ContainerEngine")
 @patch("dem.cli.command.info_cmd.registry.list_repos")
 def test_info_arg_nagy_cica_project(mock_list_repos, mock_ContainerEngine, 
-                                    mock_get_deserialized_dev_env_json):
+                                    mock_read_deserialized_dev_env_json):
     # Test setup
     test_local_images = [
         "alpine:latest",
@@ -127,7 +127,7 @@ def test_info_arg_nagy_cica_project(mock_list_repos, mock_ContainerEngine,
         "cpputest:latest",
         "stlink_org:latest", 
     ]
-    mock_get_deserialized_dev_env_json.return_value = json.loads(fake_data.dev_env_json)
+    mock_read_deserialized_dev_env_json.return_value = json.loads(fake_data.dev_env_json)
     mock_container_engine = MagicMock()
     mock_container_engine.get_local_image_tags.return_value = test_local_images
     mock_ContainerEngine.return_value = mock_container_engine
@@ -137,7 +137,7 @@ def test_info_arg_nagy_cica_project(mock_list_repos, mock_ContainerEngine,
     runner_result = runner.invoke(main.typer_cli, ["info", "nagy_cica_project"], color=True)
 
     # Check expectations
-    mock_get_deserialized_dev_env_json.assert_called_once()
+    mock_read_deserialized_dev_env_json.assert_called_once()
     mock_list_repos.assert_called_once()
 
     assert 0 == runner_result.exit_code
@@ -163,13 +163,13 @@ def test_info_arg_invalid():
     expected_output = console.file.getvalue()
     assert expected_output == runner_result.stderr
 
-@patch("dem.cli.command.info_cmd.data_management.get_deserialized_dev_env_org_json")
-@patch("dem.cli.command.info_cmd.data_management.get_deserialized_dev_env_json")
+@patch("dem.cli.command.info_cmd.data_management.read_deserialized_dev_env_org_json")
+@patch("dem.cli.command.info_cmd.data_management.read_deserialized_dev_env_json")
 @patch("dem.cli.command.info_cmd.container_engine.ContainerEngine")
 @patch("dem.cli.command.info_cmd.registry.list_repos")
 def test_info_org_dev_env(mock_list_repos, mock_ContainerEngine, 
-                                    mock_get_deserialized_dev_env_json,
-                                    mock_get_deserialized_dev_env_org_json):
+                                    mock_read_deserialized_dev_env_json,
+                                    mock_read_deserialized_dev_env_org_json):
     # Test setup
     test_local_images = [
         "alpine:latest",
@@ -193,8 +193,8 @@ def test_info_org_dev_env(mock_list_repos, mock_ContainerEngine,
         "pemicro:latest",
         "unity:latest"
     ]
-    mock_get_deserialized_dev_env_json.return_value = json.loads(fake_data.dev_env_json)
-    mock_get_deserialized_dev_env_org_json.return_value = json.loads(fake_data.dev_env_org_json)
+    mock_read_deserialized_dev_env_json.return_value = json.loads(fake_data.dev_env_json)
+    mock_read_deserialized_dev_env_org_json.return_value = json.loads(fake_data.dev_env_org_json)
     mock_container_engine = MagicMock()
     mock_container_engine.get_local_image_tags.return_value = test_local_images
     mock_ContainerEngine.return_value = mock_container_engine
@@ -204,8 +204,8 @@ def test_info_org_dev_env(mock_list_repos, mock_ContainerEngine,
     runner_result = runner.invoke(main.typer_cli, ["info", "org_only_env"])
 
     # Check expectations
-    mock_get_deserialized_dev_env_json.assert_called_once()
-    mock_get_deserialized_dev_env_org_json.assert_called_once()
+    mock_read_deserialized_dev_env_json.assert_called_once()
+    mock_read_deserialized_dev_env_org_json.assert_called_once()
     mock_container_engine.get_local_image_tags.assert_called_once()
     mock_list_repos.assert_called_once()
 

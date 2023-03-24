@@ -41,10 +41,10 @@ def update_image_status(dev_env: (dev_env_setup.DevEnvLocal | dev_env_setup.DevE
     dev_env.check_image_availability(local_images, registry_images)
 
 def execute(arg_dev_env_name: str) -> None:
-    dev_env_json_deserialized = data_management.get_deserialized_dev_env_json()
+    dev_env_json_deserialized = data_management.read_deserialized_dev_env_json()
     dev_env_setup_local_obj = dev_env_setup.DevEnvLocalSetup(dev_env_json_deserialized)
 
-    dev_env_json_deserialized = data_management.get_deserialized_dev_env_org_json()
+    dev_env_json_deserialized = data_management.read_deserialized_dev_env_org_json()
     dev_env_setup_org_obj = dev_env_setup.DevEnvOrgSetup(dev_env_json_deserialized)
 
     dev_env = find_dev_env(dev_env_setup_local_obj.dev_envs, arg_dev_env_name)
