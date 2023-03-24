@@ -11,13 +11,10 @@ def execute(dev_env_name: str) -> None:
     #Get the organization's Dev Env if available.
     dev_env_org_json_deserialized = data_management.read_deserialized_dev_env_org_json()
     dev_env_org_setup = dev_env_setup.DevEnvOrgSetup(dev_env_org_json_deserialized)
-    for dev_env_org in dev_env_org_setup.dev_envs:
-        if dev_env_org.name == dev_env_name:
-            break
-    else:
+    dev_env_org = dev_env_org_setup.get_dev_env(dev_env_name)
+    if dev_env_org is None:
         stderr.print("[red]Error: The input Development Environment is not available for the organization.[/]")
         return
-    
 
     dev_env_local_json_deserialized = data_management.read_deserialized_dev_env_json()
     dev_env_local_setup = dev_env_setup.DevEnvLocalSetup(dev_env_local_json_deserialized)
@@ -46,7 +43,7 @@ def execute(dev_env_name: str) -> None:
     container_engine_obj = container_engine.ContainerEngine()
     local_images = container_engine_obj.get_local_image_tags()
     registry_images = registry.list_repos()
-    image_statuses = dev_env_local.check_image_availability(local_images, registry_images)
+    dev_env_local.check_image_availability(local_images, registry_images)
 
     # Pull the registry only images.
     for tool in dev_env_local.tools:
