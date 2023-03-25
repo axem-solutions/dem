@@ -150,7 +150,7 @@ class DevEnvLocalSetup(DevEnvSetup):
 
 class DevEnvOrg(DevEnv):
     """A Development Environment available for the organization."""
-    def get_local_instance(self, dev_env_setup_local: DevEnvLocalSetup) -> DevEnvLocal | None:
+    def get_local_instance(self, dev_env_setup_local: DevEnvLocalSetup) -> (DevEnvLocal | None):
         """Check if this Development Enviroment already installed locally.
 
         Args:

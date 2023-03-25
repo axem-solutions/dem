@@ -11,7 +11,8 @@ typer_cli = typer.Typer()
 @typer_cli.command()
 def list(local: bool = typer.Option(False, help="Scope is the local host."),
          all: bool = typer.Option(False, help="Scope is the organization."),
-         env: bool = typer.Option(False, help="List the environments.")) -> None:
+         env: bool = typer.Option(False, help="List the environments."),
+         tool: bool = typer.Option(False, help="List the tool images.")) -> None:
     """
     List the available Development Environments available locally or for the organization.
     
@@ -20,8 +21,10 @@ def list(local: bool = typer.Option(False, help="Scope is the local host."),
         --local --env -> List the local Development Environments.
 
         --all --env -> List the organization's Development Environments.
+
+        --local --tool -> List the local tool images.
     """
-    list_cmd.execute(local, all, env)
+    list_cmd.execute(local, all, env, tool)
 
 @typer_cli.command()
 def info(dev_env_name: str = typer.Argument(...,

@@ -79,7 +79,7 @@ def test_info_arg_demo(mock_list_repos, mock_ContainerEngine, mock_read_deserial
     ]
     mock_read_deserialized_dev_env_json.return_value = json.loads(fake_data.dev_env_json)
     mock_container_engine = MagicMock()
-    mock_container_engine.get_local_image_tags.return_value = test_local_images
+    mock_container_engine.get_local_tool_images.return_value = test_local_images
     mock_ContainerEngine.return_value = mock_container_engine
     mock_list_repos.return_value = test_registry_images
 
@@ -129,7 +129,7 @@ def test_info_arg_nagy_cica_project(mock_list_repos, mock_ContainerEngine,
     ]
     mock_read_deserialized_dev_env_json.return_value = json.loads(fake_data.dev_env_json)
     mock_container_engine = MagicMock()
-    mock_container_engine.get_local_image_tags.return_value = test_local_images
+    mock_container_engine.get_local_tool_images.return_value = test_local_images
     mock_ContainerEngine.return_value = mock_container_engine
     mock_list_repos.return_value = test_registry_images
 
@@ -217,7 +217,7 @@ def test_info_org_dev_env(mock_list_repos, mock_ContainerEngine,
     mock_read_deserialized_dev_env_json.return_value = json.loads(fake_data.dev_env_json)
     mock_read_deserialized_dev_env_org_json.return_value = json.loads(fake_data.dev_env_org_json)
     mock_container_engine = MagicMock()
-    mock_container_engine.get_local_image_tags.return_value = test_local_images
+    mock_container_engine.get_local_tool_images.return_value = test_local_images
     mock_ContainerEngine.return_value = mock_container_engine
     mock_list_repos.return_value = test_registry_images
 
@@ -227,7 +227,7 @@ def test_info_org_dev_env(mock_list_repos, mock_ContainerEngine,
     # Check expectations
     mock_read_deserialized_dev_env_json.assert_called_once()
     mock_read_deserialized_dev_env_org_json.assert_called_once()
-    mock_container_engine.get_local_image_tags.assert_called_once()
+    mock_container_engine.get_local_tool_images.assert_called_once()
     mock_list_repos.assert_called_once()
 
     assert 0 == runner_result.exit_code

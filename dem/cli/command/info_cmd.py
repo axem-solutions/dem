@@ -29,7 +29,7 @@ def find_dev_env(dev_envs: list, dev_env_name_to_find: str) -> (dev_env_setup.De
 
 def update_image_status(dev_env: (dev_env_setup.DevEnvLocal | dev_env_setup.DevEnvOrg)) -> None:
     container_engine_obj = container_engine.ContainerEngine()
-    local_images = container_engine_obj.get_local_image_tags()
+    local_images = container_engine_obj.get_local_tool_images()
     registry_images = registry.list_repos()
 
     # This functions must be called, so the tools in the dev env get updated.
