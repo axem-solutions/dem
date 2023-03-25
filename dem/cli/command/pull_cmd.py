@@ -21,7 +21,7 @@ def execute(dev_env_name: str) -> None:
     dev_env_local = dev_env_org.get_local_instance(dev_env_local_setup)
 
     #Check that the Dev Env is already installed in the dev_env.json file.
-    if isinstance(dev_env_local, dev_env_setup.DevEnvLocal):
+    if dev_env_local is not None:
         # Look for any difference between the local and the org Dev Env.
         if dev_env_local.tools != dev_env_org.tools:
             dev_env_local_setup.dev_envs.remove(dev_env_local)

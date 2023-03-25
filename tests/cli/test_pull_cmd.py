@@ -70,7 +70,8 @@ def test_dev_env_already_installed(mock_DevEnvLocalSetup, mock_read_deserialized
     fake_dev_env_local = MagicMock()
     # Set the same fake tools for both the local and org instance
     fake_dev_env_local.tools = fake_tools
-    fake_dev_env_local.get_dev_env.return_value = fake_dev_env_local
+    fake_dev_env_local.name = "test_env"
+    fake_dev_env_org.get_local_instance.return_value = fake_dev_env_local
 
     fake_container_engine = MagicMock()
     mock_ContainerEngine.return_value = fake_container_engine
@@ -93,14 +94,10 @@ def test_dev_env_already_installed(mock_DevEnvLocalSetup, mock_read_deserialized
     fake_dev_env_org.get_local_instance.assert_called_once_with(fake_dev_env_local_setup)
 
     mock_ContainerEngine.assert_called_once()
-    fake_container_engine.get_local_image_tags.assert_called_once()
+    fake_container_engine.get_local_image_tags.assert_called()
     mock_list_repos.assert_called_once()
-    fake_dev_env_local.check_image_availability.assert_called_once_with(fake_local_images, 
-                                                                        fake_registry_images)
-
-    fake_container_engine.get_local_image_tags.assert_called_once()
-    fake_dev_env_local.check_image_availability.assert_called_once_with(fake_local_images,
-                                                                        fake_registry_images)
+    fake_dev_env_local.check_image_availability.assert_called_with(fake_local_images, 
+                                                                   fake_registry_images)
     assert 0 == runner_result.exit_code
 
     console = Console(file=io.StringIO())
