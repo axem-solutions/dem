@@ -33,6 +33,7 @@ def test_dev_env_not_available_in_org(mock_DevEnvOrgSetup, mock_read_deserialize
     # Run unit under test
     runner_result = runner.invoke(main.typer_cli, ["pull", "not existing env"], color=True)
 
+    # Check expectations
     mock_read_deserialized_dev_env_org_json.assert_called_once()
     mock_DevEnvOrgSetup.assert_called_once_with(fake_deserialized_dev_env_org_json)
     fake_dev_env_org_setup.get_dev_env.assert_called_once_with("not existing env")
@@ -85,6 +86,7 @@ def test_dev_env_already_installed(mock_DevEnvLocalSetup, mock_read_deserialized
     # Run unit under test
     runner_result = runner.invoke(main.typer_cli, ["pull", "test_env"], color=True)
 
+    # Check expectations
     mock_read_deserialized_dev_env_org_json.assert_called_once()
     mock_DevEnvOrgSetup.assert_called_once_with(fake_deserialized_dev_env_org_json)
     fake_dev_env_org_setup.get_dev_env.assert_called_once_with("test_env")
@@ -150,6 +152,7 @@ def test_dev_env_installed_but_different(mock_DevEnvLocalSetup,
     # Run unit under test
     runner_result = runner.invoke(main.typer_cli, ["pull", "test_env"], color=True)
 
+    # Check expectations
     mock_read_deserialized_dev_env_org_json.assert_called_once()
     mock_DevEnvOrgSetup.assert_called_once_with(fake_deserialized_dev_env_org_json)
     fake_dev_env_org_setup.get_dev_env.assert_called_once_with("test_env")
@@ -238,6 +241,7 @@ def test_dev_env_new_install(mock_DevEnvLocalSetup, mock_read_deserialized_dev_e
     # Run unit under test
     runner_result = runner.invoke(main.typer_cli, ["pull", "test_env"], color=True)
 
+    # Check expectations
     mock_read_deserialized_dev_env_org_json.assert_called_once()
     mock_DevEnvOrgSetup.assert_called_once_with(fake_deserialized_dev_env_org_json)
     fake_dev_env_org_setup.get_dev_env.assert_called_once_with("test_env")
