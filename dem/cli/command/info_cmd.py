@@ -23,14 +23,9 @@ def print_info(dev_env: (dev_env_setup.DevEnvLocal | dev_env_setup.DevEnvOrg)) -
     stdout.print(tool_info_table)
 
 def find_dev_env(dev_envs: list, dev_env_name_to_find: str) -> (dev_env_setup.DevEnvLocal | dev_env_setup.DevEnvOrg | None):
-    dev_env = None
     for dev_env in dev_envs:
         if dev_env.name == dev_env_name_to_find:
-            break
-    else:
-        dev_env = None
-
-    return dev_env
+            return dev_env
 
 def update_image_status(dev_env: (dev_env_setup.DevEnvLocal | dev_env_setup.DevEnvOrg)) -> None:
     container_engine_obj = container_engine.ContainerEngine()

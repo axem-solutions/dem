@@ -19,9 +19,9 @@ def install_to_dev_env_json(dev_env_local: dev_env_setup.DevEnvLocal,
     If the Dev Env is already installed and both the descriptors are the same, then there is nothing
     to do. 
     Args:
-    dev_env_local -- local Dev Env instance (none if not yet installed)
-    dev_env_org -- organization's Dev Env instance
-    dev_env_local_setup -- the local Dev Env setup
+        dev_env_local -- local Dev Env instance (none if not yet installed)
+        dev_env_org -- organization's Dev Env instance
+        dev_env_local_setup -- the local Dev Env setup
     Return with the dev_env_local instance.
     """
     if dev_env_local is None:
@@ -40,6 +40,19 @@ def install_to_dev_env_json(dev_env_local: dev_env_setup.DevEnvLocal,
 
     return dev_env_local
 
+def pull_registry_only_images(dev_env_local: dev_env_setup.DevEnvLocal,
+                              container_engine_obj: container_engine.ContainerEngine) -> None:
+    """Pull images that are only present in the registry.
+    
+    Args:
+        dev_env_local -- local Dev Env instance
+        container_engine_obj -- interface to communicate with the container engine
+    """
+    for tool in dev_env_local.tools:
+        if tool["image_status"] == dev_env_setup.IMAGE_REGISTRY_ONLY:
+            image_to_pull = tool["image_name" ] + ':' + tool["image_version"]
+            stdout.print("Pulling image: " + image_to_pull)
+            container_engine_obj.pull(image_to_pull)
 
 def execute(dev_env_name: str) -> None:
     #Get the organization's Dev Env if available.
@@ -62,12 +75,7 @@ def execute(dev_env_name: str) -> None:
     registry_images = registry.list_repos()
     dev_env_local.check_image_availability(local_images, registry_images)
 
-    # Pull the registry only images.
-    for tool in dev_env_local.tools:
-        if tool["image_status"] == dev_env_setup.IMAGE_REGISTRY_ONLY:
-            image_to_pull = tool["image_name" ] + ':' + tool["image_version"]
-            stdout.print("Pulling image: " + image_to_pull)
-            container_engine_obj.pull(image_to_pull)
+    pull_registry_only_images(dev_env_local, container_engine_obj)
 
     local_images = container_engine_obj.get_local_image_tags()
     image_statuses = dev_env_local.check_image_availability(local_images, registry_images)
