@@ -60,22 +60,18 @@ def get_expected_table(expected_tools: list[list[str]]) ->str:
 def test_info_arg_demo(mock_list_repos, mock_ContainerEngine, mock_read_deserialized_dev_env_json):
     # Test setup
     test_local_images = [
-        "alpine:latest",
-        "make_gnu_arm:v1.0.0",
-        "stlink_org:latest", 
-        "stlink_org:v1.0.0",
-        "cpputest:latest",
-        "make_gnu_arm:latest", 
-        "make_gnu_arm:v0.1.0", 
-        "make_gnu_arm:v1.1.0",
-        "debian:latest",
-        "ubuntu:latest",
-        "hello-world:latest",
+        "axemsolutions/make_gnu_arm:v1.0.0",
+        "axemsolutions/stlink_org:latest", 
+        "axemsolutions/stlink_org:v1.0.0",
+        "axemsolutions/cpputest:latest",
+        "axemsolutions/make_gnu_arm:latest", 
+        "axemsolutions/make_gnu_arm:v0.1.0", 
+        "axemsolutions/make_gnu_arm:v1.1.0",
     ]
     test_registry_images = [
-        "make_gnu_arm:latest", 
-        "cpputest:latest",
-        "stlink_org:latest", 
+        "axemsolutions/make_gnu_arm:latest", 
+        "axemsolutions/cpputest:latest",
+        "axemsolutions/stlink_org:latest", 
     ]
     mock_read_deserialized_dev_env_json.return_value = json.loads(fake_data.dev_env_json)
     mock_container_engine = MagicMock()
@@ -93,11 +89,11 @@ def test_info_arg_demo(mock_list_repos, mock_ContainerEngine, mock_read_deserial
     assert 0 == runner_result.exit_code
 
     expected_tools = [
-        ["build system", "make_gnu_arm:latest", "Image is available locally and in the registry."],
-        ["toolchain", "make_gnu_arm:latest", "Image is available locally and in the registry."],
-        ["debugger", "stlink_org:latest", "Image is available locally and in the registry."],
-        ["deployer", "stlink_org:latest", "Image is available locally and in the registry."],
-        ["test framework", "cpputest:latest", "Image is available locally and in the registry."],
+        ["build system", "axemsolutions/make_gnu_arm:latest", "Image is available locally and in the registry."],
+        ["toolchain", "axemsolutions/make_gnu_arm:latest", "Image is available locally and in the registry."],
+        ["debugger", "axemsolutions/stlink_org:latest", "Image is available locally and in the registry."],
+        ["deployer", "axemsolutions/stlink_org:latest", "Image is available locally and in the registry."],
+        ["test framework", "axemsolutions/cpputest:latest", "Image is available locally and in the registry."],
     ]
     assert get_expected_table(expected_tools)  == runner_result.stdout
 
@@ -109,23 +105,19 @@ def test_info_arg_nagy_cica_project(mock_list_repos, mock_ContainerEngine,
                                     mock_read_deserialized_dev_env_json):
     # Test setup
     test_local_images = [
-        "alpine:latest",
-        "make_gnu_arm:v1.0.0",
-        "stlink_org:latest", 
-        "stlink_org:v1.0.0",
-        "cpputest:latest",
-        "make_gnu_arm:latest", 
-        "make_gnu_arm:v0.1.0", 
-        "make_gnu_arm:v1.1.0",
-        "debian:latest",
-        "ubuntu:latest",
-        "hello-world:latest",
-        "jlink:latest",
+        "axemsolutions/make_gnu_arm:v1.0.0",
+        "axemsolutions/stlink_org:latest", 
+        "axemsolutions/stlink_org:v1.0.0",
+        "axemsolutions/cpputest:latest",
+        "axemsolutions/make_gnu_arm:latest", 
+        "axemsolutions/make_gnu_arm:v0.1.0", 
+        "axemsolutions/make_gnu_arm:v1.1.0",
+        "axemsolutions/jlink:latest",
     ]
     test_registry_images = [
-        "make_gnu_arm:latest", 
-        "cpputest:latest",
-        "stlink_org:latest", 
+        "axemsolutions/make_gnu_arm:latest", 
+        "axemsolutions/cpputest:latest",
+        "axemsolutions/stlink_org:latest", 
     ]
     mock_read_deserialized_dev_env_json.return_value = json.loads(fake_data.dev_env_json)
     mock_container_engine = MagicMock()
@@ -143,11 +135,11 @@ def test_info_arg_nagy_cica_project(mock_list_repos, mock_ContainerEngine,
     assert 0 == runner_result.exit_code
 
     expected_tools = [
-        ["build system", "bazel:latest", "[red]Error: Image is not available.[/]"],
-        ["toolchain", "gnu_arm:latest", "[red]Error: Image is not available.[/]"],
-        ["debugger", "jlink:latest", "Image is available locally."],
-        ["deployer", "jlink:latest", "Image is available locally."],
-        ["test framework", "cpputest:latest", "Image is available locally and in the registry."],
+        ["build system", "axemsolutions/bazel:latest", "[red]Error: Image is not available.[/]"],
+        ["toolchain", "axemsolutions/gnu_arm:latest", "[red]Error: Image is not available.[/]"],
+        ["debugger", "axemsolutions/jlink:latest", "Image is available locally."],
+        ["deployer", "axemsolutions/jlink:latest", "Image is available locally."],
+        ["test framework", "axemsolutions/cpputest:latest", "Image is available locally and in the registry."],
     ]
     assert get_expected_table(expected_tools) == runner_result.stdout
 
@@ -193,26 +185,23 @@ def test_info_org_dev_env(mock_list_repos, mock_ContainerEngine,
                                     mock_read_deserialized_dev_env_org_json):
     # Test setup
     test_local_images = [
-        "alpine:latest",
-        "make_gnu_arm:v1.0.0",
-        "stlink_org:latest", 
-        "stlink_org:v1.0.0",
-        "cpputest:latest",
-        "make_gnu_arm:latest", 
-        "make_gnu_arm:v0.1.0", 
-        "make_gnu_arm:v1.1.0",
-        "debian:latest",
-        "ubuntu:latest",
-        "hello-world:latest",
+        "axemsolutions/make_gnu_arm:v1.0.0",
+        "axemsolutions/stlink_org:latest", 
+        "axemsolutions/stlink_org:v1.0.0",
+        "axemsolutions/cpputest:latest",
+        "axemsolutions/make_gnu_arm:latest", 
+        "axemsolutions/make_gnu_arm:v0.1.0", 
+        "axemsolutions/make_gnu_arm:v1.1.0",
+        "axemsolutions/jlink:latest",
     ]
     test_registry_images = [
-        "make_gnu_arm:latest", 
-        "cpputest:latest",
-        "stlink_org:latest", 
-        "cmake:latest",
-        "llvm:latest",
-        "pemicro:latest",
-        "unity:latest"
+        "axemsolutions/make_gnu_arm:latest", 
+        "axemsolutions/cpputest:latest",
+        "axemsolutions/stlink_org:latest", 
+        "axemsolutions/cmake:latest",
+        "axemsolutions/llvm:latest",
+        "axemsolutions/pemicro:latest",
+        "axemsolutions/unity:latest"
     ]
     mock_read_deserialized_dev_env_json.return_value = json.loads(fake_data.dev_env_json)
     mock_read_deserialized_dev_env_org_json.return_value = json.loads(fake_data.dev_env_org_json)
@@ -233,10 +222,10 @@ def test_info_org_dev_env(mock_list_repos, mock_ContainerEngine,
     assert 0 == runner_result.exit_code
 
     expected_tools = [
-        ["build system", "cmake:latest", "Image is available in the registry."],
-        ["toolchain", "llvm:latest", "Image is available in the registry."],
-        ["debugger", "pemicro:latest", "Image is available in the registry."],
-        ["deployer", "pemicro:latest", "Image is available in the registry."],
-        ["test framework", "unity:latest", "Image is available in the registry."],
+        ["build system", "axemsolutions/cmake:latest", "Image is available in the registry."],
+        ["toolchain", "axemsolutions/llvm:latest", "Image is available in the registry."],
+        ["debugger", "axemsolutions/pemicro:latest", "Image is available in the registry."],
+        ["deployer", "axemsolutions/pemicro:latest", "Image is available in the registry."],
+        ["test framework", "axemsolutions/unity:latest", "Image is available in the registry."],
     ]
     assert get_expected_table(expected_tools) == runner_result.stdout
