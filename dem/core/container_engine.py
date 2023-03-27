@@ -12,7 +12,7 @@ class ContainerEngine():
 
         for image in self._docker_client.images.list():
             for tag in image.tags:
-                if tag:
+                if tag and tag.startswith("axemsolutions/"):
                     local_image_tags.append(tag)
 
         return local_image_tags

@@ -17,31 +17,27 @@ def _get_test_image_tags_as_images(test_image_tags):
     return test_images
 
 @patch("docker.from_env")
-def test_get_local_image_tags(mock_docker_from_env):
+def test_get_local_tool_images(mock_docker_from_env):
     test_image_tags = [
     ["alpine:latest"],
     [""],
-    ["make_gnu_arm:v1.0.0"],
-    ["stlink_org:latest", "stlink_org:v1.0.0"],
-    ["cpputest:latest"],
-    ["make_gnu_arm:latest", "make_gnu_arm:v0.1.0", "make_gnu_arm:v1.1.0"],
+    ["axemsolutions/make_gnu_arm:v1.0.0"],
+    ["axemsolutions/stlink_org:latest", "axemsolutions/stlink_org:v1.0.0"],
+    ["axemsolutions/cpputest:latest"],
+    ["axemsolutions/make_gnu_arm:latest", "axemsolutions/make_gnu_arm:v0.1.0", "axemsolutions/make_gnu_arm:v1.1.0"],
     ["debian:latest"],
     ["ubuntu:latest"],
     ["hello-world:latest"],
     [""],
     ]
     expected_image_tags = [
-    "alpine:latest",
-    "make_gnu_arm:v1.0.0",
-    "stlink_org:latest", 
-    "stlink_org:v1.0.0",
-    "cpputest:latest",
-    "make_gnu_arm:latest", 
-    "make_gnu_arm:v0.1.0", 
-    "make_gnu_arm:v1.1.0",
-    "debian:latest",
-    "ubuntu:latest",
-    "hello-world:latest",
+    "axemsolutions/make_gnu_arm:v1.0.0",
+    "axemsolutions/stlink_org:latest", 
+    "axemsolutions/stlink_org:v1.0.0",
+    "axemsolutions/cpputest:latest",
+    "axemsolutions/make_gnu_arm:latest", 
+    "axemsolutions/make_gnu_arm:v0.1.0", 
+    "axemsolutions/make_gnu_arm:v1.1.0",
     ]
     mock_docker_client = MagicMock()
     mock_docker_client.images.list.return_value = _get_test_image_tags_as_images(test_image_tags)
@@ -54,7 +50,7 @@ def test_get_local_image_tags(mock_docker_from_env):
     mock_docker_client.images.list.assert_called_once()
 
 @patch("docker.from_env")
-def test_get_local_image_tags_no_image_available(mock_docker_from_env):
+def test_get_local_tool_images_when_none_available(mock_docker_from_env):
     test_image_tags = []
     expected_image_tags = []
     mock_docker_client = MagicMock()
