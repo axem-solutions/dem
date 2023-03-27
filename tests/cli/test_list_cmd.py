@@ -280,3 +280,52 @@ def test_no_local_tool_images(mock_ContainerEngine):
     console = Console(file=io.StringIO())
     console.print(expected_table)
     assert console.file.getvalue() == runner_result.stdout
+
+## Test listing the local tool images.
+
+@patch("dem.cli.command.list_cmd.registry.list_repos")
+def test_registry_tool_images(mock_list_repos):
+    # Test setup
+    fake_registry_tool_images = [
+        "axemsolutions/cpputest:latest",
+        "axemsolutions/stlink_org:latest",
+        "axemsolutions/make_gnu_arm:latest",
+    ]
+    mock_list_repos.return_value = fake_registry_tool_images
+
+    # Run unit under test
+    runner_result = runner.invoke(main.typer_cli, ["list", "--all", "--tool"])
+
+    # Check expectations
+    assert 0 == runner_result.exit_code
+
+    mock_list_repos.assert_called_once()
+    
+    expected_table = Table()
+    expected_table.add_column("Repository")
+    expected_table.add_row("axemsolutions/cpputest:latest")
+    expected_table.add_row("axemsolutions/stlink_org:latest")
+    expected_table.add_row("axemsolutions/make_gnu_arm:latest")
+    console = Console(file=io.StringIO())
+    console.print(expected_table)
+    assert console.file.getvalue() == runner_result.stdout
+
+@patch("dem.cli.command.list_cmd.registry.list_repos")
+def test_empty_repository(mock_list_repos):
+    # Test setup
+    fake_registry_tool_images = []
+    mock_list_repos.return_value = fake_registry_tool_images
+
+    # Run unit under test
+    runner_result = runner.invoke(main.typer_cli, ["list", "--all", "--tool"])
+
+    # Check expectations
+    assert 0 == runner_result.exit_code
+
+    mock_list_repos.assert_called_once()
+    
+    expected_table = Table()
+    expected_table.add_column("Repository")
+    console = Console(file=io.StringIO())
+    console.print(expected_table)
+    assert console.file.getvalue() == runner_result.stdout

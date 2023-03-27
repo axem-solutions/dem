@@ -90,15 +90,23 @@ def execute(local: bool, all: bool, env: bool, tool: bool) -> None:
             table.add_row(dev_env.name, get_dev_env_status(dev_env, local_images, registry_images))
 
         stdout.print(table)
-    elif (local == True) and (env == False) and (tool == True):
-        container_engine_obj = container_engine.ContainerEngine()
-        local_images = container_engine_obj.get_local_tool_images()
+    elif ((local == True) or (all == True)) and (env == False) and (tool == True):
+        if (local == True) and (all == False):
+            container_engine_obj = container_engine.ContainerEngine()
+            local_images = container_engine_obj.get_local_tool_images()
 
-        table = Table()
-        table.add_column("Repository")
-        for local_image in local_images:
-            table.add_row(local_image)
-        stdout.print(table)
+            table = Table()
+            table.add_column("Repository")
+            for local_image in local_images:
+                table.add_row(local_image)
+            stdout.print(table)
+        elif (local == False) and (all == True):
+            registry_images = registry.list_repos()
+            table = Table()
+            table.add_column("Repository")
+            for registry_image in registry_images:
+                table.add_row(registry_image)
+            stdout.print(table)
     else:
         stderr.print(\
 """Usage: dem list [OPTIONS]
