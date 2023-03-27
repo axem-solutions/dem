@@ -60,53 +60,59 @@ def get_dev_env_status(dev_env: (dev_env_setup.DevEnvLocal | dev_env_setup.DevEn
             dev_env_status = dev_env_local_status_messages[DEV_ENV_LOCAL_INSTALLED]
     return dev_env_status
 
-def execute(local: bool, all: bool, env: bool, tool: bool) -> None:
-    if ((local == True) or (all == True)) and (env == True) and (tool == False):
-        dev_env_setup_obj = None
-        if ((local == True) and (all == False)):
-            dev_env_json_deserialized = data_management.read_deserialized_dev_env_json()
-            dev_env_setup_obj = dev_env_setup.DevEnvLocalSetup(dev_env_json_deserialized)
-            if not dev_env_setup_obj.dev_envs:
-                stdout.print("[yellow]No installed Development Environments.[/]")
-                return
-        elif((local == False) and (all==True)):
-            dev_env_org_json_deserialized = data_management.read_deserialized_dev_env_org_json()
-            dev_env_setup_obj = dev_env_setup.DevEnvOrgSetup(dev_env_org_json_deserialized)
-            if not dev_env_setup_obj.dev_envs:
-                stdout.print("[yellow]No Development Environment in your organization.[/]")
-                return
-        else:
-            stderr.print("[red]Error: This command is not supported.[/]")
+def list_dev_envs(local: bool, org: bool)-> None:
+    dev_env_setup_obj = None
+    if ((local == True) and (org == False)):
+        dev_env_json_deserialized = data_management.read_deserialized_dev_env_json()
+        dev_env_setup_obj = dev_env_setup.DevEnvLocalSetup(dev_env_json_deserialized)
+        if not dev_env_setup_obj.dev_envs:
+            stdout.print("[yellow]No installed Development Environments.[/]")
             return
-        
+    elif((local == False) and (org == True)):
+        dev_env_org_json_deserialized = data_management.read_deserialized_dev_env_org_json()
+        dev_env_setup_obj = dev_env_setup.DevEnvOrgSetup(dev_env_org_json_deserialized)
+        if not dev_env_setup_obj.dev_envs:
+            stdout.print("[yellow]No Development Environment in your organization.[/]")
+            return
+    else:
+        stderr.print("[red]Error: This command is not supported.[/]")
+        return
+    
+    container_engine_obj = container_engine.ContainerEngine()
+    local_images = container_engine_obj.get_local_tool_images()
+    registry_images = registry.list_repos()
+
+    table = Table()
+    table.add_column("Development Environment")
+    table.add_column("Status")
+    for dev_env in dev_env_setup_obj.dev_envs:
+        table.add_row(dev_env.name, get_dev_env_status(dev_env, local_images, registry_images))
+
+    stdout.print(table)
+
+def list_tool_images(local: bool, org: bool) -> None:
+    if (local == True) and (org == False):
         container_engine_obj = container_engine.ContainerEngine()
         local_images = container_engine_obj.get_local_tool_images()
-        registry_images = registry.list_repos()
 
         table = Table()
-        table.add_column("Development Environment")
-        table.add_column("Status")
-        for dev_env in dev_env_setup_obj.dev_envs:
-            table.add_row(dev_env.name, get_dev_env_status(dev_env, local_images, registry_images))
-
+        table.add_column("Repository")
+        for local_image in local_images:
+            table.add_row(local_image)
         stdout.print(table)
-    elif ((local == True) or (all == True)) and (env == False) and (tool == True):
-        if (local == True) and (all == False):
-            container_engine_obj = container_engine.ContainerEngine()
-            local_images = container_engine_obj.get_local_tool_images()
+    elif (local == False) and (org == True):
+        registry_images = registry.list_repos()
+        table = Table()
+        table.add_column("Repository")
+        for registry_image in registry_images:
+            table.add_row(registry_image)
+        stdout.print(table)
 
-            table = Table()
-            table.add_column("Repository")
-            for local_image in local_images:
-                table.add_row(local_image)
-            stdout.print(table)
-        elif (local == False) and (all == True):
-            registry_images = registry.list_repos()
-            table = Table()
-            table.add_column("Repository")
-            for registry_image in registry_images:
-                table.add_row(registry_image)
-            stdout.print(table)
+def execute(local: bool, org: bool, env: bool, tool: bool) -> None:
+    if ((local == True) or (org == True)) and (env == True) and (tool == False):
+        list_dev_envs(local, org)
+    elif ((local == True) or (org == True)) and (env == False) and (tool == True):
+        list_tool_images(local, org)
     else:
         stderr.print(\
 """Usage: dem list [OPTIONS]
