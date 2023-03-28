@@ -11,7 +11,6 @@ class ContainerEngine():
     def get_local_tool_images(self) -> list[str]:
         """Get local tool images.
         
-        Filter the local container images that are assigned to the axemsolutions registry.
         Return with the list of the locally avialable tool image names.
         """
         local_image_tags = []
