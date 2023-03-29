@@ -138,6 +138,100 @@ dev_env_org_json = """{
                     "image_version": "latest"
                 }
             ]
+        },
+        {
+            "name": "demo",
+            "tools": [{
+                    "type": "build system",
+                    "image_name": "make_gnu_arm",
+                    "image_version": "latest"
+                },
+                {
+                    "type": "toolchain",
+                    "image_name": "make_gnu_arm",
+                    "image_version": "latest"
+                },
+                {
+                    "type": "debugger",
+                    "image_name": "stlink_org",
+                    "image_version": "latest"
+                },
+                {
+                    "type": "deployer",
+                    "image_name": "stlink_org",
+                    "image_version": "latest"
+                },
+                {
+                    "type": "test framework",
+                    "image_name": "cpputest",
+                    "image_version": "latest"
+                }
+            ]
+        },
+        {
+            "name": "nagy_cica_project",
+            "tools": [{
+                    "type": "build system",
+                    "image_name": "bazel",
+                    "image_version": "latest"
+                },
+                {
+                    "type": "toolchain",
+                    "image_name": "gnu_arm",
+                    "image_version": "latest"
+                },
+                {
+                    "type": "debugger",
+                    "image_name": "jlink",
+                    "image_version": "latest"
+                },
+                {
+                    "type": "deployer",
+                    "image_name": "jlink",
+                    "image_version": "latest"
+                },
+                {
+                    "type": "test framework",
+                    "image_name": "cpputest",
+                    "image_version": "latest"
+                }
+            ]
+        },
+        {
+            "name": "unavailable_image_env",
+            "tools": [{
+                    "type": "build system",
+                    "image_name": "unavailable_build_system_image",
+                    "image_version": "latest"
+                },
+                {
+                    "type": "toolchain",
+                    "image_name": "llvm",
+                    "image_version": "latest"
+                },
+                {
+                    "type": "debugger",
+                    "image_name": "pemicro",
+                    "image_version": "latest"
+                },
+                {
+                    "type": "deployer",
+                    "image_name": "pemicro",
+                    "image_version": "latest"
+                },
+                {
+                    "type": "test framework",
+                    "image_name": "unity",
+                    "image_version": "latest"
+                }
+            ]
         }
     ]
+}"""
+
+empty_dev_env_org_json = """{
+    "version": "0.1",
+    "org_name": "axem",
+    "registry": "registry-1.docker.io",
+    "development_environments": []
 }"""
