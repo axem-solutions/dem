@@ -9,7 +9,7 @@ from dem.cli.console import stdout, stderr
 
 def execute(dev_env_name: str) -> None:
     #Get the organization's Dev Env if available.
-    dev_env_org_json_deserialized = data_management.get_deserialized_dev_env_org_json()
+    dev_env_org_json_deserialized = data_management.read_deserialized_dev_env_org_json()
     dev_env_org_setup = dev_env_setup.DevEnvOrgSetup(dev_env_org_json_deserialized)
     for dev_env_org in dev_env_org_setup.dev_envs:
         if dev_env_org.name == dev_env_name:
@@ -19,7 +19,7 @@ def execute(dev_env_name: str) -> None:
         return
     
 
-    dev_env_local_json_deserialized = data_management.get_deserialized_dev_env_json()
+    dev_env_local_json_deserialized = data_management.read_deserialized_dev_env_json()
     dev_env_local_setup = dev_env_setup.DevEnvLocalSetup(dev_env_local_json_deserialized)
     dev_env_local = dev_env_org.get_local_instance(dev_env_local_setup)
 
@@ -31,7 +31,7 @@ def execute(dev_env_name: str) -> None:
             dev_env_local.tools = dev_env_org.tools
             dev_env_local_setup.dev_envs.append(dev_env_local)
             deserialized_local_dev_env = dev_env_local_setup.get_deserialized()
-            data_management.write_dev_env_json(deserialized_local_dev_env)
+            data_management.write_deserialized_dev_env_json(deserialized_local_dev_env)
         else:
             # The local and in org instance are the same.
             pass
@@ -40,7 +40,7 @@ def execute(dev_env_name: str) -> None:
         dev_env_local = dev_env_setup.DevEnvLocal(dev_env_org=dev_env_org)
         dev_env_local_setup.dev_envs.append(dev_env_local)
         deserialized_local_dev_env = dev_env_local_setup.get_deserialized()
-        data_management.write_dev_env_json(deserialized_local_dev_env)
+        data_management.write_deserialized_dev_env_json(deserialized_local_dev_env)
 
     #The local DevEnvSetup contains the DevEnvOrg to install. Check the images' status
     container_engine_obj = container_engine.ContainerEngine()
