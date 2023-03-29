@@ -12,6 +12,7 @@ typer_cli = typer.Typer()
 def list(local: bool = typer.Option(False, help="Scope is the local host."),
          all: bool = typer.Option(False, help="Scope is the organization."),
          env: bool = typer.Option(False, help="List the environments.")) -> None:
+<<<<<<< HEAD
     """
     List the available Development Environments available locally or for the organization.
     
@@ -29,15 +30,24 @@ def info(dev_env_name: str = typer.Argument(...,
     """
     Get information about the specified Development Environment.
     """
+=======
+    list_cmd.execute(local, all, env)
+
+@typer_cli.command()
+def info(dev_env_name: str) -> None:
+>>>>>>> fb0e702f0b31ca5653456335948301de03042dc8
     info_cmd.execute(dev_env_name)
 
 @typer_cli.command()
 def pull(dev_env_name: str = typer.Argument(..., 
                                             help="Name of the Development Environment to install.")) -> None:
+<<<<<<< HEAD
     """
     Pull all the required containerized tools from the registry and install the Development 
     Environment locally.
     """
+=======
+>>>>>>> fb0e702f0b31ca5653456335948301de03042dc8
     pull_cmd.execute(dev_env_name)
 
 def _version_callback(value: bool) -> None:
