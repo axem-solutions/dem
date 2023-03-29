@@ -47,8 +47,7 @@ def pull(dev_env_name: str = typer.Argument(...,
 
 @typer_cli.command()
 def create(dev_env_name: str = typer.Argument(None, help="Name of the Development Environment to create.")) -> None:
-    # create_cmd.execute()
-    pass
+    create_cmd.execute()
 
 def _version_callback(value: bool) -> None:
     if value:
