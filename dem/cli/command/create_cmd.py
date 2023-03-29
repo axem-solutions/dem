@@ -48,6 +48,12 @@ class Menu(table.Table):
                                                                                                   "*", 
                                                                                                   1)
 
+    def toggle_select(self) -> None:
+        if (self.columns[1]._cells[self.cursor_pos] == ""):
+            self.columns[1]._cells[self.cursor_pos] = "✔"
+        else:
+            self.columns[1]._cells[self.cursor_pos] = ""
+
 def execute():
     menu = Menu(list(DevEnv.supported_tool_types), "Tool types")
     menu_aligment = align.Align(menu, align="center", vertical="middle")
@@ -60,4 +66,5 @@ def execute():
                 case key.DOWN | "j":
                     menu.move_cursor(menu.CURSOR_DOWN)
                 case key.ENTER:
+                    menu.toggle_select()
                     pass
