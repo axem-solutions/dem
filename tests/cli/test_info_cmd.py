@@ -151,11 +151,32 @@ def test_info_arg_nagy_cica_project(mock_list_repos, mock_ContainerEngine,
     ]
     assert get_expected_table(expected_tools) == runner_result.stdout
 
-def test_info_arg_invalid():
+@patch("dem.cli.command.pull_cmd.data_management.read_deserialized_dev_env_org_json")
+@patch("dem.cli.command.pull_cmd.dev_env_setup.DevEnvOrgSetup")
+@patch("dem.cli.command.pull_cmd.data_management.read_deserialized_dev_env_json")
+@patch("dem.cli.command.pull_cmd.dev_env_setup.DevEnvLocalSetup")
+def test_info_arg_invalid(mock_DevEnvLocalSetup, mock_read_deserialized_dev_env_local_json, 
+                          mock_DevEnvOrgSetup, mock_read_deserialized_dev_env_org_json):
+    # Test setup
+    fake_deserialized_dev_env_json = MagicMock()
+    mock_read_deserialized_dev_env_local_json.return_value = fake_deserialized_dev_env_json
+    fake_dev_env_local_setup = MagicMock()
+    mock_DevEnvLocalSetup.return_value = fake_dev_env_local_setup
+
+    fake_deserialized_dev_env_org_json = MagicMock()
+    mock_read_deserialized_dev_env_org_json.return_value = fake_deserialized_dev_env_org_json
+    fake_dev_env_org_setup = MagicMock()
+    mock_DevEnvOrgSetup.return_value = fake_dev_env_org_setup
+
     # Run unit under test
     runner_result = runner.invoke(main.typer_cli, ["info", "not_existing_environment"])
 
     # Check expectations
+    mock_read_deserialized_dev_env_local_json.assert_called_once()
+    mock_DevEnvLocalSetup.assert_called_once_with(fake_deserialized_dev_env_json)
+
+    mock_read_deserialized_dev_env_org_json.assert_called_once()
+    mock_DevEnvOrgSetup.assert_called_once_with(fake_deserialized_dev_env_org_json)
     assert 0 == runner_result.exit_code
 
     console = Console(file=io.StringIO())

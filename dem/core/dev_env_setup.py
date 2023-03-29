@@ -56,6 +56,7 @@ class DevEnv:
     def check_image_availability(self, local_images: list, registry_images: list) -> list:
         """ Checks the tool image's availability.
         
+            Updates the "image_status" key for the tool dictionary.
             Args:
                 local_images -- list of the local image names with tags
                 registry_images -- list of the images available in the registry (name + tag)
@@ -159,10 +160,9 @@ class DevEnvOrg(DevEnv):
         for dev_env_local in dev_env_setup_local.dev_envs:
             if self.name == dev_env_local.name:
                 return dev_env_local
-        return None
 
 class DevEnvOrgSetup(DevEnvSetup):
-    def __init__(self, dev_env_json_deserialized: dict):
+    def __init__(self, dev_env_json_deserialized: dict) -> None:
         """Store the Development Environments available for the organization.
 
         Extends the DevEnvSetup super class by populating the list of Development Environments with 
@@ -174,3 +174,15 @@ class DevEnvOrgSetup(DevEnvSetup):
 
         for dev_env_descriptor in dev_env_json_deserialized["development_environments"]:
             self.dev_envs.append(DevEnvOrg(descriptor=dev_env_descriptor))
+    
+    def get_dev_env(self, dev_env_name: str) -> (DevEnvOrg | None):
+        """Get the Development Environment fromt thr organization setup by name.
+        
+        Args:
+            dev_env_name -- name of the Development Environment to get
+        Returns with the DevEnvOrg instance representing the Development Environment. If the 
+        Development Environment doesn't exist in the organization, the function returns with None.
+        """
+        for dev_env in self.dev_envs:
+            if dev_env.name == dev_env_name:
+                return dev_env

@@ -1,4 +1,6 @@
-"""Docker registry management."""
+"""Direct access to the registry over HTTP. 
+Use the container engine when possible for accessing the registry. 
+"""
 # dem/core/registry.py
 
 import dxf
