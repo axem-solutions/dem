@@ -71,13 +71,13 @@ def execute(dev_env_name: str) -> None:
 
     #The local DevEnvSetup contains the DevEnvOrg to install. Check the images' status
     container_engine_obj = container_engine.ContainerEngine()
-    local_images = container_engine_obj.get_local_image_tags()
+    local_images = container_engine_obj.get_local_tool_images()
     registry_images = registry.list_repos()
     dev_env_local.check_image_availability(local_images, registry_images)
 
     pull_registry_only_images(dev_env_local, container_engine_obj)
 
-    local_images = container_engine_obj.get_local_image_tags()
+    local_images = container_engine_obj.get_local_tool_images()
     image_statuses = dev_env_local.check_image_availability(local_images, registry_images)
 
     if image_statuses.count(dev_env_setup.IMAGE_LOCAL_AND_REGISTRY) == len(image_statuses):

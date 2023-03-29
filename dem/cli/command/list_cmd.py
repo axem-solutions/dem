@@ -60,8 +60,8 @@ def get_dev_env_status(dev_env: (dev_env_setup.DevEnvLocal | dev_env_setup.DevEn
             dev_env_status = dev_env_local_status_messages[DEV_ENV_LOCAL_INSTALLED]
     return dev_env_status
 
-def execute(local: bool, all: bool, env: bool) -> None:
-    if ((local == True) or (all == True)) and (env == True):
+def execute(local: bool, all: bool, env: bool, tool: bool) -> None:
+    if ((local == True) or (all == True)) and (env == True) and (tool == False):
         dev_env_setup_obj = None
         if ((local == True) and (all == False)):
             dev_env_json_deserialized = data_management.read_deserialized_dev_env_json()
@@ -80,16 +80,24 @@ def execute(local: bool, all: bool, env: bool) -> None:
             return
         
         container_engine_obj = container_engine.ContainerEngine()
-        local_images = container_engine_obj.get_local_image_tags()
+        local_images = container_engine_obj.get_local_tool_images()
         registry_images = registry.list_repos()
 
         table = Table()
         table.add_column("Development Environment")
         table.add_column("Status")
-        for dev_env_org in dev_env_setup_obj.dev_envs:
-            table.add_row(dev_env_org.name, get_dev_env_status(dev_env_org, 
-                                                               local_images,
-                                                               registry_images))
+        for dev_env in dev_env_setup_obj.dev_envs:
+            table.add_row(dev_env.name, get_dev_env_status(dev_env, local_images, registry_images))
+
+        stdout.print(table)
+    elif (local == True) and (env == False) and (tool == True):
+        container_engine_obj = container_engine.ContainerEngine()
+        local_images = container_engine_obj.get_local_tool_images()
+
+        table = Table()
+        table.add_column("Repository")
+        for local_image in local_images:
+            table.add_row(local_image)
         stdout.print(table)
     else:
         stderr.print(\

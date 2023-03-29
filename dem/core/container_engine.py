@@ -7,7 +7,7 @@ class ContainerEngine():
     def __init__(self) -> None:
         self._docker_client = docker.from_env()
 
-    def get_local_image_tags(self) -> list[str]:
+    def get_local_tool_images(self) -> list[str]:
         local_image_tags = []
 
         for image in self._docker_client.images.list():

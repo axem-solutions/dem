@@ -77,7 +77,7 @@ def test_dev_env_already_installed(mock_DevEnvLocalSetup, mock_read_deserialized
     fake_container_engine = MagicMock()
     mock_ContainerEngine.return_value = fake_container_engine
     fake_local_images = MagicMock()
-    fake_container_engine.get_local_image_tags.return_value = fake_local_images
+    fake_container_engine.get_local_tool_images.return_value = fake_local_images
     fake_registry_images = MagicMock()
     mock_list_repos.return_value = fake_registry_images
     fake_image_statuses = [dev_env_setup.IMAGE_LOCAL_AND_REGISTRY] * 5
@@ -96,7 +96,7 @@ def test_dev_env_already_installed(mock_DevEnvLocalSetup, mock_read_deserialized
     fake_dev_env_org.get_local_instance.assert_called_once_with(fake_dev_env_local_setup)
 
     mock_ContainerEngine.assert_called_once()
-    fake_container_engine.get_local_image_tags.assert_called()
+    fake_container_engine.get_local_tool_images.assert_called()
     mock_list_repos.assert_called_once()
     fake_dev_env_local.check_image_availability.assert_called_with(fake_local_images, 
                                                                    fake_registry_images)
@@ -143,7 +143,7 @@ def test_dev_env_installed_but_different(mock_DevEnvLocalSetup,
     fake_container_engine = MagicMock()
     mock_ContainerEngine.return_value = fake_container_engine
     fake_local_images = MagicMock()
-    fake_container_engine.get_local_image_tags.return_value = fake_local_images
+    fake_container_engine.get_local_tool_images.return_value = fake_local_images
     fake_registry_images = MagicMock()
     mock_list_repos.return_value = fake_registry_images
     fake_image_statuses = [dev_env_setup.IMAGE_LOCAL_AND_REGISTRY] * 5
@@ -168,7 +168,7 @@ def test_dev_env_installed_but_different(mock_DevEnvLocalSetup,
     mock_write_deserialized_dev_env_local_json.assert_called_once_with(fake_deserialized_dev_env_local_json)
 
     mock_ContainerEngine.assert_called_once()
-    fake_container_engine.get_local_image_tags.assert_called()
+    fake_container_engine.get_local_tool_images.assert_called()
     mock_list_repos.assert_called_once()
     fake_dev_env_local.check_image_availability.assert_called_with(fake_local_images, 
                                                                    fake_registry_images)
@@ -213,7 +213,7 @@ def test_dev_env_new_install(mock_DevEnvLocalSetup, mock_read_deserialized_dev_e
     fake_container_engine = MagicMock()
     mock_ContainerEngine.return_value = fake_container_engine
     fake_local_images = MagicMock()
-    fake_container_engine.get_local_image_tags.return_value = fake_local_images
+    fake_container_engine.get_local_tool_images.return_value = fake_local_images
     fake_registry_images = MagicMock()
     mock_list_repos.return_value = fake_registry_images
     fake_image_statuses = [dev_env_setup.IMAGE_LOCAL_AND_REGISTRY] * 5
@@ -256,7 +256,7 @@ def test_dev_env_new_install(mock_DevEnvLocalSetup, mock_read_deserialized_dev_e
     mock_write_deserialized_dev_env_local_json.assert_called_once_with(fake_deserialized_dev_env_local_json)
 
     mock_ContainerEngine.assert_called_once()
-    fake_container_engine.get_local_image_tags.assert_called()
+    fake_container_engine.get_local_tool_images.assert_called()
     mock_list_repos.assert_called_once()
     fake_dev_env_local.check_image_availability.assert_called_with(fake_local_images, 
                                                                    fake_registry_images)

@@ -4,27 +4,27 @@ dev_env_json = """{
             "name": "demo",
             "tools": [{
                     "type": "build system",
-                    "image_name": "make_gnu_arm",
+                    "image_name": "axemsolutions/make_gnu_arm",
                     "image_version": "latest"
                 },
                 {
                     "type": "toolchain",
-                    "image_name": "make_gnu_arm",
+                    "image_name": "axemsolutions/make_gnu_arm",
                     "image_version": "latest"
                 },
                 {
                     "type": "debugger",
-                    "image_name": "stlink_org",
+                    "image_name": "axemsolutions/stlink_org",
                     "image_version": "latest"
                 },
                 {
                     "type": "deployer",
-                    "image_name": "stlink_org",
+                    "image_name": "axemsolutions/stlink_org",
                     "image_version": "latest"
                 },
                 {
                     "type": "test framework",
-                    "image_name": "cpputest",
+                    "image_name": "axemsolutions/cpputest",
                     "image_version": "latest"
                 }
             ]
@@ -33,27 +33,27 @@ dev_env_json = """{
             "name": "nagy_cica_project",
             "tools": [{
                     "type": "build system",
-                    "image_name": "bazel",
+                    "image_name": "axemsolutions/bazel",
                     "image_version": "latest"
                 },
                 {
                     "type": "toolchain",
-                    "image_name": "gnu_arm",
+                    "image_name": "axemsolutions/gnu_arm",
                     "image_version": "latest"
                 },
                 {
                     "type": "debugger",
-                    "image_name": "jlink",
+                    "image_name": "axemsolutions/jlink",
                     "image_version": "latest"
                 },
                 {
                     "type": "deployer",
-                    "image_name": "jlink",
+                    "image_name": "axemsolutions/jlink",
                     "image_version": "latest"
                 },
                 {
                     "type": "test framework",
-                    "image_name": "cpputest",
+                    "image_name": "axemsolutions/cpputest",
                     "image_version": "latest"
                 }
             ]
@@ -74,27 +74,27 @@ invalid_dev_env_json = """{
 			"name": "demo",
 			"tools": [{
 					"type": "build_system",
-					"image_name": "make_gnu_arm",
+					"image_name": "axemsolutions/make_gnu_arm",
 					"image_version": "latest"
 				},
 				{
 					"type": "toolchain",
-					"image_name": "make_gnu_arm",
+					"image_name": "axemsolutions/make_gnu_arm",
 					"image_version": "latest"
 				},
 				{
 					"type": "debugger",
-					"image_name": "stlink_org",
+					"image_name": "axemsolutions/stlink_org",
 					"image_version": "latest"
 				},
 				{
 					"type": "deployer",
-					"image_name": "stlink_org",
+					"image_name": "axemsolutions/stlink_org",
 					"image_version": "latest"
 				},
 				{
 					"type": "test framework",
-					"image_name": "cpputest",
+					"image_name": "axemsolutions/cpputest",
 					"image_version": "latest"
 				}
 			]
@@ -114,27 +114,27 @@ dev_env_org_json = """{
             "name": "org_only_env",
             "tools": [{
                     "type": "build system",
-                    "image_name": "cmake",
+                    "image_name": "axemsolutions/cmake",
                     "image_version": "latest"
                 },
                 {
                     "type": "toolchain",
-                    "image_name": "llvm",
+                    "image_name": "axemsolutions/llvm",
                     "image_version": "latest"
                 },
                 {
                     "type": "debugger",
-                    "image_name": "pemicro",
+                    "image_name": "axemsolutions/pemicro",
                     "image_version": "latest"
                 },
                 {
                     "type": "deployer",
-                    "image_name": "pemicro",
+                    "image_name": "axemsolutions/pemicro",
                     "image_version": "latest"
                 },
                 {
                     "type": "test framework",
-                    "image_name": "unity",
+                    "image_name": "axemsolutions/unity",
                     "image_version": "latest"
                 }
             ]
@@ -143,27 +143,27 @@ dev_env_org_json = """{
             "name": "demo",
             "tools": [{
                     "type": "build system",
-                    "image_name": "make_gnu_arm",
+                    "image_name": "axemsolutions/make_gnu_arm",
                     "image_version": "latest"
                 },
                 {
                     "type": "toolchain",
-                    "image_name": "make_gnu_arm",
+                    "image_name": "axemsolutions/make_gnu_arm",
                     "image_version": "latest"
                 },
                 {
                     "type": "debugger",
-                    "image_name": "stlink_org",
+                    "image_name": "axemsolutions/stlink_org",
                     "image_version": "latest"
                 },
                 {
                     "type": "deployer",
-                    "image_name": "stlink_org",
+                    "image_name": "axemsolutions/stlink_org",
                     "image_version": "latest"
                 },
                 {
                     "type": "test framework",
-                    "image_name": "cpputest",
+                    "image_name": "axemsolutions/cpputest",
                     "image_version": "latest"
                 }
             ]
@@ -172,27 +172,27 @@ dev_env_org_json = """{
             "name": "nagy_cica_project",
             "tools": [{
                     "type": "build system",
-                    "image_name": "bazel",
+                    "image_name": "axemsolutions/bazel",
                     "image_version": "latest"
                 },
                 {
                     "type": "toolchain",
-                    "image_name": "gnu_arm",
+                    "image_name": "axemsolutions/gnu_arm",
                     "image_version": "latest"
                 },
                 {
                     "type": "debugger",
-                    "image_name": "jlink",
+                    "image_name": "axemsolutions/jlink",
                     "image_version": "latest"
                 },
                 {
                     "type": "deployer",
-                    "image_name": "jlink",
+                    "image_name": "axemsolutions/jlink",
                     "image_version": "latest"
                 },
                 {
                     "type": "test framework",
-                    "image_name": "cpputest",
+                    "image_name": "axemsolutions/cpputest",
                     "image_version": "latest"
                 }
             ]
@@ -201,27 +201,27 @@ dev_env_org_json = """{
             "name": "unavailable_image_env",
             "tools": [{
                     "type": "build system",
-                    "image_name": "unavailable_build_system_image",
+                    "image_name": "axemsolutions/unavailable_build_system_image",
                     "image_version": "latest"
                 },
                 {
                     "type": "toolchain",
-                    "image_name": "llvm",
+                    "image_name": "axemsolutions/llvm",
                     "image_version": "latest"
                 },
                 {
                     "type": "debugger",
-                    "image_name": "pemicro",
+                    "image_name": "axemsolutions/pemicro",
                     "image_version": "latest"
                 },
                 {
                     "type": "deployer",
-                    "image_name": "pemicro",
+                    "image_name": "axemsolutions/pemicro",
                     "image_version": "latest"
                 },
                 {
                     "type": "test framework",
-                    "image_name": "unity",
+                    "image_name": "axemsolutions/unity",
                     "image_version": "latest"
                 }
             ]
