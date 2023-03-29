@@ -31,3 +31,19 @@ def test_dev_env_json_with_invalid_version_expect_error():
 @patch("dem.core.dev_env_setup.__supported_dev_env_major_version__", 0)
 def test_valid_dev_env_json_expect_no_error():
     dev_env_setup.DevEnvLocalSetup(json.loads(fake_data.dev_env_json))
+
+def test_get_valid_dev_env_org_from_setup_by_name():
+    # Run unit under test
+    dev_env_org_setup = dev_env_setup.DevEnvOrgSetup(json.loads(fake_data.dev_env_org_json))
+    dev_env_org = dev_env_org_setup.get_dev_env("demo")
+
+    # Check expectations
+    assert dev_env_org.name == "demo"
+
+def test_get_invalid_dev_env_org_from_setup_by_name():
+    # Run unit under test
+    dev_env_org_setup = dev_env_setup.DevEnvOrgSetup(json.loads(fake_data.dev_env_org_json))
+    dev_env_org = dev_env_org_setup.get_dev_env("invalid")
+
+    # Check expectations
+    assert dev_env_org == None
