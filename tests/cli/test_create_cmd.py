@@ -15,7 +15,7 @@ runner = CliRunner(mix_stderr=False)
 ## Test helpers
 ## Test cases
 
-def test_select_tool_menu():
+def test_dev_env_creation():
     # Run unit under test
     runner_result = runner.invoke(main.typer_cli, ["create", "test_dev_env"], color=True)
 
