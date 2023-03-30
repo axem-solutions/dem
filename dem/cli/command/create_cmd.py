@@ -16,12 +16,12 @@ class ToolTypeMenu(table.Table):
         CURSOR_DOWN
     ) = range(2)
     
-    def __init__(self, elements: list[str], name: str) -> None:
+    def __init__(self, elements: list[str]) -> None:
         super().__init__()
         self.elements = elements
         self.cursor_pos = 0
 
-        self.add_column(name)
+        self.add_column("Tool types")
         self.add_column("Selected")
 
         for index, element in enumerate(elements):
@@ -30,6 +30,8 @@ class ToolTypeMenu(table.Table):
                 self.add_row("* " + element)
             else:
                 self.add_row("  " + element)
+
+        self.alignment = align.Align(self, align="center", vertical="middle")
 
     def move_cursor(self, cursor_direction: int) -> None:
         # Remove current cursor indicator
@@ -57,18 +59,39 @@ class ToolTypeMenu(table.Table):
         else:
             self.columns[1]._cells[self.cursor_pos] = ""
 
+    def wait_for_user(self):
+        with live.Live(self.alignment, refresh_per_second=8, screen=True):
+            while True:
+                match readkey():
+                    case key.UP | 'k':
+                        self.move_cursor(self.CURSOR_UP)
+                    case key.DOWN | 'j':
+                        self.move_cursor(self.CURSOR_DOWN)
+                    case ' ':
+                        self.toggle_select()
+                    case key.ENTER:
+                        break
+            
+    def get_selected_tool_types(self) -> list[str]:
+        selected_tool_types = []
+        for row_index, cell in enumerate(self.columns[1]._cells):
+            if cell ==  "✔":
+                selected_tool_types.append(self.columns[0]._cells[row_index][2:])
+        return selected_tool_types
+
+
 class ToolImageMenu(table.Table):
     (
         CURSOR_UP,
         CURSOR_DOWN,
     ) = range(2)
 
-    def __init__(self, tool_images: list[list[str]], name: str) -> None:
+    def __init__(self, tool_images: list[list[str]]) -> None:
         super().__init__()
         self.elements = tool_images
         self.cursor_pos = 0
 
-        self.add_column(name)
+        self.add_column("Tool images")
         self.add_column("Availability")
 
         for index, tool_image in enumerate(tool_images):
@@ -77,6 +100,8 @@ class ToolImageMenu(table.Table):
                 self.add_row("* " + tool_image[0], tool_image[1])
             else:
                 self.add_row("  " + tool_image[0], tool_image[1])
+        
+        self.alignment = align.Align(self, align="center", vertical="middle")
 
     def move_cursor(self, cursor_direction: int) -> None:
         # Remove current cursor indicator
@@ -101,22 +126,21 @@ class ToolImageMenu(table.Table):
     def set_title(self, title: str) -> None:
         self.title = title
 
-def execute():
-    tool_type_menu = ToolTypeMenu(list(DevEnv.supported_tool_types), "Tool types")
-    menu_aligment = align.Align(tool_type_menu, align="center", vertical="middle")
+    def wait_for_user(self) -> None:
+        with live.Live(self.alignment, refresh_per_second=8, screen=True):
+            while True:
+                match readkey():
+                    case key.UP | 'k':
+                        self.move_cursor(self.CURSOR_UP)
+                    case key.DOWN | 'j':
+                        self.move_cursor(self.CURSOR_DOWN)
+                    case key.ENTER:
+                        break
 
-    with live.Live(menu_aligment, refresh_per_second=8, screen=True):
-        while True:
-            match readkey():
-                case key.UP | 'k':
-                    tool_type_menu.move_cursor(tool_type_menu.CURSOR_UP)
-                case key.DOWN | 'j':
-                    tool_type_menu.move_cursor(tool_type_menu.CURSOR_DOWN)
-                case ' ':
-                    tool_type_menu.toggle_select()
-                case key.ENTER:
-                    break
-    
+    def get_selected_tool_image(self) -> str:
+        return self.columns[0]._cells[self.cursor_pos][2:].split(":")
+
+def get_tool_images() -> list[list[str]]:
     container_engine_obj = container_engine.ContainerEngine()
     local_images = container_engine_obj.get_local_tool_images()
     registry_images = registry.list_repos()
@@ -131,39 +155,36 @@ def execute():
                 break
         else:
             tool_images.append([regsitry_image, "registry"])
-    
-    tool_image_menu = ToolImageMenu(tool_images, "Tool images")
-    menu_aligment = align.Align(tool_image_menu, align="center", vertical="middle")
+    return tool_images
 
-    dev_env_descriptor = {
-        "name": "cica",
-        "tools": []
-    }
-
-    with live.Live(menu_aligment, refresh_per_second=8, screen=True):
-        for row_index, cell in enumerate(tool_type_menu.columns[1]._cells):
-            if cell ==  "✔":
-                tool_type = tool_type_menu.columns[0]._cells[row_index][2:]
-                tool_image_menu.set_title("Select tool image for type " + tool_type)
-                while True:
-                    match readkey():
-                        case key.UP | 'k':
-                            tool_image_menu.move_cursor(tool_image_menu.CURSOR_UP)
-                        case key.DOWN | 'j':
-                            tool_image_menu.move_cursor(tool_image_menu.CURSOR_DOWN)
-                        case key.ENTER:
-                            break
-                image = tool_image_menu.columns[0]._cells[tool_image_menu.cursor_pos][2:].split(":")
-                tool_descriptor = {
-                    "type": tool_type,
-                    "image_name": image[0],
-                    "image_version": image[1]
-                }
-                dev_env_descriptor["tools"].append(tool_descriptor)
-    
+def install_to_json(dev_env_descriptor: dict) -> None:
     dev_env_local_json_deserialized = data_management.read_deserialized_dev_env_json()
     dev_env_local_setup = DevEnvLocalSetup(dev_env_local_json_deserialized)
     new_dev_env = DevEnvLocal(dev_env_descriptor)
     dev_env_local_setup.dev_envs.append(new_dev_env)
     derserialized_local_dev_nev = dev_env_local_setup.get_deserialized()
     data_management.write_deserialized_dev_env_json(derserialized_local_dev_nev)
+
+def execute(dev_env_name: str) -> None:
+    tool_type_menu = ToolTypeMenu(list(DevEnv.supported_tool_types))
+    # Wait until the user finishes the tool type selection.
+    tool_type_menu.wait_for_user()
+    selected_tool_types = tool_type_menu.get_selected_tool_types()
+
+    tool_image_menu = ToolImageMenu(get_tool_images())
+    dev_env_descriptor = {
+        "name": dev_env_name,
+        "tools": []
+    }
+    for tool_type in selected_tool_types:
+        tool_image_menu.set_title("Select tool image for type " + tool_type)
+        tool_image_menu.wait_for_user()
+        selected_tool_image = tool_image_menu.get_selected_tool_image()
+        tool_descriptor = {
+            "type": tool_type,
+            "image_name": selected_tool_image[0],
+            "image_version": selected_tool_image[1]
+        }
+        dev_env_descriptor["tools"].append(tool_descriptor)
+    
+    install_to_json(dev_env_descriptor)
