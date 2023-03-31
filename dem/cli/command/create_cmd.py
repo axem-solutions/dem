@@ -2,11 +2,13 @@
 # dem/cli/command/create_cmd.py
 
 from rich import live, table, align
+import typer
 from dem.cli.console import stdout
 import dem.core.container_engine as container_engine
 import dem.core.registry as registry
 from dem.core.dev_env_setup import DevEnv, DevEnvLocal, DevEnvLocalSetup
 import dem.core.data_management as data_management
+from dem.cli.console import stdout
 from readchar import readkey, key
 
 
@@ -140,6 +142,11 @@ class ToolImageMenu(table.Table):
     def get_selected_tool_image(self) -> str:
         return self.columns[0]._cells[self.cursor_pos][2:].split(":")
 
+def dev_env_name_check(dev_env_local_setup: DevEnvLocalSetup, dev_env_name: str) -> (DevEnvLocal | None):
+    for dev_env in dev_env_local_setup.dev_envs:
+        if dev_env.name == dev_env_name:
+            return dev_env
+
 def get_tool_images() -> list[list[str]]:
     container_engine_obj = container_engine.ContainerEngine()
     local_images = container_engine_obj.get_local_tool_images()
@@ -157,15 +164,7 @@ def get_tool_images() -> list[list[str]]:
             tool_images.append([regsitry_image, "registry"])
     return tool_images
 
-def install_to_json(dev_env_descriptor: dict) -> None:
-    dev_env_local_json_deserialized = data_management.read_deserialized_dev_env_json()
-    dev_env_local_setup = DevEnvLocalSetup(dev_env_local_json_deserialized)
-    new_dev_env = DevEnvLocal(dev_env_descriptor)
-    dev_env_local_setup.dev_envs.append(new_dev_env)
-    derserialized_local_dev_nev = dev_env_local_setup.get_deserialized()
-    data_management.write_deserialized_dev_env_json(derserialized_local_dev_nev)
-
-def execute(dev_env_name: str) -> None:
+def get_dev_env_descriptor_from_user(dev_env_name: str) -> dict:
     tool_type_menu = ToolTypeMenu(list(DevEnv.supported_tool_types))
     # Wait until the user finishes the tool type selection.
     tool_type_menu.wait_for_user()
@@ -186,5 +185,22 @@ def execute(dev_env_name: str) -> None:
             "image_version": selected_tool_image[1]
         }
         dev_env_descriptor["tools"].append(tool_descriptor)
+    return dev_env_descriptor
+
+def execute(dev_env_name: str) -> None:
+    dev_env_local_json_deserialized = data_management.read_deserialized_dev_env_json()
+    dev_env_local_setup = DevEnvLocalSetup(dev_env_local_json_deserialized)
+    dev_env_original = dev_env_name_check(dev_env_local_setup, dev_env_name)
+    if isinstance(dev_env_original, DevEnvLocal):
+        typer.confirm("The input name is already used by a Development Environment. Overwrite it?", 
+                      abort=True)
+
+    dev_env_descriptor = get_dev_env_descriptor_from_user(dev_env_name)
     
-    install_to_json(dev_env_descriptor)
+    if isinstance(dev_env_original, DevEnvLocal):
+        dev_env_original.tools = dev_env_descriptor["tools"]
+    else:
+        new_dev_env = DevEnvLocal(dev_env_descriptor)
+        dev_env_local_setup.dev_envs.append(new_dev_env)
+    derserialized_local_dev_nev = dev_env_local_setup.get_deserialized()
+    data_management.write_deserialized_dev_env_json(derserialized_local_dev_nev)
