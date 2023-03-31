@@ -3,32 +3,27 @@ Use the container engine when possible for accessing the registry.
 """
 # dem/core/registry.py
 
-import dxf
-import requests
 import json
-
-def auth(dxf_base_obj: dxf.DXFBase, response: requests.Response):
-    with open("../password", "r") as password:
-        password = password.read()
-        dxf_base_obj.authenticate("axemsolutions", password=password[:-1], response=response)
+import docker
+import subprocess
 
 def list_repos():
-    r = requests.get("https://hub.docker.com/v2/repositories/axemsolutions")
-    r_deserialized = json.loads(r.text)
-    repos = r_deserialized["results"]
+    registryimagelist = []
     images = []
-    for repo in repos:
-        for description in repo["description"].split(';'):
-            description = description.split(':')
-            print("\ttool name: " + description[0] + "\ttool version: " + description[1])
-        print("")
 
-        repo_path = "axemsolutions/" + repo["name"]
-        dxf_obj = dxf.DXF("registry-1.docker.io", repo_path, auth=auth)
+    docker_client = docker.from_env()
 
-        for tag in dxf_obj.list_aliases():
-            images.append(repo_path + ':' + tag)
-
+    for repositories in docker_client.images.search("axemsolutions"):                
+        registryimagelist.append(repositories['name'])
+                
+    for image in registryimagelist:        
+        cmd = "docker trust inspect " + image        
+        result = subprocess.run(cmd, shell=True,stdout=subprocess.PIPE)
+        resultjson=json.loads(result.stdout.decode('UTF-8'))
+        signedTags=resultjson[0]['SignedTags']
+        for tag in signedTags:            
+            images.append(image + ":" + tag['SignedTag'])
+        
     return images
 
 if __name__ == "__main__":
