@@ -188,16 +188,16 @@ def get_dev_env_descriptor_from_user(dev_env_name: str) -> dict:
     return dev_env_descriptor
 
 def execute(dev_env_name: str) -> None:
-    dev_env_local_json_deserialized = data_management.read_deserialized_dev_env_json()
-    dev_env_local_setup = DevEnvLocalSetup(dev_env_local_json_deserialized)
+    derserialized_local_dev_nev = data_management.read_deserialized_dev_env_json()
+    dev_env_local_setup = DevEnvLocalSetup(derserialized_local_dev_nev)
     dev_env_original = dev_env_name_check(dev_env_local_setup, dev_env_name)
-    if isinstance(dev_env_original, DevEnvLocal):
+    if dev_env_original is not None:
         typer.confirm("The input name is already used by a Development Environment. Overwrite it?", 
                       abort=True)
 
     dev_env_descriptor = get_dev_env_descriptor_from_user(dev_env_name)
     
-    if isinstance(dev_env_original, DevEnvLocal):
+    if dev_env_original is not None:
         dev_env_original.tools = dev_env_descriptor["tools"]
     else:
         new_dev_env = DevEnvLocal(dev_env_descriptor)
