@@ -54,6 +54,11 @@ class ToolTypeMenu(Menu):
 
         self.alignment = align.Align(self, align="center", vertical="middle")
 
+    def preset_selection(self, already_selected: list[str]) -> None:
+        for row_idx, cell in enumerate(self.columns[0]._cells):
+            if cell[2:] in already_selected:
+                self.columns[1]._cells[row_idx] = "✔"
+
     def toggle_select(self) -> None:
         if (self.columns[1]._cells[self.cursor_pos] == ""):
             self.columns[1]._cells[self.cursor_pos] = "✔"
