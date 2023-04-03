@@ -9,7 +9,7 @@ import dem.cli.command.create_cmd as create_cmd
 from typer.testing import CliRunner
 from unittest.mock import patch, MagicMock, call
 
-from dem.core.dev_env_setup import DevEnv
+from dem.core.dev_env_setup import DevEnv, DevEnvLocal, DevEnvLocalSetup
 
 ## Global test variables
 
@@ -18,9 +18,40 @@ runner = CliRunner(mix_stderr=False)
 
 ## Test helpers
 ## Test cases
+def test_dev_env_name_check_match():
+    # Test setup
+    test_name = "dev_env_name"
+    expected_dev_env = MagicMock()
+    expected_dev_env.name = test_name
+    dev_env_local_setup = MagicMock()
+    dev_env_local_setup.dev_envs = []
+    dev_env_local_setup.dev_envs.append(expected_dev_env)
+
+    # Run unit under test
+    actual_dev_env = create_cmd.dev_env_name_check(dev_env_local_setup, test_name)
+
+    # Check expectations
+    assert actual_dev_env == expected_dev_env
+
+def test_dev_env_name_check_no_match():
+    # Test setup
+    test_name = "dev_env_name"
+    fake_dev_env = MagicMock()
+    fake_dev_env.name = test_name
+    dev_env_local_setup = MagicMock()
+    dev_env_local_setup.dev_envs = []
+    dev_env_local_setup.dev_envs.append(fake_dev_env)
+
+    # Run unit under test
+    actual_dev_env = create_cmd.dev_env_name_check(dev_env_local_setup, "no_matching_name")
+
+    # Check expectations
+    assert actual_dev_env is None
+
 @patch("dem.cli.command.create_cmd.container_engine.ContainerEngine")
 @patch("dem.cli.command.create_cmd.registry.list_repos")
 def test_get_tool_images(mock_list_repos, mock_ContainerEngine):
+    # Test setup
     fake_local_images = [
         "local_image",
         "local_and_registry_image"
@@ -34,8 +65,10 @@ def test_get_tool_images(mock_list_repos, mock_ContainerEngine):
     ]
     mock_list_repos.return_value = fake_registry_images
 
+    # Run unit under test
     actual_tool_images = create_cmd.get_tool_images()
 
+    # Check expectations
     mock_ContainerEngine.assert_called_once()
     fake_container_engine.get_local_tool_images.assert_called_once()
     mock_list_repos.assert_called_once()
@@ -52,6 +85,7 @@ def test_get_tool_images(mock_list_repos, mock_ContainerEngine):
 @patch("dem.cli.command.create_cmd.get_tool_images")
 def test_get_dev_env_descriptor_from_user(mock_get_tool_images, mock_ToolImageMenu,
                                           mock_ToolTypeMenu):
+    # Test setup
     expected_dev_env_name = "test_dev_env"
     fake_tool_type_menu = MagicMock()
     mock_ToolTypeMenu.return_value = fake_tool_type_menu
@@ -136,6 +170,7 @@ def test_get_dev_env_descriptor_from_user(mock_get_tool_images, mock_ToolImageMe
 def test_execute_dev_env_creation(mock_read_deserialized_dev_env_json, mock_DevEnvLocalSetup,
                                   mock_dev_env_name_check, mock_get_dev_env_descriptor_from_user,
                                   mock_DevEnvLocal, mock_write_deserialized_dev_env_json):
+    # Test setup
     fake_deserialized_local_dev_env = MagicMock()
     mock_read_deserialized_dev_env_json.return_value = fake_deserialized_local_dev_env
     fake_dev_env_local_setup = MagicMock()
@@ -170,6 +205,7 @@ def test_execute_dev_env_overwrite(mock_read_deserialized_dev_env_json, mock_Dev
                                    mock_dev_env_name_check, mock_confirm,
                                    mock_get_dev_env_descriptor_from_user,
                                    mock_write_deserialized_dev_env_json):
+    # Test setup
     fake_deserialized_local_dev_env = MagicMock()
     mock_read_deserialized_dev_env_json.return_value = fake_deserialized_local_dev_env
     fake_dev_env_local_setup = MagicMock()
@@ -208,6 +244,7 @@ def test_execute_dev_env_overwrite(mock_read_deserialized_dev_env_json, mock_Dev
 def test_execute_abort(mock_read_deserialized_dev_env_json, mock_DevEnvLocalSetup, 
                        mock_dev_env_name_check, mock_confirm, 
                        mock_get_dev_env_descriptor_from_user):
+    # Test setup
     fake_deserialized_local_dev_env = MagicMock()
     mock_read_deserialized_dev_env_json.return_value = fake_deserialized_local_dev_env
     fake_dev_env_local_setup = MagicMock()
