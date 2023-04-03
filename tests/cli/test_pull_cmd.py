@@ -28,7 +28,7 @@ def test_dev_env_not_available_in_org(mock_DevEnvOrgSetup, mock_read_deserialize
     mock_read_deserialized_dev_env_org_json.return_value = fake_deserialized_dev_env_org_json
     fake_dev_env_org_setup = MagicMock()
     mock_DevEnvOrgSetup.return_value = fake_dev_env_org_setup
-    fake_dev_env_org_setup.get_dev_env.return_value = None
+    fake_dev_env_org_setup.get_dev_env_by_name.return_value = None
 
     # Run unit under test
     runner_result = runner.invoke(main.typer_cli, ["pull", "not existing env"], color=True)
@@ -36,7 +36,7 @@ def test_dev_env_not_available_in_org(mock_DevEnvOrgSetup, mock_read_deserialize
     # Check expectations
     mock_read_deserialized_dev_env_org_json.assert_called_once()
     mock_DevEnvOrgSetup.assert_called_once_with(fake_deserialized_dev_env_org_json)
-    fake_dev_env_org_setup.get_dev_env.assert_called_once_with("not existing env")
+    fake_dev_env_org_setup.get_dev_env_by_name.assert_called_once_with("not existing env")
 
     assert 0 == runner_result.exit_code
 
@@ -62,7 +62,7 @@ def test_dev_env_already_installed(mock_DevEnvLocalSetup, mock_read_deserialized
     fake_dev_env_org = MagicMock()
     # Set the same fake tools for both the local and org instance
     fake_dev_env_org.tools = fake_tools
-    fake_dev_env_org_setup.get_dev_env.return_value = fake_dev_env_org
+    fake_dev_env_org_setup.get_dev_env_by_name.return_value = fake_dev_env_org
 
     fake_deserialized_dev_env_local_json = MagicMock()
     mock_read_deserialized_dev_env_local_json.return_value = fake_deserialized_dev_env_local_json
@@ -89,7 +89,7 @@ def test_dev_env_already_installed(mock_DevEnvLocalSetup, mock_read_deserialized
     # Check expectations
     mock_read_deserialized_dev_env_org_json.assert_called_once()
     mock_DevEnvOrgSetup.assert_called_once_with(fake_deserialized_dev_env_org_json)
-    fake_dev_env_org_setup.get_dev_env.assert_called_once_with("test_env")
+    fake_dev_env_org_setup.get_dev_env_by_name.assert_called_once_with("test_env")
 
     mock_read_deserialized_dev_env_local_json.assert_called_once()
     mock_DevEnvLocalSetup.assert_called_once_with(fake_deserialized_dev_env_local_json)
@@ -128,7 +128,7 @@ def test_dev_env_installed_but_different(mock_DevEnvLocalSetup,
     fake_dev_env_org = MagicMock()
     # Set the same fake tools for both the local and org instance
     fake_dev_env_org.tools = fake_tools
-    fake_dev_env_org_setup.get_dev_env.return_value = fake_dev_env_org
+    fake_dev_env_org_setup.get_dev_env_by_name.return_value = fake_dev_env_org
 
     fake_deserialized_dev_env_local_json = MagicMock()
     mock_read_deserialized_dev_env_local_json.return_value = fake_deserialized_dev_env_local_json
@@ -155,7 +155,7 @@ def test_dev_env_installed_but_different(mock_DevEnvLocalSetup,
     # Check expectations
     mock_read_deserialized_dev_env_org_json.assert_called_once()
     mock_DevEnvOrgSetup.assert_called_once_with(fake_deserialized_dev_env_org_json)
-    fake_dev_env_org_setup.get_dev_env.assert_called_once_with("test_env")
+    fake_dev_env_org_setup.get_dev_env_by_name.assert_called_once_with("test_env")
 
     mock_read_deserialized_dev_env_local_json.assert_called_once()
     mock_DevEnvLocalSetup.assert_called_once_with(fake_deserialized_dev_env_local_json)
@@ -195,7 +195,7 @@ def test_dev_env_new_install(mock_DevEnvLocalSetup, mock_read_deserialized_dev_e
     mock_DevEnvOrgSetup.return_value = fake_dev_env_org_setup
     fake_dev_env_org = MagicMock()
     # Set the same fake tools for both the local and org instance
-    fake_dev_env_org_setup.get_dev_env.return_value = fake_dev_env_org
+    fake_dev_env_org_setup.get_dev_env_by_name.return_value = fake_dev_env_org
 
     fake_deserialized_dev_env_local_json = MagicMock()
     mock_read_deserialized_dev_env_local_json.return_value = fake_deserialized_dev_env_local_json
@@ -242,7 +242,7 @@ def test_dev_env_new_install(mock_DevEnvLocalSetup, mock_read_deserialized_dev_e
     # Check expectations
     mock_read_deserialized_dev_env_org_json.assert_called_once()
     mock_DevEnvOrgSetup.assert_called_once_with(fake_deserialized_dev_env_org_json)
-    fake_dev_env_org_setup.get_dev_env.assert_called_once_with("test_env")
+    fake_dev_env_org_setup.get_dev_env_by_name.assert_called_once_with("test_env")
 
     mock_read_deserialized_dev_env_local_json.assert_called_once()
     mock_DevEnvLocalSetup.assert_called_once_with(fake_deserialized_dev_env_local_json)

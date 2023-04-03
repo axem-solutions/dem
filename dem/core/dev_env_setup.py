@@ -117,6 +117,17 @@ class DevEnvSetup:
         dev_env_json_deserialized["development_environments"] = dev_env_descriptors
         return dev_env_json_deserialized
 
+    def get_dev_env_by_name(self, dev_env_name: str) -> ("DevEnvOrg | DevEnvLocal | None"):
+        """Get the Development Environment by name.
+        
+        Args:
+            dev_env_name -- name of the Development Environment to get
+        Returns with the instance representing the Development Environment. If the Development 
+        Environment doesn't exist in the setup, the function returns with None.
+        """
+        for dev_env in self.dev_envs:
+            if dev_env.name == dev_env_name:
+                return dev_env
 
 class DevEnvLocal(DevEnv):
     """Local Development Environment
@@ -174,15 +185,3 @@ class DevEnvOrgSetup(DevEnvSetup):
 
         for dev_env_descriptor in dev_env_json_deserialized["development_environments"]:
             self.dev_envs.append(DevEnvOrg(descriptor=dev_env_descriptor))
-    
-    def get_dev_env(self, dev_env_name: str) -> (DevEnvOrg | None):
-        """Get the Development Environment fromt thr organization setup by name.
-        
-        Args:
-            dev_env_name -- name of the Development Environment to get
-        Returns with the DevEnvOrg instance representing the Development Environment. If the 
-        Development Environment doesn't exist in the organization, the function returns with None.
-        """
-        for dev_env in self.dev_envs:
-            if dev_env.name == dev_env_name:
-                return dev_env
