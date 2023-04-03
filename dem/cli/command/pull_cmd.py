@@ -32,9 +32,7 @@ def install_to_dev_env_json(dev_env_local: dev_env_setup.DevEnvLocal,
         data_management.write_deserialized_dev_env_json(deserialized_local_dev_env)
     elif dev_env_local.tools != dev_env_org.tools:
         # If already installed, but different, then overwrite it.
-        dev_env_local_setup.dev_envs.remove(dev_env_local)
         dev_env_local.tools = dev_env_org.tools
-        dev_env_local_setup.dev_envs.append(dev_env_local)
         deserialized_local_dev_env = dev_env_local_setup.get_deserialized()
         data_management.write_deserialized_dev_env_json(deserialized_local_dev_env)
 

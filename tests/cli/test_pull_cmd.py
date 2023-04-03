@@ -161,9 +161,7 @@ def test_dev_env_installed_but_different(mock_DevEnvLocalSetup,
     mock_DevEnvLocalSetup.assert_called_once_with(fake_deserialized_dev_env_local_json)
     fake_dev_env_org.get_local_instance.assert_called_once_with(fake_dev_env_local_setup)
 
-    fake_dev_env_local_setup.dev_envs.remove.assert_called_once_with(fake_dev_env_local)
     assert fake_dev_env_local.tools == fake_dev_env_org.tools
-    fake_dev_env_local_setup.dev_envs.append.assert_called_once_with(fake_dev_env_local)
     fake_dev_env_local_setup.get_deserialized.assert_called_once()
     mock_write_deserialized_dev_env_local_json.assert_called_once_with(fake_deserialized_dev_env_local_json)
 
