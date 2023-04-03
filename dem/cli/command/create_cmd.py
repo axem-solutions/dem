@@ -158,7 +158,7 @@ def get_tool_images() -> list[list[str]]:
     for regsitry_image in registry_images:
         for image in tool_images:
             if regsitry_image == image[0]:
-                image[1] = "local and regsitry"
+                image[1] = "local and registry"
                 break
         else:
             tool_images.append([regsitry_image, "registry"])
