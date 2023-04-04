@@ -4,7 +4,7 @@
 import typer
 from dem import __app_name__, __version__
 
-from dem.cli.command import info_cmd, list_cmd, pull_cmd
+from dem.cli.command import info_cmd, list_cmd, pull_cmd, create_cmd
 
 typer_cli = typer.Typer()
 
@@ -23,6 +23,8 @@ def list(local: bool = typer.Option(False, help="Scope is the local host."),
         --all --env -> List the organization's Development Environments.
 
         --local --tool -> List the local tool images.
+
+        --all --tool -> List the tool images available in the axemsolutions registry.
     """
     list_cmd.execute(local, all, env, tool)
 
@@ -42,6 +44,11 @@ def pull(dev_env_name: str = typer.Argument(...,
     Environment locally.
     """
     pull_cmd.execute(dev_env_name)
+
+@typer_cli.command()
+def create(dev_env_name: str = typer.Argument(..., 
+                                              help="Name of the Development Environment to create."),) -> None:
+    create_cmd.execute(dev_env_name)
 
 def _version_callback(value: bool) -> None:
     if value:
