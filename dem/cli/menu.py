@@ -115,3 +115,13 @@ class ToolImageMenu(Menu):
 
     def get_selected_tool_image(self) -> str:
         return self.columns[0]._cells[self.cursor_pos][2:].split(":")
+
+    def set_cursor(self, tool_image) -> None:
+        self.columns[0]._cells[self.cursor_pos] = self.columns[0]._cells[self.cursor_pos].replace("*", 
+                                                                                                  " ", 
+                                                                                                  1)
+        for cell_idx, cell in enumerate(self.columns[0]._cells):
+            if cell[2:] == tool_image:
+                cell = cell.replace(" ", "*", 1)
+                self.cursor_pos = cell_idx
+                self.columns[0]._cells[cell_idx] = cell
