@@ -28,12 +28,8 @@ def find_dev_env(dev_envs: list, dev_env_name_to_find: str) -> (dev_env_setup.De
             return dev_env
 
 def update_image_status(dev_env: (dev_env_setup.DevEnvLocal | dev_env_setup.DevEnvOrg)) -> None:
-    container_engine_obj = container_engine.ContainerEngine()
-    local_images = container_engine_obj.get_local_tool_images()
-    registry_images = registry.list_repos()
-
     # This functions must be called, so the tools in the dev env get updated.
-    dev_env.check_image_availability(local_images, registry_images)
+    dev_env.check_image_availability()
 
 def execute(arg_dev_env_name: str) -> None:
     dev_env_json_deserialized = data_management.read_deserialized_dev_env_json()

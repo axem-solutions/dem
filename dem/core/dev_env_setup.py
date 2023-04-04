@@ -3,6 +3,7 @@
 
 from dem.core.exceptions import InvalidDevEnvJson
 from dem.core.properties import __supported_dev_env_major_version__
+from dem.core.tool_images import ToolImages
 
 (
     IMAGE_LOCAL_ONLY,
@@ -25,7 +26,7 @@ class DevEnv:
         "test framework",
     )
 
-    def _check_tool_type_support(self, descriptor: dict):
+    def _check_tool_type_support(self, descriptor: dict) -> None:
         """ Check that the Dev Env doesn't contain an unsupported tool type.
         
             Private function that gets called on instantiation.
@@ -37,7 +38,7 @@ class DevEnv:
             if tool["type"] not in self.supported_tool_types:
                 raise InvalidDevEnvJson("The following tool type is not supported: " + tool["type"])
 
-    def __init__(self, descriptor: dict | None = None, dev_env_org: "DevEnvOrg | None" = None):
+    def __init__(self, descriptor: dict | None = None, dev_env_org: "DevEnvOrg | None" = None) -> None:
         """ Init the DevEnv class.
         
             Args:
@@ -53,28 +54,22 @@ class DevEnv:
             self.name = dev_env_org.name
             self.tools = dev_env_org.tools
 
-    def check_image_availability(self, local_images: list, registry_images: list) -> list:
+    def check_image_availability(self) -> list:
         """ Checks the tool image's availability.
         
             Updates the "image_status" key for the tool dictionary.
-            Args:
-                local_images -- list of the local image names with tags
-                registry_images -- list of the images available in the registry (name + tag)
             Returns with the statuses of the Dev Env tool images.
         """
         image_statuses = []
+        tool_images = ToolImages()
         for tool in self.tools:
-            image_status = IMAGE_NOT_AVAILABLE
-            tool_image = tool["image_name"] + ':' + tool["image_version"]
-            if tool_image in local_images:
-                image_status = IMAGE_LOCAL_ONLY
-            if tool_image in registry_images:
-                if image_status == IMAGE_LOCAL_ONLY:
-                    image_status = IMAGE_LOCAL_AND_REGISTRY
-                else:
-                    image_status = IMAGE_REGISTRY_ONLY
+            tool_image_name = tool["image_name"] + ':' + tool["image_version"]
+            image_status = tool_images.NOT_AVAILABLE
+            if tool_image_name in tool_images.elements:
+                image_status = tool_images.elements[tool_image_name]
             image_statuses.append(image_status)
             tool["image_status"] = image_status
+
         return image_statuses
 
 class DevEnvSetup:

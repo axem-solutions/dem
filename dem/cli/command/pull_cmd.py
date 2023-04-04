@@ -53,7 +53,7 @@ def pull_registry_only_images(dev_env_local: dev_env_setup.DevEnvLocal,
             container_engine_obj.pull(image_to_pull)
 
 def execute(dev_env_name: str) -> None:
-    #Get the organization's Dev Env if available.
+    # Get the organization's Dev Env if available.
     dev_env_org_json_deserialized = data_management.read_deserialized_dev_env_org_json()
     dev_env_org_setup = dev_env_setup.DevEnvOrgSetup(dev_env_org_json_deserialized)
     dev_env_org = dev_env_org_setup.get_dev_env_by_name(dev_env_name)
@@ -67,16 +67,12 @@ def execute(dev_env_name: str) -> None:
 
     dev_env_local = install_to_dev_env_json(dev_env_local, dev_env_org, dev_env_local_setup)
 
-    #The local DevEnvSetup contains the DevEnvOrg to install. Check the images' status
+    # The local DevEnvSetup contains the DevEnvOrg to install. Check the images' status
     container_engine_obj = container_engine.ContainerEngine()
-    local_images = container_engine_obj.get_local_tool_images()
-    registry_images = registry.list_repos()
-    dev_env_local.check_image_availability(local_images, registry_images)
-
+    dev_env_local.check_image_availability()
     pull_registry_only_images(dev_env_local, container_engine_obj)
-
-    local_images = container_engine_obj.get_local_tool_images()
-    image_statuses = dev_env_local.check_image_availability(local_images, registry_images)
+    # Check image availability again.
+    image_statuses = dev_env_local.check_image_availability()
 
     if image_statuses.count(dev_env_setup.IMAGE_LOCAL_AND_REGISTRY) == len(image_statuses):
         stdout.print("The [yellow]" + dev_env_local.name + "[/] Development Environment is ready!")

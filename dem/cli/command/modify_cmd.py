@@ -7,23 +7,17 @@ import dem.core.registry as registry
 from dem.core.dev_env_setup import DevEnvLocalSetup, DevEnvLocal, DevEnv
 from dem.cli.console import stderr
 from dem.cli.menu import ToolTypeMenu, ToolImageMenu
+from dem.core.tool_images import ToolImages
+
+tool_image_statuses = {
+    ToolImages.LOCAL_ONLY: "local",
+    ToolImages.REGISTRY_ONLY: "registry",
+    ToolImages.LOCAL_AND_REGISTRY: "local and registry"
+}
 
 def get_tool_images() -> list[list[str]]:
-    container_engine_obj = container_engine.ContainerEngine()
-    local_images = container_engine_obj.get_local_tool_images()
-    registry_images = registry.list_repos()
-
-    tool_images = []
-    for local_image in local_images:
-        tool_images.append([local_image, "local"])
-    for regsitry_image in registry_images:
-        for image in tool_images:
-            if regsitry_image == image[0]:
-                image[1] = "local and registry"
-                break
-        else:
-            tool_images.append([regsitry_image, "registry"])
-    return tool_images
+    tool_images = ToolImages()
+    return [[name, tool_image_statuses[status]] for name, status in tool_images.elements.items()]
 
 def get_modifications_from_user(dev_env: DevEnvLocal) -> None:
     selected_tool_types = []
