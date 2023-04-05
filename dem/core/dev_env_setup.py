@@ -5,13 +5,6 @@ from dem.core.exceptions import InvalidDevEnvJson
 from dem.core.properties import __supported_dev_env_major_version__
 from dem.core.tool_images import ToolImages
 
-(
-    IMAGE_LOCAL_ONLY,
-    IMAGE_REGISTRY_ONLY,
-    IMAGE_LOCAL_AND_REGISTRY,
-    IMAGE_NOT_AVAILABLE,
-) = range(4)
-
 class DevEnv:
     """A Development Environment.
     

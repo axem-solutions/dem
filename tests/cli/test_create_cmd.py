@@ -10,6 +10,7 @@ from typer.testing import CliRunner
 from unittest.mock import patch, MagicMock, call
 
 from dem.core.dev_env_setup import DevEnv
+from dem.core.tool_images import ToolImages
 
 ## Global test variables
 
@@ -19,30 +20,23 @@ runner = CliRunner(mix_stderr=False)
 ## Test helpers
 ## Test cases
 
-@patch("dem.cli.command.create_cmd.container_engine.ContainerEngine")
-@patch("dem.cli.command.create_cmd.registry.list_repos")
-def test_get_tool_images(mock_list_repos, mock_ContainerEngine):
+@patch("dem.cli.command.create_cmd.ToolImages")
+def test_get_tool_images(mock_ToolImages):
     # Test setup
-    fake_local_images = [
-        "local_image",
-        "local_and_registry_image"
-    ]
-    fake_container_engine = MagicMock()
-    mock_ContainerEngine.return_value = fake_container_engine
-    fake_container_engine.get_local_tool_images.return_value = fake_local_images
-    fake_registry_images = [
-        "registry_image",
-        "local_and_registry_image"
-    ]
-    mock_list_repos.return_value = fake_registry_images
+    fake_elements = {
+        "local_image": ToolImages.LOCAL_ONLY,
+        "local_and_registry_image": ToolImages.LOCAL_AND_REGISTRY,
+        "registry_image": ToolImages.REGISTRY_ONLY
+    }
+    fake_tool_images = MagicMock()
+    fake_tool_images.elements = fake_elements
+    mock_ToolImages.return_value = fake_tool_images
 
     # Run unit under test
     actual_tool_images = create_cmd.get_tool_images()
 
     # Check expectations
-    mock_ContainerEngine.assert_called_once()
-    fake_container_engine.get_local_tool_images.assert_called_once()
-    mock_list_repos.assert_called_once()
+    mock_ToolImages.assert_called_once()
 
     expected_tool_iamges = [
         ["local_image", "local"],
