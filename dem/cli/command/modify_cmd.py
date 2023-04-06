@@ -6,7 +6,7 @@ import dem.core.container_engine as container_engine
 import dem.core.registry as registry
 from dem.core.dev_env_setup import DevEnvLocalSetup, DevEnvLocal, DevEnv
 from dem.cli.console import stderr
-from dem.cli.menu import ToolTypeMenu, ToolImageMenu
+from dem.cli.menu import ToolTypeMenu, ToolImageMenu, SelectMenu
 from dem.core.tool_images import ToolImages
 
 tool_image_statuses = {
@@ -54,6 +54,12 @@ def get_modifications_from_user(dev_env: DevEnvLocal) -> None:
         tools.append(tool_descriptor)
     dev_env.tools = tools
 
+def get_confirm_from_user() -> None:
+    confirm_menu_selection = ["confirm", "save as", "cancel"]
+    select_menu = SelectMenu(confirm_menu_selection)
+    select_menu.set_title("Are you sure to overwrite the Development Environment?")
+    select_menu.wait_for_user()
+
 def execute(dev_env_name: str) -> None:
     deserialized_local_dev_nev = data_management.read_deserialized_dev_env_json()
     dev_env_local_setup = DevEnvLocalSetup(deserialized_local_dev_nev)
@@ -62,5 +68,6 @@ def execute(dev_env_name: str) -> None:
         stderr.print("[red]The Development Environment doesn't exist.")
     else:
         get_modifications_from_user(dev_env)
+        get_confirm_from_user()
         deserialized_local_dev_nev = dev_env_local_setup.get_deserialized()
         data_management.write_deserialized_dev_env_json(deserialized_local_dev_nev)

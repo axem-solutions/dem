@@ -125,3 +125,36 @@ class ToolImageMenu(Menu):
                 cell = cell.replace(" ", "*", 1)
                 self.cursor_pos = cell_idx
                 self.columns[0]._cells[cell_idx] = cell
+
+class SelectMenu(Menu):
+    def __init__(self, selection: list[str]) -> None:
+        super().__init__()
+        self.show_edge = False
+        self.show_lines = False
+
+        for index, element in enumerate(selection):
+            if (index == 0):
+                # Set the cursor indicator for the first element.
+                self.add_row("* " + element)
+            else:
+                self.add_row("  " + element)
+
+        self.alignment = align.Align(self, align="center", vertical="middle")
+
+    def wait_for_user(self):
+        with live.Live(self.alignment, refresh_per_second=8, screen=True):
+            while True:
+                match readkey():
+                    case key.UP | 'k':
+                        self.move_cursor(self.CURSOR_UP)
+                    case key.DOWN | 'j':
+                        self.move_cursor(self.CURSOR_DOWN)
+                    case key.ENTER:
+                        break
+            
+    def get_selected(self) -> str:
+        return self.columns[0]._cells[self.cursor_pos][2:]
+    
+    def set_title(self, title: str) -> None:
+        self.width = len(title)
+        super().set_title(title)
