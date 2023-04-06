@@ -21,24 +21,6 @@ test_docker_client = docker.from_env()
 
 ## Test helpers
 
-class mockImage:
-    def __init__(self, tags: list[str]):
-        self.tags = tags
-
-def get_test_image_list() -> list[mockImage]:
-    test_image_list = []
-    test_image_list.append(mockImage(["alpine:latest"]))
-    test_image_list.append(mockImage([""]))
-    test_image_list.append(mockImage(["make_gnu_arm:v1.0.0"]))
-    test_image_list.append(mockImage(["stlink_org:latest", "stlink_org:v1.0.0'"]))
-    test_image_list.append(mockImage(["cpputest:latest"]))
-    test_image_list.append(mockImage(["make_gnu_arm:latest"]))
-    test_image_list.append(mockImage(["debian:latest"]))
-    test_image_list.append(mockImage(["ubuntu:latest"]))
-    test_image_list.append(mockImage(["hello-world:latest"]))
-    test_image_list.append(mockImage([""]))
-    return test_image_list
-
 def get_expected_table(expected_tools: list[list[str]]) ->str:
     expected_table = Table()
     expected_table.add_column("Type")
