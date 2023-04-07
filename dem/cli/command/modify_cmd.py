@@ -3,8 +3,6 @@
 
 import copy, typer
 import dem.core.data_management as data_management
-import dem.core.container_engine as container_engine
-import dem.core.registry as registry
 from dem.core.dev_env_setup import DevEnvLocalSetup, DevEnvLocal, DevEnv
 from dem.cli.console import stderr
 from dem.cli.menu import ToolTypeMenu, ToolImageMenu, SelectMenu
