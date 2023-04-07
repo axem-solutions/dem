@@ -4,7 +4,7 @@
 import typer
 from dem import __app_name__, __version__
 
-from dem.cli.command import info_cmd, list_cmd, pull_cmd, create_cmd, modify_cmd
+from dem.cli.command import info_cmd, list_cmd, pull_cmd, create_cmd, modify_cmd, delete_cmd
 
 typer_cli = typer.Typer()
 
@@ -55,11 +55,21 @@ def create(dev_env_name: str = typer.Argument(...,
 
 @typer_cli.command()
 def modify(dev_env_name: str = typer.Argument(..., 
-                                              help="Name of the Development Enviornment to modify.")) -> None:
+                                              help="Name of the Development Environment to modify.")) -> None:
     """
     Modify the tool types and required tool images for an existing Development Environment.
     """
     modify_cmd.execute(dev_env_name)
+
+@typer_cli.command()
+def delete(dev_env_name: str = typer.Argument(..., 
+                                              help="Name of the Development Environment to delete.")) -> None:
+    """
+    Delete the Development Environment from the dev_env.json. If a tool image is not required 
+    anymore by any of the avaialable local Developtment Environments, the dem asks the user if they
+    want to delete that image or keep it.
+    """
+    delete_cmd.execute(dev_env_name)
 
 def _version_callback(value: bool) -> None:
     if value:

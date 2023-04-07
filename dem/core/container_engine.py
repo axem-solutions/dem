@@ -28,3 +28,6 @@ class ContainerEngine():
         Args:
             repository -- repository to pull"""
         self._docker_client.images.pull(repository=repository)
+
+    def remove(self, image: str) -> None:
+        pass
