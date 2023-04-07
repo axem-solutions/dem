@@ -30,4 +30,8 @@ class ContainerEngine():
         self._docker_client.images.pull(repository=repository)
 
     def remove(self, image: str) -> None:
-        pass
+        """Remove a tool image.
+        
+        Args: 
+            image -- the tool image to remove"""
+        self._docker_client.images.remove(image)
