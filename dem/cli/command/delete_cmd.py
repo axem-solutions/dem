@@ -4,6 +4,7 @@
 from dem.core.data_management import read_deserialized_dev_env_json, write_deserialized_dev_env_json
 from dem.core.dev_env_setup import DevEnvLocalSetup, DevEnvLocal
 from dem.core.container_engine import ContainerEngine
+from dem.cli.console import stderr
 import typer
 
 def remove_unused_tool_images(deleted_dev_env: DevEnvLocal, dev_env_local_setup: DevEnvLocalSetup) -> None:
@@ -24,8 +25,12 @@ def execute(dev_env_name: str) -> None:
     deserialized_dev_env_json = read_deserialized_dev_env_json()
     dev_env_local_setup = DevEnvLocalSetup(deserialized_dev_env_json)
     dev_env_to_delete = dev_env_local_setup.get_dev_env_by_name(dev_env_name)
-    dev_env_local_setup.dev_envs.remove(dev_env_to_delete)
-    deserialized_dev_env_json = dev_env_local_setup.get_deserialized()
-    write_deserialized_dev_env_json(deserialized_dev_env_json)
 
-    remove_unused_tool_images(dev_env_to_delete, dev_env_local_setup)
+    if dev_env_to_delete is None:
+        stderr.print("[red]The Development Environment doesn't exist.")
+    else:
+        dev_env_local_setup.dev_envs.remove(dev_env_to_delete)
+        deserialized_dev_env_json = dev_env_local_setup.get_deserialized()
+        write_deserialized_dev_env_json(deserialized_dev_env_json)
+
+        remove_unused_tool_images(dev_env_to_delete, dev_env_local_setup)

@@ -6,11 +6,11 @@ import dem.cli.main as main
 import dem.cli.command.delete_cmd as delete_cmd
 
 # Test framework
-import pytest
 from typer.testing import CliRunner
 from unittest.mock import patch, MagicMock, call
 
-from dem.core.tool_images import ToolImages
+from rich.console import Console
+import io
 
 ## Global test variables
 
@@ -73,8 +73,9 @@ def test_remove_unused_tool_images(mock_ContainerEngine, mock_confirm):
 @patch("dem.cli.command.delete_cmd.write_deserialized_dev_env_json")
 @patch("dem.cli.command.delete_cmd.DevEnvLocalSetup")
 @patch("dem.cli.command.delete_cmd.read_deserialized_dev_env_json")
-def test_delete_dev_env(mock_read_deserialized_dev_env_json, mock_DevEnvLocalSetup, 
-                        mock_write_deserialized_dev_env_json, mock_remove_unused_tool_images):
+def test_delete_dev_env_valid_name(mock_read_deserialized_dev_env_json, mock_DevEnvLocalSetup, 
+                                   mock_write_deserialized_dev_env_json, 
+                                   mock_remove_unused_tool_images):
     # Test setup
     fake_dev_env1 = MagicMock()
     fake_dev_env_to_delete = MagicMock()
@@ -103,3 +104,28 @@ def test_delete_dev_env(mock_read_deserialized_dev_env_json, mock_DevEnvLocalSet
 
     assert fake_dev_env1 in fake_dev_env_local_setup.dev_envs
     assert fake_dev_env_to_delete not in fake_dev_env_local_setup.dev_envs
+
+@patch("dem.cli.command.delete_cmd.DevEnvLocalSetup")
+@patch("dem.cli.command.delete_cmd.read_deserialized_dev_env_json")
+def test_delete_dev_env_invalid_name(mock_read_deserialized_dev_env_json, mock_DevEnvLocalSetup):
+    # Test setup
+    fake_dev_env_local_setup = MagicMock()
+    fake_deserialized_dev_env_json = MagicMock()
+    mock_read_deserialized_dev_env_json.return_value = fake_deserialized_dev_env_json
+    mock_DevEnvLocalSetup.return_value = fake_dev_env_local_setup
+    fake_dev_env_local_setup.get_dev_env_by_name.return_value = None
+    test_invalid_name = "test_invalid_name"
+    
+    # Run unit under test
+    runner_result = runner.invoke(main.typer_cli, ["delete", test_invalid_name], color=True)
+
+    # Check expectations
+    assert 0 == runner_result.exit_code
+
+    mock_read_deserialized_dev_env_json.assert_called_once()
+    mock_DevEnvLocalSetup.assert_called_once_with(fake_deserialized_dev_env_json)
+    fake_dev_env_local_setup.get_dev_env_by_name.assert_called_once_with(test_invalid_name)
+
+    console = Console(file=io.StringIO())
+    console.print("[red]The Development Environment doesn't exist.")
+    assert console.file.getvalue() == runner_result.stderr
