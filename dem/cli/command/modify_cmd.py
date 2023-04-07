@@ -55,8 +55,8 @@ def get_modifications_from_user(dev_env: DevEnvLocal) -> None:
     dev_env.tools = tools
 
 def get_confirm_from_user() -> None:
-    confirm_menu_selection = ["confirm", "save as", "cancel"]
-    select_menu = SelectMenu(confirm_menu_selection)
+    confirm_menu_items = ["confirm", "save as", "cancel"]
+    select_menu = SelectMenu(confirm_menu_items)
     select_menu.set_title("Are you sure to overwrite the Development Environment?")
     select_menu.wait_for_user()
 
