@@ -31,21 +31,16 @@ class DevEnv:
             if tool["type"] not in self.supported_tool_types:
                 raise InvalidDevEnvJson("The following tool type is not supported: " + tool["type"])
 
-    def __init__(self, descriptor: dict | None = None, dev_env_org: "DevEnvOrg | None" = None) -> None:
+    def __init__(self, descriptor: dict) -> None:
         """ Init the DevEnv class.
         
             Args:
                 descriptor -- the description of the Development Environment from the dev_env.json 
                               file
-                dev_env_org -- set when creating a copy (note: forward reference)
         """
-        if isinstance(descriptor, dict):
-            self._check_tool_type_support(descriptor)
-            self.name = descriptor["name"]
-            self.tools = descriptor["tools"]
-        else:
-            self.name = dev_env_org.name
-            self.tools = dev_env_org.tools
+        self._check_tool_type_support(descriptor)
+        self.name = descriptor["name"]
+        self.tools = descriptor["tools"]
 
     def check_image_availability(self) -> list:
         """ Checks the tool image's availability.
@@ -125,13 +120,17 @@ class DevEnvLocal(DevEnv):
     def __init__(self, descriptor: dict | None = None, dev_env_org: "DevEnvOrg | None" = None):
         """Init a local DevEnv class
 
-        The class is initialized either based on the Dev Env descriptor from the dev_env.json file 
-        or on a DevEnvOrg class.
+        The class can be initialized either based on the Dev Env descriptor from the dev_env.json 
+        file or on an already existing DevEnvOrg object.
         Args:
             dev_env_json_deserialized -- a deserialized representation of the dev_env.json file
             dev_env_org -- the DevEnvOrg object to make a copy from (note: forward reference)
         """
-        super().__init__(descriptor, dev_env_org)
+        if descriptor is not None:
+            super().__init__(descriptor)
+        else:
+            self.name = dev_env_org.name
+            self.tools = dev_env_org.tools
 
 class DevEnvLocalSetup(DevEnvSetup):
     def __init__(self, dev_env_json_deserialized: dict):

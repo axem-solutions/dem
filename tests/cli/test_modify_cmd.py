@@ -6,13 +6,14 @@ import dem.cli.main as main
 import dem.cli.command.modify_cmd as modify_cmd
 
 # Test framework
+import pytest
 from typer.testing import CliRunner
 from unittest.mock import patch, MagicMock, call
 
 from dem.core.dev_env_setup import DevEnvLocalSetup, DevEnvLocal, DevEnv
 from dem.core.tool_images import ToolImages
 from rich.console import Console
-import io
+import io, typer
 
 ## Global test variables
 
@@ -129,15 +130,62 @@ def test_get_confirm_from_user(mock_SelectMenu):
     # Test setup
     fake_select_menu = MagicMock()
     mock_SelectMenu.return_value = fake_select_menu
+    expected_selected_item = "confirm"
+    fake_select_menu.get_selected.return_value = expected_selected_item
 
     # Run unit under test
-    modify_cmd.get_confirm_from_user()
+    actual_selected_item = modify_cmd.get_confirm_from_user()
 
     # Check expectations
     expected_menu_items = ["confirm", "save as", "cancel"]
     mock_SelectMenu.assert_called_once_with(expected_menu_items)
     fake_select_menu.set_title.assert_called_once_with("Are you sure to overwrite the Development Environment?")
     fake_select_menu.wait_for_user.assert_called_once()
+
+    assert actual_selected_item == expected_selected_item
+
+@patch("dem.cli.command.modify_cmd.data_management.write_deserialized_dev_env_json")
+def test_handle_user_confirm_confirmed(mock_write_deserialized_dev_env_json):
+    # Test setup
+    fake_deserialized_local_dev_env = MagicMock()
+    fake_dev_env_local_setup = MagicMock()
+    fake_dev_env_local_setup.get_deserialized.return_value = fake_deserialized_local_dev_env
+
+    # Run unit under test
+    modify_cmd.handle_user_confirm("confirm", MagicMock(), fake_dev_env_local_setup)
+
+    # Check expectation
+    fake_dev_env_local_setup.get_deserialized.assert_called_once()
+    mock_write_deserialized_dev_env_json.assert_called_once_with(fake_deserialized_local_dev_env)
+
+@patch("dem.cli.command.modify_cmd.data_management.write_deserialized_dev_env_json")
+@patch("dem.cli.command.modify_cmd.typer.prompt")
+def test_handle_user_confirm_save_as(mock_prompt, mock_write_deserialized_dev_env_json):
+    # Test setup
+    mock_prompt.return_value = "test new name"
+    fake_deserialized_local_dev_env = MagicMock()
+    fake_dev_env_local_setup = MagicMock()
+    fake_dev_env_local_setup.get_deserialized.return_value = fake_deserialized_local_dev_env
+    fake_dev_env_local = MagicMock()
+    fake_dev_env_local.name = "fake dev env"
+    fake_dev_env_local_setup.dev_envs = [fake_dev_env_local]
+
+    # Run unit under test
+    modify_cmd.handle_user_confirm("save as", fake_dev_env_local, fake_dev_env_local_setup)
+
+    # Check expectation
+    mock_prompt.assert_called_once_with("Name of the new Development Environment")
+    fake_dev_env_local_setup.get_deserialized.assert_called_once()
+    mock_write_deserialized_dev_env_json.assert_called_once_with(fake_deserialized_local_dev_env)
+
+    assert "fake dev env" == fake_dev_env_local_setup.dev_envs[0].name
+    assert "test new name" == fake_dev_env_local_setup.dev_envs[1].name
+
+def test_handle_user_confirm_cancel():
+    # Test setup
+    # Run unit under test
+    with pytest.raises(typer.Abort):
+        modify_cmd.handle_user_confirm("cancel", MagicMock(), MagicMock())
 
 @patch("dem.cli.command.modify_cmd.data_management.read_deserialized_dev_env_json")
 @patch("dem.cli.command.modify_cmd.DevEnvLocalSetup")
@@ -164,22 +212,23 @@ def test_execute_invalid_name(mock_DevEnvLocalSetup, mock_read_deserialized_dev_
     console.print("[red]The Development Environment doesn't exist.")
     assert console.file.getvalue() == runner_result.stderr
 
+@patch("dem.cli.command.modify_cmd.handle_user_confirm")
 @patch("dem.cli.command.modify_cmd.get_confirm_from_user")
 @patch("dem.cli.command.modify_cmd.get_modifications_from_user")
-@patch("dem.cli.command.modify_cmd.data_management.write_deserialized_dev_env_json")
 @patch("dem.cli.command.modify_cmd.data_management.read_deserialized_dev_env_json")
 @patch("dem.cli.command.modify_cmd.DevEnvLocalSetup")
 def test_execute_valid_name(mock_DevEnvLocalSetup, mock_read_deserialized_dev_env_json,
-                            mock_write_deserialized_dev_env_json, mock_get_modifications_from_user,
-                            mock_get_confirm_from_user):
+                            mock_get_modifications_from_user, mock_get_confirm_from_user, 
+                            mock_handle_user_confirm):
     # Test setup
     fake_deserialized_local_dev_env = MagicMock()
     mock_read_deserialized_dev_env_json.return_value = fake_deserialized_local_dev_env
     fake_dev_env_local_setup = MagicMock(DevEnvLocalSetup)
     mock_DevEnvLocalSetup.return_value = fake_dev_env_local_setup
-    fake_dev_env = MagicMock(DevEnvLocal)
-    fake_dev_env_local_setup.get_dev_env_by_name.return_value = fake_dev_env
-    fake_dev_env_local_setup.get_deserialized.return_value = fake_deserialized_local_dev_env
+    fake_dev_env_local = MagicMock(DevEnvLocal)
+    fake_dev_env_local_setup.get_dev_env_by_name.return_value = fake_dev_env_local
+    fake_confirmation = MagicMock()
+    mock_get_confirm_from_user.return_value = fake_confirmation
     test_dev_env_name =  "test"
 
     # Run unit under test
@@ -191,7 +240,7 @@ def test_execute_valid_name(mock_DevEnvLocalSetup, mock_read_deserialized_dev_en
     mock_read_deserialized_dev_env_json.assert_called_once()
     mock_DevEnvLocalSetup.assert_called_once()
     fake_dev_env_local_setup.get_dev_env_by_name.assert_called_once_with(test_dev_env_name)
-    mock_get_modifications_from_user.assert_called_once_with(fake_dev_env)
+    mock_get_modifications_from_user.assert_called_once_with(fake_dev_env_local)
     mock_get_confirm_from_user.assert_called_once()
-    fake_dev_env_local_setup.get_deserialized.assert_called_once()
-    mock_write_deserialized_dev_env_json.assert_called_once_with(fake_deserialized_local_dev_env)
+    mock_handle_user_confirm.assert_called_once_with(fake_confirmation, fake_dev_env_local, 
+                                                     fake_dev_env_local_setup)
