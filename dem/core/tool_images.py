@@ -27,3 +27,5 @@ class ToolImages():
                 self.elements[registry_image] = self.LOCAL_AND_REGISTRY
             else:
                 self.elements[registry_image] = self.REGISTRY_ONLY
+
+tool_images = ToolImages()

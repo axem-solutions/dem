@@ -3,7 +3,7 @@
 
 from dem.core.exceptions import InvalidDevEnvJson
 from dem.core.properties import __supported_dev_env_major_version__
-from dem.core.tool_images import ToolImages
+import dem.core.tool_images as tool_images
 
 class DevEnv:
     """A Development Environment.
@@ -49,12 +49,11 @@ class DevEnv:
             Returns with the statuses of the Dev Env tool images.
         """
         image_statuses = []
-        tool_images = ToolImages()
         for tool in self.tools:
             tool_image_name = tool["image_name"] + ':' + tool["image_version"]
-            image_status = tool_images.NOT_AVAILABLE
-            if tool_image_name in tool_images.elements:
-                image_status = tool_images.elements[tool_image_name]
+            image_status = tool_images.tool_images.NOT_AVAILABLE
+            if tool_image_name in tool_images.tool_images.elements:
+                image_status = tool_images.tool_images.elements[tool_image_name]
             image_statuses.append(image_status)
             tool["image_status"] = image_status
 

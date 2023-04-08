@@ -4,8 +4,9 @@
 from dem.core.data_management import read_deserialized_dev_env_json, write_deserialized_dev_env_json
 from dem.core.dev_env_setup import DevEnvLocalSetup, DevEnvLocal
 from dem.core.container_engine import ContainerEngine
-from dem.cli.console import stderr
+from dem.cli.console import stderr, stdout
 import typer
+import docker.errors
 
 def remove_unused_tool_images(deleted_dev_env: DevEnvLocal, dev_env_local_setup: DevEnvLocalSetup) -> None:
     required_tool_images = set()
@@ -19,7 +20,10 @@ def remove_unused_tool_images(deleted_dev_env: DevEnvLocal, dev_env_local_setup:
         if tool_image not in required_tool_images:
             if typer.confirm(tool_image + " is not required by any Development Environment. \
                              Would you like to remove it?"):
-                container_engine.remove(tool_image)
+                try:
+                    container_engine.remove(tool_image)
+                except docker.errors.ImageNotFound:
+                    stdout.print("[yellow]Couldn't delete " + tool_image + ", because doesn't exist.")
 
 def execute(dev_env_name: str) -> None:
     deserialized_dev_env_json = read_deserialized_dev_env_json()
