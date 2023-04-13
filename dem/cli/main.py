@@ -4,7 +4,7 @@
 import typer
 from dem import __app_name__, __version__
 
-from dem.cli.command import info_cmd, list_cmd, pull_cmd, create_cmd
+from dem.cli.command import info_cmd, list_cmd, pull_cmd, create_cmd, rename_cmd
 
 typer_cli = typer.Typer()
 
@@ -49,6 +49,11 @@ def pull(dev_env_name: str = typer.Argument(...,
 def create(dev_env_name: str = typer.Argument(..., 
                                               help="Name of the Development Environment to create."),) -> None:
     create_cmd.execute(dev_env_name)
+
+@typer_cli.command()
+def rename(dev_env_name: str = typer.Argument(...,help="Name of the Development Environment to rename."),
+           new_dev_env_name: str = typer.Argument(...,help="Name of the New Development Environment.")) -> None:
+    rename_cmd.execute(dev_env_name,new_dev_env_name)
 
 def _version_callback(value: bool) -> None:
     if value:
