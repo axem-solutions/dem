@@ -150,7 +150,7 @@ def dev_env_name_check(dev_env_local_setup: DevEnvLocalSetup, dev_env_name: str)
 def get_tool_images() -> list[list[str]]:
     container_engine_obj = container_engine.ContainerEngine()
     local_images = container_engine_obj.get_local_tool_images()
-    registry_images = registry.list_repos()
+    registry_images = registry.list_repos(container_engine_obj)
 
     tool_images = []
     for local_image in local_images:
