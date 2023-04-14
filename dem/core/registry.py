@@ -13,11 +13,6 @@ def list_repos(container_engine_obj: container_engine.ContainerEngine) -> None:
     registryimagelist = []
     images = []
 
-    #docker_client = docker.from_env()
-
-    #for repositories in docker_client.images.search("axemsolutions"):        
-    #    registryimagelist.append(repositories['name'])
-
     container_engine_obj = container_engine.ContainerEngine()
 
     registryimagelist = container_engine_obj.search("axemsolutions")
