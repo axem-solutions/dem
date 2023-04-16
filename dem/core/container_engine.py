@@ -17,7 +17,7 @@ class ContainerEngine():
 
         for image in self._docker_client.images.list():
             for tag in image.tags:
-                if tag and tag.startswith("axemsolutions/"):
+                if tag:
                     local_image_tags.append(tag)
 
         return local_image_tags
@@ -35,3 +35,14 @@ class ContainerEngine():
         Args: 
             image -- the tool image to remove"""
         self._docker_client.images.remove(image)
+
+    def search(self, registry: str) -> None:
+        """Search repository in the axemsolutions registry.
+        
+        Args:
+            registry -- registry to search"""
+        local_registryimagelist = []
+
+        for repositories in self._docker_client.images.search(registry):        
+            local_registryimagelist.append(repositories['name'])
+        return local_registryimagelist
