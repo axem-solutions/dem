@@ -31,6 +31,7 @@ def test_get_local_tool_images(mock_docker_from_env):
     [""],
     ]
     expected_image_tags = [
+    "alpine:latest",
     "axemsolutions/make_gnu_arm:v1.0.0",
     "axemsolutions/stlink_org:latest", 
     "axemsolutions/stlink_org:v1.0.0",
@@ -38,6 +39,9 @@ def test_get_local_tool_images(mock_docker_from_env):
     "axemsolutions/make_gnu_arm:latest", 
     "axemsolutions/make_gnu_arm:v0.1.0", 
     "axemsolutions/make_gnu_arm:v1.1.0",
+    "debian:latest",
+    "ubuntu:latest",
+    "hello-world:latest",
     ]
     mock_docker_client = MagicMock()
     mock_docker_client.images.list.return_value = _get_test_image_tags_as_images(test_image_tags)
