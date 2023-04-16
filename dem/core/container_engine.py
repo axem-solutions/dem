@@ -28,3 +28,14 @@ class ContainerEngine():
         Args:
             repository -- repository to pull"""
         self._docker_client.images.pull(repository=repository)
+
+    def search(self, registry: str) -> None:
+        """Search repository in the axemsolutions registry.
+        
+        Args:
+            registry -- registry to search"""
+        local_registryimagelist = []
+
+        for repositories in self._docker_client.images.search(registry):        
+            local_registryimagelist.append(repositories['name'])
+        return local_registryimagelist
