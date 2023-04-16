@@ -3,13 +3,7 @@
 
 from dem.core.exceptions import InvalidDevEnvJson
 from dem.core.properties import __supported_dev_env_major_version__
-
-(
-    IMAGE_LOCAL_ONLY,
-    IMAGE_REGISTRY_ONLY,
-    IMAGE_LOCAL_AND_REGISTRY,
-    IMAGE_NOT_AVAILABLE,
-) = range(4)
+from dem.core.tool_images import ToolImages
 
 class DevEnv:
     """A Development Environment.
@@ -25,7 +19,7 @@ class DevEnv:
         "test framework",
     )
 
-    def _check_tool_type_support(self, descriptor: dict):
+    def _check_tool_type_support(self, descriptor: dict) -> None:
         """ Check that the Dev Env doesn't contain an unsupported tool type.
         
             Private function that gets called on instantiation.
@@ -37,44 +31,33 @@ class DevEnv:
             if tool["type"] not in self.supported_tool_types:
                 raise InvalidDevEnvJson("The following tool type is not supported: " + tool["type"])
 
-    def __init__(self, descriptor: dict | None = None, dev_env_org: "DevEnvOrg | None" = None):
+    def __init__(self, descriptor: dict) -> None:
         """ Init the DevEnv class.
         
             Args:
                 descriptor -- the description of the Development Environment from the dev_env.json 
                               file
-                dev_env_org -- set when creating a copy (note: forward reference)
         """
-        if isinstance(descriptor, dict):
-            self._check_tool_type_support(descriptor)
-            self.name = descriptor["name"]
-            self.tools = descriptor["tools"]
-        else:
-            self.name = dev_env_org.name
-            self.tools = dev_env_org.tools
+        self._check_tool_type_support(descriptor)
+        self.name = descriptor["name"]
+        self.tools = descriptor["tools"]
 
-    def check_image_availability(self, local_images: list, registry_images: list) -> list:
+    def check_image_availability(self) -> list:
         """ Checks the tool image's availability.
         
             Updates the "image_status" key for the tool dictionary.
-            Args:
-                local_images -- list of the local image names with tags
-                registry_images -- list of the images available in the registry (name + tag)
             Returns with the statuses of the Dev Env tool images.
         """
         image_statuses = []
+        tool_images = ToolImages()
         for tool in self.tools:
-            image_status = IMAGE_NOT_AVAILABLE
-            tool_image = tool["image_name"] + ':' + tool["image_version"]
-            if tool_image in local_images:
-                image_status = IMAGE_LOCAL_ONLY
-            if tool_image in registry_images:
-                if image_status == IMAGE_LOCAL_ONLY:
-                    image_status = IMAGE_LOCAL_AND_REGISTRY
-                else:
-                    image_status = IMAGE_REGISTRY_ONLY
+            tool_image_name = tool["image_name"] + ':' + tool["image_version"]
+            image_status = tool_images.NOT_AVAILABLE
+            if tool_image_name in tool_images.elements:
+                image_status = tool_images.elements[tool_image_name]
             image_statuses.append(image_status)
             tool["image_status"] = image_status
+
         return image_statuses
 
 class DevEnvSetup:
@@ -117,6 +100,17 @@ class DevEnvSetup:
         dev_env_json_deserialized["development_environments"] = dev_env_descriptors
         return dev_env_json_deserialized
 
+    def get_dev_env_by_name(self, dev_env_name: str) -> ("DevEnvOrg | DevEnvLocal | None"):
+        """Get the Development Environment by name.
+        
+        Args:
+            dev_env_name -- name of the Development Environment to get
+        Returns with the instance representing the Development Environment. If the Development 
+        Environment doesn't exist in the setup, the function returns with None.
+        """
+        for dev_env in self.dev_envs:
+            if dev_env.name == dev_env_name:
+                return dev_env
 
 class DevEnvLocal(DevEnv):
     """Local Development Environment
@@ -126,13 +120,17 @@ class DevEnvLocal(DevEnv):
     def __init__(self, descriptor: dict | None = None, dev_env_org: "DevEnvOrg | None" = None):
         """Init a local DevEnv class
 
-        The class is initialized either based on the Dev Env descriptor from the dev_env.json file 
-        or on a DevEnvOrg class.
+        The class can be initialized either based on the Dev Env descriptor from the dev_env.json 
+        file or on an already existing DevEnvOrg object.
         Args:
             dev_env_json_deserialized -- a deserialized representation of the dev_env.json file
             dev_env_org -- the DevEnvOrg object to make a copy from (note: forward reference)
         """
-        super().__init__(descriptor, dev_env_org)
+        if descriptor is not None:
+            super().__init__(descriptor)
+        else:
+            self.name = dev_env_org.name
+            self.tools = dev_env_org.tools
 
 class DevEnvLocalSetup(DevEnvSetup):
     def __init__(self, dev_env_json_deserialized: dict):
@@ -174,15 +172,3 @@ class DevEnvOrgSetup(DevEnvSetup):
 
         for dev_env_descriptor in dev_env_json_deserialized["development_environments"]:
             self.dev_envs.append(DevEnvOrg(descriptor=dev_env_descriptor))
-    
-    def get_dev_env(self, dev_env_name: str) -> (DevEnvOrg | None):
-        """Get the Development Environment fromt thr organization setup by name.
-        
-        Args:
-            dev_env_name -- name of the Development Environment to get
-        Returns with the DevEnvOrg instance representing the Development Environment. If the 
-        Development Environment doesn't exist in the organization, the function returns with None.
-        """
-        for dev_env in self.dev_envs:
-            if dev_env.name == dev_env_name:
-                return dev_env
