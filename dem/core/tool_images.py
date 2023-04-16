@@ -14,15 +14,17 @@ class ToolImages():
 
     def __init__(self) -> None:
         self.elements = {}
+        self.container_egine = container_engine.ContainerEngine()
 
-        container_engine_obj = container_engine.ContainerEngine()
-        local_images = container_engine_obj.get_local_tool_images()
-        registry_images = registry.list_repos()
+        self.update()
 
-        for local_image in local_images:
+    def update(self) -> None:
+        self.elements = {}
+
+        for local_image in self.container_egine.get_local_tool_images():
             self.elements[local_image] = self.LOCAL_ONLY
 
-        for registry_image in registry_images:
+        for registry_image in registry.list_repos(self.container_egine):
             if registry_image in self.elements:
                 self.elements[registry_image] = self.LOCAL_AND_REGISTRY
             else:

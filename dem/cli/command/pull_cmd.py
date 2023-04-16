@@ -75,4 +75,4 @@ def execute(dev_env_name: str) -> None:
     if image_statuses.count(ToolImages.LOCAL_AND_REGISTRY) == len(image_statuses):
         stdout.print("The [yellow]" + dev_env_local.name + "[/] Development Environment is ready!")
     else:
-        stderr.print("The istallation failed.")
+        stderr.print("The installation failed.")
