@@ -46,7 +46,3 @@ class ContainerEngine():
         for repositories in self._docker_client.images.search(registry):        
             local_registryimagelist.append(repositories['name'])
         return local_registryimagelist
-
-# if __name__ == "__main__":
-#     container_engine = ContainerEngine()
-#     container_engine.remove("cica")

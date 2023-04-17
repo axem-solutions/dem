@@ -8,9 +8,10 @@ import dem.cli.command.delete_cmd as delete_cmd
 # Test framework
 from typer.testing import CliRunner
 from unittest.mock import patch, MagicMock, call
+import pytest
 
 from rich.console import Console
-import io
+import io, docker.errors
 
 ## Global test variables
 
@@ -61,13 +62,69 @@ def test_remove_unused_tool_images(mock_ContainerEngine, mock_confirm):
     # Check expectations
     mock_ContainerEngine.assert_called_once()
     calls = [
-        call("not_required_tool_image_to_keep is not required by any Development Environment. \
+        call("not_required_tool_image_to_keep:latest is not required by any Development Environment. \
               Would you like to remove it?"),
-        call("not_required_tool_image_to_delete is not required by any Development Environment. \
+        call("not_required_tool_image_to_delete:latest is not required by any Development Environment. \
               Would you like to remove it?"),
     ]
     mock_confirm.asser_has_calls(calls)
     fake_container_engine.remove.assert_called_once_with("not_required_tool_image_to_delete:latest")
+
+@patch("dem.cli.command.delete_cmd.stdout.print")
+@patch("dem.cli.command.delete_cmd.typer.confirm")
+@patch("dem.cli.command.delete_cmd.ContainerEngine")
+def test_remove_unused_tool_images_ImageNotFound(mock_ContainerEngine, mock_confirm, mock_print):
+    # Test setup
+    fake_deleted_dev_env = MagicMock()
+    fake_deleted_dev_env.tools = [
+        {
+            "type": "build_system",
+            "image_name": "not_required_tool_image_to_delete",
+            "image_version": "latest"
+        }
+    ]
+    fake_dev_env_local_setup = MagicMock()
+    fake_container_engine = MagicMock()
+    mock_ContainerEngine.return_value = fake_container_engine
+    mock_confirm.return_value = True
+    fake_container_engine.remove.side_effect = docker.errors.ImageNotFound("dummy")
+
+    # Run unit under test
+    delete_cmd.remove_unused_tool_images(fake_deleted_dev_env, fake_dev_env_local_setup)
+
+    # Check expectations
+    mock_ContainerEngine.assert_called_once()
+    mock_confirm.assert_called_once_with("not_required_tool_image_to_delete:latest is not required by any Development Environment. Would you like to remove it?")
+    fake_container_engine.remove.assert_called_once_with("not_required_tool_image_to_delete:latest")
+    mock_print.assert_called_once_with("[yellow]Couldn't delete not_required_tool_image_to_delete:latest, because doesn't exist.")
+
+@patch("dem.cli.command.delete_cmd.stderr.print")
+@patch("dem.cli.command.delete_cmd.typer.confirm")
+@patch("dem.cli.command.delete_cmd.ContainerEngine")
+def test_remove_unused_tool_images_APIError(mock_ContainerEngine, mock_confirm, mock_print):
+    # Test setup
+    fake_deleted_dev_env = MagicMock()
+    fake_deleted_dev_env.tools = [
+        {
+            "type": "build_system",
+            "image_name": "not_required_tool_image_to_delete",
+            "image_version": "latest"
+        }
+    ]
+    fake_dev_env_local_setup = MagicMock()
+    fake_container_engine = MagicMock()
+    mock_ContainerEngine.return_value = fake_container_engine
+    mock_confirm.return_value = True
+    fake_container_engine.remove.side_effect = docker.errors.APIError("dummy")
+
+    # Run unit under test
+    delete_cmd.remove_unused_tool_images(fake_deleted_dev_env, fake_dev_env_local_setup)
+
+    # Check expectations
+    mock_ContainerEngine.assert_called_once()
+    mock_confirm.assert_called_once_with("not_required_tool_image_to_delete:latest is not required by any Development Environment. Would you like to remove it?")
+    fake_container_engine.remove.assert_called_once_with("not_required_tool_image_to_delete:latest")
+    mock_print.assert_called_once_with("[red]Error: not_required_tool_image_to_delete:latest is used by a container. Unable to remove it.")
 
 @patch("dem.cli.command.delete_cmd.remove_unused_tool_images")
 @patch("dem.cli.command.delete_cmd.write_deserialized_dev_env_json")

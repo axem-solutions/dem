@@ -18,12 +18,13 @@ def remove_unused_tool_images(deleted_dev_env: DevEnvLocal, dev_env_local_setup:
     for tool in deleted_dev_env.tools:
         tool_image = tool["image_name"] + ":" + tool["image_version"]
         if tool_image not in required_tool_images:
-            if typer.confirm(tool_image + " is not required by any Development Environment. \
-                             Would you like to remove it?"):
+            if typer.confirm(tool_image + " is not required by any Development Environment. Would you like to remove it?"):
                 try:
                     container_engine.remove(tool_image)
                 except docker.errors.ImageNotFound:
                     stdout.print("[yellow]Couldn't delete " + tool_image + ", because doesn't exist.")
+                except docker.errors.APIError:
+                    stderr.print("[red]Error: " + tool_image + " is used by a container. Unable to remove it.")
 
 def execute(dev_env_name: str) -> None:
     deserialized_dev_env_json = read_deserialized_dev_env_json()
