@@ -57,8 +57,7 @@ def test_get_dev_env_by_name_no_match():
     # Check expectations
     assert actual_dev_env is None
 
-@patch("dem.core.dev_env_setup.ToolImages")
-def test_check_image_availability(mock_ToolImages):
+def test_check_image_availability():
     # Test setup
     test_dev_env_setup = dev_env_setup.DevEnvLocalSetup(json.loads(fake_data.dev_env_json))
     test_dev_env = test_dev_env_setup.get_dev_env_by_name("demo")
@@ -68,13 +67,12 @@ def test_check_image_availability(mock_ToolImages):
         "axemsolutions/stlink_org:latest": ToolImages.REGISTRY_ONLY
     }
     fake_tool_images.NOT_AVAILABLE = ToolImages.NOT_AVAILABLE
-    mock_ToolImages.return_value = fake_tool_images
 
     # Run unit under test
-    actual_image_statuses = test_dev_env.check_image_availability()
+    actual_image_statuses = test_dev_env.check_image_availability(fake_tool_images)
 
     # Check expectations
-    mock_ToolImages.assert_called_once()
+    fake_tool_images.update.assert_called_once()
 
     expected_image_statuses = [
         ToolImages.LOCAL_AND_REGISTRY,
@@ -83,7 +81,6 @@ def test_check_image_availability(mock_ToolImages):
         ToolImages.REGISTRY_ONLY,
         ToolImages.NOT_AVAILABLE
     ]
-
     assert expected_image_statuses == actual_image_statuses
 
     for idx, tool in enumerate(test_dev_env.tools):

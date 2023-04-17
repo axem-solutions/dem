@@ -67,10 +67,10 @@ def execute(dev_env_name: str) -> None:
     dev_env_local = install_to_dev_env_json(dev_env_local, dev_env_org, dev_env_local_setup)
 
     # The local Dev Env setup contains the DevEnvOrg to install. Check the images' statuses
-    dev_env_local.check_image_availability()
+    dev_env_local.check_image_availability(dev_env_local_setup.tool_images)
     pull_registry_only_images(dev_env_local)
     # Check image availability again.
-    image_statuses = dev_env_local.check_image_availability()
+    image_statuses = dev_env_local.check_image_availability(dev_env_local_setup.tool_images)
 
     if image_statuses.count(ToolImages.LOCAL_AND_REGISTRY) == len(image_statuses):
         stdout.print("The [yellow]" + dev_env_local.name + "[/] Development Environment is ready!")

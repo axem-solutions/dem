@@ -3,7 +3,7 @@
 
 from dem.core.exceptions import InvalidDevEnvJson
 from dem.core.properties import __supported_dev_env_major_version__
-import dem.core.tool_images as tool_images
+from dem.core.tool_images import ToolImages
 
 class DevEnv:
     """A Development Environment.
@@ -42,18 +42,22 @@ class DevEnv:
         self.name = descriptor["name"]
         self.tools = descriptor["tools"]
 
-    def check_image_availability(self) -> list:
+    def check_image_availability(self, tool_images: ToolImages) -> list:
         """ Checks the tool image's availability.
         
             Updates the "image_status" key for the tool dictionary.
             Returns with the statuses of the Dev Env tool images.
+
+            Args:
+                tool_images -- the images the Dev Envs can access
         """
+        tool_images.update()
         image_statuses = []
         for tool in self.tools:
             tool_image_name = tool["image_name"] + ':' + tool["image_version"]
-            image_status = tool_images.tool_images.NOT_AVAILABLE
-            if tool_image_name in tool_images.tool_images.elements:
-                image_status = tool_images.tool_images.elements[tool_image_name]
+            image_status = tool_images.NOT_AVAILABLE
+            if tool_image_name in tool_images.elements:
+                image_status = tool_images.elements[tool_image_name]
             image_statuses.append(image_status)
             tool["image_status"] = image_status
 
@@ -65,7 +69,12 @@ class DevEnvSetup:
     Args:
         dev_env_json_deserialized -- a deserialized representation of the dev_env.json or 
                                      dev_env_org.json file
+
+    Class attributes:
+        tool_images -- a Dev Env setup can access these images
     """
+    _tool_images = None
+
     def _dev_env_json_version_check(self) -> None:
         """Check that the dev_env.json or dev_evn_org.json file supported.
 
@@ -86,6 +95,13 @@ class DevEnvSetup:
         self.version = dev_env_json_deserialized["version"]
         self._dev_env_json_version_check()
         self.dev_envs = []
+
+    @classmethod
+    @property
+    def tool_images(cls):
+        if cls._tool_images is None:
+            cls._tool_images = ToolImages()
+        return cls._tool_images
 
     def get_deserialized(self) -> dict:
         dev_env_json_deserialized = {}

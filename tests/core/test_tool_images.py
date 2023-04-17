@@ -42,7 +42,7 @@ def test_init(mock_list_repos, mock_ContainerEngine):
 
 @patch("dem.core.tool_images.container_engine.ContainerEngine")
 @patch("dem.core.tool_images.registry.list_repos")
-def test_rerun_update(mock_list_repos, mock_ContainerEngine):
+def test_update(mock_list_repos, mock_ContainerEngine):
     # Test setup
     test_local_images = [
         [

@@ -12,6 +12,11 @@ class ToolImages():
         NOT_AVAILABLE,
     ) = range(4)
 
+    def __new__(cls) -> "ToolImages":
+        if not hasattr(cls, 'instance'):
+            cls.instance = super(ToolImages, cls).__new__(cls)
+        return cls.instance
+
     def __init__(self) -> None:
         self.elements = {}
         self.container_egine = container_engine.ContainerEngine()
@@ -29,5 +34,3 @@ class ToolImages():
                 self.elements[registry_image] = self.LOCAL_AND_REGISTRY
             else:
                 self.elements[registry_image] = self.REGISTRY_ONLY
-
-tool_images = ToolImages()
