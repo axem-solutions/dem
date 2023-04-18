@@ -6,11 +6,12 @@ import dem.core.dev_env_setup as dev_env_setup
 
 # Test framework
 import pytest
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 
 import tests.fake_data as fake_data
 import json
 from dem.core.exceptions import InvalidDevEnvJson
+from dem.core.tool_images import ToolImages
 
 def test_dev_env_json_with_invalid_tool_type_expect_error():
     excepted_error_message = "Error in dev_env.json: The following tool type is not supported: build_system" 
@@ -32,18 +33,58 @@ def test_dev_env_json_with_invalid_version_expect_error():
 def test_valid_dev_env_json_expect_no_error():
     dev_env_setup.DevEnvLocalSetup(json.loads(fake_data.dev_env_json))
 
-def test_get_valid_dev_env_org_from_setup_by_name():
+def test_get_dev_env_by_name_match():
+    # Test setup
+    test_dev_env_setup = dev_env_setup.DevEnvSetup(json.loads(fake_data.dev_env_json))
+    test_name = "dev_env_name"
+    expected_dev_env = MagicMock()
+    expected_dev_env.name = test_name
+    test_dev_env_setup.dev_envs.append(expected_dev_env)
+
     # Run unit under test
-    dev_env_org_setup = dev_env_setup.DevEnvOrgSetup(json.loads(fake_data.dev_env_org_json))
-    dev_env_org = dev_env_org_setup.get_dev_env("demo")
+    actual_dev_env = test_dev_env_setup.get_dev_env_by_name(test_name)
 
     # Check expectations
-    assert dev_env_org.name == "demo"
+    assert actual_dev_env == expected_dev_env
 
-def test_get_invalid_dev_env_org_from_setup_by_name():
+def test_get_dev_env_by_name_no_match():
+    # Test setup
+    test_dev_env_setup = dev_env_setup.DevEnvSetup(json.loads(fake_data.dev_env_json))
+
     # Run unit under test
-    dev_env_org_setup = dev_env_setup.DevEnvOrgSetup(json.loads(fake_data.dev_env_org_json))
-    dev_env_org = dev_env_org_setup.get_dev_env("invalid")
+    actual_dev_env = test_dev_env_setup.get_dev_env_by_name("no_matching_name")
 
     # Check expectations
-    assert dev_env_org == None
+    assert actual_dev_env is None
+
+@patch("dem.core.dev_env_setup.ToolImages")
+def test_check_image_availability(mock_ToolImages):
+    # Test setup
+    test_dev_env_setup = dev_env_setup.DevEnvLocalSetup(json.loads(fake_data.dev_env_json))
+    test_dev_env = test_dev_env_setup.get_dev_env_by_name("demo")
+    fake_tool_images = MagicMock(spec=ToolImages)
+    fake_tool_images.elements = {
+        "axemsolutions/make_gnu_arm:latest": ToolImages.LOCAL_AND_REGISTRY,
+        "axemsolutions/stlink_org:latest": ToolImages.REGISTRY_ONLY
+    }
+    fake_tool_images.NOT_AVAILABLE = ToolImages.NOT_AVAILABLE
+    mock_ToolImages.return_value = fake_tool_images
+
+    # Run unit under test
+    actual_image_statuses = test_dev_env.check_image_availability()
+
+    # Check expectations
+    mock_ToolImages.assert_called_once()
+
+    expected_image_statuses = [
+        ToolImages.LOCAL_AND_REGISTRY,
+        ToolImages.LOCAL_AND_REGISTRY,
+        ToolImages.REGISTRY_ONLY,
+        ToolImages.REGISTRY_ONLY,
+        ToolImages.NOT_AVAILABLE
+    ]
+
+    assert expected_image_statuses == actual_image_statuses
+
+    for idx, tool in enumerate(test_dev_env.tools):
+        assert tool["image_status"] == expected_image_statuses[idx]
