@@ -18,6 +18,7 @@ def _get_test_image_tags_as_images(test_image_tags):
 
 @patch("docker.from_env")
 def test_get_local_tool_images(mock_docker_from_env):
+    # Test setup
     test_image_tags = [
     ["alpine:latest"],
     [""],
@@ -47,22 +48,45 @@ def test_get_local_tool_images(mock_docker_from_env):
     mock_docker_client.images.list.return_value = _get_test_image_tags_as_images(test_image_tags)
     mock_docker_from_env.return_value = mock_docker_client
 
+    # Run unit under test
     container_engine_obj = container_engine.ContainerEngine()
-    assert expected_image_tags == container_engine_obj.get_local_tool_images()
+    actual_image_tags = container_engine_obj.get_local_tool_images()
+
+    # Check expectations
+    assert expected_image_tags == actual_image_tags
 
     mock_docker_from_env.assert_called_once()
     mock_docker_client.images.list.assert_called_once()
 
 @patch("docker.from_env")
 def test_get_local_tool_images_when_none_available(mock_docker_from_env):
+    # Test setup
     test_image_tags = []
     expected_image_tags = []
-    mock_docker_client = MagicMock()
-    mock_docker_from_env.return_value = mock_docker_client
-    mock_docker_client.images.list.return_value = _get_test_image_tags_as_images(test_image_tags)
+    fake_docker_client = MagicMock()
+    mock_docker_from_env.return_value = fake_docker_client
+    fake_docker_client.images.list.return_value = _get_test_image_tags_as_images(test_image_tags)
 
+    # Run unit under test
     container_engine_obj = container_engine.ContainerEngine()
-    assert expected_image_tags == container_engine_obj.get_local_tool_images()
+    actual_image_tags = container_engine_obj.get_local_tool_images()
+
+    # Check expectations
+    assert expected_image_tags == actual_image_tags
 
     mock_docker_from_env.assert_called_once()
-    mock_docker_client.images.list.assert_called_once()
+    fake_docker_client.images.list.assert_called_once()
+
+@patch("docker.from_env")
+def test_remove(mock_from_env):
+    # Test setup
+    fake_docker_client = MagicMock()
+    mock_from_env.return_value = fake_docker_client
+    test_image_to_remove = "test_image_to_remove:latest"
+
+    # Run unit under test
+    test_container_engine = container_engine.ContainerEngine()
+    test_container_engine.remove(test_image_to_remove)
+
+    # Check expectations
+    fake_docker_client.images.remove.assert_called_once_with(test_image_to_remove)

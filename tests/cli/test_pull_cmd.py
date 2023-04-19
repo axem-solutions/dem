@@ -96,7 +96,7 @@ def test_dev_env_already_installed(mock_DevEnvLocalSetup, mock_read_deserialized
     mock_DevEnvLocalSetup.assert_called_once_with(fake_deserialized_dev_env_local_json)
     fake_dev_env_org.get_local_instance.assert_called_once_with(fake_dev_env_local_setup)
     mock_pull_registry_only_images.assert_called_once_with(fake_dev_env_local)
-    fake_dev_env_local.check_image_availability.assert_called()
+    fake_dev_env_local.check_image_availability.assert_called_with(fake_dev_env_local_setup.tool_images)
 
     console = Console(file=io.StringIO())
     console.print("The [yellow]test_env[/] Development Environment is ready!")
@@ -249,7 +249,7 @@ def test_dev_env_new_install(mock_DevEnvLocalSetup, mock_read_deserialized_dev_e
     calls = [call("registry_only_tool1:latest"), call("registry_only_tool2:latest")]
     fake_container_engine.pull.assert_has_calls(calls)
 
-    fake_dev_env_local.check_image_availability.assert_called()
+    fake_dev_env_local.check_image_availability.assert_called_with(fake_dev_env_local_setup.tool_images)
     
     assert 0 == runner_result.exit_code
 

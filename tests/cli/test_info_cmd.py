@@ -91,7 +91,7 @@ def test_info_local_dev_env_demo(mock_DevEnvOrgSetup, mock_read_deserialized_dev
     mock_read_deserialized_dev_env_org_json.assert_not_called()
     mock_DevEnvOrgSetup.assert_not_called()
     fake_dev_env_local_setup.get_dev_env_by_name.assert_called_once_with(test_dev_env_name)
-    fake_dev_env.check_image_availability.assert_called_once()
+    fake_dev_env.check_image_availability.assert_called_once_with(fake_dev_env_local_setup.tool_images)
 
     expected_tools = [
         ["build system", "axemsolutions/make_gnu_arm:latest", "Image is available locally and in the registry."],
@@ -164,7 +164,7 @@ def test_info_local_dev_env_nagy_cica_project(mock_DevEnvOrgSetup,
     mock_read_deserialized_dev_env_org_json.assert_not_called()
     mock_DevEnvOrgSetup.assert_not_called()
     fake_dev_env_local_setup.get_dev_env_by_name.assert_called_once_with(test_dev_env_name)
-    fake_dev_env.check_image_availability.assert_called_once()
+    fake_dev_env.check_image_availability.assert_called_once_with(fake_dev_env_local_setup.tool_images)
 
     expected_tools = [
         ["build system", "axemsolutions/bazel:latest", "[red]Error: Image is not available.[/]"],
@@ -278,7 +278,7 @@ def test_info_org_dev_env(mock_DevEnvOrgSetup, mock_read_deserialized_dev_env_or
     mock_DevEnvOrgSetup.assert_called_once_with(fake_dev_env_json_deserialized)
     fake_dev_env_org_setup.get_dev_env_by_name.assert_called_once_with(test_dev_env_name)
 
-    fake_dev_env.check_image_availability.assert_called_once()
+    fake_dev_env.check_image_availability.assert_called_once_with(fake_dev_env_org_setup.tool_images)
 
     expected_tools = [
         ["build system", "axemsolutions/cmake:latest", "Image is available in the registry."],

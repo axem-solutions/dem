@@ -37,8 +37,9 @@ def is_dev_env_org_installed_locally(dev_env_org: dev_env_setup.DevEnvOrg) -> bo
     dev_env_local_setup_obj = dev_env_setup.DevEnvLocalSetup(dev_env_json_deserialized)
     return isinstance(dev_env_org.get_local_instance(dev_env_local_setup_obj), dev_env_setup.DevEnvLocal)
 
-def get_dev_env_status(dev_env: (dev_env_setup.DevEnvLocal | dev_env_setup.DevEnvOrg)) -> str:
-    image_statuses = dev_env.check_image_availability()
+def get_dev_env_status(dev_env: (dev_env_setup.DevEnvLocal | dev_env_setup.DevEnvOrg), 
+                       tool_images: ToolImages) -> str:
+    image_statuses = dev_env.check_image_availability(tool_images)
     dev_env_status = ""
     if isinstance(dev_env, dev_env_setup.DevEnvOrg):
         if (ToolImages.NOT_AVAILABLE in image_statuses) or (ToolImages.LOCAL_ONLY in image_statuses):
@@ -82,7 +83,7 @@ def list_dev_envs(local: bool, org: bool)-> None:
     table.add_column("Development Environment")
     table.add_column("Status")
     for dev_env in dev_env_setup_obj.dev_envs:
-        table.add_row(dev_env.name, get_dev_env_status(dev_env))
+        table.add_row(dev_env.name, get_dev_env_status(dev_env, dev_env_setup_obj.tool_images))
 
     stdout.print(table)
 

@@ -193,7 +193,7 @@ def test_execute_invalid_name(mock_DevEnvLocalSetup, mock_read_deserialized_dev_
     # Test setup
     fake_deserialized_local_dev_env = MagicMock()
     mock_read_deserialized_dev_env_json.return_value = fake_deserialized_local_dev_env
-    fake_dev_env_local_setup = MagicMock(DevEnvLocalSetup)
+    fake_dev_env_local_setup = MagicMock()
     mock_DevEnvLocalSetup.return_value = fake_dev_env_local_setup
     fake_dev_env_local_setup.get_dev_env_by_name.return_value = None
     test_dev_env_name =  "not existing env"
@@ -223,9 +223,9 @@ def test_execute_valid_name(mock_DevEnvLocalSetup, mock_read_deserialized_dev_en
     # Test setup
     fake_deserialized_local_dev_env = MagicMock()
     mock_read_deserialized_dev_env_json.return_value = fake_deserialized_local_dev_env
-    fake_dev_env_local_setup = MagicMock(DevEnvLocalSetup)
+    fake_dev_env_local_setup = MagicMock()
     mock_DevEnvLocalSetup.return_value = fake_dev_env_local_setup
-    fake_dev_env_local = MagicMock(DevEnvLocal)
+    fake_dev_env_local = MagicMock()
     fake_dev_env_local_setup.get_dev_env_by_name.return_value = fake_dev_env_local
     fake_confirmation = MagicMock()
     mock_get_confirm_from_user.return_value = fake_confirmation

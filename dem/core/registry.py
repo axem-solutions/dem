@@ -9,7 +9,7 @@ import subprocess
 
 from dem.core import container_engine as container_engine
 
-def list_repos(container_engine_obj: container_engine.ContainerEngine) -> None:
+def list_repos(container_engine_obj: container_engine.ContainerEngine) -> list[str]:
     registryimagelist = []
     images = []
 
@@ -26,6 +26,3 @@ def list_repos(container_engine_obj: container_engine.ContainerEngine) -> None:
             images.append(image + ":" + tag['SignedTag'])
         
     return images
-
-if __name__ == "__main__":
-    list_repos()

@@ -29,6 +29,13 @@ class ContainerEngine():
             repository -- repository to pull"""
         self._docker_client.images.pull(repository=repository)
 
+    def remove(self, image: str) -> None:
+        """Remove a tool image.
+        
+        Args: 
+            image -- the tool image to remove"""
+        self._docker_client.images.remove(image)
+
     def search(self, registry: str) -> None:
         """Search repository in the axemsolutions registry.
         

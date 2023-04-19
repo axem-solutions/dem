@@ -26,18 +26,18 @@ def print_info(dev_env: (DevEnvLocal | DevEnvOrg)) -> None:
 
 def execute(arg_dev_env_name: str) -> None:
     dev_env_json_deserialized = data_management.read_deserialized_dev_env_json()
-    dev_env_local_setup = DevEnvLocalSetup(dev_env_json_deserialized)
-    dev_env = dev_env_local_setup.get_dev_env_by_name(arg_dev_env_name)
+    dev_env_setup = DevEnvLocalSetup(dev_env_json_deserialized)
+    dev_env = dev_env_setup.get_dev_env_by_name(arg_dev_env_name)
 
     if dev_env is None:
         dev_env_json_deserialized = data_management.read_deserialized_dev_env_org_json()
-        dev_env_org_setup = DevEnvOrgSetup(dev_env_json_deserialized)
-        dev_env = dev_env_org_setup.get_dev_env_by_name(arg_dev_env_name)
+        dev_env_setup = DevEnvOrgSetup(dev_env_json_deserialized)
+        dev_env = dev_env_setup.get_dev_env_by_name(arg_dev_env_name)
 
     if dev_env is None:
         stderr.print("[red]Error: Unknown Development Environment: " + arg_dev_env_name + "[/]")
         return
     else:
         # This functions must be called, so the tools in the dev env get updated.
-        dev_env.check_image_availability()
+        dev_env.check_image_availability(dev_env_setup.tool_images)
         print_info(dev_env)
