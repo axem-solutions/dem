@@ -3,7 +3,7 @@
 
 from pathlib import PurePath
 import os
-import json
+import json, requests
 
 # Local dev_env.json
 
@@ -23,9 +23,8 @@ def write_deserialized_dev_env_json(dev_env_json_deserialized: dict) -> None:
 # Organization specific dev_env_org.json
 
 def read_deserialized_dev_env_org_json():
-    #Get the raw json file.
-    dev_env_org_json_path = PurePath("example_json/dev_env_org.json")
-    dev_env_org_json = open(dev_env_org_json_path, "r")
-    deserialized_dev_env_org_json = json.load(dev_env_org_json)
-    dev_env_org_json.close()
-    return deserialized_dev_env_org_json
+    response = requests.get("http://127.0.0.1:8000/dev_env_org.json")
+    return response.json()
+
+if __name__ == "__main__":
+    read_deserialized_dev_env_org_json()
