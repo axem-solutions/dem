@@ -3,7 +3,7 @@
 
 import typer
 from dem import __app_name__, __version__
-from dem.cli.command import info_cmd, list_cmd, pull_cmd, create_cmd, modify_cmd, delete_cmd, rename_cmd
+from dem.cli.command import info_cmd, list_cmd, pull_cmd, create_cmd, modify_cmd, delete_cmd, rename_cmd, clone_cmd
 
 typer_cli = typer.Typer()
 
@@ -43,6 +43,11 @@ def pull(dev_env_name: str = typer.Argument(...,
     Environment locally.
     """
     pull_cmd.execute(dev_env_name)
+
+@typer_cli.command()
+def clone(dev_env_name: str = typer.Argument(...,help="Name of the Development Environment to clone."),
+           new_dev_env_name: str = typer.Argument(...,help="Name of the New Development Environment.")) -> None:
+    clone_cmd.execute(dev_env_name,new_dev_env_name)
 
 @typer_cli.command()
 def create(dev_env_name: str = typer.Argument(..., 
