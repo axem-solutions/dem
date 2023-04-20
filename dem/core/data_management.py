@@ -17,17 +17,24 @@ _empty_dev_env_json = """
 """
 
 class DevEnvJSON():
+    """ Serialize and deserialize the dev_env.json file."""
     _path = PurePath(os.path.expanduser('~') + "/.config/axem/dev_env.json")
 
     def _create_empty_dev_env_json(self) -> None:
+        """ If the dev_env.json doesn't exist, then create an emmpty one."""
         dev_env_json = open(self._path, "w")
         dev_env_json.write(_empty_dev_env_json)
         dev_env_json.close()
 
     def __init__(self) -> None:
+        """ Init the class with an empty placeholder for the deserialized dev_env.json file. 
+            Later the variable can be to access the deserialized data, until the dev_env.json file 
+            changes. 
+        """
         self.deserialized = ""
 
     def read(self) -> dict:
+        """ Read the deserialized dev_env.json."""
         try:
             dev_env_json = open(self._path, "r")
         except FileNotFoundError:
@@ -40,6 +47,11 @@ class DevEnvJSON():
         return self.deserialized
 
     def write(self, deserialized: dict) -> None:
+        """ Write modified deserialized data to the dev_env.json file.
+            
+            Args:
+                deserialized -- the modified deserialized data
+        """
         self.deserialized = deserialized
         dev_env_json = open(self._path, "w")
         json.dump(deserialized, dev_env_json, indent=4)

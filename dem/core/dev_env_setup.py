@@ -6,7 +6,7 @@ from dem.core.properties import __supported_dev_env_major_version__
 from dem.core.tool_images import ToolImages
 
 class DevEnv:
-    """A Development Environment."""
+    """ A Development Environment."""
     supported_tool_types = ( 
         "build system",
         "toolchain",
