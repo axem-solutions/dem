@@ -23,8 +23,5 @@ def write_deserialized_dev_env_json(dev_env_json_deserialized: dict) -> None:
 # Organization specific dev_env_org.json
 
 def read_deserialized_dev_env_org_json():
-    response = requests.get("http://127.0.0.1:8000/dev_env_org.json")
+    response = requests.get("https://axemsolutions.io/dem/dev_env_org.json")
     return response.json()
-
-if __name__ == "__main__":
-    read_deserialized_dev_env_org_json()
