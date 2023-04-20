@@ -8,7 +8,6 @@ import dem.cli.command.delete_cmd as delete_cmd
 # Test framework
 from typer.testing import CliRunner
 from unittest.mock import patch, MagicMock, call
-import pytest
 
 from rich.console import Console
 import io, docker.errors
