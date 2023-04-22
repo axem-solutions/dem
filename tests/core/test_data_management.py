@@ -48,3 +48,17 @@ def test_serialize_dev_env_json(mock_json_dump, mock_open, mock_PurePath):
     mock_json_dump.assert_called_once_with(fake_dev_env_json_deserialized, fake_opened_file,
                                            indent=4)
     fake_opened_file.close.assert_called_once_with()
+
+@patch("dem.core.data_management.requests.get")
+def test_read_deserialized_dev_env_org_json(mock_requests_get):
+    # Test setup
+    fake_response = MagicMock()
+    mock_requests_get.return_value = fake_response
+    expected_json = "dummy_json"
+    fake_response.json.return_value = expected_json
+
+    # Run unit under test
+    actual_json = data_management.read_deserialized_dev_env_org_json()
+
+    # Check expectations
+    assert expected_json == actual_json
