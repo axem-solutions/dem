@@ -57,7 +57,7 @@ def test_get_dev_env_by_name_no_match():
     # Check expectations
     assert actual_dev_env is None
 
-def test_check_image_availability():
+def common_test_check_image_availability(with_update: bool) -> None:
     # Test setup
     test_dev_env_setup = dev_env_setup.DevEnvLocalSetup(json.loads(fake_data.dev_env_json))
     test_dev_env = test_dev_env_setup.get_dev_env_by_name("demo")
@@ -69,10 +69,12 @@ def test_check_image_availability():
     fake_tool_images.NOT_AVAILABLE = ToolImages.NOT_AVAILABLE
 
     # Run unit under test
-    actual_image_statuses = test_dev_env.check_image_availability(fake_tool_images)
+    actual_image_statuses = test_dev_env.check_image_availability(fake_tool_images, 
+                                                                  update_tool_images=with_update)
 
     # Check expectations
-    fake_tool_images.update.assert_called_once()
+    if with_update == True:
+        fake_tool_images.update.assert_called_once()
 
     expected_image_statuses = [
         ToolImages.LOCAL_AND_REGISTRY,
@@ -85,3 +87,9 @@ def test_check_image_availability():
 
     for idx, tool in enumerate(test_dev_env.tools):
         assert tool["image_status"] == expected_image_statuses[idx]
+
+def test_check_image_availability_without_update():
+    common_test_check_image_availability(False)
+
+def test_check_image_availability_with_update():
+    common_test_check_image_availability(True)

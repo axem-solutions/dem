@@ -3,6 +3,8 @@
 
 import dem.core.container_engine as container_engine
 import dem.core.registry as registry
+from dem.cli.console import stdout
+from dem.core.exceptions import RegistryError
 
 class ToolImages():
     """The available tool images for a Dev Env.
@@ -30,7 +32,14 @@ class ToolImages():
         for local_image in self.container_egine.get_local_tool_images():
             self.elements[local_image] = self.LOCAL_ONLY
 
-        for registry_image in registry.list_repos(self.container_egine):
+        try:
+            registry_images = registry.list_repos(self.container_egine)
+        except RegistryError as e:
+            stdout.print("[red]" + str(e) + "[/]")
+            stdout.print("[red]Using local tool images only![/]")
+            registry_images = []
+
+        for registry_image in registry_images:
             if registry_image in self.elements:
                 self.elements[registry_image] = self.LOCAL_AND_REGISTRY
             else:

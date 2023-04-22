@@ -38,7 +38,7 @@ class DevEnv:
         self.name = descriptor["name"]
         self.tools = descriptor["tools"]
 
-    def check_image_availability(self, tool_images: ToolImages) -> list:
+    def check_image_availability(self, tool_images: ToolImages, update_tool_images: bool = False) -> list:
         """ Checks the tool image's availability.
         
             Updates the "image_status" key for the tool dictionary.
@@ -46,8 +46,10 @@ class DevEnv:
 
             Args:
                 tool_images -- the images the Dev Envs can access
+                update_tool_images -- update the list of available tool images
         """
-        tool_images.update()
+        if update_tool_images == True:
+            tool_images.update()
         image_statuses = []
         for tool in self.tools:
             tool_image_name = tool["image_name"] + ':' + tool["image_version"]

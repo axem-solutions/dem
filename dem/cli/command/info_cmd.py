@@ -38,6 +38,5 @@ def execute(arg_dev_env_name: str) -> None:
         stderr.print("[red]Error: Unknown Development Environment: " + arg_dev_env_name + "[/]")
         return
     else:
-        # This functions must be called, so the tools in the dev env get updated.
         dev_env.check_image_availability(dev_env_setup.tool_images)
         print_info(dev_env)

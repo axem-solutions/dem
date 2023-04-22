@@ -99,6 +99,7 @@ def list_tool_images(local: bool, org: bool) -> None:
         stdout.print(table)
     elif (local == False) and (org == True):
         registry_images = registry.list_repos(container_engine_obj)
+
         table = Table()
         table.add_column("Repository")
         for registry_image in registry_images:
