@@ -1,0 +1,39 @@
+/* Change the font size of the body text to 16px */
+body {
+	font-size: 16px;
+}
+
+/* Change the font size of all headings to 24px */
+h1, h2, h3, h4, h5, h6 {
+	font-size: 24px;
+}
+      
+/* Change the font size of all paragraphs to 18px */
+p {
+	font-size: 20px;
+}
+
+a {
+	font-size: 20px;
+}
+
+li {
+	font-size: 20px;
+}
+
+label {
+	font-size: 20px;
+}
+
+div {
+	font-size: 20px;
+}
+
+span {
+	font-size: 24px;
+}
+
+@font-face {
+	font-family: 'DarkerGrotesque-SemiBold';
+	src: url(../fonts/DarkerGrotesque-SemiBold.ttf) format('truetype');
+}
