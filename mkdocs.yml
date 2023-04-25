@@ -58,3 +58,15 @@ copyright: >
 
 repo_url: https://github.com/axem-solutions/dem
 repo_name: dem
+
+markdown_extensions:
+  - tables
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+
+nav:
+  - 'index.md'
+  - 'development_environments.md'
+  - 'installation.md'
+  - 'commands.md'
