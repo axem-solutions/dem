@@ -20,8 +20,8 @@ theme:
     - navigation.tracking
   icon:
     repo: fontawesome/brands/github
-  logo: images/x_w.png
-  favicon: images/logo2.png
+  logo: wp-content/uploads/2023/03/x_w.png
+  favicon: wp-content/uploads/2023/03/logo2.png
   
 extra_css:
   - stylesheets/scheme.css
