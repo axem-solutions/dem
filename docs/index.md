@@ -32,9 +32,11 @@ container images, and the way they communicate with the host system is totally u
 ### Scaleable tool change management :arrows_counterclockwise:
 Several times throughout the development lifecycle changes in the used tools might needed. dem makes
 it possible to quickly swap tool images:
-    - to use a different version of the same tool. Containerization ensures the safe coexistense of 
-    the same tools with different version number
-    - to use a completely different one
+
+- to use a different version of the same tool. Containerization ensures the safe coexistense of 
+the same tools with different version number
+- to use a completely different one
+
 Adding a new tool is as simple as to change one. This makes the Development Environment scalable.
 
 ### Reliable Development Environment sharing :material-share:
