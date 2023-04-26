@@ -20,7 +20,7 @@ assign the required tool images to them.
 
 !!! tip
 
-    Check out the `dem create` command to learn more about creating a new Development Environment!
+    Check out the [`dem create`](commands.md#dem-create-dev_env_name) command to learn more about creating a new Development Environment!
 
 ## Tool images
 
@@ -53,4 +53,4 @@ Installation can be done with the `dem pull` command:
 
 !!! tip
 
-    See the `dem pull` command for more details.
+    See the [`dem pull`](commands.md#dem-pull-dev_env_name) command for more details.
