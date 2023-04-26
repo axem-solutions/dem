@@ -15,7 +15,7 @@ To use the dem on your PC, you need to have the following tools installed:
 - Python 3.10+
 - Docker Engine
 
-:information_source: Currently only the Linux operating system supported.
+:information_source: Currently only the Linux operating system is supported.
 
 ## Installation
 
