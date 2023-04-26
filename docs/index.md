@@ -1,6 +1,6 @@
 # Introduction
 
-dem is a command line tool to manage *containerized* development environments.
+dem is a command line tool to manage *containerized* Development Environments.
 
 ## Developing Embedded Software
 
@@ -29,7 +29,7 @@ To solve this problem the tools need to operate in their own isolated environmen
 and fast solution for isolation is containerization. The tools get built into their respective 
 container images, and the way they communicate with the host system is totally under control.
 
-### Scaleable tool change management :chart_with_upwards_trend:
+### Scaleable tool change management :arrows_counterclockwise:
 Several times throughout the development lifecycle changes in the used tools might needed. dem makes
 it possible to quickly swap tool images:
     - to use a different version of the same tool. Containerization ensures the safe coexistense of 
