@@ -41,7 +41,7 @@ Adding a new tool is as simple as to change one. This makes the Development Envi
 To have a consistent development for every developer in the organization is mandatory to effectively
 create software. With dem you can easily share the exact same environment for every coworker.
 
-### Fast setup :rocket:
+### Quick setup :rocket:
 Before joining a project, setting up the required tools can be a time cosuming taks. With dem you 
 can install a new Development Environment with a single command.
 

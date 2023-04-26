@@ -1,5 +1,7 @@
 ## Prerequisites
 
+To use the dem on your PC, you need to have the following tools installed:
+
 - Python 3.10+
 - Docker Engine
 
@@ -9,4 +11,10 @@
 
 ## Installation
 
+dem is available in the PyPI repository. Install it with:
+
     pip install axem-dem
+
+## Source
+
+The [dem source](https://github.com/axem-solutions/dem) can be used as a python module. You need to prepend `python -m` to your command.
