@@ -1,7 +1,7 @@
 [data-md-color-scheme="axem_light"] {
   --md-primary-fg-color:               #12282E;
   --md-accent-fg-color:                #277f97;
-  --md-text-font: 'DarkerGrotesque-SemiBold'; 
+  --md-text-font:                       'DarkerGrotesque-SemiBold'; 
 
   --md-default-fg-color:               hsla(0, 0%, 0%, 0.87);
   --md-default-fg-color--light:        hsla(0, 0%, 0%, 0.54);
@@ -75,7 +75,7 @@
 
   --md-primary-fg-color:               #79A7B5;
   --md-accent-fg-color:                #277f97;
-  --md-text-font:                        'DarkerGrotesque-SemiBold'; 
+  --md-text-font:                       'DarkerGrotesque-SemiBold'; 
 
   --md-default-fg-color:             hsla(var(--md-hue), 75%, 95%, 1);
   --md-default-fg-color--light:      hsla(var(--md-hue), 75%, 90%, 0.62);

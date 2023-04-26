@@ -4,8 +4,9 @@ title: Development Environments
 
 ## Development Environments
 
-The dem assigns a set of tools for every project, these are called Development Environments. The
-dem's functionality is based on the operation on the Development Environments.
+A set of tools assigned for a software project is called a Development Environment.
+The dem's functionality is based on the operation on these Development Environments.
+
 Currently the following tool types are supported:
 
     - Build system
