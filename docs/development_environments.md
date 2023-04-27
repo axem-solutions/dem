@@ -42,7 +42,7 @@ An organization can specify Development Environments which are **available for a
 ![organization](wp-content/organization.png){: .center}
 
 The members can list the available Development Environments in the organization with the 
-`dem list --all --env` commmand.  
+`dem list --all --env` command.  
 By default the dem has the axem registry registered. The Development Environments provided by axem
 can be installed for free.
 

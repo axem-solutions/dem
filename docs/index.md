@@ -48,7 +48,7 @@ it possible to **quickly swap tool images**:
 - to use a different version of the same tool 
 - to use a completely different tool
 
-Containerization ensures the **safe coexistence** of the same tools with different version number.  
+Containerization ensures the **safe coexistence** of the same tools with different version numbers.  
 Adding a new tool is as simple as to change one, making the Development Environment **scalable**.
 
 ### :material-share: Reliable Development Environment sharing
