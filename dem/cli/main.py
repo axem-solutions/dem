@@ -47,6 +47,9 @@ def pull(dev_env_name: str = typer.Argument(...,
 @typer_cli.command()
 def clone(dev_env_name: str = typer.Argument(...,help="Name of the Development Environment to clone."),
            new_dev_env_name: str = typer.Argument(...,help="Name of the New Development Environment.")) -> None:
+    """
+    Clone existing Development Environment locally.
+    """
     clone_cmd.execute(dev_env_name,new_dev_env_name)
 
 @typer_cli.command()
@@ -60,6 +63,9 @@ def create(dev_env_name: str = typer.Argument(...,
 @typer_cli.command()
 def rename(dev_env_name: str = typer.Argument(...,help="Name of the Development Environment to rename."),
            new_dev_env_name: str = typer.Argument(...,help="Name of the New Development Environment.")) -> None:
+    """
+    Rename existing Development Environment locally.
+    """
     rename_cmd.execute(dev_env_name,new_dev_env_name)
 
 @typer_cli.command()
