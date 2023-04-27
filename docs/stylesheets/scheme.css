@@ -1,5 +1,5 @@
 [data-md-color-scheme="axem_light"] {
-  --md-primary-fg-color:               #12282E;
+  --md-primary-fg-color:               #214851;
   --md-accent-fg-color:                #277f97;
   --md-text-font:                       'DarkerGrotesque-SemiBold'; 
 
@@ -73,7 +73,7 @@
 [data-md-color-scheme="axem_dark"] {
   --md-hue: 232;
 
-  --md-primary-fg-color:               #79A7B5;
+  --md-primary-fg-color:               #8f64eb;
   --md-accent-fg-color:                #277f97;
   --md-text-font:                       'DarkerGrotesque-SemiBold'; 
 

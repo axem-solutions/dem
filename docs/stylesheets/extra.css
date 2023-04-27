@@ -35,5 +35,10 @@ span {
 
 @font-face {
 	font-family: 'DarkerGrotesque-SemiBold';
-	src: url(../Darker_Grotesque/DarkerGrotesque-SemiBold.ttf) format('truetype');
+	src: url(../Darker_Grotesque/DarkerGrotesque-Medium.ttf) format('truetype');
+}
+
+.center {
+	display: block;
+	margin: 0 auto;
 }

@@ -7,7 +7,7 @@ To use the dem on your PC, you need to have the following tools installed:
 
 !!! info
 
-    Currently only the Linux operating system supported.
+    Currently only the Linux operating system is supported.
 
 ## Installation
 
