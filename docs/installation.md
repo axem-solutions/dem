@@ -7,7 +7,7 @@ To use the dem on your PC, you need to have the following tools installed:
 
 !!! info
 
-    Currently only the Linux operating system is supported.
+    Currently only the Linux operating system and the Docker Container Engine is supported.
 
 ## Installation
 
@@ -17,4 +17,9 @@ dem is available in the PyPI repository. Install it with:
 
 ## Source
 
-The [dem source](https://github.com/axem-solutions/dem) can be used as a python module. You need to prepend `python -m` to your command.
+The dem is [open source](https://github.com/axem-solutions/dem), so you can use it as a python 
+module. To do this, you need to add the `-m` flag to your command.
+
+For example:
+
+    python -m dem list --local --env

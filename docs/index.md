@@ -5,9 +5,9 @@ containerized Development Environments.**
 
 !!! info
 
-    Currently only the Linux operating system is supported.
+    Currently only the Linux operating system and the Docker Container Engine is supported.
 
-    If you have any questions, you can ask them at the 
+    Feel free to ask any question at
     [discussions](https://github.com/axem-solutions/dem/discussions).
 
 !!! example "Example Tutorial"

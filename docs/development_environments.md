@@ -41,9 +41,11 @@ An organization can specify Development Environments which are **available for a
 
 ![organization](wp-content/organization.png){: .center}
 
-The members can list the available Development Environments in the organization with the 
-`dem list --all --env` command.  
-By default the dem has the axem registry registered. The Development Environments provided by axem
+The members can list the available Development Environments in the organization with the following
+command:  
+`dem list --all --env`
+
+By default, the dem has the axem registry registered. The Development Environments provided by axem
 can be installed for free.
 
 !!! warning
@@ -55,7 +57,7 @@ can be installed for free.
 Installation can be done with the `dem pull` command:
 
 1. First the dem installs the Development Environment descriptor.
-2. Then downloads the tool images that are not yet available on the host PC.
+2. Then downloads the necessary tool images, which are not yet available on the host PC.
 
 !!! tip
 
