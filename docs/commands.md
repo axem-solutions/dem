@@ -116,8 +116,20 @@ not required anymore, the dem asks the user if they prefer to delete or keep it.
 
 Arguments:
 
-  DEV_ENV_NAME  Name of the Development Environment to delete. [required]
+`DEV_ENV_NAME` Name of the Development Environment to delete. [required]
 
 !!! warning
 
     You can't withdraw this command!
+
+---
+
+## **`dem clone DEV_ENV_NAME NEW_DEV_ENV_NAME`**
+
+Create a copy of an existing local Development Environment.
+
+Arguments:
+
+`DEV_ENV_NAME` Name of the Development Environment to clone. [required]
+
+`NEW_DEV_ENV_NAME` Name of the New Development Environment. [required]
