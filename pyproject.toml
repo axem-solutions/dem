@@ -1,11 +1,14 @@
 [tool.poetry]
 name = "axem-dem"
-version = "0.1"
+version = "0.1.0"
 description = "Manager for Containerized Development Environments"
 authors = ["janosmurai <murai.janos@gmail.com>"]
-license = "LICENSE"
+license = "Eclipse Public License - v2.0"
 readme = "README.md"
 packages = [{include = "dem"}]
+
+[tool.poetry.scripts]
+dem = "dem.__main__:main"
 
 [tool.poetry.dependencies]
 python = "^3.10"
@@ -15,7 +18,15 @@ requests = "^2.29.0"
 rich = "^13.3.5"
 typer = "^0.8.0"
 
-[tool.poetry.group.dev.dependencies]
+[tool.poetry.group.docs]
+optional = true
+
+[tool.poetry.group.docs.dependencies]
+mkdocs-material = "^9.1.7"
+
+[tool.poetry.group.test]
+
+[tool.poetry.group.test.dependencies]
 pytest = "^7.3.1"
 mock = "^5.0.2"
 
