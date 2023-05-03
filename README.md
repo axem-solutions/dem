@@ -1,45 +1,45 @@
-# Development Environment Manager - dem
+# Manage your containerized Development Environments
 
 ## Overview
-The dem's purpose is to have an easy, reproduceable and scalable way to set up development environments for embedded software development.
+The DEM is a command line tool that provides an easy, reproduceable and scalable way to set up 
+Development Environments for embedded software development.
 
-:construction: dem is under heavy development and only works with restricted functionality! :construction:
+## Useful
+### [Documentation](https://www.axemsolutions.io/dem_doc/index.html)
+### Tutorial - coming soon
 
-## Prerequisites:
-- Please note that currently only linux is supported.
-- Python:
-  version >3.10 and the following python libs are required: 
-  * python -m pip install rich 
-  * python -m pip install typer 
-  * python -m pip install docker 
-  * python -m pip install pytest 
-  * python -m pip install mock 
-  * python -m pip install unittest 
-  * python -m pip install python-dxf
-- docker
+## Prerequisites
 
- Copy the dev_env.json file from the example_json dir to ~/.config/axem directory.
- 
- ## Usage
- Currently the following commands supported:
- 
- `dem list [OPTIONS]`
- 
- List the available Development Environments locally or for the organization.
- 
- Options:
- --local Scope is the local host.
- --all Scope is the organization.
- --env List the environments.
- 
- `dem info DEV_ENV_NAME`
- 
- DEV_ENV_NAME: Name of the development environment.
- 
- Prints out generic information about a Development Environment.
- 
- `dem pull DEV_ENV_NAME`
- 
- DEV_ENV_NAME: Name of the development environment to install.
- 
- Installs the Development Environment by pulling the required tool container images.
+To be able to use the DEM on your PC, you need to have the following software installed:
+
+- Python 3.10+
+- Docker Engine
+
+:information_source: Currently only the Linux operating system is supported.
+
+## Installation
+
+DEM is available in the PyPI repository. Install it with:
+
+    pip install axem-dem
+
+:information_source: The package name is axem-dem, but the command is `dem`.
+
+## Source
+
+You can use DEM as a python module. To do this, you need to add the `-m` flag to your command.
+
+For example:
+
+    python -m dem list --local --env
+
+We use [poetry](https://python-poetry.org/) to manage dependencies. To ensure that you use the 
+correct version of the required modules, you should enter the preconfigured virtual environment.
+
+First install the environment with the required dependencies:
+
+    poetry install
+
+Enter the virtual environment:
+
+    poetry shell
