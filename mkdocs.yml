@@ -1,0 +1,78 @@
+site_name: dem
+theme:
+  name: material
+  palette: 
+    - media: "(prefers-color-scheme: light)"
+      scheme: axem_light
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+        
+    - media: "(prefers-color-scheme: dark)"
+      scheme: axem_dark
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  font:
+    code: Inconsolata
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.footer
+  icon:
+    repo: fontawesome/brands/github
+  logo: wp-content/uploads/2023/03/x_w.png
+  favicon: wp-content/uploads/2023/03/logo2.png
+  
+extra_css:
+  - stylesheets/scheme.css
+  - stylesheets/extra.css
+
+extra:
+  consent:
+    title: Cookie consent
+    description: >-
+      We need some cookies to make axem work. axem and our social media, advertising, analytics etc. 
+      partners would like to use additional cookies to store your preferences, gather statistics and 
+      assist with our marketing - this helps us improve axem. By clicking [Acccept] you consent 
+      to the use of these cookies and you acknowledge that you read and understood our Cookie and 
+      Privacy Policy.
+      <br>
+      <a href="/policies.html">Read Privacy and Cookie Policy</a>
+    actions:
+      - accept
+      - reject
+  social:
+    - icon: fontawesome/brands/linkedin
+      link: https://www.linkedin.com/company/axemsolutions/
+    - icon: fontawesome/brands/instagram
+      link: https://www.instagram.com/axemsolutions/
+    - icon: fontawesome/brands/github
+      link: https://github.com/axem-solutions
+  generator: false
+  homepage: https://axemsolutions.io
+
+copyright: >
+  Copyright 2023 - axem solutions - All rights reserved |
+  <a href="#__consent">Change cookie settings</a> |
+  Made with <a href="https://squidfunk.github.io/mkdocs-material/">Material for MkDocs</a>
+
+repo_url: https://github.com/axem-solutions/dem
+repo_name: dem
+
+markdown_extensions:
+  - tables
+  - admonition
+  - attr_list
+  - toc
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
+
+nav:
+  - 'index.md'
+  - 'installation.md'
+  - 'development_environments.md'
+  - 'commands.md'

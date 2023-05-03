@@ -62,9 +62,9 @@ def create(dev_env_name: str = typer.Argument(...,
 
 @typer_cli.command()
 def rename(dev_env_name: str = typer.Argument(...,help="Name of the Development Environment to rename."),
-           new_dev_env_name: str = typer.Argument(...,help="Name of the New Development Environment.")) -> None:
+           new_dev_env_name: str = typer.Argument(...,help="The new name.")) -> None:
     """
-    Rename existing Development Environment locally.
+    Rename the Development Environment.
     """
     rename_cmd.execute(dev_env_name,new_dev_env_name)
 
