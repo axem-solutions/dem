@@ -1,11 +1,11 @@
-# Manage your containerized Development Environment
+# Manage your containerized Development Environments
 
 ## Overview
 The DEM is a command line tool that provides an easy, reproduceable and scalable way to set up 
 Development Environments for embedded software development.
 
 ## Useful
-### [Documentation](https://www.axemsoltuions.io/dem_doc/index.html)
+### [Documentation](https://www.axemsolutions.io/dem_doc/index.html)
 ### Tutorial - coming soon
 
 ## Prerequisites
