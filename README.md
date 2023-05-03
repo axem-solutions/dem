@@ -5,7 +5,7 @@ The DEM is a command line tool that provides an easy, reproduceable and scalable
 Development Environments for embedded software development.
 
 ## Useful
-### [Documentation]()
+### [Documentation](https://www.axemsoltuions.io/dem_doc/index.html)
 ### Tutorial - coming soon
 
 ## Prerequisites
@@ -15,7 +15,7 @@ To be able to use the DEM on your PC, you need to have the following software in
 - Python 3.10+
 - Docker Engine
 
-    :information_source: Currently only the Linux operating system is supported.
+:information_source: Currently only the Linux operating system is supported.
 
 ## Installation
 
@@ -23,7 +23,7 @@ DEM is available in the PyPI repository. Install it with:
 
     pip install axem-dem
 
-    :information_source: The package name is axem-dem, but the command is `dem`.
+:information_source: The package name is axem-dem, but the command is `dem`.
 
 ## Source
 
