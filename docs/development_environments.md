@@ -5,7 +5,7 @@ title: Development Environments
 ## Development Environments
 
 A set of tools assigned for a software project is called a Development Environment.
-The dem's functionality is based on the operation on these Development Environments.
+The DEM's functionality is based on the operation on these Development Environments.
 
 Currently the following tool types are supported:
 
@@ -38,7 +38,7 @@ present
 ## Organization Development Environments
 
 An organization can specify Development Environments which are available for every member. By 
-default the dem only has access to the axem registry. The Development Environments defines here can 
+default the DEM only has access to the axem registry. The Development Environments defines here can 
 be downloaded for free.
 
 !!! warning

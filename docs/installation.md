@@ -1,6 +1,6 @@
 ## Prerequisites
 
-To use the dem on your PC, you need to have the following tools installed:
+To use the DEM on your PC, you need to have the following tools installed:
 
 - Python 3.10+
 - Docker Engine

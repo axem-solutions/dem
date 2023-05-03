@@ -30,7 +30,7 @@ and fast solution for isolation is containerization. The tools get built into th
 container images, and the way they communicate with the host system is totally under control.
 
 ### Scaleable tool change management :arrows_counterclockwise:
-Several times throughout the development lifecycle changes in the used tools might needed. dem makes
+Several times throughout the development lifecycle changes in the used tools might needed. DEM makes
 it possible to quickly swap tool images:
     - to use a different version of the same tool. Containerization ensures the safe coexistense of 
     the same tools with different version number
@@ -39,10 +39,10 @@ Adding a new tool is as simple as to change one. This makes the Development Envi
 
 ### Reliable Development Environment sharing :material-share:
 To have a consistent development for every developer in the organization is mandatory to effectively
-create software. With dem you can easily share the exact same environment for every coworker.
+create software. With DEM you can easily share the exact same environment for every coworker.
 
 ### Quick setup :rocket:
-Before joining a project, setting up the required tools can be a time cosuming taks. With dem you 
+Before joining a project, setting up the required tools can be a time cosuming taks. With DEM you 
 can install a new Development Environment with a single command.
 
 

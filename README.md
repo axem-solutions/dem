@@ -1,21 +1,21 @@
 # Manage your containerized Development Environment
 
 ## Overview
-The dem is a command line tool that provides an easy, reproduceable and scalable way to set up 
+The DEM is a command line tool that provides an easy, reproduceable and scalable way to set up 
 Development Environments for embedded software development.
 
 ## Useful
 ### [Documentation]()
-### [Tutorial]()
+### Tutorial - coming soon
 
 ## Prerequisites
 
-To use the dem on your PC, you need to have the following tools installed:
+To be able to use the DEM on your PC, you need to have the following software installed:
 
 - Python 3.10+
 - Docker Engine
 
-:information_source: Currently only the Linux operating system is supported.
+    :information_source: Currently only the Linux operating system is supported.
 
 ## Installation
 
@@ -23,8 +23,23 @@ dem is available in the PyPI repository. Install it with:
 
     pip install axem-dem
 
+    :information_source: The package name is axem-dem, but the command is `dem`.
+
 ## Source
 
-If you'd like to use dem from source, clone this repo and prepend `python -m` to the command. The 
-command must be executed from the root of this repo.  
-:warning: Use the realesed version for stable behaviour!
+You can use DEM as a python module. To do this, you need to add the `-m` flag to your command.
+
+For example:
+
+    python -m dem list --local --env
+
+We use [poetry](https://python-poetry.org/) to manage dependencies. To ensure that you use the 
+correct version of the required modules, you should enter the preconfigured virtual environment.
+
+First install the environment with the required dependencies:
+
+    poetry install
+
+Enter the virtual environment:
+
+    poetry shell

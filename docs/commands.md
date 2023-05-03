@@ -80,7 +80,7 @@ Arguments:
 
 Modify the tool types and required tool images for an existing Development Environment.
 
-1. The dem shows a list of the already selected tools. You can modify the selection.
+1. The DEM shows a list of the already selected tools. You can modify the selection.
 2. Assign the required tool images for the selected types. If a tool type was already selected in 
 the original Development Environment, the same tool image gets preselected - you only need to press 
 the enter if you don't want to change it.
@@ -94,7 +94,7 @@ Arguments:
   DEV_ENV_NAME  Name of the Development Environment to delete.  [required]
 
 Delete the Development Environment from the dev_env.json. If a tool image is not required  anymore 
-by any of the avaialable local Developtment Environments, the dem asks the user if they want to 
+by any of the avaialable local Developtment Environments, the DEM asks the user if they want to 
 delete that image or keep it.
 
 !!! warning
