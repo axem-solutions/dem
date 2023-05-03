@@ -2,10 +2,10 @@
 title: Development Environments
 ---
 
-## Development Environments
+## Definition and supported tools
 
-A set of tools assigned for a software project is called a Development Environment.
-The DEM's functionality is based on the operation on these Development Environments.
+A set of tools assigned for a software project is called a **Development Environment**.
+The dem's functionality is based on the operation on these Development Environments.
 
 Currently the following tool types are supported:
 
@@ -35,11 +35,18 @@ present
     An image registry is a collection of image repositories.
     An image repository stores the different versions of the same image.
 
-## Organization Development Environments
+## Development Environments available organizations wide
 
-An organization can specify Development Environments which are available for every member. By 
-default the DEM only has access to the axem registry. The Development Environments defines here can 
-be downloaded for free.
+An organization can specify Development Environments which are **available for all of its members**. 
+
+![organization](wp-content/organization.png){: .center}
+
+The members can list the available Development Environments in the organization with the following
+command:  
+`dem list --all --env`
+
+By default, the dem has the axem registry registered. The Development Environments provided by axem
+can be installed for free.
 
 !!! warning
 
@@ -48,8 +55,9 @@ be downloaded for free.
 ## Installing a Development Environment
 
 Installation can be done with the `dem pull` command:
-1. First installs the Development Environment descriptor.
-2. Then downloads the tool images that are not yet available on the host PC.
+
+1. First the dem installs the Development Environment descriptor.
+2. Then downloads the necessary tool images, which are not yet available on the host PC.
 
 !!! tip
 

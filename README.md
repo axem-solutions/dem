@@ -1,4 +1,4 @@
-# Manage your containerized Development Environment
+# Development Environment Manager - dem
 
 ## Overview
 The DEM is a command line tool that provides an easy, reproduceable and scalable way to set up 
@@ -8,8 +8,7 @@ Development Environments for embedded software development.
 ### [Documentation]()
 ### Tutorial - coming soon
 
-## Prerequisites
-
+## Prerequisites:
 To be able to use the DEM on your PC, you need to have the following software installed:
 
 - Python 3.10+
@@ -19,7 +18,7 @@ To be able to use the DEM on your PC, you need to have the following software in
 
 ## Installation
 
-dem is available in the PyPI repository. Install it with:
+DEM is available in the PyPI repository. Install it with:
 
     pip install axem-dem
 
