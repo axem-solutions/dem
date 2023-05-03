@@ -7,12 +7,11 @@ import dem.cli.main
 from dem.core.exceptions import RegistryError
 
 def main():
-    dem.cli.main.typer_cli(prog_name=__app_name__)
-
-if __name__ == "__main__":
     try:
-        main()
+        dem.cli.main.typer_cli(prog_name=__app_name__)
     except LookupError as e:
         stderr.print("[red]" + str(e) + "[/]")
     except RegistryError as e:
         stderr.print("[red]" + str(e) + "[/]")
+
+main()
