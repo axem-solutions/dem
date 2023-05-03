@@ -73,6 +73,6 @@ markdown_extensions:
 
 nav:
   - 'index.md'
-  - 'development_environments.md'
   - 'installation.md'
+  - 'development_environments.md'
   - 'commands.md'
