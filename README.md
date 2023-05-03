@@ -1,4 +1,4 @@
-# Development Environment Manager - dem
+# Manage your containerized Development Environment
 
 ## Overview
 The DEM is a command line tool that provides an easy, reproduceable and scalable way to set up 
@@ -8,7 +8,8 @@ Development Environments for embedded software development.
 ### [Documentation]()
 ### Tutorial - coming soon
 
-## Prerequisites:
+## Prerequisites
+
 To be able to use the DEM on your PC, you need to have the following software installed:
 
 - Python 3.10+
