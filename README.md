@@ -1,4 +1,4 @@
-# Manage your containerized Development Environments
+# Manage your containerized Development Environments with ease
 
 ## Overview
 The DEM is a command line tool that provides an easy, reproduceable and scalable way to set up 
