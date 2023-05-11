@@ -19,9 +19,14 @@ _empty_dev_env_json = """
 class DevEnvJSON():
     """ Serialize and deserialize the dev_env.json file."""
     _path = PurePath(os.path.expanduser('~') + "/.config/axem/dev_env.json")
+    _directory = PurePath(os.path.expanduser('~') + "/.config/axem")
 
     def _create_empty_dev_env_json(self) -> None:
         """ If the dev_env.json doesn't exist, then create an emmpty one."""
+        is_path_exist = os.path.exists(self._directory)
+        if not is_path_exist:
+            os.makedirs(self._directory)
+
         dev_env_json = open(self._path, "w")
         dev_env_json.write(_empty_dev_env_json)
         dev_env_json.close()

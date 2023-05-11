@@ -35,28 +35,41 @@ def test_dev_env_json_read(mock_json_load, mock_open):
 
 @patch("dem.core.data_management.open")
 @patch("dem.core.data_management.json.loads")
-def test_dev_env_json_read_FileNotFounderror(mock_json_loads, mock_open):
+@patch("dem.core.data_management.os.path.exists")
+@patch("dem.core.data_management.os.makedirs")
+def test_dev_env_json_read_FileNotFounderror(mock_os_makedirs, mock_os_path, mock_json_loads, mock_open):
     # Test setup
     fake_opened_file = MagicMock()
     mock_open.side_effect = [FileNotFoundError, fake_opened_file]
     expected_deserialized_dev_env_json = MagicMock()
     mock_json_loads.return_value = expected_deserialized_dev_env_json
+    mock_os_path.return_value = False
 
     # Run unit under test
     dev_env_json = DevEnvJSON()
     deserialized_dev_env_json = dev_env_json.read()
-
+   
     # Check expectations
     calls = [
         call(PurePath(os.path.expanduser('~') + "/.config/axem/dev_env.json"), "r"),
         call(PurePath(os.path.expanduser('~') + "/.config/axem/dev_env.json"), "w"),
     ]
+    
+
     mock_open.assert_has_calls(calls)
-    fake_opened_file.write.assert_called_once_with(_empty_dev_env_json)
+    
+    fake_opened_file.write.assert_called_once_with(_empty_dev_env_json)    
     fake_opened_file.close.assert_called_once()
+  
+    mock_os_path.assert_called_once()
+    mock_os_makedirs.assert_called_once_with(dev_env_json._directory)
+    
     mock_json_loads.assert_called_once_with(_empty_dev_env_json)
 
     assert deserialized_dev_env_json is expected_deserialized_dev_env_json
+
+
+
 
 @patch("dem.core.data_management.open")
 @patch("dem.core.data_management.json.dump")
