@@ -12,7 +12,8 @@ containerized Development Environments.**
 
 !!! example "Example Tutorial"
 
-    Learn by doing! Try our tutorial with a simple embedded project!
+    Learn by doing! Try our [tutorial](https://www.axemsolutions.io/tutorial/index.html) 
+    with a simple embedded project!
 
 ## Developing Embedded Software
 

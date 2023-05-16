@@ -6,7 +6,7 @@ Development Environments for embedded software development.
 
 ## Useful
 ### [Documentation](https://www.axemsolutions.io/dem_doc/index.html)
-### Tutorial - coming soon
+### [Tutorial](https://www.axemsolutions.io/tutorial/index.html)
 
 ## Prerequisites
 
