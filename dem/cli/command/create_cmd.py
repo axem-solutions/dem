@@ -93,9 +93,9 @@ def execute(dev_env_name: str) -> None:
     image_statuses = dev_env.check_image_availability(dev_env_local_setup.tool_images, 
                                                       update_tool_images=True)
 
-    if image_statuses.count(ToolImages.LOCAL_AND_REGISTRY) == len(image_statuses):
+    if (ToolImages.NOT_AVAILABLE in image_statuses) or (ToolImages.REGISTRY_ONLY in image_statuses):
+        stderr.print("The installation failed.")
+    else:
         stdout.print("The [yellow]" + dev_env.name + "[/] Development Environment is ready!")
         derserialized_local_dev_nev = dev_env_local_setup.get_deserialized()
         data_management.write_deserialized_dev_env_json(derserialized_local_dev_nev)
-    else:
-        stderr.print("The installation failed.")

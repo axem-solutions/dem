@@ -295,7 +295,7 @@ def test_execute(mock_read_deserialized_dev_env_json, mock_DevEnvLocalSetup, moc
     fake_dev_env.name = expected_dev_env_name
     mock_create_dev_env.return_value = fake_dev_env
 
-    image_statuses = [ToolImages.LOCAL_AND_REGISTRY] * 5
+    image_statuses = [ToolImages.LOCAL_AND_REGISTRY, ToolImages.LOCAL_ONLY] * 2
     fake_dev_env.check_image_availability.return_value = image_statuses
 
     fake_dev_env_local_setup.get_deserialized.return_value = fake_deserialized_local_dev_env
