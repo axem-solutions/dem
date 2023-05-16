@@ -126,20 +126,98 @@ def test_get_dev_env_descriptor_from_user(mock_get_tool_images, mock_ToolImageMe
     }
     assert expected_dev_env_descriptor == actual_dev_env_descriptor
 
-@patch("dem.cli.command.create_cmd.data_management.write_deserialized_dev_env_json")
+def test_overwrite_existing_dev_env():
+    # Test setup
+    fake_original_dev_env = MagicMock()
+    fake_original_dev_env.tools = MagicMock()
+
+    fake_tools = MagicMock()
+    fake_new_dev_env_descriptor = {
+        "tools": fake_tools
+    }
+
+    # Run unit under test
+    create_cmd.overwrite_existing_dev_env(fake_original_dev_env, fake_new_dev_env_descriptor)
+
+    # Check expectations
+    assert fake_original_dev_env.tools == fake_tools
+
 @patch("dem.cli.command.create_cmd.DevEnvLocal")
+def test_create_new_dev_env(mock_DevEnvLocal):
+    # Test setup
+    fake_new_dev_env = MagicMock()
+    mock_DevEnvLocal.return_value = fake_new_dev_env
+
+    fake_dev_env_local_setup = MagicMock()
+    fake_new_dev_env_descriptor = MagicMock()
+
+    # Run unit under test
+    actual_new_dev_env = create_cmd.create_new_dev_env(fake_dev_env_local_setup, 
+                                                       fake_new_dev_env_descriptor)
+
+    # Check expectations
+    assert actual_new_dev_env == fake_new_dev_env
+    mock_DevEnvLocal.assert_called_once_with(fake_new_dev_env_descriptor)
+    fake_dev_env_local_setup.dev_envs.append.assert_called_once_with(fake_new_dev_env)
+
+@patch("dem.cli.command.create_cmd.stdout.print")
+@patch("dem.cli.command.create_cmd.ContainerEngine")
+def test_pull_registry_only_images(mock_ContainerEngine, mock_stdout_print):
+    # Test setup
+    fake_container_engine = MagicMock()
+    mock_ContainerEngine.return_value = fake_container_engine
+
+    fake_new_dev_env = MagicMock()
+    fake_new_dev_env.tools = [
+        {
+            "image_status": ToolImages.REGISTRY_ONLY,
+            "image_name": "registry_only_image",
+            "image_version": "latest"
+        },
+        {
+            "image_status": ToolImages.LOCAL_ONLY,
+            "image_name": "local_only_image",
+            "image_version": "latest"
+        },
+        {
+            "image_status": ToolImages.LOCAL_AND_REGISTRY,
+            "image_name": "local_and_registry_image",
+            "image_version": "latest"
+        }
+    ]
+
+    # Run unit under test
+    create_cmd.pull_registry_only_images(fake_new_dev_env)
+
+    # Check expectations
+    expected_image_to_pull = fake_new_dev_env.tools[0]["image_name"] + ':' + fake_new_dev_env.tools[0]["image_version"]
+    mock_stdout_print.assert_called_once_with("Pulling image: " + expected_image_to_pull)
+    fake_container_engine.pull.assert_called_once_with(expected_image_to_pull)
+
+@patch("dem.cli.command.create_cmd.data_management.write_deserialized_dev_env_json")
+@patch("dem.cli.command.create_cmd.pull_registry_only_images")
+@patch("dem.cli.command.create_cmd.create_new_dev_env")
 @patch("dem.cli.command.create_cmd.get_dev_env_descriptor_from_user")
 @patch("dem.cli.command.create_cmd.DevEnvLocalSetup")
 @patch("dem.cli.command.create_cmd.data_management.read_deserialized_dev_env_json")
-def test_execute_dev_env_creation(mock_read_deserialized_dev_env_json, mock_DevEnvLocalSetup,
-                                  mock_get_dev_env_descriptor_from_user,
-                                  mock_DevEnvLocal, mock_write_deserialized_dev_env_json):
+def test_execute_create_new_dev_env(mock_read_deserialized_dev_env_json, mock_DevEnvLocalSetup,
+                                    mock_get_dev_env_descriptor_from_user,
+                                    mock_create_new_dev_env,
+                                    mock_pull_registry_only_images,
+                                    mock_write_deserialized_dev_env_json):
     # Test setup
     fake_deserialized_local_dev_env = MagicMock()
     mock_read_deserialized_dev_env_json.return_value = fake_deserialized_local_dev_env
     fake_dev_env_local_setup = MagicMock()
     mock_DevEnvLocalSetup.return_value = fake_dev_env_local_setup
     fake_dev_env_local_setup.get_dev_env_by_name.return_value = None
+
+    fake_new_dev_env = MagicMock()
+    mock_create_new_dev_env.return_value = fake_new_dev_env
+
+    image_statuses = [ToolImages.LOCAL_AND_REGISTRY] * 5
+    fake_new_dev_env.check_image_availability.return_value = image_statuses
+
     fake_dev_env_descriptor = MagicMock()
     mock_get_dev_env_descriptor_from_user.return_value = fake_dev_env_descriptor
     fake_dev_env_local_setup.get_deserialized.return_value = fake_deserialized_local_dev_env
@@ -155,11 +233,17 @@ def test_execute_dev_env_creation(mock_read_deserialized_dev_env_json, mock_DevE
     mock_DevEnvLocalSetup.assert_called_once_with(fake_deserialized_local_dev_env)
     fake_dev_env_local_setup.get_dev_env_by_name.assert_called_once_with(expected_dev_env_name)
     mock_get_dev_env_descriptor_from_user.assert_called_once_with(expected_dev_env_name)
-    mock_DevEnvLocal.assert_called_once_with(fake_dev_env_descriptor)
+    mock_create_new_dev_env.assert_called_once_with(fake_dev_env_local_setup, fake_dev_env_descriptor)
+    calls = [call(fake_dev_env_local_setup.tool_images), 
+             call(fake_dev_env_local_setup.tool_images, update_tool_images=True)]
+    fake_new_dev_env.check_image_availability.assert_has_calls = calls
+    mock_pull_registry_only_images.assert_called_once_with(fake_new_dev_env)
     fake_dev_env_local_setup.get_deserialized.assert_called_once()
     mock_write_deserialized_dev_env_json.assert_called_once_with(fake_deserialized_local_dev_env)
 
 @patch("dem.cli.command.create_cmd.data_management.write_deserialized_dev_env_json")
+@patch("dem.cli.command.create_cmd.pull_registry_only_images")
+@patch("dem.cli.command.create_cmd.overwrite_existing_dev_env")
 @patch("dem.cli.command.create_cmd.get_dev_env_descriptor_from_user")
 @patch("dem.cli.command.create_cmd.typer.confirm")
 @patch("dem.cli.command.create_cmd.DevEnvLocalSetup")
@@ -167,6 +251,8 @@ def test_execute_dev_env_creation(mock_read_deserialized_dev_env_json, mock_DevE
 def test_execute_dev_env_overwrite(mock_read_deserialized_dev_env_json, mock_DevEnvLocalSetup,
                                    mock_confirm,
                                    mock_get_dev_env_descriptor_from_user,
+                                   mock_overwrite_existing_dev_env,
+                                   mock_pull_registry_only_images,
                                    mock_write_deserialized_dev_env_json):
     # Test setup
     fake_deserialized_local_dev_env = MagicMock()
@@ -180,6 +266,10 @@ def test_execute_dev_env_overwrite(mock_read_deserialized_dev_env_json, mock_Dev
         "tools": fake_tools
     }
     mock_get_dev_env_descriptor_from_user.return_value = fake_dev_env_descriptor
+
+    image_statuses = [ToolImages.LOCAL_AND_REGISTRY] * 5
+    fake_dev_env_original.check_image_availability.return_value = image_statuses
+
     fake_dev_env_local_setup.get_deserialized.return_value = fake_deserialized_local_dev_env
     expected_dev_env_name = "test_dev_env"
 
@@ -195,7 +285,11 @@ def test_execute_dev_env_overwrite(mock_read_deserialized_dev_env_json, mock_Dev
     mock_confirm.assert_called_once_with("The input name is already used by a Development Environment. Overwrite it?",
                                          abort=True)
     mock_get_dev_env_descriptor_from_user.assert_called_once_with(expected_dev_env_name)
-    assert fake_dev_env_original.tools == fake_tools
+    mock_overwrite_existing_dev_env.assert_called_once_with(fake_dev_env_original, fake_dev_env_descriptor)
+    calls = [call(fake_dev_env_local_setup.tool_images), 
+             call(fake_dev_env_local_setup.tool_images, update_tool_images=True)]
+    fake_dev_env_original.check_image_availability.assert_has_calls = calls
+    mock_pull_registry_only_images.assert_called_once_with(fake_dev_env_original)
     fake_dev_env_local_setup.get_deserialized.assert_called_once()
     mock_write_deserialized_dev_env_json.assert_called_once_with(fake_deserialized_local_dev_env)
 
@@ -225,3 +319,47 @@ def test_execute_abort(mock_read_deserialized_dev_env_json, mock_DevEnvLocalSetu
     mock_confirm.assert_called_once_with("The input name is already used by a Development Environment. Overwrite it?",
                                          abort=True)
     mock_get_dev_env_descriptor_from_user.assert_not_called()
+
+@patch("dem.cli.command.create_cmd.stderr.print")
+@patch("dem.cli.command.create_cmd.pull_registry_only_images")
+@patch("dem.cli.command.create_cmd.create_new_dev_env")
+@patch("dem.cli.command.create_cmd.get_dev_env_descriptor_from_user")
+@patch("dem.cli.command.create_cmd.DevEnvLocalSetup")
+@patch("dem.cli.command.create_cmd.data_management.read_deserialized_dev_env_json")
+def test_execute_create_installation_failed(mock_read_deserialized_dev_env_json, mock_DevEnvLocalSetup,
+                                            mock_get_dev_env_descriptor_from_user,
+                                            mock_create_new_dev_env,
+                                            mock_pull_registry_only_images, mock_stderr_print):
+    # Test setup
+    fake_deserialized_local_dev_env = MagicMock()
+    mock_read_deserialized_dev_env_json.return_value = fake_deserialized_local_dev_env
+    fake_dev_env_local_setup = MagicMock()
+    mock_DevEnvLocalSetup.return_value = fake_dev_env_local_setup
+    fake_dev_env_local_setup.get_dev_env_by_name.return_value = None
+
+    fake_new_dev_env = MagicMock()
+    mock_create_new_dev_env.return_value = fake_new_dev_env
+
+    image_statuses = [ToolImages.NOT_AVAILABLE] * 5
+    fake_new_dev_env.check_image_availability.return_value = image_statuses
+
+    fake_dev_env_descriptor = MagicMock()
+    mock_get_dev_env_descriptor_from_user.return_value = fake_dev_env_descriptor
+    expected_dev_env_name = "test_dev_env"
+
+    # Run unit under test
+    runner_result = runner.invoke(main.typer_cli, ["create", expected_dev_env_name], color=True)
+
+    # Check expectations
+    assert 0 == runner_result.exit_code
+
+    mock_read_deserialized_dev_env_json.assert_called_once()
+    mock_DevEnvLocalSetup.assert_called_once_with(fake_deserialized_local_dev_env)
+    fake_dev_env_local_setup.get_dev_env_by_name.assert_called_once_with(expected_dev_env_name)
+    mock_get_dev_env_descriptor_from_user.assert_called_once_with(expected_dev_env_name)
+    mock_create_new_dev_env.assert_called_once_with(fake_dev_env_local_setup, fake_dev_env_descriptor)
+    calls = [call(fake_dev_env_local_setup.tool_images), 
+             call(fake_dev_env_local_setup.tool_images, update_tool_images=True)]
+    fake_new_dev_env.check_image_availability.assert_has_calls = calls
+    mock_pull_registry_only_images.assert_called_once_with(fake_new_dev_env)
+    mock_stderr_print.assert_called_once_with("The installation failed.")
