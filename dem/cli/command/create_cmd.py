@@ -64,9 +64,7 @@ def pull_registry_only_images(new_dev_env: DevEnvLocal) -> None:
             stdout.print("Pulling image: " + image_to_pull)
             container_engine.pull(image_to_pull)
 
-def execute(dev_env_name: str) -> None:
-    derserialized_local_dev_nev = data_management.read_deserialized_dev_env_json()
-    dev_env_local_setup = DevEnvLocalSetup(derserialized_local_dev_nev)
+def create_dev_env(dev_env_local_setup: DevEnvLocalSetup, dev_env_name: str) -> DevEnvLocal:
     dev_env_original = dev_env_local_setup.get_dev_env_by_name(dev_env_name)
     if dev_env_original is not None:
         typer.confirm("The input name is already used by a Development Environment. Overwrite it?", 
@@ -82,12 +80,21 @@ def execute(dev_env_name: str) -> None:
 
     new_dev_env.check_image_availability(dev_env_local_setup.tool_images)
     pull_registry_only_images(new_dev_env)
-    # Check image availability again.
-    image_statuses = new_dev_env.check_image_availability(dev_env_local_setup.tool_images, 
-                                                            update_tool_images=True)
+
+    return new_dev_env
+
+def execute(dev_env_name: str) -> None:
+    derserialized_local_dev_nev = data_management.read_deserialized_dev_env_json()
+    dev_env_local_setup = DevEnvLocalSetup(derserialized_local_dev_nev)
+
+    dev_env = create_dev_env(dev_env_local_setup, dev_env_name)
+
+    # Validate the Dev Env creation
+    image_statuses = dev_env.check_image_availability(dev_env_local_setup.tool_images, 
+                                                      update_tool_images=True)
 
     if image_statuses.count(ToolImages.LOCAL_AND_REGISTRY) == len(image_statuses):
-        stdout.print("The [yellow]" + new_dev_env.name + "[/] Development Environment is ready!")
+        stdout.print("The [yellow]" + dev_env.name + "[/] Development Environment is ready!")
         derserialized_local_dev_nev = dev_env_local_setup.get_deserialized()
         data_management.write_deserialized_dev_env_json(derserialized_local_dev_nev)
     else:
