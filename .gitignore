@@ -9,6 +9,7 @@
 *.map
 *.lst
 *__pycache__
+poetry.lock
 build/
 .vscode/
 dist/
