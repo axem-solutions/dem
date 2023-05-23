@@ -2,7 +2,6 @@
 # dem/cli/command/create_cmd.py
 
 import typer
-import dem.core.data_management as data_management
 from dem.core.dev_env_setup import DevEnv, DevEnvLocal, DevEnvLocalSetup
 from dem.core.container_engine import ContainerEngine
 from dem.core.tool_images import ToolImages
@@ -84,9 +83,7 @@ def create_dev_env(dev_env_local_setup: DevEnvLocalSetup, dev_env_name: str) -> 
     return new_dev_env
 
 def execute(dev_env_name: str) -> None:
-    derserialized_local_dev_nev = data_management.read_deserialized_dev_env_json()
-    dev_env_local_setup = DevEnvLocalSetup(derserialized_local_dev_nev)
-
+    dev_env_local_setup = DevEnvLocalSetup()
     dev_env = create_dev_env(dev_env_local_setup, dev_env_name)
 
     # Validate the Dev Env creation
@@ -97,5 +94,4 @@ def execute(dev_env_name: str) -> None:
         stderr.print("The installation failed.")
     else:
         stdout.print("The [yellow]" + dev_env.name + "[/] Development Environment is ready!")
-        derserialized_local_dev_nev = dev_env_local_setup.get_deserialized()
-        data_management.write_deserialized_dev_env_json(derserialized_local_dev_nev)
+        dev_env_local_setup.update_json()

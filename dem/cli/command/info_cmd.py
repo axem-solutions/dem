@@ -1,7 +1,6 @@
 """info CLI command implementation."""
 # dem/cli/command/info_cmd.py
 
-from dem.core import data_management
 from dem.core.tool_images import ToolImages
 from dem.core.dev_env_setup import DevEnvLocal, DevEnvOrg, DevEnvLocalSetup, DevEnvOrgSetup
 from dem.cli.console import stdout, stderr
@@ -25,13 +24,11 @@ def print_info(dev_env: (DevEnvLocal | DevEnvOrg)) -> None:
     stdout.print(tool_info_table)
 
 def execute(arg_dev_env_name: str) -> None:
-    dev_env_json_deserialized = data_management.read_deserialized_dev_env_json()
-    dev_env_setup = DevEnvLocalSetup(dev_env_json_deserialized)
+    dev_env_setup = DevEnvLocalSetup()
     dev_env = dev_env_setup.get_dev_env_by_name(arg_dev_env_name)
 
     if dev_env is None:
-        dev_env_json_deserialized = data_management.read_deserialized_dev_env_org_json()
-        dev_env_setup = DevEnvOrgSetup(dev_env_json_deserialized)
+        dev_env_setup = DevEnvOrgSetup()
         dev_env = dev_env_setup.get_dev_env_by_name(arg_dev_env_name)
 
     if dev_env is None:

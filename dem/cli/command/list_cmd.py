@@ -64,14 +64,12 @@ def get_dev_env_status(dev_env: (dev_env_setup.DevEnvLocal | dev_env_setup.DevEn
 def list_dev_envs(local: bool, org: bool)-> None:
     dev_env_setup_obj = None
     if ((local == True) and (org == False)):
-        dev_env_json_deserialized = data_management.read_deserialized_dev_env_json()
-        dev_env_setup_obj = dev_env_setup.DevEnvLocalSetup(dev_env_json_deserialized)
+        dev_env_setup_obj = dev_env_setup.DevEnvLocalSetup()
         if not dev_env_setup_obj.dev_envs:
             stdout.print("[yellow]No installed Development Environments.[/]")
             return
     elif((local == False) and (org == True)):
-        dev_env_org_json_deserialized = data_management.read_deserialized_dev_env_org_json()
-        dev_env_setup_obj = dev_env_setup.DevEnvOrgSetup(dev_env_org_json_deserialized)
+        dev_env_setup_obj = dev_env_setup.DevEnvOrgSetup()
         if not dev_env_setup_obj.dev_envs:
             stdout.print("[yellow]No Development Environment in your organization.[/]")
             return

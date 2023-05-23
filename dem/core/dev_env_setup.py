@@ -4,6 +4,7 @@
 from dem.core.exceptions import InvalidDevEnvJson
 from dem.core.properties import __supported_dev_env_major_version__
 from dem.core.tool_images import ToolImages
+from dem.core.data_management import LocalDevEnvJSON, OrgDevEnvJSON
 
 class DevEnv:
     """ A Development Environment."""
@@ -146,7 +147,7 @@ class DevEnvLocal(DevEnv):
             self.tools = dev_env_org.tools
 
 class DevEnvLocalSetup(DevEnvSetup):
-    def __init__(self, dev_env_json_deserialized: dict):
+    def __init__(self):
         """Store the local Development Environments.
 
         Extends the DevEnvSetup super class by populating the list of Development Environments with 
@@ -154,10 +155,14 @@ class DevEnvLocalSetup(DevEnvSetup):
         Args:
             dev_env_json_deserialized -- a deserialized representation of the dev_env.json file
         """
-        super().__init__(dev_env_json_deserialized)
+        self.json = LocalDevEnvJSON()
+        super().__init__(self.json.read())
 
-        for dev_env_descriptor in dev_env_json_deserialized["development_environments"]:
+        for dev_env_descriptor in self.json.deserialized["development_environments"]:
             self.dev_envs.append(DevEnvLocal(descriptor=dev_env_descriptor))
+    
+    def update_json(self):
+        pass
 
 class DevEnvOrg(DevEnv):
     """A Development Environment available for the organization."""
@@ -173,7 +178,7 @@ class DevEnvOrg(DevEnv):
                 return dev_env_local
 
 class DevEnvOrgSetup(DevEnvSetup):
-    def __init__(self, dev_env_json_deserialized: dict) -> None:
+    def __init__(self) -> None:
         """Store the Development Environments available for the organization.
 
         Extends the DevEnvSetup super class by populating the list of Development Environments with 
@@ -181,7 +186,8 @@ class DevEnvOrgSetup(DevEnvSetup):
         Args:
             dev_env_json_deserialized -- a deserialized representation of the dev_env_org.json file
         """
-        super().__init__(dev_env_json_deserialized)
+        self.json = OrgDevEnvJSON()
+        super().__init__(self.json.read())
 
-        for dev_env_descriptor in dev_env_json_deserialized["development_environments"]:
+        for dev_env_descriptor in self.json.deserialized["development_environments"]:
             self.dev_envs.append(DevEnvOrg(descriptor=dev_env_descriptor))

@@ -2,7 +2,7 @@
 # tests/core/test_data_management.py
 
 # Unit under test:
-from dem.core.data_management import DevEnvJSON, _empty_dev_env_json, read_deserialized_dev_env_org_json
+from dem.core.data_management import LocalDevEnvJSON, _empty_dev_env_json, read_deserialized_dev_env_org_json
 
 # Test framework
 from unittest.mock import patch, MagicMock, call
@@ -23,7 +23,7 @@ def test_dev_env_json_read(mock_json_load, mock_open):
     mock_json_load.return_value = expected_deserialized_dev_env_json
 
     # Run unit under test
-    dev_env_json = DevEnvJSON()
+    dev_env_json = LocalDevEnvJSON()
     deserialized_dev_env_json = dev_env_json.read()
 
     # Check expectations
@@ -46,7 +46,7 @@ def test_dev_env_json_read_FileNotFounderror(mock_os_makedirs, mock_os_path, moc
     mock_os_path.return_value = False
 
     # Run unit under test
-    dev_env_json = DevEnvJSON()
+    dev_env_json = LocalDevEnvJSON()
     deserialized_dev_env_json = dev_env_json.read()
    
     # Check expectations
@@ -80,7 +80,7 @@ def test_dev_env_json_write(mock_json_dump, mock_open):
     fake_dev_env_json_deserialized = MagicMock()
 
     # Run unit under test
-    dev_env_json = DevEnvJSON()
+    dev_env_json = LocalDevEnvJSON()
     dev_env_json.write(fake_dev_env_json_deserialized)
 
     # Check expectations
