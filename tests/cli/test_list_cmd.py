@@ -3,6 +3,7 @@
 
 # Unit under test:
 import dem.cli.main as main
+import dem.cli.command.list_cmd as list_cmd
 
 # Test framework
 from typer.testing import CliRunner
@@ -23,6 +24,42 @@ from dem.core.tool_images import ToolImages
 runner = CliRunner(mix_stderr=False)
 
 ## Test cases
+
+@patch("dem.cli.command.list_cmd.dev_env_setup.DevEnvLocalSetup")
+def test_is_dev_env_org_installed_locally_true(mock_DevEnvLocalSetup):
+    # Test setup
+    fake_dev_env_local_setup = MagicMock()
+    mock_DevEnvLocalSetup.return_value = fake_dev_env_local_setup
+
+    fake_dev_env_org = MagicMock()
+    fake_dev_env_org.get_local_instance.return_value = MagicMock()
+
+    # Run unit under test
+    actual_is_installed = list_cmd.is_dev_env_org_installed_locally(fake_dev_env_org)
+
+    # Check expectations
+    assert actual_is_installed is True
+
+    mock_DevEnvLocalSetup.assert_called_once()
+    fake_dev_env_org.get_local_instance.assert_called_once_with(fake_dev_env_local_setup)
+
+@patch("dem.cli.command.list_cmd.dev_env_setup.DevEnvLocalSetup")
+def test_is_dev_env_org_installed_locally_false(mock_DevEnvLocalSetup):
+    # Test setup
+    fake_dev_env_local_setup = MagicMock()
+    mock_DevEnvLocalSetup.return_value = fake_dev_env_local_setup
+
+    fake_dev_env_org = MagicMock()
+    fake_dev_env_org.get_local_instance.return_value = None
+
+    # Run unit under test
+    actual_is_installed = list_cmd.is_dev_env_org_installed_locally(fake_dev_env_org)
+
+    # Check expectations
+    assert actual_is_installed is False
+
+    mock_DevEnvLocalSetup.assert_called_once()
+    fake_dev_env_org.get_local_instance.assert_called_once_with(fake_dev_env_local_setup)
 
 ## Test listing the local dev envs.
 

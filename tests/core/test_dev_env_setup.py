@@ -13,20 +13,35 @@ import json
 from dem.core.exceptions import InvalidDevEnvJson
 from dem.core.tool_images import ToolImages
 
-def test_dev_env_json_with_invalid_tool_type_expect_error():
-    excepted_error_message = "Error in dev_env.json: The following tool type is not supported: build_system" 
+@patch("dem.core.dev_env_setup.LocalDevEnvJSON")
+def test_dev_env_json_with_invalid_tool_type_expect_error(mock_LocalDevEnvJSON):
+    # Test setup
+    fake_json = MagicMock()
+    mock_LocalDevEnvJSON.return_value = fake_json
+    fake_json.read.return_value = json.loads(fake_data.invalid_dev_env_json)
 
     with pytest.raises(InvalidDevEnvJson) as exported_exception_info:
-        invaid_deserialized_dev_env_json = json.loads(fake_data.invalid_dev_env_json)
-        dev_env_setup.DevEnvLocalSetup(invaid_deserialized_dev_env_json)
+        # Run unit under test
+        dev_env_setup.DevEnvLocalSetup()
+
+        # Check expectations
+        excepted_error_message = "Error in dev_env.json: The following tool type is not supported: build_system" 
         assert str(exported_exception_info.value) == excepted_error_message
 
 @patch("dem.core.dev_env_setup.__supported_dev_env_major_version__", 0)
-def test_dev_env_json_with_invalid_version_expect_error():
-    excepted_error_message = "Error in dev_env.json: The dev_env.json version v1.0 is not supported."
+@patch("dem.core.dev_env_setup.LocalDevEnvJSON")
+def test_dev_env_json_with_invalid_version_expect_error(mock_LocalDevEnvJSON):
+    # Test setup
+    fake_json = MagicMock()
+    mock_LocalDevEnvJSON.return_value = fake_json
+    fake_json.read.return_value = json.loads(fake_data.invalid_version_dev_env_json)
 
     with pytest.raises(InvalidDevEnvJson) as exported_exception_info:
-        dev_env_setup.DevEnvLocalSetup(json.loads(fake_data.invalid_version_dev_env_json))
+        # Run unit under test
+        dev_env_setup.DevEnvLocalSetup()
+
+        # Check expectations
+        excepted_error_message = "Error in dev_env.json: The dev_env.json version v1.0 is not supported."
         assert str(exported_exception_info.value) == excepted_error_message
 
 @patch("dem.core.dev_env_setup.__supported_dev_env_major_version__", 0)

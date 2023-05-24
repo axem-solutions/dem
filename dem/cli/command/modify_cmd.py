@@ -2,7 +2,6 @@
 # dem/cli/command/modify_cmd
 
 import copy, typer
-import dem.core.data_management as data_management
 from dem.core.dev_env_setup import DevEnvLocalSetup, DevEnvLocal, DevEnv
 from dem.cli.console import stderr
 from dem.cli.menu import ToolTypeMenu, ToolImageMenu, SelectMenu
@@ -69,13 +68,14 @@ def handle_user_confirm(confirmation: str, dev_env_local: DevEnvLocal,
         new_dev_env = copy.deepcopy(dev_env_local)
         new_dev_env.name = typer.prompt("Name of the new Development Environment")
         dev_env_local_setup.dev_envs.append(new_dev_env)
-    deserialized_local_dev_nev = dev_env_local_setup.get_deserialized()
-    data_management.write_deserialized_dev_env_json(deserialized_local_dev_nev)
+
+    # Update the json file if the user confirms or saves as a new Dev Env.
+    dev_env_local_setup.update_json()
 
 def execute(dev_env_name: str) -> None:
-    deserialized_local_dev_nev = data_management.read_deserialized_dev_env_json()
-    dev_env_local_setup = DevEnvLocalSetup(deserialized_local_dev_nev)
+    dev_env_local_setup = DevEnvLocalSetup()
     dev_env_local = dev_env_local_setup.get_dev_env_by_name(dev_env_name)
+
     if dev_env_local is None:
         stderr.print("[red]The Development Environment doesn't exist.")
     else:
