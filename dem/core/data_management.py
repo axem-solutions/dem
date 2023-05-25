@@ -5,8 +5,6 @@ from pathlib import PurePath
 import os
 import json, requests
 
-# Local dev_env.json
-
 _empty_dev_env_json = """
 {
     "version": "0.1",
@@ -33,8 +31,7 @@ class LocalDevEnvJSON():
 
     def __init__(self) -> None:
         """ Init the class with an empty placeholder for the deserialized dev_env.json file. 
-            Later the variable can be to access the deserialized data, until the dev_env.json file 
-            changes. 
+            Later this variable can be used to access the deserialized data. 
         """
         self.deserialized = None
 
@@ -63,16 +60,15 @@ class LocalDevEnvJSON():
         dev_env_json.close()
 
 class OrgDevEnvJSON():
+    """ Deserialize the dev_env_org.json file."""
     def __init__(self) -> None:
+        """ Init the class with an empty placeholder for the deserialized dev_env_org.json file. 
+            Later this variable can be used to access the deserialized data. 
+        """
         self.deserialized = None
 
     def read(self) -> dict:
+        """ Read the deserialized dev_env_org.json from the axemsolutions domain."""
         response = requests.get("https://axemsolutions.io/dem/dev_env_org.json")
         self.deserialized = response.json()
         return self.deserialized
-
-# Organization specific dev_env_org.json
-
-def read_deserialized_dev_env_org_json():
-    response = requests.get("https://axemsolutions.io/dem/dev_env_org.json")
-    return response.json()

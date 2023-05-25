@@ -125,3 +125,23 @@ def test_check_image_availability_without_update(mock_LocalDevEnvJSON):
 @patch("dem.core.dev_env_setup.LocalDevEnvJSON")
 def test_check_image_availability_with_update(mock_LocalDevEnvJSON):
     common_test_check_image_availability(mock_LocalDevEnvJSON, True)
+
+@patch("dem.core.dev_env_setup.LocalDevEnvJSON")
+def test_DevEnvLocalSetup_update_json(mock_LocalDevEnvJSON):
+    # Test setup
+    fake_json = MagicMock()
+    mock_LocalDevEnvJSON.return_value = fake_json
+    fake_json.read.return_value = json.loads(fake_data.dev_env_json)
+    fake_json.deserialized = fake_json.read.return_value
+
+    test_dev_env_local_setup = dev_env_setup.DevEnvLocalSetup()
+    test_new_name = "new name"
+    test_dev_env_local_setup.dev_envs[0].name = test_new_name
+    expected_deserialized_json = fake_json.deserialized
+    expected_deserialized_json["development_environments"][0]["name"] = test_new_name
+
+    # Run unit under test
+    test_dev_env_local_setup.update_json()
+
+    # Check expectations
+    test_dev_env_local_setup.json.write.assert_called_once_with(expected_deserialized_json)
