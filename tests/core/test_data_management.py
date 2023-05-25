@@ -2,7 +2,7 @@
 # tests/core/test_data_management.py
 
 # Unit under test:
-from dem.core.data_management import LocalDevEnvJSON, _empty_dev_env_json, read_deserialized_dev_env_org_json
+from dem.core.data_management import LocalDevEnvJSON, OrgDevEnvJSON, _empty_dev_env_json
 
 # Test framework
 from unittest.mock import patch, MagicMock, call
@@ -54,7 +54,6 @@ def test_dev_env_json_read_FileNotFounderror(mock_os_makedirs, mock_os_path, moc
         call(PurePath(os.path.expanduser('~') + "/.config/axem/dev_env.json"), "r"),
         call(PurePath(os.path.expanduser('~') + "/.config/axem/dev_env.json"), "w"),
     ]
-    
 
     mock_open.assert_has_calls(calls)
     
@@ -67,9 +66,6 @@ def test_dev_env_json_read_FileNotFounderror(mock_os_makedirs, mock_os_path, moc
     mock_json_loads.assert_called_once_with(_empty_dev_env_json)
 
     assert deserialized_dev_env_json is expected_deserialized_dev_env_json
-
-
-
 
 @patch("dem.core.data_management.open")
 @patch("dem.core.data_management.json.dump")
@@ -94,11 +90,13 @@ def test_read_deserialized_dev_env_org_json(mock_requests_get):
     # Test setup
     fake_response = MagicMock()
     mock_requests_get.return_value = fake_response
-    expected_json = "dummy_json"
+    expected_json = MagicMock()
     fake_response.json.return_value = expected_json
 
     # Run unit under test
-    actual_json = read_deserialized_dev_env_org_json()
+    org_dev_env_json = OrgDevEnvJSON()
+    actual_json = org_dev_env_json.read()
 
     # Check expectations
     assert expected_json == actual_json
+    assert expected_json == org_dev_env_json.deserialized

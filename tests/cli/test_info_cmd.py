@@ -34,10 +34,8 @@ def get_expected_table(expected_tools: list[list[str]]) ->str:
 ## Test cases
 
 @patch("dem.cli.command.info_cmd.DevEnvLocalSetup")
-@patch("dem.cli.command.info_cmd.data_management.read_deserialized_dev_env_org_json")
 @patch("dem.cli.command.info_cmd.DevEnvOrgSetup")
-def test_info_local_dev_env_demo(mock_DevEnvOrgSetup, mock_read_deserialized_dev_env_org_json,
-                                 mock_DevEnvLocalSetup):
+def test_info_local_dev_env_demo(mock_DevEnvOrgSetup, mock_DevEnvLocalSetup):
     # Test setup
     fake_dev_env_local_setup = MagicMock()
     mock_DevEnvLocalSetup.return_value = fake_dev_env_local_setup
@@ -83,7 +81,6 @@ def test_info_local_dev_env_demo(mock_DevEnvOrgSetup, mock_read_deserialized_dev
     assert runner_result.exit_code == 0
 
     mock_DevEnvLocalSetup.assert_called_once()
-    mock_read_deserialized_dev_env_org_json.assert_not_called()
     mock_DevEnvOrgSetup.assert_not_called()
     fake_dev_env_local_setup.get_dev_env_by_name.assert_called_once_with(test_dev_env_name)
     fake_dev_env.check_image_availability.assert_called_once_with(fake_dev_env_local_setup.tool_images)
@@ -98,11 +95,8 @@ def test_info_local_dev_env_demo(mock_DevEnvOrgSetup, mock_read_deserialized_dev
     assert get_expected_table(expected_tools)  == runner_result.stdout
 
 @patch("dem.cli.command.info_cmd.DevEnvLocalSetup")
-@patch("dem.cli.command.info_cmd.data_management.read_deserialized_dev_env_org_json")
 @patch("dem.cli.command.info_cmd.DevEnvOrgSetup")
-def test_info_local_dev_env_nagy_cica_project(mock_DevEnvOrgSetup, 
-                                              mock_read_deserialized_dev_env_org_json,
-                                              mock_DevEnvLocalSetup):
+def test_info_local_dev_env_nagy_cica_project(mock_DevEnvOrgSetup, mock_DevEnvLocalSetup):
     # Test setup
     fake_dev_env_local_setup = MagicMock()
     mock_DevEnvLocalSetup.return_value = fake_dev_env_local_setup
@@ -151,7 +145,6 @@ def test_info_local_dev_env_nagy_cica_project(mock_DevEnvOrgSetup,
     assert runner_result.exit_code == 0
 
     mock_DevEnvLocalSetup.assert_called_once()
-    mock_read_deserialized_dev_env_org_json.assert_not_called()
     mock_DevEnvOrgSetup.assert_not_called()
     fake_dev_env_local_setup.get_dev_env_by_name.assert_called_once_with(test_dev_env_name)
     fake_dev_env.check_image_availability.assert_called_once_with(fake_dev_env_local_setup.tool_images)

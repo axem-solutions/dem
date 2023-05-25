@@ -19,6 +19,7 @@ def test_dev_env_json_with_invalid_tool_type_expect_error(mock_LocalDevEnvJSON):
     fake_json = MagicMock()
     mock_LocalDevEnvJSON.return_value = fake_json
     fake_json.read.return_value = json.loads(fake_data.invalid_dev_env_json)
+    fake_json.deserialized = fake_json.read.return_value
 
     with pytest.raises(InvalidDevEnvJson) as exported_exception_info:
         # Run unit under test
@@ -35,6 +36,7 @@ def test_dev_env_json_with_invalid_version_expect_error(mock_LocalDevEnvJSON):
     fake_json = MagicMock()
     mock_LocalDevEnvJSON.return_value = fake_json
     fake_json.read.return_value = json.loads(fake_data.invalid_version_dev_env_json)
+    fake_json.deserialized = fake_json.read.return_value
 
     with pytest.raises(InvalidDevEnvJson) as exported_exception_info:
         # Run unit under test
@@ -45,8 +47,16 @@ def test_dev_env_json_with_invalid_version_expect_error(mock_LocalDevEnvJSON):
         assert str(exported_exception_info.value) == excepted_error_message
 
 @patch("dem.core.dev_env_setup.__supported_dev_env_major_version__", 0)
-def test_valid_dev_env_json_expect_no_error():
-    dev_env_setup.DevEnvLocalSetup(json.loads(fake_data.dev_env_json))
+@patch("dem.core.dev_env_setup.LocalDevEnvJSON")
+def test_valid_dev_env_json_expect_no_error(mock_LocalDevEnvJSON):
+    # Test setup
+    fake_json = MagicMock()
+    mock_LocalDevEnvJSON.return_value = fake_json
+    fake_json.read.return_value = json.loads(fake_data.dev_env_json)
+    fake_json.deserialized = fake_json.read.return_value
+
+    # Run unit under test
+    dev_env_setup.DevEnvLocalSetup()
 
 def test_get_dev_env_by_name_match():
     # Test setup
@@ -72,9 +82,14 @@ def test_get_dev_env_by_name_no_match():
     # Check expectations
     assert actual_dev_env is None
 
-def common_test_check_image_availability(with_update: bool) -> None:
+def common_test_check_image_availability(mock_LocalDevEnvJSON: MagicMock, with_update: bool) -> None:
     # Test setup
-    test_dev_env_setup = dev_env_setup.DevEnvLocalSetup(json.loads(fake_data.dev_env_json))
+    fake_json = MagicMock()
+    mock_LocalDevEnvJSON.return_value = fake_json
+    fake_json.read.return_value = json.loads(fake_data.dev_env_json)
+    fake_json.deserialized = fake_json.read.return_value
+
+    test_dev_env_setup = dev_env_setup.DevEnvLocalSetup()
     test_dev_env = test_dev_env_setup.get_dev_env_by_name("demo")
     fake_tool_images = MagicMock(spec=ToolImages)
     fake_tool_images.elements = {
@@ -103,8 +118,10 @@ def common_test_check_image_availability(with_update: bool) -> None:
     for idx, tool in enumerate(test_dev_env.tools):
         assert tool["image_status"] == expected_image_statuses[idx]
 
-def test_check_image_availability_without_update():
-    common_test_check_image_availability(False)
+@patch("dem.core.dev_env_setup.LocalDevEnvJSON")
+def test_check_image_availability_without_update(mock_LocalDevEnvJSON):
+    common_test_check_image_availability(mock_LocalDevEnvJSON, False)
 
-def test_check_image_availability_with_update():
-    common_test_check_image_availability(True)
+@patch("dem.core.dev_env_setup.LocalDevEnvJSON")
+def test_check_image_availability_with_update(mock_LocalDevEnvJSON):
+    common_test_check_image_availability(mock_LocalDevEnvJSON, True)

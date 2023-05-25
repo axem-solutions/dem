@@ -71,14 +71,6 @@ class OrgDevEnvJSON():
         self.deserialized = response.json()
         return self.deserialized
 
-def read_deserialized_dev_env_json():
-    dev_env_json = LocalDevEnvJSON()
-    return dev_env_json.read()
-
-def write_deserialized_dev_env_json(dev_env_json_deserialized: dict) -> None:
-    dev_env_json = LocalDevEnvJSON()
-    dev_env_json.write(dev_env_json_deserialized)
-
 # Organization specific dev_env_org.json
 
 def read_deserialized_dev_env_org_json():
