@@ -3,7 +3,6 @@
 
 import typer
 from dem.core.dev_env_setup import DevEnv, DevEnvLocal, DevEnvLocalSetup
-from dem.core.container_engine import ContainerEngine
 from dem.core.tool_images import ToolImages
 from dem.cli.menu import ToolTypeMenu, ToolImageMenu
 from dem.cli.console import stdout, stderr
@@ -50,19 +49,6 @@ def create_new_dev_env(dev_env_local_setup: DevEnvLocalSetup, new_dev_env_descri
 
     return new_dev_env
 
-def pull_registry_only_images(new_dev_env: DevEnvLocal) -> None:
-    """Pull images that are only present in the registry.
-    
-    Args:
-        new_dev_env -- the new local Dev Env instance
-    """
-    container_engine = ContainerEngine()
-    for tool in new_dev_env.tools:
-        if tool["image_status"] == ToolImages.REGISTRY_ONLY:
-            image_to_pull = tool["image_name" ] + ':' + tool["image_version"]
-            stdout.print("Pulling image: " + image_to_pull)
-            container_engine.pull(image_to_pull)
-
 def create_dev_env(dev_env_local_setup: DevEnvLocalSetup, dev_env_name: str) -> DevEnvLocal:
     dev_env_original = dev_env_local_setup.get_dev_env_by_name(dev_env_name)
     if dev_env_original is not None:
@@ -78,7 +64,7 @@ def create_dev_env(dev_env_local_setup: DevEnvLocalSetup, dev_env_name: str) -> 
         new_dev_env = create_new_dev_env(dev_env_local_setup, new_dev_env_descriptor)
 
     new_dev_env.check_image_availability(dev_env_local_setup.tool_images)
-    pull_registry_only_images(new_dev_env)
+    dev_env_local_setup.pull_images(new_dev_env.tools)
 
     return new_dev_env
 
