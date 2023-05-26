@@ -5,6 +5,7 @@ from dem.core.exceptions import InvalidDevEnvJson
 from dem.core.properties import __supported_dev_env_major_version__
 from dem.core.tool_images import ToolImages
 from dem.core.data_management import LocalDevEnvJSON, OrgDevEnvJSON
+from dem.core.container_engine import ContainerEngine
 
 class DevEnv:
     """ A Development Environment."""
@@ -152,12 +153,13 @@ class DevEnvLocal(DevEnv):
 class DevEnvLocalSetup(DevEnvSetup):
     """ The local development setup. """
     def __init__(self):
-        """Store the local Development Environments.
+        """ Store the local Development Environments.
 
         Extends the DevEnvSetup super class by populating the list of Development Environments with 
         DevEnvLocal objects.
         """
         self.json = LocalDevEnvJSON()
+        self.container_engine = ContainerEngine()
         super().__init__(self.json.read())
 
         for dev_env_descriptor in self.json.deserialized["development_environments"]:
@@ -166,6 +168,17 @@ class DevEnvLocalSetup(DevEnvSetup):
     def update_json(self):
         """ Writes the deserialized json to the dev_env.json file."""
         self.json.write(self.get_deserialized())
+
+    def pull_images(self, tools):
+        """ Pull images that are only present in the registry.
+        
+        Args:
+            tools -- the tool images to pull
+        """
+        for tool in tools:
+            if tool["image_status"] == ToolImages.REGISTRY_ONLY:
+                image_to_pull = tool["image_name" ] + ':' + tool["image_version"]
+                self.container_engine.pull(image_to_pull)
 
 class DevEnvOrg(DevEnv):
     """A Development Environment available for the organization."""

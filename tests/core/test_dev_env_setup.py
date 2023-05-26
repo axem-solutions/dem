@@ -6,7 +6,7 @@ import dem.core.dev_env_setup as dev_env_setup
 
 # Test framework
 import pytest
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch, MagicMock, call
 
 import tests.fake_data as fake_data
 import json
@@ -145,3 +145,35 @@ def test_DevEnvLocalSetup_update_json(mock_LocalDevEnvJSON):
 
     # Check expectations
     test_dev_env_local_setup.json.write.assert_called_once_with(expected_deserialized_json)
+
+@patch("dem.core.dev_env_setup.ContainerEngine")
+@patch("dem.core.dev_env_setup.LocalDevEnvJSON")
+def test_DevEnvLocalSetup_pull_images(mock_LocalDevEnvJSON, mock_ContainerEngine):
+    # Test setup
+    mock_json = MagicMock()
+    mock_LocalDevEnvJSON.return_value = mock_json
+    mock_json.read.return_value = json.loads(fake_data.dev_env_json)
+    mock_json.deserialized = mock_json.read.return_value
+
+    mock_container_engine = MagicMock()
+    mock_ContainerEngine.return_value = mock_container_engine
+
+    test_dev_env_local_setup = dev_env_setup.DevEnvLocalSetup()
+    test_dev_env = test_dev_env_local_setup.dev_envs[0]
+
+    for tool in test_dev_env.tools:
+        tool["image_status"] = ToolImages.REGISTRY_ONLY
+
+    # Run unit under test
+    test_dev_env_local_setup.pull_images(test_dev_env.tools)
+
+    # Check expectations
+    mock_LocalDevEnvJSON.assert_called_once()
+    mock_ContainerEngine.assert_called_once()
+
+    pull_calls = []
+    for tool in test_dev_env.tools:
+        test_image_to_pull = tool["image_name"] + ":" + tool["image_version"]
+        pull_calls.append(call(test_image_to_pull))
+
+    test_dev_env_local_setup.container_engine.pull.assert_has_calls(pull_calls)

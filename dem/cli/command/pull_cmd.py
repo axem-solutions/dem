@@ -2,7 +2,6 @@
 # dem/cli/command/pull_cmd.py
 
 from dem.core import dev_env_setup as dev_env_setup, \
-                     container_engine as container_engine, \
                      registry as registry
 from dem.core.tool_images import ToolImages
 from dem.cli.console import stdout, stderr
@@ -36,19 +35,6 @@ def install_to_dev_env_json(dev_env_local: dev_env_setup.DevEnvLocal,
 
     return dev_env_local
 
-def pull_registry_only_images(dev_env_local: dev_env_setup.DevEnvLocal) -> None:
-    """Pull images that are only present in the registry.
-    
-    Args:
-        dev_env_local -- local Dev Env instance
-    """
-    container_engine_obj = container_engine.ContainerEngine()
-    for tool in dev_env_local.tools:
-        if tool["image_status"] == ToolImages.REGISTRY_ONLY:
-            image_to_pull = tool["image_name" ] + ':' + tool["image_version"]
-            stdout.print("Pulling image: " + image_to_pull)
-            container_engine_obj.pull(image_to_pull)
-
 def execute(dev_env_name: str) -> None:
     # Get the organization's Dev Env if available.
     dev_env_org_setup = dev_env_setup.DevEnvOrgSetup()
@@ -63,7 +49,7 @@ def execute(dev_env_name: str) -> None:
 
     # The local Dev Env setup contains the DevEnvOrg to install. Check the images' statuses
     dev_env_local.check_image_availability(dev_env_local_setup.tool_images)
-    pull_registry_only_images(dev_env_local)
+    dev_env_local_setup.pull_images(dev_env_local.tools)
     # Check image availability again.
     image_statuses = dev_env_local.check_image_availability(dev_env_local_setup.tool_images, 
                                                             update_tool_images=True)
