@@ -13,17 +13,16 @@ tool_image_statuses = {
     ToolImages.LOCAL_AND_REGISTRY: "local and registry"
 }
 
-def get_tool_images() -> list[list[str]]:
-    tool_images = ToolImages()
+def get_tool_image_list(tool_images: ToolImages) -> list[list[str]]:
     return [[name, tool_image_statuses[status]] for name, status in tool_images.elements.items()]
 
-def get_dev_env_descriptor_from_user(dev_env_name: str) -> dict:
+def get_dev_env_descriptor_from_user(dev_env_name: str, tool_image_list: list[list[str]]) -> dict:
     tool_type_menu = ToolTypeMenu(list(DevEnv.supported_tool_types))
     # Wait until the user finishes the tool type selection.
     tool_type_menu.wait_for_user()
     selected_tool_types = tool_type_menu.get_selected_tool_types()
 
-    tool_image_menu = ToolImageMenu(get_tool_images())
+    tool_image_menu = ToolImageMenu(tool_image_list)
     dev_env_descriptor = {
         "name": dev_env_name,
         "tools": []
@@ -55,7 +54,8 @@ def create_dev_env(dev_env_local_setup: DevEnvLocalSetup, dev_env_name: str) -> 
         typer.confirm("The input name is already used by a Development Environment. Overwrite it?", 
                       abort=True)
 
-    new_dev_env_descriptor = get_dev_env_descriptor_from_user(dev_env_name)
+    tool_image_list = get_tool_image_list(dev_env_local_setup.tool_images)
+    new_dev_env_descriptor = get_dev_env_descriptor_from_user(dev_env_name, tool_image_list)
     
     if dev_env_original is not None:
         overwrite_existing_dev_env(dev_env_original, new_dev_env_descriptor)

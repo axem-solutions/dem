@@ -69,9 +69,11 @@ class DevEnvSetup:
         - The available Development Environments.
 
     Class attributes:
-        _tool_images -- the available tool images.
+        _tool_images -- the available tool images
+        container_engine -- the container engine
     """
     _tool_images = None
+    container_engine = ContainerEngine()
 
     def _dev_env_json_version_check(self) -> None:
         """Check that the dev_env.json or dev_evn_org.json file supported.
@@ -96,16 +98,19 @@ class DevEnvSetup:
 
     @classmethod
     @property
-    def tool_images(cls):
+    def tool_images(cls) -> ToolImages:
         """ Only instantiate the _tool_images when first accessed, because it is time consuming.
 
-        The decorators are needed so the tool_images can act as a class-level property.
+        The decorators are needed so the tool_images can act as a class-level property, ensuring 
+        only a single ToolImage class intance exists for every DevEnvSetup() instance. The class 
+        variable can be accessed through a getter, so the ToolImage() gets instantiated only at the 
+        first use.
 
         Args:
             cls - the class object
         """
         if cls._tool_images is None:
-            cls._tool_images = ToolImages()
+            cls._tool_images = ToolImages(cls.container_engine)
         return cls._tool_images
 
     def get_deserialized(self) -> dict:
@@ -151,15 +156,19 @@ class DevEnvLocal(DevEnv):
             self.tools = dev_env_org.tools
 
 class DevEnvLocalSetup(DevEnvSetup):
-    """ The local development setup. """
+    """ The local development setup.
+
+    Class attributes:
+        json -- deserialized json representing the local setup
+    """
+    json = LocalDevEnvJSON()
+
     def __init__(self):
         """ Store the local Development Environments.
 
         Extends the DevEnvSetup super class by populating the list of Development Environments with 
         DevEnvLocal objects.
         """
-        self.json = LocalDevEnvJSON()
-        self.container_engine = ContainerEngine()
         super().__init__(self.json.read())
 
         for dev_env_descriptor in self.json.deserialized["development_environments"]:
@@ -194,14 +203,19 @@ class DevEnvOrg(DevEnv):
                 return dev_env_local
 
 class DevEnvOrgSetup(DevEnvSetup):
-    """ The organization's development setup. The user can install Dev Envs listed in the class. """
+    """ The organization's development setup. The user can install Dev Envs listed in the class.
+
+    Class attributes:
+        json -- deserialized json representing the organization's setup 
+    """
+    json = OrgDevEnvJSON()
+
     def __init__(self) -> None:
         """Store the Development Environments available for the organization.
 
         Extends the DevEnvSetup super class by populating the list of Development Environments with 
         DevEnvOrg objects.
         """
-        self.json = OrgDevEnvJSON()
         super().__init__(self.json.read())
 
         for dev_env_descriptor in self.json.deserialized["development_environments"]:
