@@ -91,7 +91,7 @@ def _version_callback(value: bool) -> None:
     if value:
         try: 
             version = importlib.metadata.version(__app_name__)
-        except:
+        except importlib.metadata.PackageNotFoundError:
             stdout.print("[yellow]Install DEM to get the version number.[/]")
         else: 
             stdout.print("[cyan]" + __app_name__ + " v" + version + "[/]")
