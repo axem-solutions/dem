@@ -219,7 +219,7 @@ def test_create_dev_env_overwrite(mock_confirm, mock_get_tool_image_list,
     mock_confirm.assert_called_once_with("The input name is already used by a Development Environment. Overwrite it?",
                                          abort=True)
     mock_get_tool_image_list(mock_dev_env_local_setup.tool_images)
-    mock_get_dev_env_descriptor_from_user.assert_called_once_with(expected_dev_env_name, 
+    mock_get_dev_env_descriptor_from_user.assert_called_once_with(expected_dev_env_name,
                                                                   mock_tool_images)
     mock_overwrite_existing_dev_env.assert_called_once_with(mock_dev_env_original, mock_dev_env_descriptor)
     mock_dev_env_original.check_image_availability.assert_called_once_with(mock_dev_env_local_setup.tool_images)
