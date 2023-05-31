@@ -161,45 +161,9 @@ def test_create_new_dev_env(mock_DevEnvLocal):
     mock_DevEnvLocal.assert_called_once_with(fake_new_dev_env_descriptor)
     fake_dev_env_local_setup.dev_envs.append.assert_called_once_with(fake_new_dev_env)
 
-@patch("dem.cli.command.create_cmd.stdout.print")
-@patch("dem.cli.command.create_cmd.ContainerEngine")
-def test_pull_registry_only_images(mock_ContainerEngine, mock_stdout_print):
-    # Test setup
-    fake_container_engine = MagicMock()
-    mock_ContainerEngine.return_value = fake_container_engine
-
-    fake_new_dev_env = MagicMock()
-    fake_new_dev_env.tools = [
-        {
-            "image_status": ToolImages.REGISTRY_ONLY,
-            "image_name": "registry_only_image",
-            "image_version": "latest"
-        },
-        {
-            "image_status": ToolImages.LOCAL_ONLY,
-            "image_name": "local_only_image",
-            "image_version": "latest"
-        },
-        {
-            "image_status": ToolImages.LOCAL_AND_REGISTRY,
-            "image_name": "local_and_registry_image",
-            "image_version": "latest"
-        }
-    ]
-
-    # Run unit under test
-    create_cmd.pull_registry_only_images(fake_new_dev_env)
-
-    # Check expectations
-    expected_image_to_pull = fake_new_dev_env.tools[0]["image_name"] + ':' + fake_new_dev_env.tools[0]["image_version"]
-    mock_stdout_print.assert_called_once_with("Pulling image: " + expected_image_to_pull)
-    fake_container_engine.pull.assert_called_once_with(expected_image_to_pull)
-
-@patch("dem.cli.command.create_cmd.pull_registry_only_images")
 @patch("dem.cli.command.create_cmd.create_new_dev_env")
 @patch("dem.cli.command.create_cmd.get_dev_env_descriptor_from_user")
-def test_create_dev_env_new(mock_get_dev_env_descriptor_from_user, mock_create_new_dev_env,
-                            mock_pull_registry_only_images ):
+def test_create_dev_env_new(mock_get_dev_env_descriptor_from_user, mock_create_new_dev_env):
     # Test setup
     fake_dev_env_local_setup = MagicMock()
     fake_dev_env_local_setup.get_dev_env_by_name.return_value = None
@@ -222,14 +186,13 @@ def test_create_dev_env_new(mock_get_dev_env_descriptor_from_user, mock_create_n
     mock_get_dev_env_descriptor_from_user.assert_called_once_with(expected_dev_env_name)
     mock_create_new_dev_env.assert_called_once_with(fake_dev_env_local_setup, fake_dev_env_descriptor)
     fake_new_dev_env.check_image_availability.return_value = fake_dev_env_local_setup.tool_images
-    mock_pull_registry_only_images.assert_called_once_with(fake_new_dev_env)
+    fake_dev_env_local_setup.pull_images.assert_called_once_with(fake_new_dev_env.tools)
 
-@patch("dem.cli.command.create_cmd.pull_registry_only_images")
 @patch("dem.cli.command.create_cmd.overwrite_existing_dev_env")
 @patch("dem.cli.command.create_cmd.get_dev_env_descriptor_from_user")
 @patch("dem.cli.command.create_cmd.typer.confirm")
 def test_create_dev_env_overwrite(mock_confirm, mock_get_dev_env_descriptor_from_user,
-                                  mock_overwrite_existing_dev_env, mock_pull_registry_only_images):
+                                  mock_overwrite_existing_dev_env):
     # Test setup
     fake_dev_env_local_setup = MagicMock()
     fake_dev_env_original = MagicMock()
@@ -254,7 +217,7 @@ def test_create_dev_env_overwrite(mock_confirm, mock_get_dev_env_descriptor_from
     mock_get_dev_env_descriptor_from_user.assert_called_once_with(expected_dev_env_name)
     mock_overwrite_existing_dev_env.assert_called_once_with(fake_dev_env_original, fake_dev_env_descriptor)
     fake_dev_env_original.check_image_availability.assert_called_once_with(fake_dev_env_local_setup.tool_images)
-    mock_pull_registry_only_images.assert_called_once_with(fake_dev_env_original)
+    fake_dev_env_local_setup.pull_images.assert_called_once_with(fake_dev_env_original.tools)
 
 @patch("dem.cli.command.create_cmd.get_dev_env_descriptor_from_user")
 @patch("dem.cli.command.create_cmd.typer.confirm")
