@@ -70,10 +70,10 @@ class DevEnvSetup:
 
     Class attributes:
         _tool_images -- the available tool images
-        container_engine -- the container engine
+        _container_engine -- the container engine
     """
     _tool_images = None
-    container_engine = ContainerEngine()
+    _container_engine = None
 
     def _dev_env_json_version_check(self) -> None:
         """Check that the dev_env.json or dev_evn_org.json file supported.
@@ -104,7 +104,7 @@ class DevEnvSetup:
         The decorators are needed so the tool_images can act as a class-level property, ensuring 
         only a single ToolImage class intance exists for every DevEnvSetup() instance. The class 
         variable can be accessed through a getter, so the ToolImage() gets instantiated only at the 
-        first use.
+        first access.
 
         Args:
             cls - the class object
@@ -112,6 +112,23 @@ class DevEnvSetup:
         if cls._tool_images is None:
             cls._tool_images = ToolImages(cls.container_engine)
         return cls._tool_images
+
+    @classmethod
+    @property
+    def container_engine(cls) -> ContainerEngine:
+        """ The container engine.
+
+        The decorators are needed so the container_engine can act as a class-level property, 
+        ensuring only a single ContainerEngine class intance exists for every DevEnvSetup() instance. 
+        The class variable can be accessed through a getter, so the ContainerEngine() gets 
+        instantiated only at the first access.
+
+        Args:
+            cls - the class object
+        """
+        if cls._container_engine is None:
+            cls._container_engine = ContainerEngine()
+        return cls._container_engine
 
     def get_deserialized(self) -> dict:
         """ Create the deserialized json. """

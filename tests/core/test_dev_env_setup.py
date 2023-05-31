@@ -13,7 +13,6 @@ import json
 from dem.core.exceptions import InvalidDevEnvJson
 from dem.core.tool_images import ToolImages
 
-@patch.object(dev_env_setup.DevEnvLocalSetup, "container_engine", MagicMock())
 @patch.object(dev_env_setup.DevEnvLocalSetup, "json", new_callable=PropertyMock)
 def test_dev_env_json_with_invalid_tool_type_expect_error(mock_json_attribute):
     # Test setup
@@ -31,7 +30,6 @@ def test_dev_env_json_with_invalid_tool_type_expect_error(mock_json_attribute):
         assert str(exported_exception_info.value) == excepted_error_message
 
 @patch("dem.core.dev_env_setup.__supported_dev_env_major_version__", 0)
-@patch.object(dev_env_setup.DevEnvLocalSetup, "container_engine", MagicMock())
 @patch.object(dev_env_setup.DevEnvLocalSetup, "json", new_callable=PropertyMock)
 def test_dev_env_json_with_invalid_version_expect_error(mock_json_attribute):
     # Test setup
@@ -49,7 +47,6 @@ def test_dev_env_json_with_invalid_version_expect_error(mock_json_attribute):
         assert str(exported_exception_info.value) == excepted_error_message
 
 @patch("dem.core.dev_env_setup.__supported_dev_env_major_version__", 0)
-@patch.object(dev_env_setup.DevEnvLocalSetup, "container_engine", MagicMock())
 @patch.object(dev_env_setup.DevEnvLocalSetup, "json", new_callable=PropertyMock)
 def test_valid_dev_env_json_expect_no_error(mock_json_attribute):
     # Test setup
@@ -121,22 +118,21 @@ def common_test_check_image_availability(mock_json_attribute: PropertyMock, with
     for idx, tool in enumerate(test_dev_env.tools):
         assert tool["image_status"] == expected_image_statuses[idx]
 
-@patch.object(dev_env_setup.DevEnvLocalSetup, "container_engine", MagicMock())
 @patch.object(dev_env_setup.DevEnvLocalSetup, "json", new_callable=PropertyMock)
 def test_check_image_availability_without_update(mock_json_attribute):
     common_test_check_image_availability(mock_json_attribute, False)
 
-@patch.object(dev_env_setup.DevEnvLocalSetup, "container_engine", MagicMock())
 @patch.object(dev_env_setup.DevEnvLocalSetup, "json", new_callable=PropertyMock)
 def test_check_image_availability_with_update(mock_json_attribute):
     common_test_check_image_availability(mock_json_attribute, True)
 
-@patch.object(dev_env_setup.DevEnvLocalSetup, "json")
-def test_DevEnvLocalSetup_update_json(mock_json):
+@patch.object(dev_env_setup.DevEnvLocalSetup, "json", new_callable=PropertyMock)
+def test_DevEnvLocalSetup_update_json(mock_json_attribute):
     # Test setup
-    mock_json.return_value = mock_json
+    mock_json = MagicMock()
     mock_json.read.return_value = json.loads(fake_data.dev_env_json)
     mock_json.deserialized = mock_json.read.return_value
+    mock_json_attribute.return_value = mock_json
 
     test_dev_env_local_setup = dev_env_setup.DevEnvLocalSetup()
     test_new_name = "new name"
@@ -150,15 +146,17 @@ def test_DevEnvLocalSetup_update_json(mock_json):
     # Check expectations
     test_dev_env_local_setup.json.write.assert_called_once_with(expected_deserialized_json)
 
-@patch.object(dev_env_setup.DevEnvLocalSetup, "container_engine")
-@patch.object(dev_env_setup.DevEnvLocalSetup, "json")
-def test_DevEnvLocalSetup_pull_images(mock_json, mock_container_engine):
+@patch.object(dev_env_setup.DevEnvLocalSetup, "container_engine", new_callable=PropertyMock)
+@patch.object(dev_env_setup.DevEnvLocalSetup, "json", new_callable=PropertyMock)
+def test_DevEnvLocalSetup_pull_images(mock_json_attribute, mock_container_engine_attribute):
     # Test setup
-    mock_json.return_value = mock_json
+    mock_json = MagicMock()
     mock_json.read.return_value = json.loads(fake_data.dev_env_json)
     mock_json.deserialized = mock_json.read.return_value
+    mock_json_attribute.return_value = mock_json
 
-    mock_container_engine.return_value = mock_container_engine
+    mock_container_engine = MagicMock()
+    mock_container_engine_attribute.return_value = mock_container_engine
 
     test_dev_env_local_setup = dev_env_setup.DevEnvLocalSetup()
     test_dev_env = test_dev_env_local_setup.dev_envs[0]
@@ -170,9 +168,6 @@ def test_DevEnvLocalSetup_pull_images(mock_json, mock_container_engine):
     test_dev_env_local_setup.pull_images(test_dev_env.tools)
 
     # Check expectations
-    mock_json.assert_called_once()
-    mock_container_engine.assert_called_once()
-
     pull_calls = []
     for tool in test_dev_env.tools:
         test_image_to_pull = tool["image_name"] + ":" + tool["image_version"]
