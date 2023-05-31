@@ -4,6 +4,7 @@
 from dem.core.exceptions import InvalidDevEnvJson
 from dem.core.properties import __supported_dev_env_major_version__
 from dem.core.tool_images import ToolImages
+from dem.core.data_management import LocalDevEnvJSON, OrgDevEnvJSON
 
 class DevEnv:
     """ A Development Environment."""
@@ -62,14 +63,12 @@ class DevEnv:
         return image_statuses
 
 class DevEnvSetup:
-    """Group of the Development Environments.
-
-    Args:
-        dev_env_json_deserialized -- a deserialized representation of the dev_env.json or 
-                                     dev_env_org.json file
+    """Represents the development setup:
+        - The available tool images.
+        - The available Development Environments.
 
     Class attributes:
-        tool_images -- a Dev Env setup can access these images
+        _tool_images -- the available tool images.
     """
     _tool_images = None
 
@@ -97,11 +96,19 @@ class DevEnvSetup:
     @classmethod
     @property
     def tool_images(cls):
+        """ Only instantiate the _tool_images when first accessed, because it is time consuming.
+
+        The decorators are needed so the tool_images can act as a class-level property.
+
+        Args:
+            cls - the class object
+        """
         if cls._tool_images is None:
             cls._tool_images = ToolImages()
         return cls._tool_images
 
     def get_deserialized(self) -> dict:
+        """ Create the deserialized json. """
         dev_env_json_deserialized = {}
         dev_env_json_deserialized["version"] = self.version
         dev_env_descriptors = []
@@ -126,10 +133,7 @@ class DevEnvSetup:
                 return dev_env
 
 class DevEnvLocal(DevEnv):
-    """Local Development Environment
-
-    Same as the DevEnv super class.
-    """
+    """ Local Development Environment """
     def __init__(self, descriptor: dict | None = None, dev_env_org: "DevEnvOrg | None" = None):
         """Init a local DevEnv class
 
@@ -146,18 +150,22 @@ class DevEnvLocal(DevEnv):
             self.tools = dev_env_org.tools
 
 class DevEnvLocalSetup(DevEnvSetup):
-    def __init__(self, dev_env_json_deserialized: dict):
+    """ The local development setup. """
+    def __init__(self):
         """Store the local Development Environments.
 
         Extends the DevEnvSetup super class by populating the list of Development Environments with 
         DevEnvLocal objects.
-        Args:
-            dev_env_json_deserialized -- a deserialized representation of the dev_env.json file
         """
-        super().__init__(dev_env_json_deserialized)
+        self.json = LocalDevEnvJSON()
+        super().__init__(self.json.read())
 
-        for dev_env_descriptor in dev_env_json_deserialized["development_environments"]:
+        for dev_env_descriptor in self.json.deserialized["development_environments"]:
             self.dev_envs.append(DevEnvLocal(descriptor=dev_env_descriptor))
+    
+    def update_json(self):
+        """ Writes the deserialized json to the dev_env.json file."""
+        self.json.write(self.get_deserialized())
 
 class DevEnvOrg(DevEnv):
     """A Development Environment available for the organization."""
@@ -173,15 +181,15 @@ class DevEnvOrg(DevEnv):
                 return dev_env_local
 
 class DevEnvOrgSetup(DevEnvSetup):
-    def __init__(self, dev_env_json_deserialized: dict) -> None:
+    """ The organization's development setup. The user can install Dev Envs listed in the class. """
+    def __init__(self) -> None:
         """Store the Development Environments available for the organization.
 
         Extends the DevEnvSetup super class by populating the list of Development Environments with 
         DevEnvOrg objects.
-        Args:
-            dev_env_json_deserialized -- a deserialized representation of the dev_env_org.json file
         """
-        super().__init__(dev_env_json_deserialized)
+        self.json = OrgDevEnvJSON()
+        super().__init__(self.json.read())
 
-        for dev_env_descriptor in dev_env_json_deserialized["development_environments"]:
+        for dev_env_descriptor in self.json.deserialized["development_environments"]:
             self.dev_envs.append(DevEnvOrg(descriptor=dev_env_descriptor))

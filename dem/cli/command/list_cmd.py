@@ -1,7 +1,7 @@
 """list CLI command implementation."""
 # dem/cli/list_cmd.py
 
-from dem.core import container_engine, data_management, dev_env_setup, registry
+from dem.core import container_engine, dev_env_setup, registry
 from dem.core.tool_images import ToolImages
 from dem.cli.console import stdout, stderr
 from rich.table import Table
@@ -33,9 +33,8 @@ dev_env_local_status_messages = {
 }
 
 def is_dev_env_org_installed_locally(dev_env_org: dev_env_setup.DevEnvOrg) -> bool:
-    dev_env_json_deserialized = data_management.read_deserialized_dev_env_json()
-    dev_env_local_setup_obj = dev_env_setup.DevEnvLocalSetup(dev_env_json_deserialized)
-    return isinstance(dev_env_org.get_local_instance(dev_env_local_setup_obj), dev_env_setup.DevEnvLocal)
+    dev_env_local_setup_obj = dev_env_setup.DevEnvLocalSetup()
+    return dev_env_org.get_local_instance(dev_env_local_setup_obj) is not None
 
 def get_dev_env_status(dev_env: (dev_env_setup.DevEnvLocal | dev_env_setup.DevEnvOrg), 
                        tool_images: ToolImages) -> str:
@@ -64,14 +63,12 @@ def get_dev_env_status(dev_env: (dev_env_setup.DevEnvLocal | dev_env_setup.DevEn
 def list_dev_envs(local: bool, org: bool)-> None:
     dev_env_setup_obj = None
     if ((local == True) and (org == False)):
-        dev_env_json_deserialized = data_management.read_deserialized_dev_env_json()
-        dev_env_setup_obj = dev_env_setup.DevEnvLocalSetup(dev_env_json_deserialized)
+        dev_env_setup_obj = dev_env_setup.DevEnvLocalSetup()
         if not dev_env_setup_obj.dev_envs:
             stdout.print("[yellow]No installed Development Environments.[/]")
             return
     elif((local == False) and (org == True)):
-        dev_env_org_json_deserialized = data_management.read_deserialized_dev_env_org_json()
-        dev_env_setup_obj = dev_env_setup.DevEnvOrgSetup(dev_env_org_json_deserialized)
+        dev_env_setup_obj = dev_env_setup.DevEnvOrgSetup()
         if not dev_env_setup_obj.dev_envs:
             stdout.print("[yellow]No Development Environment in your organization.[/]")
             return

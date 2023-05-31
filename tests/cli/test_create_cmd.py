@@ -277,16 +277,11 @@ def test_execute_abort(mock_confirm, mock_get_dev_env_descriptor_from_user):
                                             abort=True)
         mock_get_dev_env_descriptor_from_user.assert_not_called()
 
-@patch("dem.cli.command.create_cmd.data_management.write_deserialized_dev_env_json")
 @patch("dem.cli.command.create_cmd.stdout.print")
 @patch("dem.cli.command.create_cmd.create_dev_env")
 @patch("dem.cli.command.create_cmd.DevEnvLocalSetup")
-@patch("dem.cli.command.create_cmd.data_management.read_deserialized_dev_env_json")
-def test_execute(mock_read_deserialized_dev_env_json, mock_DevEnvLocalSetup, mock_create_dev_env, 
-                 mock_stdout_print, mock_write_deserialized_dev_env_json):
+def test_execute(mock_DevEnvLocalSetup, mock_create_dev_env, mock_stdout_print):
     # Test setup
-    fake_deserialized_local_dev_env = MagicMock()
-    mock_read_deserialized_dev_env_json.return_value = fake_deserialized_local_dev_env
     fake_dev_env_local_setup = MagicMock()
     mock_DevEnvLocalSetup.return_value = fake_dev_env_local_setup
 
@@ -298,33 +293,25 @@ def test_execute(mock_read_deserialized_dev_env_json, mock_DevEnvLocalSetup, moc
     image_statuses = [ToolImages.LOCAL_AND_REGISTRY, ToolImages.LOCAL_ONLY] * 2
     fake_dev_env.check_image_availability.return_value = image_statuses
 
-    fake_dev_env_local_setup.get_deserialized.return_value = fake_deserialized_local_dev_env
-
     # Run unit under test
     runner_result = runner.invoke(main.typer_cli, ["create", expected_dev_env_name], color=True)
 
     # Check expectations
     assert 0 == runner_result.exit_code
 
-    mock_read_deserialized_dev_env_json.assert_called_once()
-    mock_DevEnvLocalSetup.assert_called_once_with(fake_deserialized_local_dev_env)
+    mock_DevEnvLocalSetup.assert_called_once()
     mock_create_dev_env.assert_called_once_with(fake_dev_env_local_setup, expected_dev_env_name)
     fake_dev_env.check_image_availability.assert_called_once_with(fake_dev_env_local_setup.tool_images,
                                                                   update_tool_images=True)
 
     mock_stdout_print.assert_called_once_with("The [yellow]" + expected_dev_env_name + "[/] Development Environment is ready!")
-    fake_dev_env_local_setup.get_deserialized.assert_called_once()
-    mock_write_deserialized_dev_env_json.assert_called_once_with(fake_deserialized_local_dev_env)
+    fake_dev_env_local_setup.update_json()
 
 @patch("dem.cli.command.create_cmd.stderr.print")
 @patch("dem.cli.command.create_cmd.create_dev_env")
 @patch("dem.cli.command.create_cmd.DevEnvLocalSetup")
-@patch("dem.cli.command.create_cmd.data_management.read_deserialized_dev_env_json")
-def test_execute_failure(mock_read_deserialized_dev_env_json, mock_DevEnvLocalSetup,
-                         mock_create_dev_env, mock_stderr_print):
+def test_execute_failure(mock_DevEnvLocalSetup, mock_create_dev_env, mock_stderr_print):
     # Test setup
-    fake_deserialized_local_dev_env = MagicMock()
-    mock_read_deserialized_dev_env_json.return_value = fake_deserialized_local_dev_env
     fake_dev_env_local_setup = MagicMock()
     mock_DevEnvLocalSetup.return_value = fake_dev_env_local_setup
 
@@ -342,8 +329,7 @@ def test_execute_failure(mock_read_deserialized_dev_env_json, mock_DevEnvLocalSe
     # Check expectations
     assert 0 == runner_result.exit_code
 
-    mock_read_deserialized_dev_env_json.assert_called_once()
-    mock_DevEnvLocalSetup.assert_called_once_with(fake_deserialized_local_dev_env)
+    mock_DevEnvLocalSetup.assert_called_once()
     mock_create_dev_env.assert_called_once_with(fake_dev_env_local_setup, expected_dev_env_name)
     fake_dev_env.check_image_availability.assert_called_once_with(fake_dev_env_local_setup.tool_images,
                                                                   update_tool_images=True)

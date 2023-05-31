@@ -126,23 +126,16 @@ def test_remove_unused_tool_images_APIError(mock_ContainerEngine, mock_confirm, 
     mock_print.assert_called_once_with("[red]Error: not_required_tool_image_to_delete:latest is used by a container. Unable to remove it.")
 
 @patch("dem.cli.command.delete_cmd.remove_unused_tool_images")
-@patch("dem.cli.command.delete_cmd.write_deserialized_dev_env_json")
 @patch("dem.cli.command.delete_cmd.DevEnvLocalSetup")
-@patch("dem.cli.command.delete_cmd.read_deserialized_dev_env_json")
-def test_delete_dev_env_valid_name(mock_read_deserialized_dev_env_json, mock_DevEnvLocalSetup, 
-                                   mock_write_deserialized_dev_env_json, 
-                                   mock_remove_unused_tool_images):
+def test_delete_dev_env_valid_name(mock_DevEnvLocalSetup, mock_remove_unused_tool_images):
     # Test setup
     fake_dev_env1 = MagicMock()
     fake_dev_env_to_delete = MagicMock()
     fake_dev_env_to_delete.name = "dev_env"
     fake_dev_env_local_setup = MagicMock()
     fake_dev_env_local_setup.dev_envs = [fake_dev_env1, fake_dev_env_to_delete]
-    fake_deserialized_dev_env_json = MagicMock()
-    mock_read_deserialized_dev_env_json.return_value = fake_deserialized_dev_env_json
     mock_DevEnvLocalSetup.return_value = fake_dev_env_local_setup
     fake_dev_env_local_setup.get_dev_env_by_name.return_value = fake_dev_env_to_delete
-    fake_dev_env_local_setup.get_deserialized.return_value = fake_deserialized_dev_env_json
     
     # Run unit under test
     runner_result = runner.invoke(main.typer_cli, ["delete", fake_dev_env_to_delete.name], color=True)
@@ -150,11 +143,9 @@ def test_delete_dev_env_valid_name(mock_read_deserialized_dev_env_json, mock_Dev
     # Check expectations
     assert 0 == runner_result.exit_code
 
-    mock_read_deserialized_dev_env_json.assert_called_once()
-    mock_DevEnvLocalSetup.assert_called_once_with(fake_deserialized_dev_env_json)
+    mock_DevEnvLocalSetup.assert_called_once()
     fake_dev_env_local_setup.get_dev_env_by_name.assert_called_once_with(fake_dev_env_to_delete.name)
-    fake_dev_env_local_setup.get_deserialized.assert_called_once()
-    mock_write_deserialized_dev_env_json.assert_called_once_with(fake_deserialized_dev_env_json)
+    fake_dev_env_local_setup.update_json.assert_called_once()
     mock_remove_unused_tool_images.assert_called_once_with(fake_dev_env_to_delete,
                                                            fake_dev_env_local_setup)
 
@@ -162,12 +153,9 @@ def test_delete_dev_env_valid_name(mock_read_deserialized_dev_env_json, mock_Dev
     assert fake_dev_env_to_delete not in fake_dev_env_local_setup.dev_envs
 
 @patch("dem.cli.command.delete_cmd.DevEnvLocalSetup")
-@patch("dem.cli.command.delete_cmd.read_deserialized_dev_env_json")
-def test_delete_dev_env_invalid_name(mock_read_deserialized_dev_env_json, mock_DevEnvLocalSetup):
+def test_delete_dev_env_invalid_name(mock_DevEnvLocalSetup):
     # Test setup
     fake_dev_env_local_setup = MagicMock()
-    fake_deserialized_dev_env_json = MagicMock()
-    mock_read_deserialized_dev_env_json.return_value = fake_deserialized_dev_env_json
     mock_DevEnvLocalSetup.return_value = fake_dev_env_local_setup
     fake_dev_env_local_setup.get_dev_env_by_name.return_value = None
     test_invalid_name = "test_invalid_name"
@@ -178,8 +166,7 @@ def test_delete_dev_env_invalid_name(mock_read_deserialized_dev_env_json, mock_D
     # Check expectations
     assert 0 == runner_result.exit_code
 
-    mock_read_deserialized_dev_env_json.assert_called_once()
-    mock_DevEnvLocalSetup.assert_called_once_with(fake_deserialized_dev_env_json)
+    mock_DevEnvLocalSetup.assert_called_once()
     fake_dev_env_local_setup.get_dev_env_by_name.assert_called_once_with(test_invalid_name)
 
     console = Console(file=io.StringIO())

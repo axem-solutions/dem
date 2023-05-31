@@ -8,7 +8,7 @@ import dem.cli.main as main
 from typer.testing import CliRunner
 from unittest.mock import patch, MagicMock
 
-import docker, io
+import io
 from rich.console import Console
 from rich.table import Table
 from dem.core.tool_images import ToolImages
@@ -17,7 +17,6 @@ from dem.core.tool_images import ToolImages
 
 # In order to test stdout and stderr separately, the stderr can't be mixed into the stdout.
 runner = CliRunner(mix_stderr=False)
-test_docker_client = docker.from_env()
 
 ## Test helpers
 
@@ -34,15 +33,10 @@ def get_expected_table(expected_tools: list[list[str]]) ->str:
 
 ## Test cases
 
-@patch("dem.cli.command.info_cmd.data_management.read_deserialized_dev_env_json")
 @patch("dem.cli.command.info_cmd.DevEnvLocalSetup")
-@patch("dem.cli.command.info_cmd.data_management.read_deserialized_dev_env_org_json")
 @patch("dem.cli.command.info_cmd.DevEnvOrgSetup")
-def test_info_local_dev_env_demo(mock_DevEnvOrgSetup, mock_read_deserialized_dev_env_org_json,
-                                 mock_DevEnvLocalSetup, mock_read_deserialized_dev_env_json):
+def test_info_local_dev_env_demo(mock_DevEnvOrgSetup, mock_DevEnvLocalSetup):
     # Test setup
-    fake_dev_env_json_deserialized = MagicMock()
-    mock_read_deserialized_dev_env_json.return_value = fake_dev_env_json_deserialized
     fake_dev_env_local_setup = MagicMock()
     mock_DevEnvLocalSetup.return_value = fake_dev_env_local_setup
     fake_dev_env = MagicMock()
@@ -86,9 +80,7 @@ def test_info_local_dev_env_demo(mock_DevEnvOrgSetup, mock_read_deserialized_dev
     # Check expectations
     assert runner_result.exit_code == 0
 
-    mock_read_deserialized_dev_env_json.assert_called_once()
-    mock_DevEnvLocalSetup.assert_called_once_with(fake_dev_env_json_deserialized)
-    mock_read_deserialized_dev_env_org_json.assert_not_called()
+    mock_DevEnvLocalSetup.assert_called_once()
     mock_DevEnvOrgSetup.assert_not_called()
     fake_dev_env_local_setup.get_dev_env_by_name.assert_called_once_with(test_dev_env_name)
     fake_dev_env.check_image_availability.assert_called_once_with(fake_dev_env_local_setup.tool_images)
@@ -102,17 +94,10 @@ def test_info_local_dev_env_demo(mock_DevEnvOrgSetup, mock_read_deserialized_dev
     ]
     assert get_expected_table(expected_tools)  == runner_result.stdout
 
-@patch("dem.cli.command.info_cmd.data_management.read_deserialized_dev_env_json")
 @patch("dem.cli.command.info_cmd.DevEnvLocalSetup")
-@patch("dem.cli.command.info_cmd.data_management.read_deserialized_dev_env_org_json")
 @patch("dem.cli.command.info_cmd.DevEnvOrgSetup")
-def test_info_local_dev_env_nagy_cica_project(mock_DevEnvOrgSetup, 
-                                              mock_read_deserialized_dev_env_org_json,
-                                              mock_DevEnvLocalSetup, 
-                                              mock_read_deserialized_dev_env_json):
+def test_info_local_dev_env_nagy_cica_project(mock_DevEnvOrgSetup, mock_DevEnvLocalSetup):
     # Test setup
-    fake_dev_env_json_deserialized = MagicMock()
-    mock_read_deserialized_dev_env_json.return_value = fake_dev_env_json_deserialized
     fake_dev_env_local_setup = MagicMock()
     mock_DevEnvLocalSetup.return_value = fake_dev_env_local_setup
     fake_dev_env = MagicMock()
@@ -159,9 +144,7 @@ def test_info_local_dev_env_nagy_cica_project(mock_DevEnvOrgSetup,
     # Check expectations
     assert runner_result.exit_code == 0
 
-    mock_read_deserialized_dev_env_json.assert_called_once()
-    mock_DevEnvLocalSetup.assert_called_once_with(fake_dev_env_json_deserialized)
-    mock_read_deserialized_dev_env_org_json.assert_not_called()
+    mock_DevEnvLocalSetup.assert_called_once()
     mock_DevEnvOrgSetup.assert_not_called()
     fake_dev_env_local_setup.get_dev_env_by_name.assert_called_once_with(test_dev_env_name)
     fake_dev_env.check_image_availability.assert_called_once_with(fake_dev_env_local_setup.tool_images)
@@ -175,20 +158,14 @@ def test_info_local_dev_env_nagy_cica_project(mock_DevEnvOrgSetup,
     ]
     assert get_expected_table(expected_tools) == runner_result.stdout
 
-@patch("dem.cli.command.info_cmd.data_management.read_deserialized_dev_env_json")
 @patch("dem.cli.command.info_cmd.DevEnvLocalSetup")
-@patch("dem.cli.command.info_cmd.data_management.read_deserialized_dev_env_org_json")
 @patch("dem.cli.command.info_cmd.DevEnvOrgSetup")
-def test_info_dev_env_invalid(mock_DevEnvOrgSetup, mock_read_deserialized_dev_env_org_json,
-                              mock_DevEnvLocalSetup, mock_read_deserialized_dev_env_json):
+def test_info_dev_env_invalid(mock_DevEnvOrgSetup, mock_DevEnvLocalSetup):
     # Test setup
-    fake_dev_env_json_deserialized = MagicMock()
-    mock_read_deserialized_dev_env_json.return_value = fake_dev_env_json_deserialized
     fake_dev_env_local_setup = MagicMock()
     mock_DevEnvLocalSetup.return_value = fake_dev_env_local_setup
     fake_dev_env_local_setup.get_dev_env_by_name.return_value = None
 
-    mock_read_deserialized_dev_env_org_json.return_value = fake_dev_env_json_deserialized
     fake_dev_env_org_setup = MagicMock()
     mock_DevEnvOrgSetup.return_value = fake_dev_env_org_setup
     fake_dev_env_org_setup.get_dev_env_by_name.return_value = None
@@ -200,11 +177,9 @@ def test_info_dev_env_invalid(mock_DevEnvOrgSetup, mock_read_deserialized_dev_en
     # Check expectations
     assert runner_result.exit_code == 0
 
-    mock_read_deserialized_dev_env_json.assert_called_once()
-    mock_DevEnvLocalSetup.assert_called_once_with(fake_dev_env_json_deserialized)
+    mock_DevEnvLocalSetup.assert_called_once()
     fake_dev_env_local_setup.get_dev_env_by_name.assert_called_once_with(test_dev_env_name)
 
-    mock_read_deserialized_dev_env_org_json.assert_called_once()
     mock_DevEnvOrgSetup.assert_called_once()
     fake_dev_env_org_setup.get_dev_env_by_name.assert_called_once_with(test_dev_env_name)
 
@@ -213,20 +188,14 @@ def test_info_dev_env_invalid(mock_DevEnvOrgSetup, mock_read_deserialized_dev_en
     expected_output = console.file.getvalue()
     assert expected_output == runner_result.stderr
 
-@patch("dem.cli.command.info_cmd.data_management.read_deserialized_dev_env_json")
 @patch("dem.cli.command.info_cmd.DevEnvLocalSetup")
-@patch("dem.cli.command.info_cmd.data_management.read_deserialized_dev_env_org_json")
 @patch("dem.cli.command.info_cmd.DevEnvOrgSetup")
-def test_info_org_dev_env(mock_DevEnvOrgSetup, mock_read_deserialized_dev_env_org_json,
-                          mock_DevEnvLocalSetup, mock_read_deserialized_dev_env_json):
+def test_info_org_dev_env(mock_DevEnvOrgSetup, mock_DevEnvLocalSetup):
     # Test setup
-    fake_dev_env_json_deserialized = MagicMock()
-    mock_read_deserialized_dev_env_json.return_value = fake_dev_env_json_deserialized
     fake_dev_env_local_setup = MagicMock()
     mock_DevEnvLocalSetup.return_value = fake_dev_env_local_setup
     fake_dev_env_local_setup.get_dev_env_by_name.return_value = None
 
-    mock_read_deserialized_dev_env_org_json.return_value = fake_dev_env_json_deserialized
     fake_dev_env_org_setup = MagicMock()
     mock_DevEnvOrgSetup.return_value = fake_dev_env_org_setup
     fake_dev_env = MagicMock()
@@ -270,12 +239,10 @@ def test_info_org_dev_env(mock_DevEnvOrgSetup, mock_read_deserialized_dev_env_or
     # Check expectations
     assert runner_result.exit_code == 0
 
-    mock_read_deserialized_dev_env_json.assert_called_once()
-    mock_DevEnvLocalSetup.assert_called_once_with(fake_dev_env_json_deserialized)
+    mock_DevEnvLocalSetup.assert_called_once()
     fake_dev_env_local_setup.get_dev_env_by_name.assert_called_once_with(test_dev_env_name)
 
-    mock_read_deserialized_dev_env_org_json.assert_called_once()
-    mock_DevEnvOrgSetup.assert_called_once_with(fake_dev_env_json_deserialized)
+    mock_DevEnvOrgSetup.assert_called_once()
     fake_dev_env_org_setup.get_dev_env_by_name.assert_called_once_with(test_dev_env_name)
 
     fake_dev_env.check_image_availability.assert_called_once_with(fake_dev_env_org_setup.tool_images)

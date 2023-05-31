@@ -2,7 +2,6 @@
 # dem/cli/command/pull_cmd.py
 
 from dem.core import dev_env_setup as dev_env_setup, \
-                     data_management as data_management, \
                      container_engine as container_engine, \
                      registry as registry
 from dem.core.tool_images import ToolImages
@@ -29,13 +28,11 @@ def install_to_dev_env_json(dev_env_local: dev_env_setup.DevEnvLocal,
         # If not available, install it.
         dev_env_local = dev_env_setup.DevEnvLocal(dev_env_org=dev_env_org)
         dev_env_local_setup.dev_envs.append(dev_env_local)
-        deserialized_local_dev_env = dev_env_local_setup.get_deserialized()
-        data_management.write_deserialized_dev_env_json(deserialized_local_dev_env)
+        dev_env_local_setup.update_json()
     elif dev_env_local.tools != dev_env_org.tools:
         # If already installed, but different, then overwrite it.
         dev_env_local.tools = dev_env_org.tools
-        deserialized_local_dev_env = dev_env_local_setup.get_deserialized()
-        data_management.write_deserialized_dev_env_json(deserialized_local_dev_env)
+        dev_env_local_setup.update_json()
 
     return dev_env_local
 
@@ -54,15 +51,13 @@ def pull_registry_only_images(dev_env_local: dev_env_setup.DevEnvLocal) -> None:
 
 def execute(dev_env_name: str) -> None:
     # Get the organization's Dev Env if available.
-    dev_env_org_json_deserialized = data_management.read_deserialized_dev_env_org_json()
-    dev_env_org_setup = dev_env_setup.DevEnvOrgSetup(dev_env_org_json_deserialized)
+    dev_env_org_setup = dev_env_setup.DevEnvOrgSetup()
     dev_env_org = dev_env_org_setup.get_dev_env_by_name(dev_env_name)
     if dev_env_org is None:
         stderr.print("[red]Error: The input Development Environment is not available for the organization.[/]")
         return
 
-    dev_env_local_json_deserialized = data_management.read_deserialized_dev_env_json()
-    dev_env_local_setup = dev_env_setup.DevEnvLocalSetup(dev_env_local_json_deserialized)
+    dev_env_local_setup = dev_env_setup.DevEnvLocalSetup()
     dev_env_local = dev_env_org.get_local_instance(dev_env_local_setup)
     dev_env_local = install_to_dev_env_json(dev_env_local, dev_env_org, dev_env_local_setup)
 

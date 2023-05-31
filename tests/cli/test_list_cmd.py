@@ -3,6 +3,7 @@
 
 # Unit under test:
 import dem.cli.main as main
+import dem.cli.command.list_cmd as list_cmd
 
 # Test framework
 from typer.testing import CliRunner
@@ -24,14 +25,47 @@ runner = CliRunner(mix_stderr=False)
 
 ## Test cases
 
+@patch("dem.cli.command.list_cmd.dev_env_setup.DevEnvLocalSetup")
+def test_is_dev_env_org_installed_locally_true(mock_DevEnvLocalSetup):
+    # Test setup
+    fake_dev_env_local_setup = MagicMock()
+    mock_DevEnvLocalSetup.return_value = fake_dev_env_local_setup
+
+    fake_dev_env_org = MagicMock()
+    fake_dev_env_org.get_local_instance.return_value = MagicMock()
+
+    # Run unit under test
+    actual_is_installed = list_cmd.is_dev_env_org_installed_locally(fake_dev_env_org)
+
+    # Check expectations
+    assert actual_is_installed is True
+
+    mock_DevEnvLocalSetup.assert_called_once()
+    fake_dev_env_org.get_local_instance.assert_called_once_with(fake_dev_env_local_setup)
+
+@patch("dem.cli.command.list_cmd.dev_env_setup.DevEnvLocalSetup")
+def test_is_dev_env_org_installed_locally_false(mock_DevEnvLocalSetup):
+    # Test setup
+    fake_dev_env_local_setup = MagicMock()
+    mock_DevEnvLocalSetup.return_value = fake_dev_env_local_setup
+
+    fake_dev_env_org = MagicMock()
+    fake_dev_env_org.get_local_instance.return_value = None
+
+    # Run unit under test
+    actual_is_installed = list_cmd.is_dev_env_org_installed_locally(fake_dev_env_org)
+
+    # Check expectations
+    assert actual_is_installed is False
+
+    mock_DevEnvLocalSetup.assert_called_once()
+    fake_dev_env_org.get_local_instance.assert_called_once_with(fake_dev_env_local_setup)
+
 ## Test listing the local dev envs.
 
 @patch("dem.cli.command.list_cmd.dev_env_setup.DevEnvLocalSetup")
-@patch("dem.cli.command.list_cmd.data_management.read_deserialized_dev_env_json")
-def test_with_valid_dev_env_json(mock_read_deserialized_dev_env_json, mock_DevEnvLocalSetup):
+def test_with_valid_dev_env_json(mock_DevEnvLocalSetup):
     # Test setup
-    fake_dev_env_json_deserialized = json.loads(fake_data.dev_env_json)
-    mock_read_deserialized_dev_env_json.return_value = fake_dev_env_json_deserialized
     fake_dev_env_local_setup = MagicMock()
     expected_dev_env_list = [
         ["demo", "Installed."],
@@ -54,8 +88,7 @@ def test_with_valid_dev_env_json(mock_read_deserialized_dev_env_json, mock_DevEn
     runner_result = runner.invoke(main.typer_cli, ["list", "--local", "--env"])
 
     # Check expectations
-    mock_read_deserialized_dev_env_json.assert_called_once()
-    mock_DevEnvLocalSetup.assert_called_once_with(fake_dev_env_json_deserialized)
+    mock_DevEnvLocalSetup.assert_called_once()
 
     assert 0 == runner_result.exit_code
 
@@ -69,17 +102,17 @@ def test_with_valid_dev_env_json(mock_read_deserialized_dev_env_json, mock_DevEn
     expected_output = console.file.getvalue()
     assert expected_output == runner_result.stdout
 
-@patch("dem.cli.command.list_cmd.data_management.read_deserialized_dev_env_json")
-def test_with_empty_dev_env_json(mock_read_deserialized_dev_env_json):
+@patch("dem.cli.command.list_cmd.dev_env_setup.DevEnvLocalSetup")
+def test_with_empty_dev_env_json(mock_DevEnvLocalSetup):
     # Test setup
-    mock_read_deserialized_dev_env_json.return_value = json.loads(fake_data.empty_dev_env_json)
+    fake_dev_env_setup = MagicMock()
+    fake_dev_env_setup.dev_envs = []
+    mock_DevEnvLocalSetup.return_value = fake_dev_env_setup
 
     # Run unit under test
     runner_result = runner.invoke(main.typer_cli, ["list", "--local", "--env"])
 
     # Check expectations
-    mock_read_deserialized_dev_env_json.assert_called_once()
-
     assert 0 == runner_result.exit_code
 
     console = Console(file=io.StringIO())
@@ -89,17 +122,17 @@ def test_with_empty_dev_env_json(mock_read_deserialized_dev_env_json):
 
 ## Test listing the org dev envs.
 
-@patch("dem.cli.command.list_cmd.data_management.read_deserialized_dev_env_org_json")
-def test_with_empty_dev_env_org_json(mock_read_deserialized_dev_env_org_json):
+@patch("dem.cli.command.list_cmd.dev_env_setup.DevEnvOrgSetup")
+def test_with_empty_dev_env_org_json(mock_DevEnvOrgSetup):
     # Test setup
-    mock_read_deserialized_dev_env_org_json.return_value = json.loads(fake_data.empty_dev_env_org_json)
+    fake_dev_env_org = MagicMock()
+    fake_dev_env_org.dev_envs = []
+    mock_DevEnvOrgSetup.return_value = fake_dev_env_org
 
     # Run unit under test
     runner_result = runner.invoke(main.typer_cli, ["list", "--all", "--env"])
 
     # Check expectations
-    mock_read_deserialized_dev_env_org_json.assert_called_once()
-
     assert 0 == runner_result.exit_code
 
     console = Console(file=io.StringIO())
@@ -108,12 +141,8 @@ def test_with_empty_dev_env_org_json(mock_read_deserialized_dev_env_org_json):
 
 @patch("dem.cli.command.list_cmd.is_dev_env_org_installed_locally")
 @patch("dem.cli.command.list_cmd.dev_env_setup.DevEnvOrgSetup")
-@patch("dem.cli.command.list_cmd.data_management.read_deserialized_dev_env_org_json")
-def test_with_valid_dev_env_org_json(mock_read_deserialized_dev_env_org_json, mock_DevEnvOrgSetup,
-                                     mock_is_dev_env_org_installed_locally):
+def test_with_valid_dev_env_org_json(mock_DevEnvOrgSetup, mock_is_dev_env_org_installed_locally):
     # Test setup
-    fake_dev_env_org_json_deserialized = json.loads(fake_data.dev_env_org_json)
-    mock_read_deserialized_dev_env_org_json.return_value = fake_dev_env_org_json_deserialized
     fake_dev_env_org_setup = MagicMock()
     expected_dev_env_list = [
         ["org_only_env", "Ready to be installed."],
@@ -141,8 +170,7 @@ def test_with_valid_dev_env_org_json(mock_read_deserialized_dev_env_org_json, mo
     runner_result = runner.invoke(main.typer_cli, ["list", "--all", "--env"])
 
     # Check expectations
-    mock_read_deserialized_dev_env_org_json.assert_called_once()
-    mock_DevEnvOrgSetup.assert_called_once_with(fake_dev_env_org_json_deserialized)
+    mock_DevEnvOrgSetup.assert_called_once()
     mock_is_dev_env_org_installed_locally.assert_called()
 
     expected_table = Table()
