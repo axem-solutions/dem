@@ -46,6 +46,11 @@ def test_remove_unused_tool_images(mock_confirm):
             "type": "build_system",
             "image_name": "not_required_tool_image_to_delete",
             "image_version": "latest"
+        },
+        {
+            "type": "toolchain",
+            "image_name": "not_required_tool_image_to_delete",
+            "image_version": "latest"
         }
     ]
     fake_dev_env_local_setup = MagicMock()
