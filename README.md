@@ -13,7 +13,7 @@ Development Environments for embedded software development.
 To be able to use the DEM on your PC, you need to have the following software installed:
 
 - Python 3.10+
-- Docker Engine
+- Docker Engine 24.0+
 
 :information_source: Currently only the Linux operating system is supported.
 
