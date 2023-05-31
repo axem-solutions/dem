@@ -13,3 +13,4 @@ poetry.lock
 build/
 .vscode/
 dist/
+dem_doc/
