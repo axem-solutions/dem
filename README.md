@@ -17,6 +17,8 @@ To be able to use the DEM on your PC, you need to have the following software in
 
 :information_source: Currently only the Linux operating system is supported.
 
+:warning: Offline usage is not supported!
+
 ## Installation
 
 DEM is available in the PyPI repository. Install it with:
