@@ -20,7 +20,7 @@ class LocalDevEnvJSON():
     _directory = PurePath(os.path.expanduser('~') + "/.config/axem")
 
     def _create_empty_dev_env_json(self) -> None:
-        """ If the dev_env.json doesn't exist, then create an emmpty one."""
+        """ If the dev_env.json doesn't exist, then create an empty one."""
         is_path_exist = os.path.exists(self._directory)
         if not is_path_exist:
             os.makedirs(self._directory)

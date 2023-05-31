@@ -1,7 +1,7 @@
 """Tests for the create CLI command."""
 # tests/cli/test_create_cmd.py
 
-# Unit under test:
+# Unit under test
 import dem.cli.main as main
 import dem.cli.command.create_cmd as create_cmd
 

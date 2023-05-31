@@ -1,9 +1,10 @@
 """This module provides the CLI."""
 # dem/cli/main.py
 
-import typer
-from dem import __app_name__, __version__
+import typer, importlib.metadata
+from dem import __command__, __app_name__
 from dem.cli.command import info_cmd, list_cmd, pull_cmd, create_cmd, modify_cmd, delete_cmd, rename_cmd, clone_cmd
+from dem.cli.console import stdout
 
 typer_cli = typer.Typer()
 
@@ -88,7 +89,13 @@ def delete(dev_env_name: str = typer.Argument(...,
 
 def _version_callback(value: bool) -> None:
     if value:
-        typer.echo(f"{__app_name__} v{__version__}")
+        try: 
+            version = importlib.metadata.version(__app_name__)
+        except:
+            stdout.print("[yellow]Install DEM to get the version number.[/]")
+        else: 
+            stdout.print("[cyan]" + __app_name__ + " v" + version + "[/]")
+
         raise typer.Exit()
 
 @typer_cli.callback()
