@@ -13,11 +13,10 @@ tool_image_statuses = {
     ToolImages.LOCAL_AND_REGISTRY: "local and registry"
 }
 
-def get_tool_images() -> list[list[str]]:
-    tool_images = ToolImages()
+def get_tool_image_list(tool_images: ToolImages) -> list[list[str]]:
     return [[name, tool_image_statuses[status]] for name, status in tool_images.elements.items()]
 
-def get_modifications_from_user(dev_env: DevEnvLocal) -> None:
+def get_modifications_from_user(dev_env: DevEnvLocal, tool_image_list: list[list[str]]) -> None:
     selected_tool_types = []
     # Get tools that are already selected for this Dev Env.
     for tool in dev_env.tools:
@@ -28,7 +27,7 @@ def get_modifications_from_user(dev_env: DevEnvLocal) -> None:
     tool_type_menu.wait_for_user()
     selected_tool_types = tool_type_menu.get_selected_tool_types()
 
-    tool_image_menu = ToolImageMenu(get_tool_images())
+    tool_image_menu = ToolImageMenu(tool_image_list)
 
     tools = []
     for tool_type in selected_tool_types:
@@ -79,6 +78,7 @@ def execute(dev_env_name: str) -> None:
     if dev_env_local is None:
         stderr.print("[red]The Development Environment doesn't exist.")
     else:
-        get_modifications_from_user(dev_env_local)
+        tool_image_list = get_tool_image_list(dev_env_local_setup.tool_images)
+        get_modifications_from_user(dev_env_local, tool_image_list)
         confirmation = get_confirm_from_user()
         handle_user_confirm(confirmation, dev_env_local, dev_env_local_setup)
