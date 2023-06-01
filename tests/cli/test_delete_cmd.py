@@ -9,8 +9,7 @@ import dem.cli.command.delete_cmd as delete_cmd
 from typer.testing import CliRunner
 from unittest.mock import patch, MagicMock, call
 
-from rich.console import Console
-import io, docker.errors
+import docker.errors
 
 ## Global test variables
 runner = CliRunner()
