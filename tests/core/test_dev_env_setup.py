@@ -146,7 +146,7 @@ def test_DevEnvLocalSetup_update_json(mock_json_attribute):
     # Check expectations
     test_dev_env_local_setup.json.write.assert_called_once_with(expected_deserialized_json)
 
-@patch.object(dev_env_setup.DevEnvLocalSetup, "container_engine", new_callable=PropertyMock)
+@patch.object(dev_env_setup.DevEnvLocalSetup, "_container_engine", new_callable=PropertyMock)
 @patch.object(dev_env_setup.DevEnvLocalSetup, "json", new_callable=PropertyMock)
 def test_DevEnvLocalSetup_pull_images(mock_json_attribute, mock_container_engine_attribute):
     # Test setup

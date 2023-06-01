@@ -186,8 +186,6 @@ class DevEnvLocalSetup(DevEnvSetup):
         Extends the DevEnvSetup super class by populating the list of Development Environments with 
         DevEnvLocal objects.
         """
-        self.json = LocalDevEnvJSON()
-        self.container_engine = ContainerEngine()
         super().__init__(self.json.read())
 
         for dev_env_descriptor in self.json.deserialized["development_environments"]:
