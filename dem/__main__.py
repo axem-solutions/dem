@@ -2,9 +2,10 @@
 # dem/__main__.py
 
 from dem import __command__
-from dem.cli.console import stdout, stderr
-import dem.cli.main 
+from dem.cli.console import stderr, stdout
 from dem.core.exceptions import RegistryError
+import dem.cli.main 
+import docker.errors
 
 def main():
     try:
@@ -13,5 +14,14 @@ def main():
         stderr.print("[red]" + str(e) + "[/]")
     except RegistryError as e:
         stderr.print("[red]" + str(e) + "[/]")
+    except docker.errors.DockerException as e:
+        stderr.print("[red]" + str(e) + "[/]")
 
-main()
+        if "Permission denied" in str(e):
+            stdout.print("\nHint: Is your user part of the docker group?")
+        else:
+            stdout.print("\nHint: Reinstall the Docker Engine.")
+
+# Call the main() when run as `python -m`
+if __name__ == "__main__":
+    main()
