@@ -35,6 +35,10 @@ class LocalDevEnvJSON():
     def _invalid_json_callback(*args, **kwargs) -> None:
         pass
 
+    @staticmethod
+    def _callback() -> None:
+        pass
+
     def __init__(self) -> None:
         """ Init the class with an empty dict for the deserialized dev_env.json file. 
             Later this variable can be used to access the deserialized data. 
@@ -72,6 +76,9 @@ class LocalDevEnvJSON():
 
     def set_invalid_json_callback(self, invalid_json_callback: Callable):
         self._invalid_json_callback = types.MethodType(invalid_json_callback, self)
+
+    def set_callback(self, callback_func: Callable):
+        self._callback = types.MethodType(callback_func, self)
 
 class OrgDevEnvJSON():
     """ Deserialize the dev_env_org.json file."""
