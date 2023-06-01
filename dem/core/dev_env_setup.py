@@ -177,8 +177,10 @@ class DevEnvLocalSetup(DevEnvSetup):
 
     Class attributes:
         json -- deserialized json representing the local setup
+        core_cb -- the core classes can provide information through this callback
     """
     json = LocalDevEnvJSON()
+    core_cb = None
 
     def __init__(self):
         """ Store the local Development Environments.
@@ -186,11 +188,14 @@ class DevEnvLocalSetup(DevEnvSetup):
         Extends the DevEnvSetup super class by populating the list of Development Environments with 
         DevEnvLocal objects.
         """
+        if self.core_cb is not None:
+            self.json.set_callback(self.core_cb)
+
         super().__init__(self.json.read())
 
         for dev_env_descriptor in self.json.deserialized["development_environments"]:
             self.dev_envs.append(DevEnvLocal(descriptor=dev_env_descriptor))
-    
+
     def update_json(self):
         """ Writes the deserialized json to the dev_env.json file."""
         self.json.write(self.get_deserialized())

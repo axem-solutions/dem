@@ -2,11 +2,11 @@
 # dem/core/data_management.py
 
 from pathlib import PurePath
-import os
+from typing import Callable
+import os, types
 import json, requests
 
-_empty_dev_env_json = """
-{
+_empty_dev_env_json = """{
     "version": "0.1",
     "org_name": "axem",
     "registry": "registry-1.docker.io",
@@ -29,6 +29,10 @@ class LocalDevEnvJSON():
         dev_env_json.write(_empty_dev_env_json)
         dev_env_json.close()
 
+    @staticmethod
+    def _callback() -> None:
+        pass
+
     def __init__(self) -> None:
         """ Init the class with an empty placeholder for the deserialized dev_env.json file. 
             Later this variable can be used to access the deserialized data. 
@@ -43,7 +47,12 @@ class LocalDevEnvJSON():
             self._create_empty_dev_env_json()
             self.deserialized = json.loads(_empty_dev_env_json)
         else:
-            self.deserialized = json.load(dev_env_json)
+            try:
+                self.deserialized = json.load(dev_env_json)
+            except json.decoder.JSONDecodeError:
+                self._callback()
+                exit()
+
             dev_env_json.close()
         
         return self.deserialized
@@ -58,6 +67,9 @@ class LocalDevEnvJSON():
         dev_env_json = open(self._path, "w")
         json.dump(deserialized, dev_env_json, indent=4)
         dev_env_json.close()
+
+    def set_callback(self, callback_func: Callable):
+        self._callback = types.MethodType(callback_func, self)
 
 class OrgDevEnvJSON():
     """ Deserialize the dev_env_org.json file."""

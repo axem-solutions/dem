@@ -9,6 +9,7 @@ from unittest.mock import patch, MagicMock, call
 
 from pathlib import PurePath
 import os
+import json.decoder
 
 ## Test cases
 
@@ -64,6 +65,26 @@ def test_dev_env_json_read_FileNotFounderror(mock_os_makedirs, mock_os_path, moc
     mock_os_makedirs.assert_called_once_with(dev_env_json._directory)
     
     mock_json_loads.assert_called_once_with(_empty_dev_env_json)
+
+    assert deserialized_dev_env_json is expected_deserialized_dev_env_json
+
+@patch("dem.core.data_management.open")
+@patch("dem.core.data_management.json.load")
+def test_dev_env_json_read_JSONDecodeError(mock_json_load, mock_open):
+    # Test setup
+    fake_opened_file = MagicMock()
+    mock_open.return_value = fake_opened_file
+    expected_deserialized_dev_env_json = MagicMock()
+    mock_json_load.side_effect = json.decoder.JSONDecodeError("dummy_msg", "dummy_doc", 0)
+
+    # Run unit under test
+    dev_env_json = LocalDevEnvJSON()
+    deserialized_dev_env_json = dev_env_json.read()
+
+    # Check expectations
+    mock_open.assert_called_once_with(PurePath(os.path.expanduser('~') + "/.config/axem/dev_env.json"), "r")
+    mock_json_load.assert_called_once_with(fake_opened_file)
+    fake_opened_file.close.assert_called_once()
 
     assert deserialized_dev_env_json is expected_deserialized_dev_env_json
 
