@@ -11,10 +11,10 @@ from dem.core.dev_env_setup import DevEnvLocalSetup
 >>>>>>> 5353bc3 (Started to work on the core callback mechanism.)
 import dem.cli.main, dem.cli.core_cb
 import docker.errors
-import types
 
 def main():
     """ Entry point for the CLI application"""
+<<<<<<< HEAD
 <<<<<<< HEAD
 
     # Set callback for core modules.
@@ -22,6 +22,10 @@ def main():
     DevEnvLocalSetup.msg_cb = dem.cli.core_cb.msg_cb
     DevEnvLocalSetup.pull_progress_cb = dem.cli.core_cb.pull_progress_cb
 =======
+=======
+
+    # Set callback for core modules.
+>>>>>>> 763e6e6 (Minor fixes. Test cases added.)
     DevEnvLocalSetup.core_cb = dem.cli.core_cb.core_cb
 >>>>>>> 5353bc3 (Started to work on the core callback mechanism.)
 

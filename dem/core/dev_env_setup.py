@@ -192,6 +192,8 @@ class DevEnvLocalSetup(DevEnvSetup):
     def __init__(self):
         """ Store the local Development Environments.
 
+        Sets the core callback if the core_cb class attribute has been set before the instantiation.
+
         Extends the DevEnvSetup super class by populating the list of Development Environments with 
         DevEnvLocal objects.
         """
