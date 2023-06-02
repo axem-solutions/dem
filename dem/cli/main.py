@@ -14,9 +14,9 @@ def list(local: bool = typer.Option(False, help="Scope is the local host."),
          env: bool = typer.Option(False, help="List the environments."),
          tool: bool = typer.Option(False, help="List the tool images.")) -> None:
     """
-    List the available Development Environments available locally or for the organization.
+    List the Development Environments available locally or for the organization.
     
-    The following option combinations suppported:
+    The following option combinations are suppported:
 
         --local --env -> List the local Development Environments.
 
