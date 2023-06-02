@@ -35,8 +35,10 @@ class LocalDevEnvJSON():
     def _invalid_json_callback(*args, **kwargs) -> None:
         pass
 
+        self.deserialized = json.loads(_empty_dev_env_json)
+
     @staticmethod
-    def _callback() -> None:
+    def _callback(*args, **kwargs) -> None:
         pass
 
     def __init__(self) -> None:
