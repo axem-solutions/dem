@@ -29,15 +29,17 @@ class LocalDevEnvJSON():
         dev_env_json.write(_empty_dev_env_json)
         dev_env_json.close()
 
+        self.deserialized = json.loads(_empty_dev_env_json)
+
     @staticmethod
-    def _callback() -> None:
+    def _callback(*args, **kwargs) -> None:
         pass
 
     def __init__(self) -> None:
-        """ Init the class with an empty placeholder for the deserialized dev_env.json file. 
+        """ Init the class with an empty dict for the deserialized dev_env.json file. 
             Later this variable can be used to access the deserialized data. 
         """
-        self.deserialized = None
+        self.deserialized = {}
 
     def read(self) -> dict:
         """ Read the deserialized dev_env.json."""
@@ -45,13 +47,13 @@ class LocalDevEnvJSON():
             dev_env_json = open(self._path, "r")
         except FileNotFoundError:
             self._create_empty_dev_env_json()
-            self.deserialized = json.loads(_empty_dev_env_json)
         else:
             try:
                 self.deserialized = json.load(dev_env_json)
             except json.decoder.JSONDecodeError:
-                self._callback()
-                exit()
+                self._callback(msg="[red]Error: invalid json format.[/]", 
+                               user_confirm="Restore the original json file?")
+                self._create_empty_dev_env_json()
 
             dev_env_json.close()
         
