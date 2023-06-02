@@ -25,9 +25,9 @@ class LocalDevEnvJSON():
         if not is_path_exist:
             os.makedirs(self._directory)
 
-        dev_env_json = open(self._path, "w")
-        dev_env_json.write(_empty_dev_env_json)
-        dev_env_json.close()
+        json_file = open(self._path, "w")
+        json_file.write(_empty_dev_env_json)
+        json_file.close()
 
         return json.loads(_empty_dev_env_json)
 
@@ -66,9 +66,9 @@ class LocalDevEnvJSON():
                 deserialized -- the modified deserialized data
         """
         self.deserialized = deserialized
-        dev_env_json = open(self._path, "w")
-        json.dump(deserialized, dev_env_json, indent=4)
-        dev_env_json.close()
+        json_file = open(self._path, "w")
+        json.dump(deserialized, json_file, indent=4)
+        json_file.close()
 
     def set_callback(self, callback_func: Callable):
         self._callback = types.MethodType(callback_func, self)
