@@ -40,8 +40,8 @@ def info(dev_env_name: str = typer.Argument(...,
 def pull(dev_env_name: str = typer.Argument(..., 
                                             help="Name of the Development Environment to install.")) -> None:
     """
-    Pull all the required containerized tools from the registry and install the Development 
-    Environment locally.
+    Pull all the required tool images from the registry and install the Development Environment
+    locally.
     """
     pull_cmd.execute(dev_env_name)
 
