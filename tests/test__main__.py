@@ -5,15 +5,16 @@
 import dem.__main__ as __main__
 
 # Test framework
-import pytest
 from unittest.mock import patch, MagicMock
 
 from dem import __command__
 from dem.core.exceptions import RegistryError
 import docker.errors
 
+@patch("dem.__main__.dem.cli.core_cb.core_cb")
+@patch("dem.__main__.DevEnvLocalSetup")
 @patch("dem.__main__.dem.cli.main.typer_cli")
-def test_cli_success(mock_typer_cli):
+def test_cli_success(mock_typer_cli, mock_DevEnvLocalSetup, mock_core_cb):
     # Test setup
 
     # Run unit under test
@@ -22,6 +23,10 @@ def test_cli_success(mock_typer_cli):
     # Check expectations
     mock_typer_cli.assert_called_once_with(prog_name=__command__)
 
+    assert mock_DevEnvLocalSetup.core_cb is mock_core_cb
+
+@patch("dem.__main__.dem.cli.core_cb.core_cb", MagicMock())
+@patch("dem.__main__.DevEnvLocalSetup", MagicMock())
 @patch("dem.__main__.stderr.print")
 @patch("dem.__main__.dem.cli.main.typer_cli")
 def test_cli_LookupError(mock_typer_cli, mock_stderr_print):
@@ -36,6 +41,8 @@ def test_cli_LookupError(mock_typer_cli, mock_stderr_print):
     mock_typer_cli.assert_called_once_with(prog_name=__command__)
     mock_stderr_print.assert_called_once_with("[red]" + test_exception + "[/]")
 
+@patch("dem.__main__.dem.cli.core_cb.core_cb", MagicMock())
+@patch("dem.__main__.DevEnvLocalSetup", MagicMock())
 @patch("dem.__main__.stderr.print")
 @patch("dem.__main__.dem.cli.main.typer_cli")
 def test_cli_RegistryError(mock_typer_cli, mock_stderr_print):
@@ -50,6 +57,8 @@ def test_cli_RegistryError(mock_typer_cli, mock_stderr_print):
     mock_typer_cli.assert_called_once_with(prog_name=__command__)
     mock_stderr_print.assert_called_once_with("[red]" + test_exception + "[/]")
 
+@patch("dem.__main__.dem.cli.core_cb.core_cb", MagicMock())
+@patch("dem.__main__.DevEnvLocalSetup", MagicMock())
 @patch("dem.__main__.stdout.print")
 @patch("dem.__main__.stderr.print")
 @patch("dem.__main__.dem.cli.main.typer_cli")
@@ -66,6 +75,8 @@ def test_cli_DockerException_permission_denied(mock_typer_cli, mock_stderr_print
     mock_stderr_print.assert_called_once_with("[red]" + test_exception + "[/]")
     mock_stdout_print.assert_called_once_with("\nHint: Is your user part of the docker group?")
 
+@patch("dem.__main__.dem.cli.core_cb.core_cb", MagicMock())
+@patch("dem.__main__.DevEnvLocalSetup", MagicMock())
 @patch("dem.__main__.stdout.print")
 @patch("dem.__main__.stderr.print")
 @patch("dem.__main__.dem.cli.main.typer_cli")

@@ -19,7 +19,7 @@ class LocalDevEnvJSON():
     _path = PurePath(os.path.expanduser('~') + "/.config/axem/dev_env.json")
     _directory = PurePath(os.path.expanduser('~') + "/.config/axem")
 
-    def _create_empty_dev_env_json(self) -> None:
+    def _create_empty_dev_env_json(self) -> dict:
         """ If the dev_env.json doesn't exist, then create an empty one."""
         is_path_exist = os.path.exists(self._directory)
         if not is_path_exist:
@@ -29,7 +29,7 @@ class LocalDevEnvJSON():
         dev_env_json.write(_empty_dev_env_json)
         dev_env_json.close()
 
-        self.deserialized = json.loads(_empty_dev_env_json)
+        return json.loads(_empty_dev_env_json)
 
     @staticmethod
     def _callback(*args, **kwargs) -> None:
@@ -44,18 +44,18 @@ class LocalDevEnvJSON():
     def read(self) -> dict:
         """ Read the deserialized dev_env.json."""
         try:
-            dev_env_json = open(self._path, "r")
+            json_file = open(self._path, "r")
         except FileNotFoundError:
-            self._create_empty_dev_env_json()
+            self.deserialized = self._create_empty_dev_env_json()
         else:
             try:
-                self.deserialized = json.load(dev_env_json)
+                self.deserialized = json.load(json_file)
             except json.decoder.JSONDecodeError:
                 self._callback(msg="[red]Error: invalid json format.[/]", 
                                user_confirm="Restore the original json file?")
-                self._create_empty_dev_env_json()
-
-            dev_env_json.close()
+                self.deserialized = self._create_empty_dev_env_json()
+            else:
+                json_file.close()
         
         return self.deserialized
 

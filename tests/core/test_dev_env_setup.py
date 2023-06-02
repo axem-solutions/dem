@@ -126,6 +126,26 @@ def test_check_image_availability_without_update(mock_json_attribute):
 def test_check_image_availability_with_update(mock_json_attribute):
     common_test_check_image_availability(mock_json_attribute, True)
 
+@patch.object(dev_env_setup.DevEnvSetup, "__init__")
+@patch.object(dev_env_setup.DevEnvLocalSetup, "json", new_callable=PropertyMock)
+def test_DevEnvLocalSetup_core_cb_set(mock_json_attribute, mock_super_init):
+    # Test setup
+    mock_json = MagicMock()
+    mock_json.read.return_value = MagicMock()
+    mock_json.deserialized["development_environments"] = []
+    mock_json.set_callback = MagicMock()
+    mock_json_attribute.return_value = mock_json
+    
+    test_callback = MagicMock()
+
+    # Run unit under test
+    dev_env_setup.DevEnvLocalSetup.core_cb = test_callback
+    test_dev_env_local_setup = dev_env_setup.DevEnvLocalSetup()
+
+    # Check expectations
+    mock_json.set_callback.assert_called_once_with(test_dev_env_local_setup.core_cb)
+    mock_super_init.assert_called_once_with(mock_json.read.return_value)
+
 @patch.object(dev_env_setup.DevEnvLocalSetup, "json", new_callable=PropertyMock)
 def test_DevEnvLocalSetup_update_json(mock_json_attribute):
     # Test setup

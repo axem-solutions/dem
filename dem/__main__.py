@@ -7,10 +7,11 @@ from dem.core.exceptions import RegistryError
 from dem.core.dev_env_setup import DevEnvLocalSetup
 import dem.cli.main, dem.cli.core_cb
 import docker.errors
-import types
 
 def main():
     """ Entry point for the CLI application"""
+
+    # Set callback for core modules.
     DevEnvLocalSetup.core_cb = dem.cli.core_cb.core_cb
 
     try:
