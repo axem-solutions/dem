@@ -5,13 +5,14 @@ from typing import Callable
 from types import MethodType
 import docker
 
+import dem.cli.core_cb as core_cb
+
 class ContainerEngine():
     def __init__(self) -> None:
         """Operations on the Docker Container Engine."""
         self._docker_client = docker.from_env()
         self._docker_api_client = docker.APIClient(base_url="unix:///var/run/docker.sock", 
                                                    version="auto")
-        self._pull_progress_cb = None
 
     def get_local_tool_images(self) -> list[str]:
         """Get local tool images.
@@ -32,11 +33,8 @@ class ContainerEngine():
         
         Args:
             repository -- repository to pull"""
-        if self._pull_progress_cb:
-            resp = self._docker_api_client.pull(repository, stream=True, decode=True)
-            self._pull_progress_cb(generator=resp)
-        else:
-            self._docker_api_client.pull(repository)
+        resp = self._docker_api_client.pull(repository, stream=True, decode=True)
+        core_cb.progress_cb(generator=resp)
 
     def remove(self, image: str) -> None:
         """Remove a tool image.
