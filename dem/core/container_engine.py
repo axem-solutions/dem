@@ -5,6 +5,8 @@ from typing import Callable
 from types import MethodType
 import docker
 
+import dem.cli.core_cb as core_cb
+
 class ContainerEngine():
     def __init__(self) -> None:
         """Operations on the Docker Container Engine."""
