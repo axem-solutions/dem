@@ -74,6 +74,7 @@ class DevEnvSetup:
     """
     _tool_images = None
     _container_engine = None
+    pull_progress_cb = None
 
     def _dev_env_json_version_check(self) -> None:
         """Check that the dev_env.json or dev_evn_org.json file supported.
@@ -128,6 +129,10 @@ class DevEnvSetup:
         """
         if cls._container_engine is None:
             cls._container_engine = ContainerEngine()
+
+            if cls.pull_progress_cb:
+                cls.container_engine.set_pull_progress_cb(cls.pull_progress_cb)
+
         return cls._container_engine
 
     def get_deserialized(self) -> dict:
@@ -180,7 +185,8 @@ class DevEnvLocalSetup(DevEnvSetup):
         core_cb -- the core classes can provide information through this callback
     """
     json = LocalDevEnvJSON()
-    core_cb = None
+    invalid_json_cb = None
+    msg_cb = None
 
     def __init__(self):
         """ Store the local Development Environments.
@@ -190,8 +196,8 @@ class DevEnvLocalSetup(DevEnvSetup):
         Extends the DevEnvSetup super class by populating the list of Development Environments with 
         DevEnvLocal objects.
         """
-        if self.core_cb is not None:
-            self.json.set_callback(self.core_cb)
+        if self.invalid_json_cb:
+            self.json.set_invalid_json_callback(self.invalid_json_cb)
 
         super().__init__(self.json.read())
 
@@ -202,17 +208,27 @@ class DevEnvLocalSetup(DevEnvSetup):
         """ Writes the deserialized json to the dev_env.json file."""
         self.json.write(self.get_deserialized())
 
-    def pull_images(self, tools):
+    def pull_images(self, tools: list):
         """ Pull images that are only present in the registry.
         
         Args:
             tools -- the tool images to pull (with any status, this function will filter the 
                      registry only ones)
         """
+
+        # Remove the duplications and the locally already available tools
+        unique_tool_images_to_pull = []
         for tool in tools:
-            if tool["image_status"] == ToolImages.REGISTRY_ONLY:
-                image_to_pull = tool["image_name" ] + ':' + tool["image_version"]
-                self.container_engine.pull(image_to_pull)
+            image_to_pull = tool["image_name" ] + ':' + tool["image_version"]
+            if (image_to_pull not in unique_tool_images_to_pull) and \
+                (tool["image_status"] == ToolImages.REGISTRY_ONLY):
+                unique_tool_images_to_pull.append(image_to_pull)
+
+        for tool_image in unique_tool_images_to_pull:
+            if self.msg_cb:
+                self.msg_cb(msg="\n")
+                self.msg_cb(msg="Pulling image " + tool_image, rule=True)
+                self.container_engine.pull(tool_image)
 
 class DevEnvOrg(DevEnv):
     """A Development Environment available for the organization."""

@@ -15,7 +15,7 @@ def test_core_cb(mock_stdout_print, mock_confirm):
     test_user_confirm = "test_user_confirm"
 
     # Run unit under test
-    core_cb.core_cb(msg=test_msg, user_confirm=test_user_confirm)
+    core_cb.user_confirm_cb(msg=test_msg, user_confirm=test_user_confirm)
 
     # Check expectations
     mock_stdout_print.assert_called_once_with(test_msg)

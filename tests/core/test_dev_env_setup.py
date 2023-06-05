@@ -139,11 +139,11 @@ def test_DevEnvLocalSetup_core_cb_set(mock_json_attribute, mock_super_init):
     test_callback = MagicMock()
 
     # Run unit under test
-    dev_env_setup.DevEnvLocalSetup.core_cb = test_callback
+    dev_env_setup.DevEnvLocalSetup.invalid_json_cb = test_callback
     test_dev_env_local_setup = dev_env_setup.DevEnvLocalSetup()
 
     # Check expectations
-    mock_json.set_callback.assert_called_once_with(test_dev_env_local_setup.core_cb)
+    mock_json.set_callback.assert_called_once_with(test_dev_env_local_setup.invalid_json_cb)
     mock_super_init.assert_called_once_with(mock_json.read.return_value)
 
 @patch.object(dev_env_setup.DevEnvLocalSetup, "json", new_callable=PropertyMock)
