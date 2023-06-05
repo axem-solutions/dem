@@ -111,6 +111,11 @@ def main(
     """
     Development Environment Manager (dem)
     
-    Manage your containerized development environments with ease.
+    Manage your containerized Development Environments with ease.
+
+
+
+    ❗ Always put the input text into double quotation marks (""), if it contains whitespaces.
+
     """
     return
