@@ -63,7 +63,7 @@ def user_confirm_cb(*args, **kwargs) -> None:
 def pull_progress_cb(*args, generator: typing.Generator):
     with Progress(TextColumn("[progress.layer_id]{task.fields[id]}"), 
                   TextColumn("[progress.description]{task.description}"),
-                  BarColumn(), TaskProgressColumn()) as progress:
+                  BarColumn(), TaskProgressColumn(), console=stdout) as progress:
         tasks = {}
 
         for item in generator:

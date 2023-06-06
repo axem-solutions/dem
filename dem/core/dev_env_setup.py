@@ -74,6 +74,7 @@ class DevEnvSetup:
     """
     _tool_images = None
     _container_engine = None
+    pull_progress_cb = None
 
     def _dev_env_json_version_check(self) -> None:
         """Check that the dev_env.json or dev_evn_org.json file supported.
@@ -222,15 +223,15 @@ class DevEnvLocalSetup(DevEnvSetup):
         unique_tool_images_to_pull = []
         for tool in tools:
             image_to_pull = tool["image_name" ] + ':' + tool["image_version"]
+            if (image_to_pull not in unique_tool_images_to_pull) and \
+                (tool["image_status"] == ToolImages.REGISTRY_ONLY):
+                unique_tool_images_to_pull.append(image_to_pull)
 
-            if tool["image_status"] == ToolImages.REGISTRY_ONLY:
-                if self.core_cb:
-                    self.core_cb(msg="Pulling image " + image_to_pull + "\n")
-
-                self.container_engine.pull(image_to_pull)
-            else:
-                if self.core_cb:
-                    self.core_cb(msg="The tool image " + image_to_pull + " is already available.\n")
+        for tool_image in unique_tool_images_to_pull:
+            if self.msg_cb:
+                self.msg_cb(msg="\n")
+                self.msg_cb(msg="Pulling image " + tool_image, rule=True)
+                self.container_engine.pull(tool_image)
 
 class DevEnvOrg(DevEnv):
     """A Development Environment available for the organization."""
