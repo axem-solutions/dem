@@ -3,7 +3,7 @@
 
 from dem.cli.console import stdout
 import typer, typing
-from rich.progress import Progress, TaskID
+from rich.progress import Progress, TaskID, TextColumn, BarColumn, TaskProgressColumn
 
 
 def get_value_by_key_if_exist(dictionary: dict, keys: list[str]) -> str | TaskID | None:
@@ -60,8 +60,10 @@ def user_confirm_cb(*args, **kwargs) -> None:
     if "user_confirm" in kwargs:
         typer.confirm(kwargs["user_confirm"], abort=True)
 
-def progress_cb(*args, generator: typing.Generator):
-    with Progress() as progress:
+def pull_progress_cb(*args, generator: typing.Generator):
+    with Progress(TextColumn("[progress.layer_id]{task.fields[id]}"), 
+                  TextColumn("[progress.description]{task.description}"),
+                  BarColumn(), TaskProgressColumn()) as progress:
         tasks = {}
 
         for item in generator:

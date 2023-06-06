@@ -34,7 +34,7 @@ class ContainerEngine():
         Args:
             repository -- repository to pull"""
         resp = self._docker_api_client.pull(repository, stream=True, decode=True)
-        core_cb.progress_cb(generator=resp)
+        core_cb.pull_progress_cb(generator=resp)
 
     def remove(self, image: str) -> None:
         """Remove a tool image.
