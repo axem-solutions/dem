@@ -74,6 +74,7 @@ class DevEnvSetup:
     """
     _tool_images = None
     _container_engine = None
+    pull_progress_cb = None
 
     def _dev_env_json_version_check(self) -> None:
         """Check that the dev_env.json or dev_evn_org.json file supported.

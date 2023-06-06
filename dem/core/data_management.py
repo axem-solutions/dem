@@ -35,12 +35,6 @@ class LocalDevEnvJSON():
     def _invalid_json_callback(*args, **kwargs) -> None:
         pass
 
-        return json.loads(_empty_dev_env_json)
-
-    @staticmethod
-    def _callback(*args, **kwargs) -> None:
-        pass
-
     def __init__(self) -> None:
         """ Init the class with an empty dict for the deserialized dev_env.json file. 
             Later this variable can be used to access the deserialized data. 
