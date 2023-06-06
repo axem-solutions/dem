@@ -56,5 +56,5 @@ class ContainerEngine():
             local_registryimagelist.append(repositories['name'])
         return local_registryimagelist
 
-    def set_pull_progress_cb(self, pull_progress_callback: Callable):
+    def set_pull_progress_cb(self, pull_progress_callback: Callable) -> None:
         self._pull_progress_cb = MethodType(pull_progress_callback, self)

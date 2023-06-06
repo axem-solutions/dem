@@ -74,7 +74,6 @@ class DevEnvSetup:
     """
     _tool_images = None
     _container_engine = None
-    pull_progress_cb = None
 
     def _dev_env_json_version_check(self) -> None:
         """Check that the dev_env.json or dev_evn_org.json file supported.
@@ -130,9 +129,6 @@ class DevEnvSetup:
         if cls._container_engine is None:
             cls._container_engine = ContainerEngine()
 
-            if cls.pull_progress_cb:
-                cls.container_engine.set_pull_progress_cb(cls.pull_progress_cb)
-
         return cls._container_engine
 
     def get_deserialized(self) -> dict:
@@ -187,6 +183,7 @@ class DevEnvLocalSetup(DevEnvSetup):
     json = LocalDevEnvJSON()
     invalid_json_cb = None
     msg_cb = None
+    pull_progress_cb = None
 
     def __init__(self):
         """ Store the local Development Environments.
@@ -198,6 +195,9 @@ class DevEnvLocalSetup(DevEnvSetup):
         """
         if self.invalid_json_cb:
             self.json.set_invalid_json_callback(self.invalid_json_cb)
+
+        if self.pull_progress_cb:
+            self.container_engine.set_pull_progress_cb(self.pull_progress_cb)
 
         super().__init__(self.json.read())
 
@@ -225,10 +225,11 @@ class DevEnvLocalSetup(DevEnvSetup):
                 unique_tool_images_to_pull.append(image_to_pull)
 
         for tool_image in unique_tool_images_to_pull:
-            if self.msg_cb:
+            if self.msg_cb is not None:
                 self.msg_cb(msg="\n")
                 self.msg_cb(msg="Pulling image " + tool_image, rule=True)
-                self.container_engine.pull(tool_image)
+
+            self.container_engine.pull(tool_image)
 
 class DevEnvOrg(DevEnv):
     """A Development Environment available for the organization."""
