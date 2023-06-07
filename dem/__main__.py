@@ -25,6 +25,7 @@ def main():
     DevEnvLocalSetup.invalid_json_cb = dem.cli.core_cb.user_confirm_cb
     DevEnvLocalSetup.msg_cb = dem.cli.core_cb.msg_cb
 <<<<<<< HEAD
+<<<<<<< HEAD
     DevEnvLocalSetup.pull_progress_cb = dem.cli.core_cb.pull_progress_cb
 =======
 =======
@@ -36,6 +37,9 @@ def main():
 =======
     DevEnvSetup.pull_progress_cb = dem.cli.core_cb.pull_progress_cb
 >>>>>>> 987018c (Callback mechanism added for the progress bar. Further tweaks in the output design.)
+=======
+    DevEnvLocalSetup.pull_progress_cb = dem.cli.core_cb.pull_progress_cb
+>>>>>>> 12a36b0 (Test cases fixed.)
 
     try:
         dem.cli.main.typer_cli(prog_name=__command__)
