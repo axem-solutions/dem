@@ -82,7 +82,7 @@ def delete(dev_env_name: str = typer.Argument(...,
                                               help="Name of the Development Environment to delete.")) -> None:
     """
     Delete the Development Environment from the local setup. If a tool image is not required
-    anymore by any of the available local Developtment Environments, the DEM asks the user whether
+    anymore by any of the available local Development Environments, the DEM asks the user whether
     they want to delete that image or not.
     """
     delete_cmd.execute(dev_env_name)
