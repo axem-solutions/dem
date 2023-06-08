@@ -186,8 +186,6 @@ class DevEnvLocalSetup(DevEnvSetup):
         Extends the DevEnvSetup super class by populating the list of Development Environments with 
         DevEnvLocal objects.
         """
-        self.json = LocalDevEnvJSON()
-        self.container_engine = ContainerEngine()
         super().__init__(self.json.read())
 
         for dev_env_descriptor in self.json.deserialized["development_environments"]:
@@ -201,7 +199,8 @@ class DevEnvLocalSetup(DevEnvSetup):
         """ Pull images that are only present in the registry.
         
         Args:
-            tools -- the tool images to pull
+            tools -- the tool images to pull (with any status, this function will filter the 
+                     registry only ones)
         """
         for tool in tools:
             if tool["image_status"] == ToolImages.REGISTRY_ONLY:

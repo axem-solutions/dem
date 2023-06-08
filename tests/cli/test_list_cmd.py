@@ -267,14 +267,17 @@ def test_no_local_tool_images(mock_ContainerEngine):
 ## Test listing the local tool images.
 
 @patch("dem.cli.command.list_cmd.registry.list_repos")
-def test_registry_tool_images(mock_list_repos):
+@patch("dem.cli.command.list_cmd.container_engine.ContainerEngine")
+def test_registry_tool_images(mock_ContainerEngine, mock_list_repos):
     # Test setup
-    fake_registry_tool_images = [
+    test_registry_tool_images = [
         "axemsolutions/cpputest:latest",
         "axemsolutions/stlink_org:latest",
         "axemsolutions/make_gnu_arm:latest",
     ]
-    mock_list_repos.return_value = fake_registry_tool_images
+    mock_container_engine = MagicMock()
+    mock_ContainerEngine.return_value = mock_container_engine
+    mock_list_repos.return_value = test_registry_tool_images
 
     # Run unit under test
     runner_result = runner.invoke(main.typer_cli, ["list", "--all", "--tool"])
@@ -282,7 +285,7 @@ def test_registry_tool_images(mock_list_repos):
     # Check expectations
     assert 0 == runner_result.exit_code
 
-    mock_list_repos.assert_called_once()
+    mock_list_repos.assert_called_once_with(mock_container_engine)
     
     expected_table = Table()
     expected_table.add_column("Repository")
@@ -294,9 +297,12 @@ def test_registry_tool_images(mock_list_repos):
     assert console.file.getvalue() == runner_result.stdout
 
 @patch("dem.cli.command.list_cmd.registry.list_repos")
-def test_empty_repository(mock_list_repos):
+@patch("dem.cli.command.list_cmd.container_engine.ContainerEngine")
+def test_empty_repository(mock_ContainerEngine, mock_list_repos):
     # Test setup
     fake_registry_tool_images = []
+    mock_container_engine = MagicMock()
+    mock_ContainerEngine.return_value = mock_container_engine
     mock_list_repos.return_value = fake_registry_tool_images
 
     # Run unit under test
@@ -305,7 +311,7 @@ def test_empty_repository(mock_list_repos):
     # Check expectations
     assert 0 == runner_result.exit_code
 
-    mock_list_repos.assert_called_once()
+    mock_list_repos.assert_called_once_with(mock_container_engine)
     
     expected_table = Table()
     expected_table.add_column("Repository")
