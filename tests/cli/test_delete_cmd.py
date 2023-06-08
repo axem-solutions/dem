@@ -29,7 +29,7 @@ def test_try_to_delete_tool_image_ImageNotFound(mock_confirm, mock_print):
     # Check expectations
     calls = [
         call("\nThe tool image [bold]" + test_tool_image + "[/bold] is not required by any Development Environment anymore."),
-        call("[yellow]Couldn't delete " + test_tool_image + ", because doesn't exist.\n")
+        call("[yellow]" + test_tool_image + " doesn't exist. Unable to remove it.[/]\n")
     ]
     mock_print.assert_has_calls(calls)
     mock_confirm.assert_called_once_with("Would you like to remove it?")
@@ -52,7 +52,7 @@ def test_try_to_delete_tool_image_APIError(mock_confirm, mock_stdout_print, mock
     mock_stdout_print.assert_called_once_with("\nThe tool image [bold]" + test_tool_image + "[/bold] is not required by any Development Environment anymore.")
     mock_confirm.assert_called_once_with("Would you like to remove it?")
     mock_dev_env_local_setup.container_engine.remove.assert_called_once_with(test_tool_image)
-    mock_stderr_print.assert_called_once_with("[red]Error: " + test_tool_image + " is used by a container. Unable to remove it.\n")
+    mock_stderr_print.assert_called_once_with("[red]Error: " + test_tool_image + " is used by a container. Unable to remove it.[/]\n")
 
 @patch("dem.cli.command.delete_cmd.stdout.print")
 @patch("dem.cli.command.delete_cmd.typer.confirm")
