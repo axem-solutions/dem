@@ -12,9 +12,9 @@ def try_to_delete_tool_image(tool_image: str, dev_env_local_setup: DevEnvLocalSe
         try:
             dev_env_local_setup.container_engine.remove(tool_image)
         except docker.errors.ImageNotFound:
-            stdout.print("[yellow]Couldn't delete " + tool_image + ", because doesn't exist.\n")
+            stdout.print("[yellow]" + tool_image + " doesn't exist. Unable to remove it.[/]\n")
         except docker.errors.APIError:
-            stderr.print("[red]Error: " + tool_image + " is used by a container. Unable to remove it.\n")
+            stderr.print("[red]Error: " + tool_image + " is used by a container. Unable to remove it.[/]\n")
         else:
             stdout.print("[green]Successfully removed![/]\n")
 
