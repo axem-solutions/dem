@@ -2,11 +2,11 @@
 # dem/core/data_management.py
 
 from pathlib import PurePath
-import os
+from typing import Callable
+import os, types
 import json, requests
 
-_empty_dev_env_json = """
-{
+_empty_dev_env_json = """{
     "version": "0.1",
     "org_name": "axem",
     "registry": "registry-1.docker.io",
@@ -19,32 +19,43 @@ class LocalDevEnvJSON():
     _path = PurePath(os.path.expanduser('~') + "/.config/axem/dev_env.json")
     _directory = PurePath(os.path.expanduser('~') + "/.config/axem")
 
-    def _create_empty_dev_env_json(self) -> None:
+    def _create_empty_dev_env_json(self) -> dict:
         """ If the dev_env.json doesn't exist, then create an empty one."""
         is_path_exist = os.path.exists(self._directory)
         if not is_path_exist:
             os.makedirs(self._directory)
 
-        dev_env_json = open(self._path, "w")
-        dev_env_json.write(_empty_dev_env_json)
-        dev_env_json.close()
+        json_file = open(self._path, "w")
+        json_file.write(_empty_dev_env_json)
+        json_file.close()
+
+        return json.loads(_empty_dev_env_json)
+
+    @staticmethod
+    def _callback(*args, **kwargs) -> None:
+        pass
 
     def __init__(self) -> None:
-        """ Init the class with an empty placeholder for the deserialized dev_env.json file. 
+        """ Init the class with an empty dict for the deserialized dev_env.json file. 
             Later this variable can be used to access the deserialized data. 
         """
-        self.deserialized = None
+        self.deserialized = {}
 
     def read(self) -> dict:
         """ Read the deserialized dev_env.json."""
         try:
-            dev_env_json = open(self._path, "r")
+            json_file = open(self._path, "r")
         except FileNotFoundError:
-            self._create_empty_dev_env_json()
-            self.deserialized = json.loads(_empty_dev_env_json)
+            self.deserialized = self._create_empty_dev_env_json()
         else:
-            self.deserialized = json.load(dev_env_json)
-            dev_env_json.close()
+            try:
+                self.deserialized = json.load(json_file)
+            except json.decoder.JSONDecodeError:
+                self._callback(msg="[red]Error: invalid json format.[/]", 
+                               user_confirm="Restore the original json file?")
+                self.deserialized = self._create_empty_dev_env_json()
+            else:
+                json_file.close()
         
         return self.deserialized
 
@@ -55,9 +66,12 @@ class LocalDevEnvJSON():
                 deserialized -- the modified deserialized data
         """
         self.deserialized = deserialized
-        dev_env_json = open(self._path, "w")
-        json.dump(deserialized, dev_env_json, indent=4)
-        dev_env_json.close()
+        json_file = open(self._path, "w")
+        json.dump(deserialized, json_file, indent=4)
+        json_file.close()
+
+    def set_callback(self, callback_func: Callable):
+        self._callback = types.MethodType(callback_func, self)
 
 class OrgDevEnvJSON():
     """ Deserialize the dev_env_org.json file."""

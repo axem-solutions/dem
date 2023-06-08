@@ -9,9 +9,9 @@ from unittest.mock import patch, MagicMock, call
 
 from pathlib import PurePath
 import os
+import json.decoder
 
 ## Test cases
-
 
 @patch("dem.core.data_management.open")
 @patch("dem.core.data_management.json.load")
@@ -66,6 +66,34 @@ def test_dev_env_json_read_FileNotFounderror(mock_os_makedirs, mock_os_path, moc
     mock_json_loads.assert_called_once_with(_empty_dev_env_json)
 
     assert deserialized_dev_env_json is expected_deserialized_dev_env_json
+
+@patch("dem.core.data_management.open")
+@patch("dem.core.data_management.json.load")
+def test_dev_env_json_read_JSONDecodeError(mock_json_load, mock_open):
+    # Test setup
+    fake_opened_file = MagicMock()
+    mock_open.return_value = fake_opened_file
+    mock_json_load.side_effect = json.decoder.JSONDecodeError("dummy_msg", "dummy_doc", 0)
+
+    dev_env_json = LocalDevEnvJSON()
+    dev_env_json._callback = MagicMock()
+    dev_env_json._create_empty_dev_env_json = MagicMock()
+
+    mock_deserialized = MagicMock()
+    dev_env_json._create_empty_dev_env_json.return_value = mock_deserialized
+
+    # Run unit under test
+    deserialized_dev_env_json = dev_env_json.read()
+
+    # Check expectations
+    mock_open.assert_called_once_with(PurePath(os.path.expanduser('~') + "/.config/axem/dev_env.json"), "r")
+    mock_json_load.assert_called_once_with(fake_opened_file)
+
+    dev_env_json._callback.assert_called_once_with(msg="[red]Error: invalid json format.[/]", 
+                                                   user_confirm="Restore the original json file?")
+    dev_env_json._create_empty_dev_env_json.assert_called_once()
+
+    assert deserialized_dev_env_json is mock_deserialized
 
 @patch("dem.core.data_management.open")
 @patch("dem.core.data_management.json.dump")
