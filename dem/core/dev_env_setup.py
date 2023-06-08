@@ -64,7 +64,7 @@ class DevEnv:
         return image_statuses
 
 class DevEnvSetup:
-    """Represents the development setup:
+    """Representation of the development setup:
         - The available tool images.
         - The available Development Environments.
 
@@ -178,7 +178,11 @@ class DevEnvLocalSetup(DevEnvSetup):
 
     Class attributes:
         json -- deserialized json representing the local setup
-        core_cb -- the core classes can provide information through this callback
+        invalid_json_cb -- the user can be noted through this callback when something is wrong with
+                           the dev_env.json file
+        msg_cb -- a generic callback to send messages for the user
+        pull_progress_cb -- a generator is provided for this callback to note the user of the 
+                            current status of the pull process
     """
     json = LocalDevEnvJSON()
     invalid_json_cb = None
@@ -187,8 +191,6 @@ class DevEnvLocalSetup(DevEnvSetup):
 
     def __init__(self):
         """ Store the local Development Environments.
-
-        Sets the core callback if the core_cb class attribute has been set before the instantiation.
 
         Extends the DevEnvSetup super class by populating the list of Development Environments with 
         DevEnvLocal objects.
@@ -245,7 +247,7 @@ class DevEnvOrg(DevEnv):
                 return dev_env_local
 
 class DevEnvOrgSetup(DevEnvSetup):
-    """ The organization's development setup. The user can install Dev Envs listed in the class.
+    """ The organization's development setup. The user can install Dev Envs listed in this class.
 
     Class attributes:
         json -- deserialized json representing the organization's setup 
