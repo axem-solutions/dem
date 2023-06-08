@@ -275,8 +275,8 @@ def test_registry_tool_images(mock_ContainerEngine, mock_list_repos):
         "axemsolutions/stlink_org:latest",
         "axemsolutions/make_gnu_arm:latest",
     ]
-    mock_container_egnine = MagicMock()
-    mock_ContainerEngine.return_value = mock_container_egnine
+    mock_container_engine = MagicMock()
+    mock_ContainerEngine.return_value = mock_container_engine
     mock_list_repos.return_value = test_registry_tool_images
 
     # Run unit under test
@@ -285,7 +285,7 @@ def test_registry_tool_images(mock_ContainerEngine, mock_list_repos):
     # Check expectations
     assert 0 == runner_result.exit_code
 
-    mock_list_repos.assert_called_once_with(mock_container_egnine)
+    mock_list_repos.assert_called_once_with(mock_container_engine)
     
     expected_table = Table()
     expected_table.add_column("Repository")
@@ -301,8 +301,8 @@ def test_registry_tool_images(mock_ContainerEngine, mock_list_repos):
 def test_empty_repository(mock_ContainerEngine, mock_list_repos):
     # Test setup
     fake_registry_tool_images = []
-    mock_container_egnine = MagicMock()
-    mock_ContainerEngine.return_value = mock_container_egnine
+    mock_container_engine = MagicMock()
+    mock_ContainerEngine.return_value = mock_container_engine
     mock_list_repos.return_value = fake_registry_tool_images
 
     # Run unit under test
@@ -311,7 +311,7 @@ def test_empty_repository(mock_ContainerEngine, mock_list_repos):
     # Check expectations
     assert 0 == runner_result.exit_code
 
-    mock_list_repos.assert_called_once_with(mock_container_egnine)
+    mock_list_repos.assert_called_once_with(mock_container_engine)
     
     expected_table = Table()
     expected_table.add_column("Repository")

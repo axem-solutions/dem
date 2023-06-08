@@ -80,4 +80,4 @@ def test_cli_DockerException_unknown(mock_typer_cli, mock_stderr_print, mock_std
     # Check expectations
     mock_typer_cli.assert_called_once_with(prog_name=__command__)
     mock_stderr_print.assert_called_once_with("[red]" + test_exception + "[/]")
-    mock_stdout_print.assert_called_once_with("\nHint: Reinstall the Docker Engine.")
+    mock_stdout_print.assert_called_once_with("\nHint: Probably something is wrong with your Docker Engine installation. Try to reinstall it.")
