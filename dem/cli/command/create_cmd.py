@@ -6,6 +6,7 @@ from dem.core.dev_env_setup import DevEnv, DevEnvLocal, DevEnvLocalSetup
 from dem.core.tool_images import ToolImages
 from dem.cli.menu import ToolTypeMenu, ToolImageMenu
 from dem.cli.console import stdout, stderr
+from dem.cli.tool_selector import ToolSelectorPanel
 
 tool_image_statuses = {
     ToolImages.LOCAL_ONLY: "local",
@@ -17,27 +18,33 @@ def get_tool_image_list(tool_images: ToolImages) -> list[list[str]]:
     return [[name, tool_image_statuses[status]] for name, status in tool_images.elements.items()]
 
 def get_dev_env_descriptor_from_user(dev_env_name: str, tool_image_list: list[list[str]]) -> dict:
-    tool_type_menu = ToolTypeMenu(list(DevEnv.supported_tool_types))
-    # Wait until the user finishes the tool type selection.
-    tool_type_menu.wait_for_user()
-    selected_tool_types = tool_type_menu.get_selected_tool_types()
+    tool_selector = ToolSelectorPanel(list(DevEnv.supported_tool_types))
+    tool_selector.tool_type_menu.set_title("What kind of tools would you like to include in [cyan]" + dev_env_name + "[/]?")
 
-    tool_image_menu = ToolImageMenu(tool_image_list)
-    dev_env_descriptor = {
-        "name": dev_env_name,
-        "tools": []
-    }
-    for tool_type in selected_tool_types:
-        tool_image_menu.set_title("Select tool image for type " + tool_type)
-        tool_image_menu.wait_for_user()
-        selected_tool_image = tool_image_menu.get_selected_tool_image()
-        tool_descriptor = {
-            "type": tool_type,
-            "image_name": selected_tool_image[0],
-            "image_version": selected_tool_image[1]
-        }
-        dev_env_descriptor["tools"].append(tool_descriptor)
-    return dev_env_descriptor
+    tool_selector.wait_for_user()
+
+
+
+    # # Wait until the user finishes the tool type selection.
+    # tool_type_menu.wait_for_user()
+    # selected_tool_types = tool_type_menu.get_selected_tool_types()
+
+    # tool_image_menu = ToolImageMenu(tool_image_list)
+    # dev_env_descriptor = {
+    #     "name": dev_env_name,
+    #     "tools": []
+    # }
+    # for tool_type in selected_tool_types:
+    #     tool_image_menu.set_title("Select tool image for type " + tool_type)
+    #     tool_image_menu.wait_for_user()
+    #     selected_tool_image = tool_image_menu.get_selected_tool_image()
+    #     tool_descriptor = {
+    #         "type": tool_type,
+    #         "image_name": selected_tool_image[0],
+    #         "image_version": selected_tool_image[1]
+    #     }
+    #     dev_env_descriptor["tools"].append(tool_descriptor)
+    # return dev_env_descriptor
 
 def overwrite_existing_dev_env(original_dev_env: DevEnvLocal, new_dev_env_descriptor: dict) -> None:
     original_dev_env.tools = new_dev_env_descriptor["tools"]

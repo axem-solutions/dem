@@ -17,9 +17,8 @@ class Menu(table.Table):
 
     def move_cursor(self, cursor_direction: int) -> None:
         # Remove current cursor indicator
-        self.columns[0]._cells[self.cursor_pos] = self.columns[0]._cells[self.cursor_pos].replace("*", 
-                                                                                                  " ", 
-                                                                                                  1)
+        self.hide_cursor()
+
         if (cursor_direction == self.CURSOR_UP):
             if self.cursor_pos == 0:
                 self.cursor_pos = self.row_count - 1
@@ -31,14 +30,87 @@ class Menu(table.Table):
             else:
                 self.cursor_pos += 1
         # Set new cursor indicator
+        self.show_cursor()
+                                                                                                
+    def hide_cursor(self):
+        self.columns[0]._cells[self.cursor_pos] = self.columns[0]._cells[self.cursor_pos].replace("*", 
+                                                                                                  " ", 
+                                                                                                  1)
+
+    def show_cursor(self):
         self.columns[0]._cells[self.cursor_pos] = self.columns[0]._cells[self.cursor_pos].replace(" ", 
                                                                                                   "*", 
                                                                                                   1)
-                                                                                                
+
     def set_title(self, title: str) -> None:
-        self.title = title
+        self.title = title + "\n"
+
+class VerticalMenu(table.Table):
+    (
+        CURSOR_LEFT,
+        CURSOR_RIGHT
+    ) = range(2)
+
+    def __init__(self) -> None:
+        super().__init__(box=None)
+        self.cursor_pos = 0
+        self.alignment = align.Align(self, align="center", vertical="middle")
+
+    def move_cursor(self, cursor_direction: int) -> None:
+        # Remove current cursor indicator
+        self.hide_cursor()
+
+        if (cursor_direction == self.CURSOR_LEFT):
+            if self.cursor_pos == 0:
+                self.cursor_pos = len(self.columns) - 1
+            else:
+                self.cursor_pos -= 1
+        else:
+            if self.cursor_pos == len(self.columns) - 1:
+                self.cursor_pos = 0
+            else:
+                self.cursor_pos += 1
+
+        # Set new cursor indicator
+        self.show_cursor()
+
+    def hide_cursor(self):
+        self.columns[self.cursor_pos]._cells[0] = self.columns[self.cursor_pos]._cells[0].replace("*", 
+                                                                                                  " ", 
+                                                                                                  1)
+
+    def show_cursor(self):
+        self.columns[self.cursor_pos]._cells[0] = self.columns[self.cursor_pos]._cells[0].replace(" ", 
+                                                                                                  "*", 
+                                                                                                  1)
+
+    def set_title(self, title: str) -> None:
+        self.title = title + "\n"
+
+class CancelNextMenu(VerticalMenu):
+    menu_items = ("cancel", "next")
+    
+    def __init__(self) -> None:
+        super().__init__()
+
+        self.add_row("* " + self.menu_items[0],"  " + self.menu_items[1])
+        self.selected = False
+
+    def handle_user_input(self, input: str) -> None:
+        match input:
+            case key.LEFT | 'h':
+                self.move_cursor(self.CURSOR_LEFT)
+            case key.RIGHT | 'l':
+                self.move_cursor(self.CURSOR_RIGHT)
+            case key.ENTER:
+                self.selected = True
 
 class ToolTypeMenu(Menu):
+    selection_status = {
+        "selected": "[green]yes[/]",
+        "not selected": "no",
+    }
+
     def __init__(self, elements: list[str]) -> None:
         super().__init__()
 
@@ -48,40 +120,36 @@ class ToolTypeMenu(Menu):
         for index, element in enumerate(elements):
             if (index == 0):
                 # Set the cursor indicator for the first element.
-                self.add_row("* " + element)
+                self.add_row("* " + element, self.selection_status["not selected"])
             else:
-                self.add_row("  " + element)
-
-        self.alignment = align.Align(self, align="center", vertical="middle")
+                self.add_row("  " + element, self.selection_status["not selected"])
 
     def preset_selection(self, already_selected: list[str]) -> None:
         for row_idx, cell in enumerate(self.columns[0]._cells):
             if cell[2:] in already_selected:
-                self.columns[1]._cells[row_idx] = "✔"
+                self.columns[1]._cells[row_idx] = self.selection_status["selected"]
 
     def toggle_select(self) -> None:
-        if (self.columns[1]._cells[self.cursor_pos] == ""):
-            self.columns[1]._cells[self.cursor_pos] = "✔"
+        if (self.columns[1]._cells[self.cursor_pos] is self.selection_status["selected"]):
+            self.columns[1]._cells[self.cursor_pos] = self.selection_status["not selected"]
         else:
-            self.columns[1]._cells[self.cursor_pos] = ""
+            self.columns[1]._cells[self.cursor_pos] = self.selection_status["selected"]
 
-    def wait_for_user(self):
-        with live.Live(self.alignment, refresh_per_second=8, screen=True):
-            while True:
-                match readkey():
-                    case key.UP | 'k':
-                        self.move_cursor(self.CURSOR_UP)
-                    case key.DOWN | 'j':
-                        self.move_cursor(self.CURSOR_DOWN)
-                    case ' ':
-                        self.toggle_select()
-                    case key.ENTER:
-                        break
-            
+    def handle_user_input(self, input: str) -> None:
+        match input:
+            case key.UP | 'k':
+                self.move_cursor(self.CURSOR_UP)
+            case key.DOWN | 'j':
+                self.move_cursor(self.CURSOR_DOWN)
+            case ' ':
+                self.toggle_select()
+            case key.ENTER:
+                pass
+
     def get_selected_tool_types(self) -> list[str]:
         selected_tool_types = []
         for row_index, cell in enumerate(self.columns[1]._cells):
-            if cell ==  "✔":
+            if cell == self.selection_status["selected"]:
                 selected_tool_types.append(self.columns[0]._cells[row_index][2:])
         return selected_tool_types
 

@@ -3,5 +3,5 @@
 
 from rich.console import Console
 
-stdout = Console()
+stdout = Console(highlight=False)
 stderr = Console(stderr=True)
