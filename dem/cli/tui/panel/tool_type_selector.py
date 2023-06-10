@@ -1,4 +1,7 @@
-from dem.cli.menu import ToolTypeMenu, CancelNextMenu
+"""Tool selector panel."""
+# dem/cli/tui/panel/tool_selector.py
+
+from dem.cli.tui.renderable.menu import ToolTypeMenu, CancelNextMenu
 from rich.panel import Panel
 from rich.layout import Layout
 from rich.console import RenderableType, Group
@@ -8,7 +11,7 @@ from readchar import readkey, key
 
 class NavigationHint():
     hint_test = """
-- [bold]move cursor[/]: up/down arrows or j/k
+- [bold]move cursor[/]: arrows or h/j/k/l
 - [bold]select[/]: space or enter
 - [bold]jump to next/cancel[/]: tab
 - [bold]finish selection[/]: press enter when [italic]next[/] is selected
@@ -21,7 +24,7 @@ class NavigationHint():
     def get_renderable(self) -> RenderableType:
         return self.aligned_panel
 
-class ToolSelectorPanel():
+class ToolTypeSelectorPanel():
     def __init__(self, elements: list[str]) -> None:
         # Panel content
         self.tool_type_menu = ToolTypeMenu(elements)
@@ -35,7 +38,6 @@ class ToolSelectorPanel():
 
         self.navigation_hint = NavigationHint()
 
-        self.active_menu = self.tool_type_menu
 
         self.layout = Layout(name="root")
         self.layout.split(
@@ -46,17 +48,18 @@ class ToolSelectorPanel():
         self.layout["navigation_hint"].update(self.navigation_hint.get_renderable())
         
     def wait_for_user(self) -> None:
+        active_menu = self.tool_type_menu
         with Live(self.layout, refresh_per_second=8, screen=True):
-            while True:
+            while self.cancel_next_menu.is_selected is False:
                 input = readkey()
                 if input is key.TAB:
-                    self.active_menu.hide_cursor()
+                    active_menu.hide_cursor()
 
-                    if self.active_menu is self.tool_type_menu:
-                        self.active_menu = self.cancel_next_menu
+                    if active_menu is self.tool_type_menu:
+                        active_menu = self.cancel_next_menu
                     else:
-                        self.active_menu = self.tool_type_menu
+                        active_menu = self.tool_type_menu
 
-                    self.active_menu.show_cursor()
+                    active_menu.show_cursor()
                 else:
-                    self.active_menu.handle_user_input(input)
+                    active_menu.handle_user_input(input)

@@ -4,7 +4,7 @@
 import copy, typer
 from dem.core.dev_env_setup import DevEnvLocalSetup, DevEnvLocal, DevEnv
 from dem.cli.console import stderr
-from dem.cli.menu import ToolTypeMenu, ToolImageMenu, SelectMenu
+from dem.cli.tui.renderable.menu import ToolTypeMenu, ToolImageMenu, SelectMenu
 from dem.core.tool_images import ToolImages
 
 tool_image_statuses = {
