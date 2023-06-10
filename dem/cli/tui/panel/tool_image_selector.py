@@ -49,20 +49,20 @@ class ToolImageSelectorPanel():
         self.layout["navigation_hint"].update(self.navigation_hint.aligned_renderable)
 
         self.back_menu.hide_cursor()
+        self.active_menu = self.tool_image_menu
 
     def wait_for_user(self) -> None:
-        active_menu = self.tool_image_menu
         with Live(self.layout, refresh_per_second=8, screen=True):
-            while active_menu.is_selected is False:
+            while self.active_menu.is_selected is False:
                 input = readkey()
                 if input is key.TAB:
-                    active_menu.hide_cursor()
+                    self.active_menu.hide_cursor()
 
-                    if active_menu is self.tool_image_menu:
-                        active_menu = self.back_menu
+                    if self.active_menu is self.tool_image_menu:
+                        self.active_menu = self.back_menu
                     else:
-                        active_menu = self.tool_image_menu
+                        self.active_menu = self.tool_image_menu
 
-                    active_menu.show_cursor()
+                    self.active_menu.show_cursor()
                 else:
-                    active_menu.handle_user_input(input)
+                    self.active_menu.handle_user_input(input)

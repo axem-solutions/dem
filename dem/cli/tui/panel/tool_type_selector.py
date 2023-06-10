@@ -38,7 +38,6 @@ class ToolTypeSelectorPanel():
 
         self.navigation_hint = NavigationHint()
 
-
         self.layout = Layout(name="root")
         self.layout.split(
             Layout(name="tool_type_menu"),
@@ -47,19 +46,20 @@ class ToolTypeSelectorPanel():
         self.layout["tool_type_menu"].update(self.menus)
         self.layout["navigation_hint"].update(self.navigation_hint.get_renderable())
         
+        self.active_menu = self.tool_type_menu
+
     def wait_for_user(self) -> None:
-        active_menu = self.tool_type_menu
         with Live(self.layout, refresh_per_second=8, screen=True):
             while self.cancel_next_menu.is_selected is False:
                 input = readkey()
                 if input is key.TAB:
-                    active_menu.hide_cursor()
+                    self.active_menu.hide_cursor()
 
-                    if active_menu is self.tool_type_menu:
-                        active_menu = self.cancel_next_menu
+                    if self.active_menu is self.tool_type_menu:
+                        self.active_menu = self.cancel_next_menu
                     else:
-                        active_menu = self.tool_type_menu
+                        self.active_menu = self.tool_type_menu
 
-                    active_menu.show_cursor()
+                    self.active_menu.show_cursor()
                 else:
-                    active_menu.handle_user_input(input)
+                    self.active_menu.handle_user_input(input)

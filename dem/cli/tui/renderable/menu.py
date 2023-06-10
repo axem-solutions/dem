@@ -129,10 +129,14 @@ class BackMenu(VerticalMenu):
 class DevEnvStatus(panel.Panel):
     def __init__(self, tool_types: list[str]) -> None:
         self.outer_table = table.Table(box=None)
-        panel_height = 3 + len(tool_types) * 4
-        super().__init__(self.outer_table, title="Development Environment", expand=False, 
-                         height=panel_height)
+        super().__init__(self.outer_table, title="Development Environment", expand=False)
         self.aligned_renderable = align.Align(self, vertical="middle")
+        
+        self._fill_table(tool_types)
+    
+    def _fill_table(self, tool_types: list[str]) -> None:
+        panel_height = 3 + len(tool_types) * 4
+        self.height = panel_height
 
         for tool_type in tool_types:
             inner_table = table.Table(box=None)
@@ -141,6 +145,11 @@ class DevEnvStatus(panel.Panel):
             inner_table.add_row("")
 
             self.outer_table.add_row(inner_table)
+
+    def reset_table(self, tool_types: list[str]) -> None:
+        self.outer_table = table.Table(box=None)
+        self._fill_table(tool_types)
+        self.renderable = self.outer_table
 
     def set_tool_image(self, tool_selection: dict) -> None:
         for tool_type, tool_image in tool_selection.items():

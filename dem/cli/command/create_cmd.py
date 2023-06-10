@@ -25,7 +25,9 @@ def handle_tool_type_selector_panel(tool_type_selector_panel: ToolTypeSelectorPa
     tool_type_selector_panel.wait_for_user()
 
     if "cancel" in tool_type_selector_panel.cancel_next_menu.get_selection():
-        typer.Abort()
+        raise(typer.Abort())
+
+    tool_type_selector_panel.cancel_next_menu.is_selected = False
 
     return tool_type_selector_panel.tool_type_menu.get_selected_tool_types()
 
@@ -35,8 +37,11 @@ def handle_tool_iamge_selector_panel(tool_image_selector_panel: ToolImageSelecto
     tool_image_selector_panel.wait_for_user()
 
     if tool_image_selector_panel.back_menu.is_selected is True:
+        # Reset the back menu selection
+        tool_image_selector_panel.back_menu.is_selected = False
         return None
     else:
+        tool_image_selector_panel.tool_image_menu.is_selected = False
         return tool_image_selector_panel.tool_image_menu.get_selected_tool_image()
 
 def get_dev_env_descriptor_from_user(dev_env_name: str, tool_image_list: list[list[str]]) -> dict:
@@ -57,6 +62,7 @@ def get_dev_env_descriptor_from_user(dev_env_name: str, tool_image_list: list[li
 
             if len(panel_list) > 1:
                 current_panel = panel_list[1]
+                current_panel.dev_env_status.reset_table(selected_tool_types)
             else:
                 current_panel = ToolImageSelectorPanel(tool_image_list, selected_tool_types)
                 panel_list.append(current_panel)
@@ -71,6 +77,9 @@ def get_dev_env_descriptor_from_user(dev_env_name: str, tool_image_list: list[li
 
                 panel_index -= 1
                 current_panel = panel_list[panel_index]
+                
+                if tool_index != 0:
+                    tool_index -= 1
             else:
                 tool_selection[selected_tool_types[tool_index]] = selected_tool_image
 
@@ -92,7 +101,8 @@ def get_dev_env_descriptor_from_user(dev_env_name: str, tool_image_list: list[li
                     current_panel = ToolImageSelectorPanel(tool_image_list, selected_tool_types)
                     panel_list.append(current_panel)
 
-            current_panel.dev_env_status.set_tool_image(tool_selection)
+            if isinstance(current_panel, ToolImageSelectorPanel):
+                current_panel.dev_env_status.set_tool_image(tool_selection)
 
     return dev_env_descriptor
 
