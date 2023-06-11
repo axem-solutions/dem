@@ -27,7 +27,7 @@ def main():
 
         if "Permission denied" in str(e):
             stdout.print("\nHint: Is your user part of the docker group?")
-        elif "inavlid reference format" in str(e):
+        elif "invalid reference format" in str(e):
             stdout.print("\nHint: The input repository might not exist in the registry.")
         else:
             stdout.print("\nHint: Probably something is wrong with your Docker Engine installation. Try to reinstall it.")

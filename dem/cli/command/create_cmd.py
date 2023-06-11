@@ -45,11 +45,6 @@ def handle_tool_iamge_selector_panel(tool_image_selector_panel: ToolImageSelecto
         return tool_image_selector_panel.tool_image_menu.get_selected_tool_image()
 
 def get_dev_env_descriptor_from_user(dev_env_name: str, tool_image_list: list[list[str]]) -> dict:
-    dev_env_descriptor = {
-        "name": dev_env_name,
-        "tools": []
-    }
-
     current_panel = ToolTypeSelectorPanel(list(DevEnv.supported_tool_types))
     panel_list = [current_panel]
 
@@ -83,12 +78,6 @@ def get_dev_env_descriptor_from_user(dev_env_name: str, tool_image_list: list[li
             else:
                 tool_selection[selected_tool_types[tool_index]] = selected_tool_image
 
-                tool_descriptor = {
-                    "type": selected_tool_types[tool_index],
-                    "image_name": selected_tool_image.split(":")[0],
-                    "image_version": selected_tool_image.split(":")[1]
-                }
-                dev_env_descriptor["tools"].append(tool_descriptor)
                 tool_index += 1
                 
                 if tool_index == len(selected_tool_types):
@@ -103,6 +92,19 @@ def get_dev_env_descriptor_from_user(dev_env_name: str, tool_image_list: list[li
 
             if isinstance(current_panel, ToolImageSelectorPanel):
                 current_panel.dev_env_status.set_tool_image(tool_selection)
+
+    dev_env_descriptor = {
+        "name": dev_env_name,
+        "tools": []
+    }
+
+    for tool_type, tool_image in tool_selection.items():
+        tool_descriptor = {
+            "type": tool_type,
+            "image_name": tool_image.split(":")[0],
+            "image_version": tool_image.split(":")[1]
+        }
+        dev_env_descriptor["tools"].append(tool_descriptor)
 
     return dev_env_descriptor
 
