@@ -50,6 +50,7 @@ class ToolTypeSelectorPanel():
 
     def wait_for_user(self) -> None:
         with Live(self.layout, refresh_per_second=8, screen=True):
+            # selection = ""
             while self.cancel_next_menu.is_selected is False:
                 input = readkey()
                 if input is key.TAB:
@@ -63,3 +64,6 @@ class ToolTypeSelectorPanel():
                     self.active_menu.show_cursor()
                 else:
                     self.active_menu.handle_user_input(input)
+
+                    # if self.cancel_next_menu.is_selected is True:
+                    #     selection = self.cancel_next_menu.get_selection()

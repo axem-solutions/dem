@@ -208,8 +208,8 @@ class ToolImageMenu(Menu):
     def __init__(self, tool_images: list[list[str]]) -> None:
         super().__init__()
 
-        self.add_column("Tool images")
-        self.add_column("Availability")
+        self.add_column("Tool images", no_wrap=True)
+        self.add_column("Availability", no_wrap=True)
 
         for index, tool_image in enumerate(tool_images):
             if (index == 0):
