@@ -4,7 +4,6 @@
 import typer
 from dem.core.dev_env_setup import DevEnv, DevEnvLocal, DevEnvLocalSetup
 from dem.core.tool_images import ToolImages
-from dem.cli.tui.renderable.menu import ToolTypeMenu, ToolImageMenu
 from dem.cli.console import stdout, stderr
 from dem.cli.tui.panel.tool_type_selector import ToolTypeSelectorPanel
 from dem.cli.tui.panel.tool_image_selector import ToolImageSelectorPanel
