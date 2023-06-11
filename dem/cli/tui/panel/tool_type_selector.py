@@ -41,19 +41,25 @@ class ToolTypeSelectorPanel():
         self.layout = Layout(name="root")
         self.layout.split(
             Layout(name="tool_type_menu"),
-            Layout(name="navigation_hint", size=8),
+            Layout(name="info", size=8),
         )
         self.layout["tool_type_menu"].update(self.menus)
-        self.layout["navigation_hint"].update(self.navigation_hint.get_renderable())
+        self.layout["info"].update(self.navigation_hint.get_renderable())
+
+        self.no_tool_type_selected_error = Align(Panel("[red]You need to select at least one tool type![/]"),
+                                                 align="center", vertical="middle")
         
         self.active_menu = self.tool_type_menu
 
     def wait_for_user(self) -> None:
         with Live(self.layout, refresh_per_second=8, screen=True):
-            # selection = ""
-            while self.cancel_next_menu.is_selected is False:
+            selection = ""
+            is_error_presented = False
+            while selection == "":
                 input = readkey()
                 if input is key.TAB:
+                    if is_error_presented is True:
+                        self.layout["info"].update(self.navigation_hint.get_renderable())
                     self.active_menu.hide_cursor()
 
                     if self.active_menu is self.tool_type_menu:
@@ -65,5 +71,11 @@ class ToolTypeSelectorPanel():
                 else:
                     self.active_menu.handle_user_input(input)
 
-                    # if self.cancel_next_menu.is_selected is True:
-                    #     selection = self.cancel_next_menu.get_selection()
+                    if self.cancel_next_menu.is_selected is True:
+                        selection = self.cancel_next_menu.get_selection()
+
+                        if ("next" in selection) and (len(self.tool_type_menu.get_selected_tool_types()) == 0):
+                            self.cancel_next_menu.is_selected = False
+                            self.layout["info"].update(self.no_tool_type_selected_error)
+                            is_error_presented = True
+                            selection = ""
