@@ -29,24 +29,24 @@ class ToolTypeSelectorPanel():
         # Panel content
         self.tool_type_menu = ToolTypeMenu(elements)
         self.cancel_next_menu = CancelNextMenu()
-        self.cancel_next_menu.hide_cursor()
+        self.cancel_next_menu.remove_cursor()
 
         self.menus = Align(Group(
-            self.tool_type_menu.alignment,
-            self.cancel_next_menu.alignment,
+            Align(self.tool_type_menu, align="center", vertical="middle"),
+            Align(self.cancel_next_menu, align="center", vertical="middle"),
         ), align="center", vertical="middle")
 
         self.navigation_hint = NavigationHint()
 
         self.layout = Layout(name="root")
         self.layout.split(
-            Layout(name="tool_type_menu"),
+            Layout(name="menus"),
             Layout(name="info", size=8),
         )
-        self.layout["tool_type_menu"].update(self.menus)
+        self.layout["menus"].update(self.menus)
         self.layout["info"].update(self.navigation_hint.get_renderable())
 
-        self.no_tool_type_selected_error = Align(Panel("[red]You need to select at least one tool type![/]"),
+        self.no_tool_type_selected_error = Align(Panel("[yellow]You need to select at least one tool type![/]"),
                                                  align="center", vertical="middle")
         
         self.active_menu = self.tool_type_menu
@@ -60,14 +60,14 @@ class ToolTypeSelectorPanel():
                 if input is key.TAB:
                     if is_error_presented is True:
                         self.layout["info"].update(self.navigation_hint.get_renderable())
-                    self.active_menu.hide_cursor()
+                    self.active_menu.remove_cursor()
 
                     if self.active_menu is self.tool_type_menu:
                         self.active_menu = self.cancel_next_menu
                     else:
                         self.active_menu = self.tool_type_menu
 
-                    self.active_menu.show_cursor()
+                    self.active_menu.add_cursor()
                 else:
                     self.active_menu.handle_user_input(input)
 

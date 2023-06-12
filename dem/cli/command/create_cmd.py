@@ -54,6 +54,11 @@ def get_dev_env_descriptor_from_user(dev_env_name: str, tool_image_list: list[li
         if isinstance(current_panel, ToolTypeSelectorPanel):
             selected_tool_types = handle_tool_type_selector_panel(current_panel, dev_env_name)
 
+            # Remove the not selected tool type from the tool_selection.
+            for tool_type in list(tool_selection.keys()):
+                if tool_type not in selected_tool_types:
+                    del tool_selection[tool_type]
+
             if len(panel_list) > 1:
                 current_panel = panel_list[1]
                 current_panel.dev_env_status.reset_table(selected_tool_types)
@@ -88,6 +93,8 @@ def get_dev_env_descriptor_from_user(dev_env_name: str, tool_image_list: list[li
                 else:
                     current_panel = ToolImageSelectorPanel(tool_image_list, selected_tool_types)
                     panel_list.append(current_panel)
+
+                current_panel.dev_env_status.reset_table(selected_tool_types)
 
             if isinstance(current_panel, ToolImageSelectorPanel):
                 current_panel.dev_env_status.set_tool_image(tool_selection)
