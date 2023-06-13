@@ -51,6 +51,9 @@ extra:
       link: https://github.com/axem-solutions
   generator: false
   homepage: https://axemsolutions.io
+  analytics:
+    provider: google
+    property: G-MCWQMMXY3W
 
 copyright: >
   Copyright 2023 - axem solutions - All rights reserved |
