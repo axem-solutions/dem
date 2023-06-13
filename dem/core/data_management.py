@@ -32,7 +32,7 @@ class LocalDevEnvJSON():
         return json.loads(_empty_dev_env_json)
 
     @staticmethod
-    def _callback(*args, **kwargs) -> None:
+    def _invalid_json_callback(*args, **kwargs) -> None:
         pass
 
     def __init__(self) -> None:
@@ -51,8 +51,8 @@ class LocalDevEnvJSON():
             try:
                 self.deserialized = json.load(json_file)
             except json.decoder.JSONDecodeError:
-                self._callback(msg="[red]Error: invalid json format.[/]", 
-                               user_confirm="Restore the original json file?")
+                self._invalid_json_callback(msg="[red]Error: invalid json format.[/]", 
+                                            user_confirm="Restore the original json file?")
                 self.deserialized = self._create_empty_dev_env_json()
             else:
                 json_file.close()
@@ -70,8 +70,8 @@ class LocalDevEnvJSON():
         json.dump(deserialized, json_file, indent=4)
         json_file.close()
 
-    def set_callback(self, callback_func: Callable):
-        self._callback = types.MethodType(callback_func, self)
+    def set_invalid_json_callback(self, invalid_json_callback: Callable):
+        self._invalid_json_callback = types.MethodType(invalid_json_callback, self)
 
 class OrgDevEnvJSON():
     """ Deserialize the dev_env_org.json file."""

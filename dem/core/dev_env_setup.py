@@ -64,7 +64,7 @@ class DevEnv:
         return image_statuses
 
 class DevEnvSetup:
-    """Represents the development setup:
+    """Representation of the development setup:
         - The available tool images.
         - The available Development Environments.
 
@@ -128,6 +128,7 @@ class DevEnvSetup:
         """
         if cls._container_engine is None:
             cls._container_engine = ContainerEngine()
+
         return cls._container_engine
 
     def get_deserialized(self) -> dict:
@@ -177,21 +178,28 @@ class DevEnvLocalSetup(DevEnvSetup):
 
     Class attributes:
         json -- deserialized json representing the local setup
-        core_cb -- the core classes can provide information through this callback
+        invalid_json_cb -- the user can be noted through this callback when something is wrong with
+                           the dev_env.json file
+        msg_cb -- a generic callback to send messages for the user
+        pull_progress_cb -- a generator is provided for this callback to note the user of the 
+                            current status of the pull process
     """
     json = LocalDevEnvJSON()
-    core_cb = None
+    invalid_json_cb = None
+    msg_cb = None
+    pull_progress_cb = None
 
     def __init__(self):
         """ Store the local Development Environments.
 
-        Sets the core callback if the core_cb class attribute has been set before the instantiation.
-
         Extends the DevEnvSetup super class by populating the list of Development Environments with 
         DevEnvLocal objects.
         """
-        if self.core_cb is not None:
-            self.json.set_callback(self.core_cb)
+        if self.invalid_json_cb:
+            self.json.set_invalid_json_callback(self.invalid_json_cb)
+
+        if self.pull_progress_cb:
+            self.container_engine.set_pull_progress_cb(self.pull_progress_cb)
 
         super().__init__(self.json.read())
 
@@ -202,17 +210,28 @@ class DevEnvLocalSetup(DevEnvSetup):
         """ Writes the deserialized json to the dev_env.json file."""
         self.json.write(self.get_deserialized())
 
-    def pull_images(self, tools):
+    def pull_images(self, tools: list):
         """ Pull images that are only present in the registry.
         
         Args:
             tools -- the tool images to pull (with any status, this function will filter the 
                      registry only ones)
         """
+
+        # Remove the duplications and the locally already available tools
+        unique_tool_images_to_pull = []
         for tool in tools:
-            if tool["image_status"] == ToolImages.REGISTRY_ONLY:
-                image_to_pull = tool["image_name" ] + ':' + tool["image_version"]
-                self.container_engine.pull(image_to_pull)
+            image_to_pull = tool["image_name" ] + ':' + tool["image_version"]
+            if (image_to_pull not in unique_tool_images_to_pull) and \
+                (tool["image_status"] == ToolImages.REGISTRY_ONLY):
+                unique_tool_images_to_pull.append(image_to_pull)
+
+        for tool_image in unique_tool_images_to_pull:
+            if self.msg_cb is not None:
+                self.msg_cb(msg="\n")
+                self.msg_cb(msg="Pulling image " + tool_image, rule=True)
+
+            self.container_engine.pull(tool_image)
 
 class DevEnvOrg(DevEnv):
     """A Development Environment available for the organization."""
@@ -228,7 +247,7 @@ class DevEnvOrg(DevEnv):
                 return dev_env_local
 
 class DevEnvOrgSetup(DevEnvSetup):
-    """ The organization's development setup. The user can install Dev Envs listed in the class.
+    """ The organization's development setup. The user can install Dev Envs listed in this class.
 
     Class attributes:
         json -- deserialized json representing the organization's setup 

@@ -1,12 +1,17 @@
 """Docker container engine management."""
 # dem/core/container_engine.py
 
+from typing import Callable
+from types import MethodType
 import docker
 
 class ContainerEngine():
     def __init__(self) -> None:
         """Operations on the Docker Container Engine."""
         self._docker_client = docker.from_env()
+        self._docker_api_client = docker.APIClient(base_url="unix:///var/run/docker.sock", 
+                                                   version="auto")
+        self._pull_progress_cb = None
 
     def get_local_tool_images(self) -> list[str]:
         """Get local tool images.
@@ -27,7 +32,11 @@ class ContainerEngine():
         
         Args:
             repository -- repository to pull"""
-        self._docker_client.images.pull(repository=repository)
+        if self._pull_progress_cb:
+            resp = self._docker_api_client.pull(repository, stream=True, decode=True)
+            self._pull_progress_cb(generator=resp)
+        else:
+            self._docker_api_client.pull(repository)
 
     def remove(self, image: str) -> None:
         """Remove a tool image.
@@ -46,3 +55,6 @@ class ContainerEngine():
         for repositories in self._docker_client.images.search(registry):        
             local_registryimagelist.append(repositories['name'])
         return local_registryimagelist
+
+    def set_pull_progress_cb(self, pull_progress_callback: Callable) -> None:
+        self._pull_progress_cb = MethodType(pull_progress_callback, self)
