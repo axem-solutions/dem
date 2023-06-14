@@ -4,7 +4,7 @@
 from dem import __command__
 from dem.cli.console import stderr, stdout
 from dem.core.exceptions import RegistryError
-from dem.core.dev_env_setup import DevEnvLocalSetup, DevEnvSetup
+from dem.core.dev_env_setup import DevEnvLocalSetup
 import dem.cli.main, dem.cli.core_cb
 import docker.errors
 import types

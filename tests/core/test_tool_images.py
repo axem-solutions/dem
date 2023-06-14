@@ -72,7 +72,7 @@ def test_update(mock_list_repos):
 
     # Check expectations
     mock_container_engine.get_local_tool_images.assert_called()
-    mock_list_repos.assert_called_with(mock_container_engine)
+    mock_list_repos.assert_called_with(mock_container_engine, None, None)
 
     expected_elements = {
         "local_only_image_after_update:latest": ToolImages.LOCAL_ONLY,
