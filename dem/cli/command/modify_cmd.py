@@ -31,7 +31,7 @@ def handle_tool_type_selector_panel(tool_type_selector_panel: ToolTypeSelectorPa
 
     return tool_type_selector_panel.tool_type_menu.get_selected_tool_types()
 
-def handle_tool_iamge_selector_panel(tool_image_selector_panel: ToolImageSelectorPanel, 
+def handle_tool_image_selector_panel(tool_image_selector_panel: ToolImageSelectorPanel, 
                                      tool_type:str) -> str | None:
     tool_image_selector_panel.tool_image_menu.set_title("Select tool image for type " + tool_type)
     tool_image_selector_panel.wait_for_user()
@@ -77,7 +77,7 @@ def get_modifications_from_user(dev_env: DevEnvLocal, tool_image_list: list[list
             tool_index = 0
             panel_index = 1
         else:
-            selected_tool_image = handle_tool_iamge_selector_panel(current_panel, selected_tool_types[tool_index])
+            selected_tool_image = handle_tool_image_selector_panel(current_panel, selected_tool_types[tool_index])
 
             if selected_tool_image is None:
                 tool_selection[selected_tool_types[tool_index]] = "<not selected>"
