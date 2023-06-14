@@ -4,7 +4,7 @@
 from dem.cli.console import stdout
 import typer, typing
 from rich.progress import Progress, TaskID, TextColumn, BarColumn, TaskProgressColumn
-
+from rich.status import Status
 
 def get_value_by_key_if_exist(dictionary: dict, keys: list[str]) -> str | TaskID | None:
     """ Returns with the value based on the key if it exists, None if not.
@@ -108,3 +108,11 @@ def pull_progress_cb(*args, generator: typing.Generator) -> None:
 
         for item in generator:
             process_generator_item(item, tasks, progress)
+
+status = Status("")
+def status_start_cb(*args, status_msg: str) -> None:
+    status.update(status=status_msg)
+    status.start()
+
+def status_stop_cb(*args) -> None:
+    status.stop()
