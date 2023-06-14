@@ -2,9 +2,25 @@
 name = "axem-dem"
 version = "0.1.1"
 description = "Manager for Containerized Development Environments"
-authors = ["janosmurai <murai.janos@gmail.com>"]
+authors = ["Janos Murai <janos.murai@axemsolutions.io>"]
 license = "Eclipse Public License - v2.0"
 readme = "README.md"
+homepage = "https://axemsolutions.io/"
+documentation = "https://axemsolutions.io/dem_doc/"
+repository = "https://github.com/axem-solutions/dem"
+keywords = ["iot", "embedded", "edge", "devops", "tools", "containers"]
+classifiers = [
+	"Development Status :: 2 - Pre-Alpha",
+	"Environment :: Console",
+	"Intended Audience :: Developers",
+	"Natural Language :: English",
+	"Topic :: Software Development",
+	"Topic :: Software Development :: Build Tools",
+	"Topic :: Software Development :: Compilers",
+	"Topic :: Software Development :: Debuggers",
+	"Topic :: Software Development :: Embedded Systems",
+	"Topic :: Software Development :: Testing"
+]
 packages = [{include = "dem"}]
 
 [tool.poetry.scripts]
