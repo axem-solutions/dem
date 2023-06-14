@@ -73,6 +73,9 @@ class LocalDevEnvJSON():
     def set_invalid_json_callback(self, invalid_json_callback: Callable):
         self._invalid_json_callback = types.MethodType(invalid_json_callback, self)
 
+    def set_callback(self, callback_func: Callable):
+        self._callback = types.MethodType(callback_func, self)
+
 class OrgDevEnvJSON():
     """ Deserialize the dev_env_org.json file."""
     def __init__(self) -> None:

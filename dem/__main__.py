@@ -7,6 +7,7 @@ from dem.core.exceptions import RegistryError
 from dem.core.dev_env_setup import DevEnvLocalSetup, DevEnvSetup
 import dem.cli.main, dem.cli.core_cb
 import docker.errors
+import types
 
 def main():
     """ Entry point for the CLI application"""
@@ -27,6 +28,8 @@ def main():
 
         if "Permission denied" in str(e):
             stdout.print("\nHint: Is your user part of the docker group?")
+        elif "invalid reference format" in str(e):
+            stdout.print("\nHint: The input repository might not exist in the registry.")
         else:
             stdout.print("\nHint: Probably something is wrong with your Docker Engine installation. Try to reinstall it.")
 

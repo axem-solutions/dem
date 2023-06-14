@@ -59,8 +59,7 @@ configure the new Environment.
 
 1. First you need to select the tool types. You can navigate with the :material-arrow-up: and 
 :material-arrow-down: or :material-alpha-k: and :material-alpha-j: keys. Select the required 
-tool types with :material-keyboard-space:. Press :material-keyboard-return: when you're done with 
-the selection.
+tool types with :material-keyboard-space:. Select next if you finished the selection.
 
     ![tool select](wp-content/tool_select.png)
 
@@ -93,18 +92,16 @@ Modify the tool types and required tool images of an existing Development Enviro
 
 1. The dem shows a list of the already selected tools. You can modify the selection. You can 
 navigate with the :material-arrow-up: and :material-arrow-down: or :material-alpha-k: and 
-:material-alpha-j: keys. Modify the required tool types with :material-keyboard-space:. Press 
-:material-keyboard-return: when you're done with the selection.
+:material-alpha-j: keys. Modify the required tool types with :material-keyboard-space:. Select next 
+when you're done with the selection.
 
     ![tool select](wp-content/tool_select.png)
 
 2. Assign the required tool images for the selected types. You can navigate with the 
 :material-arrow-up: and :material-arrow-down: or :material-alpha-k: and :material-alpha-j: keys. 
 Select the required tool image and press :material-keyboard-return:.  
-If a tool type is already part of the current Development Environment, the original tool image 
-gets preselected - you only need to press :material-keyboard-return: if you don't want to change it.
 
-    ![modify image select](wp-content/modify_image_select.png)
+    ![image select](wp-content/image_select.png)
 
 Arguments:
 
