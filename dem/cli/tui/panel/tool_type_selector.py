@@ -11,7 +11,7 @@ from readchar import readkey, key
 
 class NavigationHint():
     hint_test = """
-- [bold]move cursor[/]: arrows or h/j/k/l
+- [bold]move cursor[/]: arrows or vi mode
 - [bold]select[/]: space or enter
 - [bold]jump to next/cancel[/]: tab
 - [bold]finish selection[/]: press enter when [italic]next[/] is selected

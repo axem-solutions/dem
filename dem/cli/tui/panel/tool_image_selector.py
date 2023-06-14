@@ -11,7 +11,7 @@ from readchar import readkey, key
 
 class NavigationHint(Panel):
     hint_text = """
-- [bold]move cursor[/]: arrows or j/k
+- [bold]move cursor[/]: arrows or vi mode
 - [bold]select[/]: space or enter
 - [bold]jump to back[/]: tab
 """
