@@ -18,6 +18,9 @@ class ToolImages():
         NOT_AVAILABLE,
     ) = range(4)
 
+    status_start_cb = None
+    status_stop_cb = None
+
     def __init__(self, container_engine: ContainerEngine) -> None:
         """Init the ToolImages class with the up to date image statuses."""
         self.elements = {}
@@ -33,7 +36,8 @@ class ToolImages():
             self.elements[local_image] = self.LOCAL_ONLY
 
         try:
-            registry_images = registry.list_repos(self.container_egine)
+            registry_images = registry.list_repos(self.container_egine, 
+                                                  self.status_start_cb, self.status_stop_cb)
         except RegistryError as e:
             stdout.print("[red]" + str(e) + "[/]")
             stdout.print("[red]Using local tool images only![/]")

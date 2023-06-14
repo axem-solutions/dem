@@ -189,6 +189,8 @@ class DevEnvLocalSetup(DevEnvSetup):
     invalid_json_cb = None
     msg_cb = None
     pull_progress_cb = None
+    status_start_cb = None
+    status_stop_cb = None
 
     def __init__(self):
         """ Store the local Development Environments.
@@ -201,6 +203,10 @@ class DevEnvLocalSetup(DevEnvSetup):
 
         if self.pull_progress_cb:
             self.container_engine.set_pull_progress_cb(self.pull_progress_cb)
+
+        if (self.status_start_cb is not None) and (self.status_stop_cb is not None):
+            ToolImages.status_start_cb = self.status_start_cb
+            ToolImages.status_stop_cb = self.status_stop_cb
 
         super().__init__(self.json.read())
 

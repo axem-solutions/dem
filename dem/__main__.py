@@ -16,6 +16,8 @@ def main():
     DevEnvLocalSetup.invalid_json_cb = dem.cli.core_cb.user_confirm_cb
     DevEnvLocalSetup.msg_cb = dem.cli.core_cb.msg_cb
     DevEnvLocalSetup.pull_progress_cb = dem.cli.core_cb.pull_progress_cb
+    DevEnvLocalSetup.status_start_cb = dem.cli.core_cb.status_start_cb
+    DevEnvLocalSetup.status_stop_cb = dem.cli.core_cb.status_stop_cb
 
     try:
         dem.cli.main.typer_cli(prog_name=__command__)
