@@ -234,10 +234,11 @@ class DevEnvLocalSetup(DevEnvSetup):
                 unique_tool_images_to_pull.append(image_to_pull)
 
         for tool_image in unique_tool_images_to_pull:
-            if self.msg_cb:
+            if self.msg_cb is not None:
                 self.msg_cb(msg="\n")
                 self.msg_cb(msg="Pulling image " + tool_image, rule=True)
-                self.container_engine.pull(tool_image)
+
+            self.container_engine.pull(tool_image)
 
 class DevEnvOrg(DevEnv):
     """A Development Environment available for the organization."""
