@@ -2,9 +2,25 @@
 name = "axem-dem"
 version = "0.1.1"
 description = "Manager for Containerized Development Environments"
-authors = ["janosmurai <murai.janos@gmail.com>"]
+authors = ["Janos Murai <janos.murai@axemsolutions.io>"]
 license = "Eclipse Public License - v2.0"
 readme = "README.md"
+homepage = "https://axemsolutions.io/"
+documentation = "https://axemsolutions.io/dem_doc/"
+repository = "https://github.com/axem-solutions/dem"
+keywords = ["iot", "embedded", "edge", "devops", "tools", "containers"]
+classifiers = [
+	"Development Status :: 2 - Pre-Alpha",
+	"Environment :: Console",
+	"Intended Audience :: Developers",
+	"Natural Language :: English",
+	"Topic :: Software Development",
+	"Topic :: Software Development :: Build Tools",
+	"Topic :: Software Development :: Compilers",
+	"Topic :: Software Development :: Debuggers",
+	"Topic :: Software Development :: Embedded Systems",
+	"Topic :: Software Development :: Testing"
+]
 packages = [{include = "dem"}]
 
 [tool.poetry.scripts]
@@ -12,11 +28,11 @@ dem = "dem.__main__:main"
 
 [tool.poetry.dependencies]
 python = "^3.10"
-docker = "^6.0.1"
-readchar = "^4.0.5"
-requests = "^2.29.0"
-rich = "^13.3.5"
-typer = "^0.8.0"
+docker = "6.1.2"
+readchar = "4.0.5"
+requests = "2.30.0"
+rich = "13.3.5"
+typer = "0.8.0"
 
 [tool.poetry.group.docs]
 optional = true
