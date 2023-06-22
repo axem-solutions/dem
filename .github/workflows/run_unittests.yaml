@@ -1,0 +1,24 @@
+name: Unittest Action
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: checkout repo content
+        uses: actions/checkout@v2 
+      - name: Install dependencies
+        run: |          
+          pip install axem-dem
+          pip install pytest
+          pip install pytest-cov          
+
+      - name: execute tests
+        run: |
+          python -m pytest tests
+          
+      - name: coverage
+        run: |
+          python -m pytest --cov=dem tests/    
+          
