@@ -3,7 +3,7 @@
 To use the DEM on your PC, you need to have the following tools installed:
 
 - Python 3.10+
-- Docker Engine
+- Docker Engine 24.0+
 
 !!! info
 
