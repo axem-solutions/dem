@@ -3,7 +3,7 @@
 
 from dem.core.exceptions import InvalidDevEnvJson
 from dem.core.properties import __supported_dev_env_major_version__
-from dem.core.tool_images import ToolImages
+from dem.core.tool_images import ToolImages, RegistryToolImages
 from dem.core.data_management import LocalDevEnvJSON, OrgDevEnvJSON
 from dem.core.container_engine import ContainerEngine
 
@@ -52,13 +52,20 @@ class DevEnv:
                 update_tool_images -- update the list of available tool images
         """
         if update_tool_images == True:
-            tool_images.update()
+            tool_images.local.update()
+            tool_images.registry.update()
+
         image_statuses = []
         for tool in self.tools:
             tool_image_name = tool["image_name"] + ':' + tool["image_version"]
-            image_status = tool_images.NOT_AVAILABLE
-            if tool_image_name in tool_images.elements:
-                image_status = tool_images.elements[tool_image_name]
+            if (tool_image_name in tool_images.local.elements) and (tool_image_name in tool_images.registry.elements):
+                image_status = ToolImages.LOCAL_AND_REGISTRY
+            elif (tool_image_name in tool_images.local.elements):
+                image_status = ToolImages.LOCAL_ONLY
+            elif (tool_image_name in tool_images.registry.elements):
+                image_status = ToolImages.REGISTRY_ONLY
+            else:
+                image_status = tool_images.NOT_AVAILABLE
             image_statuses.append(image_status)
             tool["image_status"] = image_status
 
@@ -206,8 +213,8 @@ class DevEnvLocalSetup(DevEnvSetup):
             self.container_engine.set_pull_progress_cb(self.pull_progress_cb)
 
         if (self.status_start_cb is not None) and (self.status_stop_cb is not None):
-            ToolImages.status_start_cb = self.status_start_cb
-            ToolImages.status_stop_cb = self.status_stop_cb
+            RegistryToolImages.status_start_cb = self.status_start_cb
+            RegistryToolImages.status_stop_cb = self.status_stop_cb
 
         super().__init__(self.json.read())
 

@@ -6,11 +6,45 @@ from dem.cli.console import stdout
 from dem.core.exceptions import RegistryError
 from dem.core.container_engine import ContainerEngine
 
-class ToolImages():
+class BaseToolImages():
     """The available tool images for a Dev Env.
     
     Provides the list of tool images available locally and in the registry.
     """
+
+    def __init__(self, container_engine: ContainerEngine) -> None:
+        """Init the ToolImages class with the up to date image statuses."""
+        self.elements = []
+        self.container_egine = container_engine
+
+class LocalToolImages(BaseToolImages):
+    def __init__(self, container_engine: ContainerEngine) -> None:
+        super().__init__(container_engine)
+
+        self.update()
+
+    def update(self) -> None:
+        self.elements = self.container_egine.get_local_tool_images()
+
+class RegistryToolImages(BaseToolImages):
+    status_start_cb = None
+    status_stop_cb = None
+
+    def __init__(self, container_engine: ContainerEngine) -> None:
+        super().__init__(container_engine)
+
+        self.update()
+
+    def update(self) -> None:
+        try:
+            self.elements = registry.list_repos(self.container_egine, 
+                                                  self.status_start_cb, self.status_stop_cb)
+        except RegistryError as e:
+            stdout.print("[red]" + str(e) + "[/]")
+            stdout.print("[red]Using local tool images only![/]")
+            self.elements = []
+
+class ToolImages():
     (
         LOCAL_ONLY,
         REGISTRY_ONLY,
@@ -18,33 +52,6 @@ class ToolImages():
         NOT_AVAILABLE,
     ) = range(4)
 
-    status_start_cb = None
-    status_stop_cb = None
-
     def __init__(self, container_engine: ContainerEngine) -> None:
-        """Init the ToolImages class with the up to date image statuses."""
-        self.elements = {}
-        self.container_egine = container_engine
-
-        self.update()
-
-    def update(self) -> None:
-        """Update the image statuses based on the local and registry tool availability."""
-        self.elements = {}
-
-        for local_image in self.container_egine.get_local_tool_images():
-            self.elements[local_image] = self.LOCAL_ONLY
-
-        try:
-            registry_images = registry.list_repos(self.container_egine, 
-                                                  self.status_start_cb, self.status_stop_cb)
-        except RegistryError as e:
-            stdout.print("[red]" + str(e) + "[/]")
-            stdout.print("[red]Using local tool images only![/]")
-            registry_images = []
-
-        for registry_image in registry_images:
-            if registry_image in self.elements:
-                self.elements[registry_image] = self.LOCAL_AND_REGISTRY
-            else:
-                self.elements[registry_image] = self.REGISTRY_ONLY
+        self.local = LocalToolImages(container_engine)
+        self.registry = RegistryToolImages(container_engine)

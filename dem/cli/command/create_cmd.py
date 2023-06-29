@@ -15,7 +15,19 @@ tool_image_statuses = {
 }
 
 def get_tool_image_list(tool_images: ToolImages) -> list[list[str]]:
-    return [[name, tool_image_statuses[status]] for name, status in tool_images.elements.items()]
+    tool_image_list = []
+
+    for tool_image in tool_images.registry.elements:
+        if tool_image in tool_images.local.elements:
+            tool_image_list.append([tool_image, tool_image_statuses[ToolImages.LOCAL_AND_REGISTRY]])
+        else:
+            tool_image_list.append([tool_image, tool_image_statuses[ToolImages.REGISTRY_ONLY]])
+
+    for tool_image in tool_images.local.elements:
+        if tool_image not in tool_images.registry.elements:
+            tool_image_list.append([tool_image, tool_image_statuses[ToolImages.LOCAL_ONLY]])
+
+    return tool_image_list
 
 def handle_tool_type_selector_panel(tool_type_selector_panel: ToolTypeSelectorPanel, 
                                     dev_env_name: str) -> list[str]:

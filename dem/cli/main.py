@@ -87,6 +87,12 @@ def delete(dev_env_name: str = typer.Argument(...,
     """
     delete_cmd.execute(dev_env_name)
 
+@typer_cli.command()
+def run(dev_env_name: str = typer.Argument(..., help="Name of the Development Environment"),
+        tool_type: str = typer.Argument(..., help="Tool type to run."),
+        command: str = typer.Argument(..., help="Command to be passed to the assigned tool image.")) -> None:
+    pass
+
 def _version_callback(value: bool) -> None:
     if value:
         try: 
