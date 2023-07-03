@@ -28,11 +28,11 @@ dem = "dem.__main__:main"
 
 [tool.poetry.dependencies]
 python = "^3.10"
-docker = "6.1.2"
+docker = "6.1.3"
 readchar = "4.0.5"
-requests = "2.30.0"
-rich = "13.3.5"
-typer = "0.8.0"
+requests = "2.31.0"
+rich = "13.4.2"
+typer = "0.9.0"
 
 [tool.poetry.group.docs]
 optional = true
