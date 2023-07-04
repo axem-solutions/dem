@@ -14,6 +14,7 @@ Currently the following tool types are supported:
     - Debugger
     - Deployer
     - Test framework
+    - CI/CD server
 
 When creating a new Development Environment the user can select any of the above tools and then 
 assign the required tool images to them. 

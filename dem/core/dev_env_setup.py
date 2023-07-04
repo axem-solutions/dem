@@ -15,6 +15,7 @@ class DevEnv:
         "debugger",
         "deployer",
         "test framework",
+        "CI/CD server",
     )
 
     def _check_tool_type_support(self, descriptor: dict) -> None:
