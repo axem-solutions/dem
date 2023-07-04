@@ -82,7 +82,8 @@ def test_get_dev_env_by_name_no_match():
     # Check expectations
     assert actual_dev_env is None
 
-def common_test_check_image_availability(mock_json_attribute: PropertyMock, with_update: bool) -> None:
+def common_test_check_image_availability(mock_json_attribute: PropertyMock, with_update: bool,
+                                         local_only: bool) -> None:
     # Test setup
     mock_json = MagicMock()
     mock_json.read.return_value = json.loads(fake_data.dev_env_json)
@@ -91,28 +92,42 @@ def common_test_check_image_availability(mock_json_attribute: PropertyMock, with
 
     test_dev_env_setup = dev_env_setup.DevEnvLocalSetup()
     test_dev_env = test_dev_env_setup.get_dev_env_by_name("demo")
-    fake_tool_images = MagicMock(spec=ToolImages)
-    fake_tool_images.elements = {
-        "axemsolutions/make_gnu_arm:latest": ToolImages.LOCAL_AND_REGISTRY,
-        "axemsolutions/stlink_org:latest": ToolImages.REGISTRY_ONLY
-    }
-    fake_tool_images.NOT_AVAILABLE = ToolImages.NOT_AVAILABLE
+    mock_tool_images = MagicMock()
+    mock_tool_images.local.elements = [
+        "axemsolutions/make_gnu_arm:latest",
+    ]
+    mock_tool_images.registry.elements = [
+        "axemsolutions/make_gnu_arm:latest",
+        "axemsolutions/stlink_org:latest",
+    ]
 
     # Run unit under test
-    actual_image_statuses = test_dev_env.check_image_availability(fake_tool_images, 
-                                                                  update_tool_images=with_update)
+    actual_image_statuses = test_dev_env.check_image_availability(mock_tool_images, 
+                                                                  update_tool_images=with_update,
+                                                                  local_only=local_only)
 
     # Check expectations
     if with_update == True:
-        fake_tool_images.update.assert_called_once()
+        mock_tool_images.local.update.assert_called_once()
+        if local_only is False:
+            mock_tool_images.registry.update.assert_called_once()
 
-    expected_image_statuses = [
-        ToolImages.LOCAL_AND_REGISTRY,
-        ToolImages.LOCAL_AND_REGISTRY,
-        ToolImages.REGISTRY_ONLY,
-        ToolImages.REGISTRY_ONLY,
-        ToolImages.NOT_AVAILABLE
-    ]
+    if local_only is False:
+        expected_image_statuses = [
+            ToolImages.LOCAL_AND_REGISTRY,
+            ToolImages.LOCAL_AND_REGISTRY,
+            ToolImages.REGISTRY_ONLY,
+            ToolImages.REGISTRY_ONLY,
+            ToolImages.NOT_AVAILABLE
+        ]
+    else:
+        expected_image_statuses = [
+            ToolImages.LOCAL_ONLY,
+            ToolImages.LOCAL_ONLY,
+            ToolImages.NOT_AVAILABLE,
+            ToolImages.NOT_AVAILABLE,
+            ToolImages.NOT_AVAILABLE
+        ]
     assert expected_image_statuses == actual_image_statuses
 
     for idx, tool in enumerate(test_dev_env.tools):
@@ -120,11 +135,15 @@ def common_test_check_image_availability(mock_json_attribute: PropertyMock, with
 
 @patch.object(dev_env_setup.DevEnvLocalSetup, "json", new_callable=PropertyMock)
 def test_check_image_availability_without_update(mock_json_attribute):
-    common_test_check_image_availability(mock_json_attribute, False)
+    common_test_check_image_availability(mock_json_attribute, False, False)
 
 @patch.object(dev_env_setup.DevEnvLocalSetup, "json", new_callable=PropertyMock)
 def test_check_image_availability_with_update(mock_json_attribute):
-    common_test_check_image_availability(mock_json_attribute, True)
+    common_test_check_image_availability(mock_json_attribute, True, False)
+
+@patch.object(dev_env_setup.DevEnvLocalSetup, "json", new_callable=PropertyMock)
+def test_check_image_availability_with_update_and_local_only(mock_json_attribute):
+    common_test_check_image_availability(mock_json_attribute, True, True)
 
 @patch("dem.core.dev_env_setup.ContainerEngine")
 @patch.object(dev_env_setup.DevEnvSetup, "__init__")
@@ -205,17 +224,44 @@ def test_DevEnvLocalSetup_pull_images(mock_json_attribute, mock_container_engine
     # Check expectations
     msg_cb_calls = [
         call(msg="\n"),
+        call(msg="Pulling image axemsolutions/cpputest:latest", rule=True),
+        call(msg="\n"),
         call(msg="Pulling image axemsolutions/make_gnu_arm:latest", rule=True),
         call(msg="\n"),
         call(msg="Pulling image axemsolutions/stlink_org:latest", rule=True),
-        call(msg="\n"),
-        call(msg="Pulling image axemsolutions/cpputest:latest", rule=True),
     ]
-    mock_msg_cb.assert_has_calls(msg_cb_calls)
+    mock_msg_cb.assert_has_calls(msg_cb_calls, any_order=True)
 
     pull_calls = [
+        call("axemsolutions/cpputest:latest"),
         call("axemsolutions/make_gnu_arm:latest"),
         call("axemsolutions/stlink_org:latest"),
-        call("axemsolutions/cpputest:latest")
     ]
-    test_dev_env_local_setup.container_engine.pull.assert_has_calls(pull_calls)
+    test_dev_env_local_setup.container_engine.pull.assert_has_calls(pull_calls, any_order=True)
+
+@patch.object(dev_env_setup.DevEnvLocalSetup, "json")
+@patch.object(dev_env_setup.DevEnvLocalSetup, "_container_engine", new_callable=PropertyMock)
+@patch.object(dev_env_setup.DevEnvSetup, "__init__")
+def test_DevEnvLocalSetup_run_container(mock_super__init__, mock_container_engine_attribute, 
+                                        mock_json):
+    # Test setup
+    test_tool_image = "test_tool_image"
+    test_workspace_path = "test_workspace_path"
+    test_command = "test_command"
+    test_privileged = False
+    mock_container_engine = MagicMock()
+    mock_container_engine_attribute.return_value = mock_container_engine
+    mock_deserialized_json = MagicMock()
+    mock_json.read.return_value = mock_deserialized_json
+
+    test_dev_env_local_setup = dev_env_setup.DevEnvLocalSetup()
+
+    # Run unit under test
+    test_dev_env_local_setup.run_container(test_tool_image, test_workspace_path, test_command, 
+                                           test_privileged)
+
+    # Check expectations
+    mock_json.read.assert_called_once()
+    mock_super__init__.assert_called_once_with(mock_deserialized_json)
+    mock_container_engine.run.assert_called_once_with(test_tool_image, test_workspace_path, 
+                                                      test_command, test_privileged)

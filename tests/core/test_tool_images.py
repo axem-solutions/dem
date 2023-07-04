@@ -2,113 +2,105 @@
 # tests/core/test_tool_images.py
 
 # Unit under test:
-from dem.core.tool_images import ToolImages
+import dem.core.tool_images as tool_images
 
 # Test framework
 from unittest.mock import patch, MagicMock, call
 
 from dem.core.exceptions import RegistryError
 
-@patch("dem.core.tool_images.registry.list_repos")
-def test_init(mock_list_repos):
+def test_BaseToolImages():
     # Test setup
-    test_local_images = [
-        "local_only_image:latest",
-        "local_and_registry_image:latest"
-    ]
-    test_registry_images = [
-        "registry_only_image:latest",
-        "local_and_registry_image:latest"
-    ]
-    mock_container_engine = MagicMock()
-    mock_container_engine.get_local_tool_images.return_value = test_local_images
-    mock_list_repos.return_value = test_registry_images
+    test_container_engine = MagicMock()
 
     # Run unit under test
-    actual_tool_images = ToolImages(mock_container_engine)
+    base_tool_images = tool_images.BaseToolImages(test_container_engine)
 
     # Check expectations
-    mock_container_engine.get_local_tool_images.assert_called_once()
-    mock_list_repos.assert_called_once()
+    assert base_tool_images.container_egine is test_container_engine
 
-    expected_elements = {
-        "local_only_image:latest": ToolImages.LOCAL_ONLY,
-        "registry_only_image:latest": ToolImages.REGISTRY_ONLY,
-        "local_and_registry_image:latest": ToolImages.LOCAL_AND_REGISTRY
-    }
-
-    assert actual_tool_images.elements == expected_elements
-
-@patch("dem.core.tool_images.registry.list_repos")
-def test_update(mock_list_repos):
+@patch.object(tool_images.BaseToolImages, "__init__")
+def test_LocalToolImages(mock_super__init__):
     # Test setup
-    test_local_images = [
-        [
-            "local_only_image_before_update:latest",
-            "local_and_registry_image_before_update:latest"
-        ],
-        [
-            "local_only_image_after_update:latest",
-            "local_and_registry_image_after_update:latest"
-        ]
-    ]
-    test_registry_images = [
-        [
-            "registry_only_image_before_update:latest",
-            "local_and_registry_image_before_update:latest"
-        ],
-        [
-            "registry_only_image_after_update:latest",
-            "local_and_registry_image_after_update:latest"
-        ]
-    ]
-    mock_container_engine = MagicMock()
-    mock_container_engine.get_local_tool_images.side_effect = test_local_images
-    mock_list_repos.side_effect = test_registry_images
+    test_container_engine = MagicMock()
+    mock_elements = MagicMock()
+    test_container_engine.get_local_tool_images.return_value = mock_elements
 
     # Run unit under test
-    actual_tool_images = ToolImages(mock_container_engine)
-    actual_tool_images.update()
+    local_tool_images = tool_images.LocalToolImages(test_container_engine)
+
+    # Inject the test_container_engine for the registry_tool_images (super init is mocked).
+    local_tool_images.container_egine = test_container_engine
 
     # Check expectations
-    mock_container_engine.get_local_tool_images.assert_called()
-    mock_list_repos.assert_called_with(mock_container_engine, None, None)
-
-    expected_elements = {
-        "local_only_image_after_update:latest": ToolImages.LOCAL_ONLY,
-        "registry_only_image_after_update:latest": ToolImages.REGISTRY_ONLY,
-        "local_and_registry_image_after_update:latest": ToolImages.LOCAL_AND_REGISTRY
-    }
-
-    assert actual_tool_images.elements == expected_elements
-
-@patch("dem.core.tool_images.stdout.print")
-@patch("dem.core.tool_images.registry.list_repos")
-def test_registry_error(mock_list_repos, mock_print):
-    # Test setup
-    test_local_images = [
-        "local_only_image:latest",
-        "local_only_image2:latest",
-    ]
-    mock_container_engine = MagicMock()
-    mock_container_engine.get_local_tool_images.return_value = test_local_images
-    test_exception_message = "test exception message"
-    mock_list_repos.side_effect = RegistryError(test_exception_message)
+    mock_super__init__.assert_called_once_with(test_container_engine)
 
     # Run unit under test
-    actual_tool_images = ToolImages(mock_container_engine)
+    local_tool_images.update()
 
     # Check expectations
-    mock_container_engine.get_local_tool_images.assert_called_once()
-    mock_list_repos.assert_called_once()
+    test_container_engine.get_local_tool_images.assert_called_once()
+    assert local_tool_images.elements is mock_elements
 
-    calls = [call("[red]" + test_exception_message + "[/]"),
-             call("[red]Using local tool images only![/]")]
-    mock_print.assert_has_calls(calls)
+@patch("dem.core.tool_images.registry.list_repos")
+@patch.object(tool_images.BaseToolImages, "__init__")
+def test_RegistryToolImages(mock_super__init__, mock_list_repos):
+    # Test setup
+    test_container_engine = MagicMock()
+    mock_elements = MagicMock()
+    mock_list_repos.return_value = mock_elements
 
-    expected_elements = {
-        "local_only_image:latest": ToolImages.LOCAL_ONLY,
-        "local_only_image2:latest": ToolImages.LOCAL_ONLY,
-    }
+    # Run unit under test
+    registry_tool_images = tool_images.RegistryToolImages(test_container_engine)
 
-    assert actual_tool_images.elements == expected_elements
+    # Inject the test_container_engine for the registry_tool_images (super init is mocked).
+    registry_tool_images.container_egine = test_container_engine
+
+    # Check expectations
+    mock_super__init__.assert_called_once_with(test_container_engine)
+
+    # Run unit under test
+    registry_tool_images.update()
+
+    # Check expectations
+    mock_list_repos.assert_called_once_with(test_container_engine, None, None)
+    assert registry_tool_images.elements is mock_elements
+
+@patch.object(tool_images.BaseToolImages, "__init__", MagicMock())
+@patch("dem.core.tool_images.registry.list_repos")
+def test_RegistryToolImages_RegistryError(mock_list_repos):
+    # Test setup
+    test_container_engine = MagicMock()
+    mock_list_repos.side_effect = RegistryError()
+
+    # Run unit under test
+    registry_tool_images = tool_images.RegistryToolImages(test_container_engine)
+
+    # Inject the test_container_engine for the registry_tool_images (super init is mocked).
+    registry_tool_images.container_egine = test_container_engine
+
+    registry_tool_images.update()
+
+    # Check expectations
+    mock_list_repos.assert_called_once_with(test_container_engine, None, None)
+    assert not registry_tool_images.elements
+
+@patch("dem.core.tool_images.RegistryToolImages")
+@patch("dem.core.tool_images.LocalToolImages")
+def test_ToolImages(mock_LocalToolImages, mock_RegistryToolImages):
+    # Test setup
+    test_container_engine = MagicMock()
+    mock_local_tool_images = MagicMock()
+    mock_LocalToolImages.return_value = mock_local_tool_images
+    mock_registry_tool_images = MagicMock()
+    mock_RegistryToolImages.return_value = mock_registry_tool_images
+
+    # Run unit under test
+    tool_images_obj = tool_images.ToolImages(test_container_engine)
+
+    # Check expectations
+    mock_local_tool_images.update.assert_called_once()
+    mock_registry_tool_images.update.assert_called_once()
+
+    assert tool_images_obj.local is mock_local_tool_images
+    assert tool_images_obj.registry is mock_registry_tool_images

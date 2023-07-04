@@ -32,6 +32,8 @@ def main():
             stdout.print("\nHint: Is your user part of the docker group?")
         elif "invalid reference format" in str(e):
             stdout.print("\nHint: The input repository might not exist in the registry.")
+        elif "400" in str(e):
+            stdout.print("\nHint: The input parameters might not be valid.")
         else:
             stdout.print("\nHint: Probably something is wrong with your Docker Engine installation. Try to reinstall it.")
 

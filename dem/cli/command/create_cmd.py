@@ -15,6 +15,12 @@ tool_image_statuses = {
 }
 
 def get_tool_image_list(tool_images: ToolImages) -> list[list[str]]:
+    """
+    Combine the registry and local tool images, and assign the availabilities. 
+    
+    Args:
+        tool_images -- all the tool images
+    """
     tool_image_list = []
 
     for tool_image in tool_images.registry.elements:

@@ -7,35 +7,53 @@ from dem.core.exceptions import RegistryError
 from dem.core.container_engine import ContainerEngine
 
 class BaseToolImages():
-    """The available tool images for a Dev Env.
+    """ Base class for the tool images. 
     
-    Provides the list of tool images available locally and in the registry.
+    Do not instantiate it directly!
     """
-
     def __init__(self, container_engine: ContainerEngine) -> None:
-        """Init the ToolImages class with the up to date image statuses."""
+        """ Init the class.
+        
+        Args: 
+            container_engine -- container engine
+        """
         self.elements = []
         self.container_egine = container_engine
 
 class LocalToolImages(BaseToolImages):
+    """ Local tool images."""
     def __init__(self, container_engine: ContainerEngine) -> None:
+        """ Init the class.
+        
+        Args: 
+            container_engine -- container engine
+        """
         super().__init__(container_engine)
 
-        self.update()
-
     def update(self) -> None:
+        """ Update the local tool image list using the container engine."""
         self.elements = self.container_egine.get_local_tool_images()
 
 class RegistryToolImages(BaseToolImages):
+    """ Registry tool images.
+    
+    Class attributes:
+        status_start_cb -- gets called when the process has been started
+        status_stop_cb -- gets called when the process has been finished
+    """
     status_start_cb = None
     status_stop_cb = None
 
     def __init__(self, container_engine: ContainerEngine) -> None:
+        """ Init the class.
+        
+        Args: 
+            container_engine -- container engine
+        """
         super().__init__(container_engine)
 
-        self.update()
-
     def update(self) -> None:
+        """ Update the list of available tools in the registry using the registry interface."""
         try:
             self.elements = registry.list_repos(self.container_egine, 
                                                   self.status_start_cb, self.status_stop_cb)
@@ -45,6 +63,7 @@ class RegistryToolImages(BaseToolImages):
             self.elements = []
 
 class ToolImages():
+    """ Available tool images."""
     (
         LOCAL_ONLY,
         REGISTRY_ONLY,
@@ -52,6 +71,16 @@ class ToolImages():
         NOT_AVAILABLE,
     ) = range(4)
 
-    def __init__(self, container_engine: ContainerEngine) -> None:
+    def __init__(self, container_engine: ContainerEngine, update_on_instantiation: bool = True) -> None:
+        """ Init the class.
+        
+        Args: 
+            container_engine -- container engine
+            update_on_instantiation -- set to false for manual update
+        """
         self.local = LocalToolImages(container_engine)
         self.registry = RegistryToolImages(container_engine)
+
+        if update_on_instantiation is True:
+            self.local.update()
+            self.registry.update()

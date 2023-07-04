@@ -3,10 +3,11 @@
 
 import typer, importlib.metadata
 from dem import __command__, __app_name__
-from dem.cli.command import info_cmd, list_cmd, pull_cmd, create_cmd, modify_cmd, delete_cmd, rename_cmd, clone_cmd
+from dem.cli.command import info_cmd, list_cmd, pull_cmd, create_cmd, modify_cmd, delete_cmd, \
+                            rename_cmd, clone_cmd, run_cmd
 from dem.cli.console import stdout
 
-typer_cli = typer.Typer()
+typer_cli = typer.Typer(rich_markup_mode="rich")
 
 @typer_cli.command()
 def list(local: bool = typer.Option(False, help="Scope is the local host."),
@@ -90,8 +91,15 @@ def delete(dev_env_name: str = typer.Argument(...,
 @typer_cli.command()
 def run(dev_env_name: str = typer.Argument(..., help="Name of the Development Environment"),
         tool_type: str = typer.Argument(..., help="Tool type to run."),
-        command: str = typer.Argument(..., help="Command to be passed to the assigned tool image.")) -> None:
-    pass
+        workspace_path: str = typer.Argument(..., help="Workspace path."),
+        command: str = typer.Argument(..., help="Command to be passed to the assigned tool image."),
+        privileged: bool = typer.Option(False, help="Give extended priviliges to the container.")) -> None:
+    """
+    Run the image assigned to the tool type with the given command.
+
+    :warning: Current restriction: put all parameters into quotes(")
+    """
+    run_cmd.execute(dev_env_name, tool_type, workspace_path, command, privileged)
 
 def _version_callback(value: bool) -> None:
     if value:

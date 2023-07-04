@@ -8,9 +8,8 @@ import dem.cli.command.create_cmd as create_cmd
 # Test framework
 import pytest
 from typer.testing import CliRunner
-from unittest.mock import patch, MagicMock, call
+from unittest.mock import patch, MagicMock
 
-from dem.core.dev_env_setup import DevEnv
 from dem.core.tool_images import ToolImages
 
 ## Global test variables
@@ -18,27 +17,26 @@ from dem.core.tool_images import ToolImages
 # In order to test stdout and stderr separately, the stderr can't be mixed into the stdout.
 runner = CliRunner(mix_stderr=False)
 
-## Test helpers
-## Test cases
-
 def test_get_tool_image_list():
     # Test setup
-    mock_elements = {
-        "local_image": ToolImages.LOCAL_ONLY,
-        "local_and_registry_image": ToolImages.LOCAL_AND_REGISTRY,
-        "registry_image": ToolImages.REGISTRY_ONLY
-    }
     mock_tool_images = MagicMock()
-    mock_tool_images.elements = mock_elements
+    mock_tool_images.registry.elements = [
+        "local_and_registry_image",
+        "registry_image",
+    ]
+    mock_tool_images.local.elements = [
+        "local_image",
+        "local_and_registry_image",
+    ]
 
     # Run unit under test
     actual_tool_images = create_cmd.get_tool_image_list(mock_tool_images)
 
     # Check expectations
     expected_tool_iamges = [
-        ["local_image", "local"],
         ["local_and_registry_image", "local and registry"],
-        ["registry_image", "registry"]
+        ["registry_image", "registry"],
+        ["local_image", "local"],
     ]
     assert actual_tool_images == expected_tool_iamges
 

@@ -8,10 +8,8 @@ import dem.cli.command.modify_cmd as modify_cmd
 # Test framework
 import pytest
 from typer.testing import CliRunner
-from unittest.mock import patch, MagicMock, call
+from unittest.mock import patch, MagicMock
 
-from dem.core.dev_env_setup import DevEnv
-from dem.core.tool_images import ToolImages
 from rich.console import Console
 import io, typer
 
@@ -23,22 +21,25 @@ runner = CliRunner(mix_stderr=False)
 def test_get_tool_image_list():
     # Test setup
     mock_tool_images = MagicMock()
-    mock_tool_images.elements = {
-        "local_image:latest": ToolImages.LOCAL_ONLY,
-        "registry_image:latest": ToolImages.REGISTRY_ONLY,
-        "local_and_registry_image:latest": ToolImages.LOCAL_AND_REGISTRY
-    }
+    mock_tool_images.registry.elements = [
+        "local_and_registry_image",
+        "registry_image",
+    ]
+    mock_tool_images.local.elements = [
+        "local_image",
+        "local_and_registry_image",
+    ]
 
     # Run unit under test
     actual_tool_images = modify_cmd.get_tool_image_list(mock_tool_images)
 
     # Check expectations
-    expected_tool_images = [
-        ["local_image:latest", "local"],
-        ["registry_image:latest", "registry"],
-        ["local_and_registry_image:latest", "local and registry"]
+    expected_tool_iamges = [
+        ["local_and_registry_image", "local and registry"],
+        ["registry_image", "registry"],
+        ["local_image", "local"],
     ]
-    assert expected_tool_images == actual_tool_images
+    assert actual_tool_images == expected_tool_iamges
 
 @patch("dem.cli.command.modify_cmd.SelectMenu")
 def test_get_confirm_from_user(mock_SelectMenu):

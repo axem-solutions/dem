@@ -41,7 +41,8 @@ class DevEnv:
         self.name = descriptor["name"]
         self.tools = descriptor["tools"]
 
-    def check_image_availability(self, tool_images: ToolImages, update_tool_images: bool = False) -> list:
+    def check_image_availability(self, tool_images: ToolImages, update_tool_images: bool = False,
+                                 local_only: bool = False) -> list:
         """ Checks the tool image's availability.
         
             Updates the "image_status" key for the tool dictionary.
@@ -50,22 +51,31 @@ class DevEnv:
             Args:
                 tool_images -- the images the Dev Envs can access
                 update_tool_images -- update the list of available tool images
+                local_only -- only local images are used
         """
         if update_tool_images == True:
             tool_images.local.update()
-            tool_images.registry.update()
+            if local_only is False:
+                tool_images.registry.update()
+
+        local_tool_images = tool_images.local.elements
+
+        if local_only is True:
+            registry_tool_images = []
+        else:
+            registry_tool_images = tool_images.registry.elements
 
         image_statuses = []
         for tool in self.tools:
             tool_image_name = tool["image_name"] + ':' + tool["image_version"]
-            if (tool_image_name in tool_images.local.elements) and (tool_image_name in tool_images.registry.elements):
+            if (tool_image_name in local_tool_images) and (tool_image_name in registry_tool_images):
                 image_status = ToolImages.LOCAL_AND_REGISTRY
-            elif (tool_image_name in tool_images.local.elements):
+            elif (tool_image_name in local_tool_images):
                 image_status = ToolImages.LOCAL_ONLY
-            elif (tool_image_name in tool_images.registry.elements):
+            elif (tool_image_name in registry_tool_images):
                 image_status = ToolImages.REGISTRY_ONLY
             else:
-                image_status = tool_images.NOT_AVAILABLE
+                image_status = ToolImages.NOT_AVAILABLE
             image_statuses.append(image_status)
             tool["image_status"] = image_status
 
@@ -82,7 +92,7 @@ class DevEnvSetup:
     """
     _tool_images = None
     _container_engine = None
-    pull_progress_cb = None
+    update_tool_images_on_instantiation = True
 
     def _dev_env_json_version_check(self) -> None:
         """Check that the dev_env.json or dev_evn_org.json file supported.
@@ -119,7 +129,8 @@ class DevEnvSetup:
             cls - the class object
         """
         if cls._tool_images is None:
-            cls._tool_images = ToolImages(cls.container_engine)
+            cls._tool_images = ToolImages(cls.container_engine, 
+                                          cls.update_tool_images_on_instantiation)
         return cls._tool_images
 
     @classmethod
@@ -212,6 +223,9 @@ class DevEnvLocalSetup(DevEnvSetup):
         if self.pull_progress_cb:
             self.container_engine.set_pull_progress_cb(self.pull_progress_cb)
 
+        if self.msg_cb: 
+            self.container_engine.set_msg_cb(self.msg_cb)
+
         if (self.status_start_cb is not None) and (self.status_stop_cb is not None):
             RegistryToolImages.status_start_cb = self.status_start_cb
             RegistryToolImages.status_stop_cb = self.status_stop_cb
@@ -234,24 +248,34 @@ class DevEnvLocalSetup(DevEnvSetup):
         """
 
         # Remove the duplications and the locally already available tools
-        unique_tool_images_to_pull = []
+        tool_images_to_pull = set()
         for tool in tools:
-            image_to_pull = tool["image_name" ] + ':' + tool["image_version"]
-            if (image_to_pull not in unique_tool_images_to_pull) and \
-                (tool["image_status"] == ToolImages.REGISTRY_ONLY):
-                unique_tool_images_to_pull.append(image_to_pull)
+            tool_image = tool["image_name" ] + ':' + tool["image_version"]
+            if (tool["image_status"] == ToolImages.REGISTRY_ONLY):
+                tool_images_to_pull.add(tool_image)
 
-        for tool_image in unique_tool_images_to_pull:
+        for tool_image in tool_images_to_pull:
             if self.msg_cb is not None:
                 self.msg_cb(msg="\n")
                 self.msg_cb(msg="Pulling image " + tool_image, rule=True)
 
             self.container_engine.pull(tool_image)
 
+    def run_container(self, tool_image: str, workspace_path: str, command: str, privileged: bool) -> None:
+        """ Run the tool image.
+
+        Args:
+            tool_image -- tool image to run
+            workspace_path -- workspace path
+            command -- command to be passed to the assigned tool image
+            priviliged -- give extended priviliges to the container
+        """
+        self.container_engine.run(tool_image, workspace_path, command, privileged)
+
 class DevEnvOrg(DevEnv):
-    """A Development Environment available for the organization."""
+    """ A Development Environment available for the organization."""
     def get_local_instance(self, dev_env_setup_local: DevEnvLocalSetup) -> (DevEnvLocal | None):
-        """Check if this Development Enviroment already installed locally.
+        """ Check if this Development Enviroment already installed locally.
 
         Args:
             dev_env_setup_local -- the locally installed Development Environments
