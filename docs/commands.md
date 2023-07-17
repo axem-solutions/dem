@@ -2,7 +2,7 @@
 
     Always put the input text into double quotation marks (""), if it contains whitespaces.
 
-## **`dem list`**
+## **`dem list [OPTIONS]`**
 
 List the Development Environments available locally or for the organization.
 
@@ -113,15 +113,11 @@ Arguments:
 
 Delete the selected Development Environment. After the deletion, dem checks whether a tool image is 
 required or not by any of the remaining local Development Environments. In case the tool image is 
-not required anymore, the dem asks the user if they prefer to delete or keep it.
+not required anymore, the dem asks the user if they prefer to delete it or keep it.
 
 Arguments:
 
 `DEV_ENV_NAME` Name of the Development Environment to delete. [required]
-
-!!! warning
-
-    You can't withdraw this command!
 
 ---
 
@@ -134,3 +130,25 @@ Arguments:
 `DEV_ENV_NAME` Name of the Development Environment to clone. [required]
 
 `NEW_DEV_ENV_NAME` Name of the New Development Environment. [required]
+
+---
+
+## **`dem run [OPTIONS] DEV_ENV_NAME TOOL_TYPE WORKSPACE_PATH COMMAND`**
+
+Run the image assigned to the tool type with the given command.
+
+:warning: Current restriction: put all parameters into quotes(")
+
+Arguments:
+
+`DEV_ENV_NAME` Name of the Development Environment [required]
+
+`TOOL_TYPE` Tool type to run. [required]
+
+`WORKSPACE_PATH` Workspace path. [required]
+
+`COMMAND` Command to be passed to the assigned tool image. [required]
+
+Options:
+
+`--privileged` Give extended priviliges to the container.
