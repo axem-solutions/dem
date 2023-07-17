@@ -86,6 +86,6 @@ class OrgDevEnvJSON():
 
     def read(self) -> dict:
         """ Read the deserialized dev_env_org.json from the axemsolutions domain."""
-        response = requests.get("https://axemsolutions.io/dem/dev_env_org.json")
+        response = requests.get("https://axemsolutions.io/dem/dev_env_org_2.json")
         self.deserialized = response.json()
         return self.deserialized

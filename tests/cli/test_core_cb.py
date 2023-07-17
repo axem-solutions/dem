@@ -111,7 +111,7 @@ def test_update_progress_bar(mock_get_value_by_key_if_exist):
         call(test_item, ["progressDetail", "current"]),
         call(test_item, ["progressDetail", "total"]),
     ]
-    mock_get_value_by_key_if_exist.assert_has_calls = calls
+    mock_get_value_by_key_if_exist.assert_has_calls(calls)
     mock_progress.update.assert_called_once_with(mock_task, description=test_status, 
                                                  total=float(test_total), 
                                                  completed=float(test_current))
