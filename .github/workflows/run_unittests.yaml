@@ -10,15 +10,16 @@ jobs:
         uses: actions/checkout@v2 
       - name: Install dependencies
         run: |          
-          pip install axem-dem
-          pip install pytest
-          pip install pytest-cov          
+          pip install --user poetry
+          poetry install                   
 
       - name: execute tests
         run: |
+          source $(poetry env info --path)/bin/activate
           python -m pytest tests
           
       - name: coverage
         run: |
+          source $(poetry env info --path)/bin/activate
           python -m pytest --cov=dem tests/    
           
