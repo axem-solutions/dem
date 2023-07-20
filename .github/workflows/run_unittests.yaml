@@ -1,0 +1,25 @@
+name: Unittest Action
+on: [pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: checkout repo content
+        uses: actions/checkout@v2 
+      - name: Install dependencies
+        run: |          
+          pip install --user poetry
+          poetry install                   
+
+      - name: execute tests
+        run: |
+          source $(poetry env info --path)/bin/activate
+          python -m pytest tests
+          
+      - name: coverage
+        run: |
+          source $(poetry env info --path)/bin/activate
+          python -m pytest --cov=dem tests/    
+          

@@ -51,3 +51,15 @@ First install the environment with the required dependencies:
 Enter the virtual environment:
 
     poetry shell
+
+
+
+## Running Unit Tests
+
+Run unit tests:
+
+    python -m pytest tests
+
+Run unit tests with coverage information:
+
+    python -m pytest --cov-report=html --cov=dem tests/
