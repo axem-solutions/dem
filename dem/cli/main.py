@@ -4,7 +4,7 @@
 import typer, importlib.metadata
 from dem import __command__, __app_name__
 from dem.cli.command import info_cmd, list_cmd, pull_cmd, create_cmd, modify_cmd, delete_cmd, \
-                            rename_cmd, clone_cmd, run_cmd
+                            rename_cmd, clone_cmd, run_cmd, export_cmd
 from dem.cli.console import stdout
 
 typer_cli = typer.Typer(rich_markup_mode="rich")
@@ -61,6 +61,14 @@ def create(dev_env_name: str = typer.Argument(...,
     Create a new Development Environment.
     """
     create_cmd.execute(dev_env_name)
+
+@typer_cli.command()
+def export(dev_env_name: str = typer.Argument(...,help="Name of the Development Environment to export."),
+           path_to_export: str = typer.Argument(None,help="Path where to extract the Dev Env.")) -> None:
+    """
+    Export the Development Environment.
+    """
+    export_cmd.execute(dev_env_name,path_to_export)    
 
 @typer_cli.command()
 def rename(dev_env_name: str = typer.Argument(...,help="Name of the Development Environment to rename."),
