@@ -1,7 +1,7 @@
 """list CLI command implementation."""
 # dem/cli/list_cmd.py
 
-from dem.core import container_engine, dev_env_setup, registry
+from dem.core import dev_env_setup
 from dem.core.tool_images import ToolImages
 from dem.cli.console import stdout, stderr
 from rich.table import Table
@@ -85,9 +85,15 @@ def list_dev_envs(local: bool, org: bool)-> None:
     stdout.print(table)
 
 def list_tool_images(local: bool, org: bool) -> None:
-    container_engine_obj = container_engine.ContainerEngine()
+    """ List tool images
+    
+    Args:
+        local -- list local tool images
+        org -- list the tool catalog
+    """
+    platform = dev_env_setup.DevEnvLocalSetup()
     if (local == True) and (org == False):        
-        local_images = container_engine_obj.get_local_tool_images()
+        local_images = platform.container_engine.get_local_tool_images()
 
         table = Table()
         table.add_column("Repository")
@@ -95,7 +101,7 @@ def list_tool_images(local: bool, org: bool) -> None:
             table.add_row(local_image)
         stdout.print(table)
     elif (local == False) and (org == True):
-        registry_images = registry.list_repos(container_engine_obj)
+        registry_images = platform.registries.list_repos()
 
         table = Table()
         table.add_column("Repository")

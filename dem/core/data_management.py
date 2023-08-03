@@ -1,9 +1,9 @@
 """dev_env.json handling."""
 # dem/core/data_management.py
 
+from dem.core.core import Core
 from pathlib import PurePath
-from typing import Callable
-import os, types
+import os
 import json, requests
 
 _empty_dev_env_json = """{
@@ -14,7 +14,7 @@ _empty_dev_env_json = """{
 }
 """
 
-class LocalDevEnvJSON():
+class LocalDevEnvJSON(Core):
     """ Serialize and deserialize the dev_env.json file."""
     _path = PurePath(os.path.expanduser('~') + "/.config/axem/dev_env.json")
     _directory = PurePath(os.path.expanduser('~') + "/.config/axem")
@@ -30,10 +30,6 @@ class LocalDevEnvJSON():
         json_file.close()
 
         return json.loads(_empty_dev_env_json)
-
-    @staticmethod
-    def _invalid_json_callback(*args, **kwargs) -> None:
-        pass
 
     def __init__(self) -> None:
         """ Init the class with an empty dict for the deserialized dev_env.json file. 
@@ -51,8 +47,8 @@ class LocalDevEnvJSON():
             try:
                 self.deserialized = json.load(json_file)
             except json.decoder.JSONDecodeError:
-                self._invalid_json_callback(msg="[red]Error: invalid json format.[/]", 
-                                            user_confirm="Restore the original json file?")
+                self.user_output.get_confirm("[red]Error: invalid json format.[/]", 
+                                             "Restore the original json file?")
                 self.deserialized = self._create_empty_dev_env_json()
             else:
                 json_file.close()
@@ -69,12 +65,6 @@ class LocalDevEnvJSON():
         json_file = open(self._path, "w")
         json.dump(deserialized, json_file, indent=4)
         json_file.close()
-
-    def set_invalid_json_callback(self, invalid_json_callback: Callable):
-        self._invalid_json_callback = types.MethodType(invalid_json_callback, self)
-
-    def set_callback(self, callback_func: Callable):
-        self._callback = types.MethodType(callback_func, self)
 
 class OrgDevEnvJSON():
     """ Deserialize the dev_env_org.json file."""

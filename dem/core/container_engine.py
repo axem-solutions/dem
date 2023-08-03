@@ -1,18 +1,15 @@
 """Docker container engine management."""
 # dem/core/container_engine.py
 
-from typing import Callable
-from types import MethodType
+from dem.core.core import Core
 import docker
 
-class ContainerEngine():
+class ContainerEngine(Core):
     """ Operations on the Docker Container Engine."""
 
     def __init__(self) -> None:
         """ Init the class."""
         self._docker_client = docker.from_env()
-        self._pull_progress_cb = None
-        self._msg_cb = None
 
     def get_local_tool_images(self) -> list[str]:
         """ Get local tool images.
@@ -34,11 +31,8 @@ class ContainerEngine():
         Args:
             repository -- repository to pull
         """
-        if self._pull_progress_cb:
-            resp = self._docker_client.api.pull(repository, stream=True, decode=True)
-            self._pull_progress_cb(generator=resp)
-        else:
-            self._docker_client.api.pull(repository)
+        resp = self._docker_client.api.pull(repository, stream=True, decode=True)
+        self.user_output.progress_generator(resp)
 
     def run(self, image: str, workspace_path: str, command: str, privileged: bool) -> None:
         """ Run the image with the given command and directory to mount.
@@ -53,9 +47,8 @@ class ContainerEngine():
         container = self._docker_client.containers.run(image, command=command, auto_remove=True, 
                                                        privileged=privileged, stderr=True, 
                                                        volumes=volume_binds, detach=True)
-        if self._msg_cb is not None:
-            for line in container.logs(stream=True):
-                self._msg_cb(msg=line.decode().strip())
+        for line in container.logs(stream=True):
+            self.user_output.msg(line.decode().strip())
 
     def remove(self, image: str) -> None:
         """ Remove a tool image.
@@ -77,19 +70,3 @@ class ContainerEngine():
             local_registryimagelist.append(repositories['name'])
 
         return local_registryimagelist
-
-    def set_pull_progress_cb(self, pull_progress_callback: Callable) -> None:
-        """ Register the callback function for the pull command's progress.
-        
-        Args:
-            pull_progress_callback -- function to call with the new pull progress
-        """
-        self._pull_progress_cb = MethodType(pull_progress_callback, self)
-
-    def set_msg_cb(self, msg_callback: Callable) -> None:
-        """ Register the callback function for sending generic messages for the user.
-        
-        Args:
-            msg_callback -- function to call with the message
-        """
-        self._msg_cb = MethodType(msg_callback, self)
