@@ -7,7 +7,7 @@ import dem.cli.command.clone_cmd as clone_cmd
 
 # Test framework
 from typer.testing import CliRunner
-from unittest.mock import patch, MagicMock, create_autospec
+from unittest.mock import patch, MagicMock
 
 ## Global test variables
 
@@ -79,20 +79,20 @@ def test_check_new_dev_env_name_taken(mock_stderr_print):
 
 def test_clone_given_dev_env():
     # Test setup
-    fake_dev_env_local_setup = MagicMock()
+    fake_local_platform = MagicMock()
     fake_dev_env_to_clone = MagicMock()
 
     test_new_name = "test_cloned"
 
-    fake_dev_env_local_setup.dev_envs = []
+    fake_local_platform.dev_envs = []
 
     # Run unit under test
-    clone_cmd.clone_given_dev_env(fake_dev_env_local_setup, fake_dev_env_to_clone, test_new_name)
+    clone_cmd.clone_given_dev_env(fake_local_platform, fake_dev_env_to_clone, test_new_name)
 
     # Check expectations
-    assert fake_dev_env_local_setup.dev_envs[0].name is test_new_name
+    assert fake_local_platform.dev_envs[0].name is test_new_name
 
-    fake_dev_env_local_setup.update_json.assert_called_once()
+    fake_local_platform.flush_to_file.assert_called_once()
 
 @patch("dem.cli.command.clone_cmd.DevEnvLocalSetup")
 @patch("dem.cli.command.clone_cmd.get_dev_env_to_clone")
@@ -101,8 +101,8 @@ def test_clone_given_dev_env():
 def test_clone(mock_clone_given_dev_env, mock_check_new_dev_env_name_taken, 
                mock_get_dev_env_to_clone, mock_DevEnvLocalSetup):
     # Test setup
-    fake_dev_env_local_setup = MagicMock()
-    mock_DevEnvLocalSetup.return_value = fake_dev_env_local_setup
+    fake_local_platform = MagicMock()
+    mock_DevEnvLocalSetup.return_value = fake_local_platform
     fake_dev_env_to_clone = MagicMock()
     mock_get_dev_env_to_clone.return_value = fake_dev_env_to_clone
     mock_check_new_dev_env_name_taken.return_value = False
@@ -119,9 +119,9 @@ def test_clone(mock_clone_given_dev_env, mock_check_new_dev_env_name_taken,
     assert runner_result.exit_code == 0
 
     mock_DevEnvLocalSetup.assert_called_once()
-    mock_get_dev_env_to_clone.assert_called_once_with(fake_dev_env_local_setup, 
+    mock_get_dev_env_to_clone.assert_called_once_with(fake_local_platform, 
                                                       test_dev_env_to_clone_name)
-    mock_check_new_dev_env_name_taken.assert_called_once_with(fake_dev_env_local_setup, 
+    mock_check_new_dev_env_name_taken.assert_called_once_with(fake_local_platform, 
                                                               test_new_dev_env_name)
-    mock_clone_given_dev_env.assert_called_once_with(fake_dev_env_local_setup, 
+    mock_clone_given_dev_env.assert_called_once_with(fake_local_platform, 
                                                      fake_dev_env_to_clone, test_new_dev_env_name)

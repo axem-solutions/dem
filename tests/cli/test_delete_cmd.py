@@ -147,10 +147,10 @@ def test_delete_dev_env_valid_name(mock_DevEnvLocalSetup, mock_remove_unused_too
     fake_dev_env1 = MagicMock()
     fake_dev_env_to_delete = MagicMock()
     fake_dev_env_to_delete.name = "dev_env"
-    fake_dev_env_local_setup = MagicMock()
-    fake_dev_env_local_setup.dev_envs = [fake_dev_env1, fake_dev_env_to_delete]
-    mock_DevEnvLocalSetup.return_value = fake_dev_env_local_setup
-    fake_dev_env_local_setup.get_dev_env_by_name.return_value = fake_dev_env_to_delete
+    fake_local_platform = MagicMock()
+    fake_local_platform.dev_envs = [fake_dev_env1, fake_dev_env_to_delete]
+    mock_DevEnvLocalSetup.return_value = fake_local_platform
+    fake_local_platform.get_dev_env_by_name.return_value = fake_dev_env_to_delete
     
     # Run unit under test
     runner_result = runner.invoke(main.typer_cli, ["delete", fake_dev_env_to_delete.name], color=True)
@@ -159,21 +159,21 @@ def test_delete_dev_env_valid_name(mock_DevEnvLocalSetup, mock_remove_unused_too
     assert 0 == runner_result.exit_code
 
     mock_DevEnvLocalSetup.assert_called_once()
-    fake_dev_env_local_setup.get_dev_env_by_name.assert_called_once_with(fake_dev_env_to_delete.name)
-    fake_dev_env_local_setup.update_json.assert_called_once()
+    fake_local_platform.get_dev_env_by_name.assert_called_once_with(fake_dev_env_to_delete.name)
+    fake_local_platform.flush_to_file.assert_called_once()
     mock_remove_unused_tool_images.assert_called_once_with(fake_dev_env_to_delete,
-                                                           fake_dev_env_local_setup)
+                                                           fake_local_platform)
 
-    assert fake_dev_env1 in fake_dev_env_local_setup.dev_envs
-    assert fake_dev_env_to_delete not in fake_dev_env_local_setup.dev_envs
+    assert fake_dev_env1 in fake_local_platform.dev_envs
+    assert fake_dev_env_to_delete not in fake_local_platform.dev_envs
 
 @patch("dem.cli.command.delete_cmd.stderr.print")
 @patch("dem.cli.command.delete_cmd.DevEnvLocalSetup")
 def test_delete_dev_env_invalid_name(mock_DevEnvLocalSetup, mock_stderr_print):
     # Test setup
-    fake_dev_env_local_setup = MagicMock()
-    mock_DevEnvLocalSetup.return_value = fake_dev_env_local_setup
-    fake_dev_env_local_setup.get_dev_env_by_name.return_value = None
+    fake_local_platform = MagicMock()
+    mock_DevEnvLocalSetup.return_value = fake_local_platform
+    fake_local_platform.get_dev_env_by_name.return_value = None
     test_invalid_name = "test_invalid_name"
     
     # Run unit under test
@@ -183,5 +183,5 @@ def test_delete_dev_env_invalid_name(mock_DevEnvLocalSetup, mock_stderr_print):
     assert 0 == runner_result.exit_code
 
     mock_DevEnvLocalSetup.assert_called_once()
-    fake_dev_env_local_setup.get_dev_env_by_name.assert_called_once_with(test_invalid_name)
+    fake_local_platform.get_dev_env_by_name.assert_called_once_with(test_invalid_name)
     mock_stderr_print.assert_called_once_with("[red]Error: The [bold]" + test_invalid_name + "[/bold] Development Environment doesn't exist.")

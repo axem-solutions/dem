@@ -145,25 +145,31 @@ def test_check_image_availability_with_update(mock_json_attribute):
 def test_check_image_availability_with_update_and_local_only(mock_json_attribute):
     common_test_check_image_availability(mock_json_attribute, True, True)
 
+@patch.object(dev_env_setup.DevEnvSetup, "get_deserialized")
+@patch.object(dev_env_setup.DevEnvSetup, "__init__")
 @patch.object(dev_env_setup.DevEnvLocalSetup, "json", new_callable=PropertyMock)
-def test_DevEnvLocalSetup_update_json(mock_json_attribute):
+def test_DevEnvLocalSetup_flush_to_file(mock_json_attribute: MagicMock, 
+                                        mock_super__init__: MagicMock, 
+                                        mock_get_deserialized: MagicMock):
     # Test setup
     mock_json = MagicMock()
-    mock_json.read.return_value = json.loads(fake_data.dev_env_json)
-    mock_json.deserialized = mock_json.read.return_value
+    mock_json.deserialized = {
+        "development_environments": []
+    }
     mock_json_attribute.return_value = mock_json
+    mock_get_deserialized.return_value = mock_json.deserialized
 
-    test_dev_env_local_setup = dev_env_setup.DevEnvLocalSetup()
-    test_new_name = "new name"
-    test_dev_env_local_setup.dev_envs[0].name = test_new_name
-    expected_deserialized_json = mock_json.deserialized
-    expected_deserialized_json["development_environments"][0]["name"] = test_new_name
+    test_local_platform = dev_env_setup.DevEnvLocalSetup()
 
     # Run unit under test
-    test_dev_env_local_setup.update_json()
+    test_local_platform.flush_to_file()
 
     # Check expectations
-    test_dev_env_local_setup.json.write.assert_called_once_with(expected_deserialized_json)
+    assert test_local_platform.json.deserialized is mock_json.deserialized
+
+    mock_super__init__.assert_called_once_with(mock_json.deserialized)
+    mock_get_deserialized.assert_called_once()
+    mock_json.flush.assert_called_once()
 
 @patch.object(dev_env_setup.Core, "user_output")
 @patch.object(dev_env_setup.DevEnvLocalSetup, "_container_engine", new_callable=PropertyMock)
@@ -216,8 +222,9 @@ def test_DevEnvLocalSetup_run_container(mock_super__init__, mock_container_engin
     test_privileged = False
     mock_container_engine = MagicMock()
     mock_container_engine_attribute.return_value = mock_container_engine
-    mock_deserialized_json = MagicMock()
-    mock_json.read.return_value = mock_deserialized_json
+    mock_json.deserialized = {
+        "development_environments": []
+    }
 
     test_dev_env_local_setup = dev_env_setup.DevEnvLocalSetup()
 
@@ -226,7 +233,6 @@ def test_DevEnvLocalSetup_run_container(mock_super__init__, mock_container_engin
                                            test_privileged)
 
     # Check expectations
-    mock_json.read.assert_called_once()
-    mock_super__init__.assert_called_once_with(mock_deserialized_json)
+    mock_super__init__.assert_called_once_with(mock_json.deserialized)
     mock_container_engine.run.assert_called_once_with(test_tool_image, test_workspace_path, 
                                                       test_command, test_privileged)

@@ -38,7 +38,7 @@ def execute(path_to_dev_env: str) -> None:
     if check_is_file_exist(path_to_dev_env) is True:                
         retval = load_dev_env_to_dev_env_json(dev_env_local_setup,path_to_dev_env)        
         if retval == True:
-            dev_env_local_setup.update_json()                
+            dev_env_local_setup.flush_to_file()
         else:
             stderr.print("[red]Error: Something went wrong.[/]")    
     else:

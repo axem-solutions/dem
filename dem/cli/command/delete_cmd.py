@@ -41,7 +41,7 @@ def execute(dev_env_name: str) -> None:
     else:
         stdout.print("Deleting the Development Environment...")
         dev_env_local_setup.dev_envs.remove(dev_env_to_delete)
-        dev_env_local_setup.update_json()
+        dev_env_local_setup.flush_to_file()
 
         remove_unused_tool_images(dev_env_to_delete, dev_env_local_setup)
         stdout.print("[green]Successfully deleted the " + dev_env_name + "![/]")

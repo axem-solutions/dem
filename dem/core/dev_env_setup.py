@@ -5,7 +5,7 @@ from dem.core.core import Core
 from dem.core.exceptions import InvalidDevEnvJson
 from dem.core.properties import __supported_dev_env_major_version__
 from dem.core.tool_images import ToolImages
-from dem.core.data_management import LocalDevEnvJSON, OrgDevEnvJSON
+from dem.core.data_management import LocalDevEnvJSON, OrgDevEnvJSON, ConfigFile
 from dem.core.container_engine import ContainerEngine
 from dem.core.registry import Registries
 
@@ -91,10 +91,14 @@ class DevEnvSetup(Core):
     Class attributes:
         _tool_images -- the available tool images
         _container_engine -- the container engine
+        _regisitries -- managing the registries
+        _config_file -- contains the DEM configuration
+        update_tool_images_on_instantiation -- can be used to disable tool update if not needed
     """
     _tool_images = None
     _container_engine = None
     _registries = None
+    _config_file = None
     update_tool_images_on_instantiation = True
 
     def _dev_env_json_version_check(self) -> None:
@@ -158,9 +162,17 @@ class DevEnvSetup(Core):
     @property
     def registries(cls) -> Registries:
         if cls._registries is None:
-            cls._registries = Registries(cls.container_engine)
+            cls._registries = Registries(cls.container_engine, cls.config_file)
 
         return cls._registries
+
+    @classmethod
+    @property
+    def config_file(cls) -> ConfigFile:
+        if cls._config_file is None:
+            cls._config_file = ConfigFile()
+
+        return cls._config_file
 
     def get_deserialized(self) -> dict:
         """ Create the deserialized json. """
@@ -217,22 +229,24 @@ class DevEnvLocalSetup(DevEnvSetup):
     """
     json = LocalDevEnvJSON()
 
-    def __init__(self):
+    def __init__(self) -> None:
         """ Store the local Development Environments.
 
         Extends the DevEnvSetup super class by populating the list of Development Environments with 
         DevEnvLocal objects.
         """
-        super().__init__(self.json.read())
+        super().__init__(self.json.deserialized)
 
         for dev_env_descriptor in self.json.deserialized["development_environments"]:
             self.dev_envs.append(DevEnvLocal(descriptor=dev_env_descriptor))
 
-    def update_json(self):
+    def flush_to_file(self) -> None:
         """ Writes the deserialized json to the dev_env.json file."""
-        self.json.write(self.get_deserialized())
+        # Get the up-to-date deserialized data.
+        self.json.deserialized = self.get_deserialized()
+        self.json.flush()
 
-    def pull_images(self, tools: list):
+    def pull_images(self, tools: list) -> None:
         """ Pull images that are only present in the registry.
         
         Args:

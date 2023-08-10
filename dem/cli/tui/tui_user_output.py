@@ -1,7 +1,7 @@
 """The core can provide information through this module to the user."""
 # dem/cli/tui/tui_user_output.py
 
-from dem.cli.console import stdout
+from dem.cli.console import stdout, stderr
 from dem.core.user_output import UserOutput
 
 import typer
@@ -72,27 +72,33 @@ class PullProgressBar():
                 self._process(item)
 
 class TUIUserOutput(UserOutput):
-
+    """ Provides the interface between the core modules and the rich based TUI."""
     def msg(self, text: str, is_title: bool = False) -> None:
-        """ Generic callback function to present information for the user. 
+        """ Send a message.
         
-        Args:
-            msg -- the text to print
-            is_title -- the text is the title of the new section.
+            Args:
+                text -- the text to print
+                is_title -- the text is the title of a new section.
         """
         if is_title is True:
             stdout.rule(text)
         else:
             stdout.print(text)
 
-    def get_confirm(self, text: str, confirm_text: str) -> None:
-        """ Callback function to get confirmation from the user
+    def error(self, text: str) -> None:
+        """ Send and error message
         
-        Args:
-            args -- (not used) the function acts as a class method, so it gets the caller objects as 
-                    input
-            kwargs -- msg: message to print
-                    user_confirm: the action the user needs to confirm
+            Args:
+                text -- the error message
+        """
+        stderr.print("[red]" + text + "[/]")
+
+    def get_confirm(self, text: str, confirm_text: str) -> None:
+        """ Get confirmation from the user.
+        
+            Args:
+                text -- message to print (can be empty)
+                confirm_text: the action the user needs to confirm
         """
         if text != "":
             stdout.print(text)
@@ -100,17 +106,24 @@ class TUIUserOutput(UserOutput):
         typer.confirm(confirm_text, abort=True)
 
     def progress_generator(self, generator: Generator) -> None:
-        """ Process the pull command's generator
+        """ Process the progress generator. 
 
-        Args:
-            args -- (not used) the function acts as a class method, so it gets the caller objects as 
-                    input
-            generator -- the pull command's generator
+            The input generator must be exhausted.
+
+            Args:
+                generator -- the generator
         """
         pull_progress_bar = PullProgressBar(generator)
         pull_progress_bar.run_generator()
 
     def status_generator(self, generator: Generator) -> None:
+        """ Process the status generator. 
+
+            The input generator must be exhausted.
+
+            Args:
+                generator -- the generator
+        """
         with Status("") as status:
             status.start()
 

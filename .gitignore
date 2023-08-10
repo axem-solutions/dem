@@ -10,6 +10,7 @@
 *.lst
 *__pycache__
 poetry.lock
+.coverage
 build/
 .vscode/
 dist/
