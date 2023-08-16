@@ -211,17 +211,17 @@ def test_with_invalid_option():
 
 ## Test listing the local tool images.
 
-@patch("dem.cli.command.list_cmd.container_engine.ContainerEngine")
-def test_local_tool_images(mock_ContainerEngine):
+@patch("dem.cli.command.list_cmd.dev_env_setup.DevEnvLocalSetup")
+def test_local_tool_images(mock_DevEnvLocalSetup: MagicMock):
     # Test setup
-    fake_local_tool_images = [
+    test_local_tool_images = [
         "axemsolutions/cpputest:latest",
         "axemsolutions/stlink_org:latest",
         "axemsolutions/make_gnu_arm:latest",
     ]
-    fake_container_engine = MagicMock()
-    mock_ContainerEngine.return_value = fake_container_engine
-    fake_container_engine.get_local_tool_images.return_value = fake_local_tool_images
+    mock_platform = MagicMock()
+    mock_DevEnvLocalSetup.return_value = mock_platform
+    mock_platform.container_engine.get_local_tool_images.return_value = test_local_tool_images
 
     # Run unit under test
     runner_result = runner.invoke(main.typer_cli, ["list", "--local", "--tool"])
@@ -229,9 +229,9 @@ def test_local_tool_images(mock_ContainerEngine):
     # Check expectations
     assert 0 == runner_result.exit_code
 
-    mock_ContainerEngine.assert_called_once()
-    fake_container_engine.get_local_tool_images.assert_called_once()
-    
+    mock_DevEnvLocalSetup.assert_called_once()
+    mock_platform.container_engine.get_local_tool_images.assert_called_once()
+
     expected_table = Table()
     expected_table.add_column("Repository")
     expected_table.add_row("axemsolutions/cpputest:latest")
@@ -241,13 +241,13 @@ def test_local_tool_images(mock_ContainerEngine):
     console.print(expected_table)
     assert console.file.getvalue() == runner_result.stdout
 
-@patch("dem.cli.command.list_cmd.container_engine.ContainerEngine")
-def test_no_local_tool_images(mock_ContainerEngine):
+@patch("dem.cli.command.list_cmd.dev_env_setup.DevEnvLocalSetup")
+def test_no_local_tool_images(mock_DevEnvLocalSetup: MagicMock):
     # Test setup
-    fake_local_tool_images = []
-    fake_container_engine = MagicMock()
-    mock_ContainerEngine.return_value = fake_container_engine
-    fake_container_engine.get_local_tool_images.return_value = fake_local_tool_images
+    test_local_tool_images = []
+    mock_platform = MagicMock()
+    mock_DevEnvLocalSetup.return_value = mock_platform
+    mock_platform.container_engine.get_local_tool_images.return_value = test_local_tool_images
 
     # Run unit under test
     runner_result = runner.invoke(main.typer_cli, ["list", "--local", "--tool"])
@@ -255,8 +255,8 @@ def test_no_local_tool_images(mock_ContainerEngine):
     # Check expectations
     assert 0 == runner_result.exit_code
 
-    mock_ContainerEngine.assert_called_once()
-    fake_container_engine.get_local_tool_images.assert_called_once()
+    mock_DevEnvLocalSetup.assert_called_once()
+    mock_platform.container_engine.get_local_tool_images.assert_called_once()
     
     expected_table = Table()
     expected_table.add_column("Repository")
@@ -266,18 +266,17 @@ def test_no_local_tool_images(mock_ContainerEngine):
 
 ## Test listing the local tool images.
 
-@patch("dem.cli.command.list_cmd.registry.list_repos")
-@patch("dem.cli.command.list_cmd.container_engine.ContainerEngine")
-def test_registry_tool_images(mock_ContainerEngine, mock_list_repos):
+@patch("dem.cli.command.list_cmd.dev_env_setup.DevEnvLocalSetup")
+def test_registry_tool_images(mock_DevEnvLocalSetup: MagicMock):
     # Test setup
     test_registry_tool_images = [
         "axemsolutions/cpputest:latest",
         "axemsolutions/stlink_org:latest",
         "axemsolutions/make_gnu_arm:latest",
     ]
-    mock_container_engine = MagicMock()
-    mock_ContainerEngine.return_value = mock_container_engine
-    mock_list_repos.return_value = test_registry_tool_images
+    mock_platform = MagicMock()
+    mock_DevEnvLocalSetup.return_value = mock_platform
+    mock_platform.registries.list_repos.return_value = test_registry_tool_images
 
     # Run unit under test
     runner_result = runner.invoke(main.typer_cli, ["list", "--all", "--tool"])
@@ -285,7 +284,7 @@ def test_registry_tool_images(mock_ContainerEngine, mock_list_repos):
     # Check expectations
     assert 0 == runner_result.exit_code
 
-    mock_list_repos.assert_called_once_with(mock_container_engine)
+    mock_platform.registries.list_repos.assert_called_once()
     
     expected_table = Table()
     expected_table.add_column("Repository")
@@ -296,14 +295,13 @@ def test_registry_tool_images(mock_ContainerEngine, mock_list_repos):
     console.print(expected_table)
     assert console.file.getvalue() == runner_result.stdout
 
-@patch("dem.cli.command.list_cmd.registry.list_repos")
-@patch("dem.cli.command.list_cmd.container_engine.ContainerEngine")
-def test_empty_repository(mock_ContainerEngine, mock_list_repos):
+@patch("dem.cli.command.list_cmd.dev_env_setup.DevEnvLocalSetup")
+def test_empty_repository(mock_DevEnvLocalSetup: MagicMock):
     # Test setup
-    fake_registry_tool_images = []
-    mock_container_engine = MagicMock()
-    mock_ContainerEngine.return_value = mock_container_engine
-    mock_list_repos.return_value = fake_registry_tool_images
+    test_registry_tool_images = []
+    mock_platform = MagicMock()
+    mock_DevEnvLocalSetup.return_value = mock_platform
+    mock_platform.registries.list_repos.return_value = test_registry_tool_images
 
     # Run unit under test
     runner_result = runner.invoke(main.typer_cli, ["list", "--all", "--tool"])
@@ -311,7 +309,7 @@ def test_empty_repository(mock_ContainerEngine, mock_list_repos):
     # Check expectations
     assert 0 == runner_result.exit_code
 
-    mock_list_repos.assert_called_once_with(mock_container_engine)
+    mock_platform.registries.list_repos.assert_called_once()
     
     expected_table = Table()
     expected_table.add_column("Repository")

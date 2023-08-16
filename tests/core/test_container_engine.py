@@ -17,7 +17,6 @@ def _get_test_image_tags_as_images(test_image_tags):
         test_images.append(mockImage(test_image_tag))
     return test_images
 
-@patch("docker.APIClient", MagicMock())
 @patch("docker.from_env")
 def test_get_local_tool_images(mock_docker_from_env):
     # Test setup
@@ -60,7 +59,6 @@ def test_get_local_tool_images(mock_docker_from_env):
     mock_docker_from_env.assert_called_once()
     mock_docker_client.images.list.assert_called_once()
 
-@patch("docker.APIClient", MagicMock())
 @patch("docker.from_env")
 def test_get_local_tool_images_when_none_available(mock_docker_from_env):
     # Test setup
@@ -80,33 +78,17 @@ def test_get_local_tool_images_when_none_available(mock_docker_from_env):
     mock_docker_from_env.assert_called_once()
     fake_docker_client.images.list.assert_called_once()
 
+@patch.object(container_engine.Core, "user_output")
 @patch("dem.core.container_engine.docker.from_env")
-def test_pull_no_cb(mock_docker_from_env):
+def test_pull(mock_docker_from_env, mock_user_output):
     # Test setup
     mock_docker_client = MagicMock()
     mock_docker_from_env.return_value = mock_docker_client
-    test_image_to_pull = "test_image_to_remove:latest"
-
-    test_container_engine = container_engine.ContainerEngine()
-
-    # Run unit under test
-    test_container_engine.pull(test_image_to_pull)
-
-    # Check expectations
-    mock_docker_from_env.assert_called_once()
-    mock_docker_client.api.pull.assert_called_once_with(test_image_to_pull)
-
-@patch("dem.core.container_engine.docker.from_env")
-def test_pull_with_cb(mock_docker_from_env):
-    # Test setup
-    mock_docker_client = MagicMock()
-    mock_docker_from_env.return_value = mock_docker_client
-    test_image_to_pull = "test_image_to_remove:latest"
+    test_image_to_pull = "test_image:latest"
     mock_response = MagicMock()
     mock_docker_client.api.pull.return_value = mock_response
-    mock_pull_progress_cb = MagicMock()
+
     test_container_engine = container_engine.ContainerEngine()
-    test_container_engine._pull_progress_cb = mock_pull_progress_cb
 
     # Run unit under test
     test_container_engine.pull(test_image_to_pull)
@@ -115,10 +97,11 @@ def test_pull_with_cb(mock_docker_from_env):
     mock_docker_from_env.assert_called_once()
     mock_docker_client.api.pull.assert_called_once_with(test_image_to_pull, stream=True, 
                                                         decode=True)
-    mock_pull_progress_cb.assert_called_once_with(generator=mock_response)
+    mock_user_output.progress_generator.assert_called_once_with(mock_response)
 
+@patch.object(container_engine.Core, "user_output")
 @patch("docker.from_env")
-def test_run(mock_from_env):
+def test_run(mock_from_env, mock_user_output):
     # Test setup
     mock_docker_client = MagicMock()
     mock_from_env.return_value = mock_docker_client
@@ -133,10 +116,8 @@ def test_run(mock_from_env):
         b"log_line_2\n",
     ]
     mock_container.logs.return_value = fake_log_lines
-    mock_msg_cb = MagicMock()
 
     test_container_engine = container_engine.ContainerEngine()
-    test_container_engine._msg_cb = mock_msg_cb
 
     # Run unit under test
     test_container_engine.run(test_image, test_workspace_path, test_command, test_privileged)
@@ -150,10 +131,10 @@ def test_run(mock_from_env):
                                                               detach=True)
     mock_container.logs.assert_called_once_with(stream=True)
     calls = [
-        call(msg="log_line_1"), 
-        call(msg="log_line_2"),
+        call("log_line_1"), 
+        call("log_line_2"),
     ]
-    mock_msg_cb.assert_has_calls(calls)
+    mock_user_output.msg.assert_has_calls(calls)
 
 @patch("docker.from_env")
 def test_remove(mock_from_env):
@@ -196,37 +177,3 @@ def test_search(mock_from_env):
 
     expected_registry_image_list = ["repo1", "repo2"]
     assert actual_registry_image_list == expected_registry_image_list
-
-@patch("docker.from_env", MagicMock())
-@patch("dem.core.container_engine.MethodType")
-def test_set_pull_progress_cb(mock_MethodType):
-    # Test setup
-    test_pull_progress_callback = MagicMock()
-    mock_pull_progress_cb_method_type = MagicMock()
-    mock_MethodType.return_value = mock_pull_progress_cb_method_type
-
-    test_container_engine = container_engine.ContainerEngine()
-
-    # Run unit under test
-    test_container_engine.set_pull_progress_cb(test_pull_progress_callback)
-
-    # Check expectations
-    mock_MethodType.assert_called_once_with(test_pull_progress_callback, test_container_engine)
-    assert test_container_engine._pull_progress_cb == mock_pull_progress_cb_method_type
-
-@patch("docker.from_env", MagicMock())
-@patch("dem.core.container_engine.MethodType")
-def test_set_msg_cb(mock_MethodType):
-    # Test setup
-    test_msg_callback = MagicMock()
-    mock_msg_cb_method_type = MagicMock()
-    mock_MethodType.return_value = mock_msg_cb_method_type
-
-    test_container_engine = container_engine.ContainerEngine()
-
-    # Run unit under test
-    test_container_engine.set_msg_cb(test_msg_callback)
-
-    # Check expectations
-    mock_MethodType.assert_called_once_with(test_msg_callback, test_container_engine)
-    assert test_container_engine._msg_cb == mock_msg_cb_method_type

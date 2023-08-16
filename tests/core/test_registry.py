@@ -2,7 +2,7 @@
 # tests/core/test_registry.py
 
 # Unit under test:
-from dem.core.registry import list_repos
+import dem.core.registry as registry
 
 # Test framework
 import pytest
@@ -20,13 +20,13 @@ def fake_response(status_code: int, json_data: str) -> requests.Response:
 @patch("dem.core.registry.requests.get")
 def test_list_repos(mock_requests_get):
     # Test setup
-    fake_container_engine = MagicMock()
+    mock_container_engine = MagicMock()
     test_image_names = [
         "test_image_1",
         "test_image_2",
         "test_image_3",
     ]
-    fake_container_engine.search.return_value = test_image_names
+    mock_container_engine.search.return_value = test_image_names
     test_json_results = [
         {
             "results": [
@@ -60,11 +60,13 @@ def test_list_repos(mock_requests_get):
     ]
     mock_requests_get.side_effect = fake_responses
 
+    test_registries = registry.Registries(mock_container_engine)
+
     # Run unit under test
-    actual_images = list_repos(fake_container_engine)
+    actual_images = test_registries.list_repos()
 
     # Check expectations
-    fake_container_engine.search.assert_called_once_with("axemsolutions")
+    mock_container_engine.search.assert_called_once_with("axemsolutions")
     calls = []
     for test_image_name in test_image_names:
         calls.append(call(f"https://registry.hub.docker.com/v2/repositories/{test_image_name}/tags/"))
@@ -81,16 +83,18 @@ def test_list_repos(mock_requests_get):
 @patch("dem.core.registry.requests.get")
 def test_list_repos_registry_error(mock_requests_get):
     # Test setup
-    fake_container_engine = MagicMock()
+    mock_container_engine = MagicMock()
     test_image_names = [
         "test_image_1",
     ]
-    fake_container_engine.search.return_value = test_image_names
+    mock_container_engine.search.return_value = test_image_names
     fake_response = MagicMock()
     fake_response.status_code = 500
     mock_requests_get.return_value = fake_response
 
+    test_registries = registry.Registries(mock_container_engine)
+
     # Run unit under test
     with pytest.raises(RegistryError) as exported_exception_info:
-        list_repos(fake_container_engine)
+        test_registries.list_repos()
         assert str(exported_exception_info.value) == "Error in communication with the registry. Failed to retrieve tags. Response status code: 500"

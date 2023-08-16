@@ -3,31 +3,56 @@ Use the container engine when possible for accessing the registry.
 """
 # dem/core/registry.py
 
+from dem.core.core import Core
+from dem.core.container_engine import ContainerEngine
 import requests
 from dem.core import container_engine as container_engine
 from dem.core.exceptions import RegistryError
+from typing import Generator
 
-def list_repos(container_engine_obj: container_engine.ContainerEngine, 
-               status_start_cb = None, status_stop_cb = None) -> list[str]:
-    registry = "axemsolutions"
-    images = []
-    
-    if status_start_cb is not None:
-        status_start_cb(status_msg="Loading image information from the registry...")
+class Registries(Core):
+    """ Manages the registries."""
+    def __init__(self, container_engine: ContainerEngine) -> None:
+        """ Init the class.
+        
+            Args:
+                container_engine -- communication is via the container engine if possible
+        """
+        self._container_engine = container_engine
 
-    for image in container_engine_obj.search(registry):
-        url = f"https://registry.hub.docker.com/v2/repositories/{image}/tags/"
+    def _list_repos_generator(self, repo_list: list[str]) -> Generator:
+        """ Generator function for listing the repos: returns the status at every image iteration
+            for better feedback.
+            
+            Args:
+                repo_list -- this list gets filled with the available repositories
 
-        response = requests.get(url)
+            Return:
+                The generator that provides the status.
+            """
+        registry = "axemsolutions"
 
-        if response.status_code == requests.codes.ok:
-            for result in response.json()["results"]:
-                images.append(image + ":" + result["name"])
-        else:
-            raise RegistryError("Error in communication with the registry. Failed to retrieve tags. Response status code: ",
-                                response.status_code)
+        for image in self._container_engine.search(registry):
+            yield "Loading image data from " + registry + ": " + image
+            url = f"https://registry.hub.docker.com/v2/repositories/{image}/tags/"
 
-    if status_stop_cb is not None:
-        status_stop_cb()
+            response = requests.get(url)
 
-    return images
+            if response.status_code == requests.codes.ok:
+                for result in response.json()["results"]:
+                    repo_list.append(image + ":" + result["name"])
+            else:
+                raise RegistryError("Error in communication with the registry. Failed to retrieve tags. Response status code: ",
+                                    response.status_code)
+
+
+    def list_repos(self) -> list[str]:
+        """ List the available repositories.
+        
+            Return:
+                The list of repositories.
+        """
+        repo_list: list[str] = []
+        self.user_output.status_generator(self._list_repos_generator(repo_list))
+
+        return repo_list

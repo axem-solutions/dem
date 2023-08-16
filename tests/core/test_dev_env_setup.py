@@ -145,38 +145,6 @@ def test_check_image_availability_with_update(mock_json_attribute):
 def test_check_image_availability_with_update_and_local_only(mock_json_attribute):
     common_test_check_image_availability(mock_json_attribute, True, True)
 
-@patch("dem.core.dev_env_setup.ContainerEngine")
-@patch.object(dev_env_setup.DevEnvSetup, "__init__")
-@patch.object(dev_env_setup.DevEnvLocalSetup, "json", new_callable=PropertyMock)
-def test_DevEnvLocalSetup_set_callbacks(mock_json_attribute, mock_super_init, mock_ContainerEngine):
-    # Test setup
-    mock_json = MagicMock()
-    mock_json.read.return_value = MagicMock()
-    mock_json.deserialized["development_environments"] = []
-    mock_json.set_callback = MagicMock()
-    mock_json_attribute.return_value = mock_json
-
-    mock_container_engine = MagicMock()
-    mock_ContainerEngine.return_value = mock_container_engine
-    
-    test_callback = MagicMock()
-
-    dev_env_setup.DevEnvLocalSetup.invalid_json_cb = test_callback
-    dev_env_setup.DevEnvLocalSetup.pull_progress_cb  = test_callback
-    dev_env_setup.DevEnvLocalSetup.msg_cb = test_callback
-
-    # Run unit under test
-    test_dev_env_local_setup = dev_env_setup.DevEnvLocalSetup()
-
-    # Check expectations
-    mock_json.set_invalid_json_callback.assert_called_once_with(test_callback)
-    mock_container_engine.set_pull_progress_cb.assert_called_once_with(test_callback)
-    mock_super_init.assert_called_once_with(mock_json.read.return_value)
-
-    assert test_dev_env_local_setup.invalid_json_cb is test_callback
-    assert test_dev_env_local_setup.msg_cb is test_callback
-    assert test_dev_env_local_setup.pull_progress_cb is test_callback
-
 @patch.object(dev_env_setup.DevEnvLocalSetup, "json", new_callable=PropertyMock)
 def test_DevEnvLocalSetup_update_json(mock_json_attribute):
     # Test setup
@@ -197,9 +165,12 @@ def test_DevEnvLocalSetup_update_json(mock_json_attribute):
     # Check expectations
     test_dev_env_local_setup.json.write.assert_called_once_with(expected_deserialized_json)
 
+@patch.object(dev_env_setup.Core, "user_output")
 @patch.object(dev_env_setup.DevEnvLocalSetup, "_container_engine", new_callable=PropertyMock)
 @patch.object(dev_env_setup.DevEnvLocalSetup, "json", new_callable=PropertyMock)
-def test_DevEnvLocalSetup_pull_images(mock_json_attribute, mock_container_engine_attribute):
+def test_DevEnvLocalSetup_pull_images(mock_json_attribute: MagicMock, 
+                                      mock_container_engine_attribute: MagicMock,
+                                      mock_user_output: MagicMock):
     # Test setup
     mock_json = MagicMock()
     mock_json.read.return_value = json.loads(fake_data.dev_env_json)
@@ -208,9 +179,6 @@ def test_DevEnvLocalSetup_pull_images(mock_json_attribute, mock_container_engine
 
     mock_container_engine = MagicMock()
     mock_container_engine_attribute.return_value = mock_container_engine
-
-    mock_msg_cb = MagicMock()
-    dev_env_setup.DevEnvLocalSetup.msg_cb = mock_msg_cb
 
     test_dev_env_local_setup = dev_env_setup.DevEnvLocalSetup()
     test_dev_env = test_dev_env_local_setup.dev_envs[0]
@@ -222,15 +190,12 @@ def test_DevEnvLocalSetup_pull_images(mock_json_attribute, mock_container_engine
     test_dev_env_local_setup.pull_images(test_dev_env.tools)
 
     # Check expectations
-    msg_cb_calls = [
-        call(msg="\n"),
-        call(msg="Pulling image axemsolutions/cpputest:latest", rule=True),
-        call(msg="\n"),
-        call(msg="Pulling image axemsolutions/make_gnu_arm:latest", rule=True),
-        call(msg="\n"),
-        call(msg="Pulling image axemsolutions/stlink_org:latest", rule=True),
+    msg_calls = [
+        call("\nPulling image axemsolutions/cpputest:latest", is_title=True),
+        call("\nPulling image axemsolutions/make_gnu_arm:latest", is_title=True),
+        call("\nPulling image axemsolutions/stlink_org:latest", is_title=True),
     ]
-    mock_msg_cb.assert_has_calls(msg_cb_calls, any_order=True)
+    mock_user_output.msg.assert_has_calls(msg_calls, any_order=True)
 
     pull_calls = [
         call("axemsolutions/cpputest:latest"),

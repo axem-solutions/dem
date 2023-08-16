@@ -47,6 +47,17 @@ pytest = "^7.3.1"
 mock = "^5.0.2"
 pytest-cov = "^4.1.0"
 
+[tool.coverage.report]
+# Regexes for lines to exclude from consideration
+exclude_also = [
+	"if __name__ == .__main__.:",
+	]
+[tool.coverage.run]
+omit =[
+	# Tests are not needed for the absract base class.
+	"dem/core/user_output.py",
+	]
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"

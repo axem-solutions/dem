@@ -1,13 +1,15 @@
 """This module represents the Development Environments."""
 # dem/core/dev_env_setup.py
 
+from dem.core.core import Core
 from dem.core.exceptions import InvalidDevEnvJson
 from dem.core.properties import __supported_dev_env_major_version__
-from dem.core.tool_images import ToolImages, RegistryToolImages
+from dem.core.tool_images import ToolImages
 from dem.core.data_management import LocalDevEnvJSON, OrgDevEnvJSON
 from dem.core.container_engine import ContainerEngine
+from dem.core.registry import Registries
 
-class DevEnv:
+class DevEnv(Core):
     """ A Development Environment."""
     supported_tool_types = ( 
         "build system",
@@ -81,7 +83,7 @@ class DevEnv:
 
         return image_statuses
 
-class DevEnvSetup:
+class DevEnvSetup(Core):
     """Representation of the development setup:
         - The available tool images.
         - The available Development Environments.
@@ -92,6 +94,7 @@ class DevEnvSetup:
     """
     _tool_images = None
     _container_engine = None
+    _registries = None
     update_tool_images_on_instantiation = True
 
     def _dev_env_json_version_check(self) -> None:
@@ -129,7 +132,7 @@ class DevEnvSetup:
             cls - the class object
         """
         if cls._tool_images is None:
-            cls._tool_images = ToolImages(cls.container_engine, 
+            cls._tool_images = ToolImages(cls.container_engine, cls.registries,
                                           cls.update_tool_images_on_instantiation)
         return cls._tool_images
 
@@ -150,6 +153,14 @@ class DevEnvSetup:
             cls._container_engine = ContainerEngine()
 
         return cls._container_engine
+
+    @classmethod
+    @property
+    def registries(cls) -> Registries:
+        if cls._registries is None:
+            cls._registries = Registries(cls.container_engine)
+
+        return cls._registries
 
     def get_deserialized(self) -> dict:
         """ Create the deserialized json. """
@@ -205,11 +216,6 @@ class DevEnvLocalSetup(DevEnvSetup):
                             current status of the pull process
     """
     json = LocalDevEnvJSON()
-    invalid_json_cb = None
-    msg_cb = None
-    pull_progress_cb = None
-    status_start_cb = None
-    status_stop_cb = None
 
     def __init__(self):
         """ Store the local Development Environments.
@@ -217,19 +223,6 @@ class DevEnvLocalSetup(DevEnvSetup):
         Extends the DevEnvSetup super class by populating the list of Development Environments with 
         DevEnvLocal objects.
         """
-        if self.invalid_json_cb:
-            self.json.set_invalid_json_callback(self.invalid_json_cb)
-
-        if self.pull_progress_cb:
-            self.container_engine.set_pull_progress_cb(self.pull_progress_cb)
-
-        if self.msg_cb: 
-            self.container_engine.set_msg_cb(self.msg_cb)
-
-        if (self.status_start_cb is not None) and (self.status_stop_cb is not None):
-            RegistryToolImages.status_start_cb = self.status_start_cb
-            RegistryToolImages.status_stop_cb = self.status_stop_cb
-
         super().__init__(self.json.read())
 
         for dev_env_descriptor in self.json.deserialized["development_environments"]:
@@ -255,10 +248,7 @@ class DevEnvLocalSetup(DevEnvSetup):
                 tool_images_to_pull.add(tool_image)
 
         for tool_image in tool_images_to_pull:
-            if self.msg_cb is not None:
-                self.msg_cb(msg="\n")
-                self.msg_cb(msg="Pulling image " + tool_image, rule=True)
-
+            self.user_output.msg("\nPulling image "+ tool_image, is_title=True)
             self.container_engine.pull(tool_image)
 
     def run_container(self, tool_image: str, workspace_path: str, command: str, privileged: bool) -> None:

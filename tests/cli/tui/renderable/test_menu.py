@@ -5,8 +5,6 @@
 import dem.cli.tui.renderable.menu as menu
 
 # Test framework
-import pytest
-from typer.testing import CliRunner
 from unittest.mock import patch, MagicMock, call
 
 def test_BaseMenu_remove_cursor():
