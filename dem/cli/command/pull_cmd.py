@@ -27,11 +27,11 @@ def install_to_dev_env_json(dev_env_local: dev_env_setup.DevEnvLocal,
         # If not available, install it.
         dev_env_local = dev_env_setup.DevEnvLocal(dev_env_org=dev_env_org)
         dev_env_local_setup.dev_envs.append(dev_env_local)
-        dev_env_local_setup.update_json()
+        dev_env_local_setup.flush_to_file()
     elif dev_env_local.tools != dev_env_org.tools:
         # If already installed, but different, then overwrite it.
         dev_env_local.tools = dev_env_org.tools
-        dev_env_local_setup.update_json()
+        dev_env_local_setup.flush_to_file()
 
     return dev_env_local
 

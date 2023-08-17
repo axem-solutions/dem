@@ -63,35 +63,35 @@ def test_get_confirm_from_user(mock_SelectMenu):
 def test_handle_user_confirm_confirmed():
     # Test setup
     mock_deserialized_local_dev_env = MagicMock()
-    mock_dev_env_local_setup = MagicMock()
-    mock_dev_env_local_setup.get_deserialized.return_value = mock_deserialized_local_dev_env
+    mock_local_platform = MagicMock()
+    mock_local_platform.get_deserialized.return_value = mock_deserialized_local_dev_env
 
     # Run unit under test
-    modify_cmd.handle_user_confirm("confirm", MagicMock(), mock_dev_env_local_setup)
+    modify_cmd.handle_user_confirm("confirm", MagicMock(), mock_local_platform)
 
     # Check expectation
-    mock_dev_env_local_setup.update_json.assert_called_once()
+    mock_local_platform.flush_to_file.assert_called_once()
 
 @patch("dem.cli.command.modify_cmd.typer.prompt")
 def test_handle_user_confirm_save_as(mock_prompt):
     # Test setup
     mock_prompt.return_value = "test new name"
     mock_deserialized_local_dev_env = MagicMock()
-    mock_dev_env_local_setup = MagicMock()
-    mock_dev_env_local_setup.get_deserialized.return_value = mock_deserialized_local_dev_env
+    mock_local_platform = MagicMock()
+    mock_local_platform.get_deserialized.return_value = mock_deserialized_local_dev_env
     mock_dev_env_local = MagicMock()
     mock_dev_env_local.name = "fake dev env"
-    mock_dev_env_local_setup.dev_envs = [mock_dev_env_local]
+    mock_local_platform.dev_envs = [mock_dev_env_local]
 
     # Run unit under test
-    modify_cmd.handle_user_confirm("save as", mock_dev_env_local, mock_dev_env_local_setup)
+    modify_cmd.handle_user_confirm("save as", mock_dev_env_local, mock_local_platform)
 
     # Check expectation
     mock_prompt.assert_called_once_with("Name of the new Development Environment")
-    mock_dev_env_local_setup.update_json.assert_called_once()
+    mock_local_platform.flush_to_file.assert_called_once()
 
-    assert "fake dev env" == mock_dev_env_local_setup.dev_envs[0].name
-    assert "test new name" == mock_dev_env_local_setup.dev_envs[1].name
+    assert "fake dev env" == mock_local_platform.dev_envs[0].name
+    assert "test new name" == mock_local_platform.dev_envs[1].name
 
 def test_handle_user_confirm_cancel():
     # Test setup

@@ -173,4 +173,4 @@ def execute(dev_env_name: str) -> None:
         stderr.print("The installation failed.")
     else:
         stdout.print("The [yellow]" + dev_env.name + "[/] Development Environment is ready!")
-        dev_env_local_setup.update_json()
+        dev_env_local_setup.flush_to_file()

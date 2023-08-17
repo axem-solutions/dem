@@ -27,8 +27,8 @@ runner = CliRunner(mix_stderr=False)
 @patch("dem.cli.command.load_cmd.DevEnvLocalSetup")
 def test_load_dev_env_to_dev_env_json(mock_DevEnvLocalSetup,mock_open,mock_json):
     # Test setup
-    fake_dev_env_local_setup = MagicMock()
-    mock_DevEnvLocalSetup.return_value = fake_dev_env_local_setup
+    fake_local_platform = MagicMock()
+    mock_DevEnvLocalSetup.return_value = fake_local_platform
     fake_opened_file = MagicMock()
     mock_open.return_value = fake_opened_file
 
@@ -44,18 +44,18 @@ def test_load_dev_env_to_dev_env_json(mock_DevEnvLocalSetup,mock_open,mock_json)
     }
     mock_json.return_value = test_dev_env
 
-    fake_dev_env_local_setup.get_dev_env_by_name.return_value = MagicMock()
-    retval_dev_env_cant_load = load_cmd.load_dev_env_to_dev_env_json(fake_dev_env_local_setup,path)  
+    fake_local_platform.get_dev_env_by_name.return_value = MagicMock()
+    retval_dev_env_cant_load = load_cmd.load_dev_env_to_dev_env_json(fake_local_platform,path)  
     
     assert retval_dev_env_cant_load is False
     
 
-    fake_dev_env_local_setup.get_dev_env_by_name.return_value = None
-    retval_dev_env_load = load_cmd.load_dev_env_to_dev_env_json(fake_dev_env_local_setup,path)    
+    fake_local_platform.get_dev_env_by_name.return_value = None
+    retval_dev_env_load = load_cmd.load_dev_env_to_dev_env_json(fake_local_platform,path)    
     
     assert retval_dev_env_load is True
-    fake_dev_env_local_setup.get_dev_env_by_name.assert_called()
-    fake_dev_env_local_setup.dev_envs.append.assert_called_once()
+    fake_local_platform.get_dev_env_by_name.assert_called()
+    fake_local_platform.dev_envs.append.assert_called_once()
     fake_opened_file.close.assert_called() 
 
    
@@ -64,13 +64,13 @@ def test_load_dev_env_to_dev_env_json(mock_DevEnvLocalSetup,mock_open,mock_json)
 @patch("dem.cli.command.load_cmd.DevEnvLocalSetup")
 def test_json_decode_error(mock_DevEnvLocalSetup,mock_json):
      # Test setup
-    fake_dev_env_local_setup = MagicMock()
-    mock_DevEnvLocalSetup.return_value = fake_dev_env_local_setup
+    fake_local_platform = MagicMock()
+    mock_DevEnvLocalSetup.return_value = fake_local_platform
     path="/home/cica.json"
 
     mock_json.side_effect = json.decoder.JSONDecodeError("asd","asd",0)
-    fake_dev_env_local_setup.get_dev_env_by_name.return_value = MagicMock()
-    retval_dev_env_cant_load = load_cmd.load_dev_env_to_dev_env_json(fake_dev_env_local_setup,path)  
+    fake_local_platform.get_dev_env_by_name.return_value = MagicMock()
+    retval_dev_env_cant_load = load_cmd.load_dev_env_to_dev_env_json(fake_local_platform,path)  
     
     assert retval_dev_env_cant_load is False
 

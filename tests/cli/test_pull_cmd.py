@@ -52,8 +52,8 @@ def test_dev_env_already_installed(mock_DevEnvLocalSetup, mock_DevEnvOrgSetup):
     fake_dev_env_org.tools = fake_tools
     fake_dev_env_org_setup.get_dev_env_by_name.return_value = fake_dev_env_org
 
-    fake_dev_env_local_setup = MagicMock()
-    mock_DevEnvLocalSetup.return_value = fake_dev_env_local_setup
+    fake_local_platform = MagicMock()
+    mock_DevEnvLocalSetup.return_value = fake_local_platform
     fake_dev_env_local = MagicMock()
     # Set the same fake tools for both the local and org instance
     fake_dev_env_local.tools = fake_tools
@@ -78,10 +78,10 @@ def test_dev_env_already_installed(mock_DevEnvLocalSetup, mock_DevEnvOrgSetup):
     fake_dev_env_org_setup.get_dev_env_by_name.assert_called_once_with("test_env")
 
     mock_DevEnvLocalSetup.assert_called_once()
-    fake_dev_env_org.get_local_instance.assert_called_once_with(fake_dev_env_local_setup)
-    fake_dev_env_local_setup.pull_images.assert_called_once_with(fake_dev_env_local.tools)
-    calls = [call(fake_dev_env_local_setup.tool_images), 
-             call(fake_dev_env_local_setup.tool_images, update_tool_images=True)]
+    fake_dev_env_org.get_local_instance.assert_called_once_with(fake_local_platform)
+    fake_local_platform.pull_images.assert_called_once_with(fake_dev_env_local.tools)
+    calls = [call(fake_local_platform.tool_images), 
+             call(fake_local_platform.tool_images, update_tool_images=True)]
     fake_dev_env_local.check_image_availability.assert_has_calls(calls)
 
     console = Console(file=io.StringIO())
@@ -101,8 +101,8 @@ def test_dev_env_installed_but_different(mock_DevEnvLocalSetup,
     fake_dev_env_org.tools = fake_tools
     fake_dev_env_org_setup.get_dev_env_by_name.return_value = fake_dev_env_org
 
-    fake_dev_env_local_setup = MagicMock()
-    mock_DevEnvLocalSetup.return_value = fake_dev_env_local_setup
+    fake_local_platform = MagicMock()
+    mock_DevEnvLocalSetup.return_value = fake_local_platform
     fake_dev_env_local = MagicMock()
     fake_dev_env_local.name = "test_env"
     fake_dev_env_org.get_local_instance.return_value = fake_dev_env_local
@@ -125,14 +125,14 @@ def test_dev_env_installed_but_different(mock_DevEnvLocalSetup,
     fake_dev_env_org_setup.get_dev_env_by_name.assert_called_once_with("test_env")
 
     mock_DevEnvLocalSetup.assert_called_once()
-    fake_dev_env_org.get_local_instance.assert_called_once_with(fake_dev_env_local_setup)
+    fake_dev_env_org.get_local_instance.assert_called_once_with(fake_local_platform)
 
     assert fake_dev_env_local.tools == fake_dev_env_org.tools
-    fake_dev_env_local_setup.update_json.assert_called_once()
-    fake_dev_env_local_setup.pull_images.assert_called_once_with(fake_dev_env_local.tools)
+    fake_local_platform.flush_to_file.assert_called_once()
+    fake_local_platform.pull_images.assert_called_once_with(fake_dev_env_local.tools)
 
-    calls = [call(fake_dev_env_local_setup.tool_images), 
-             call(fake_dev_env_local_setup.tool_images, update_tool_images=True)]
+    calls = [call(fake_local_platform.tool_images), 
+             call(fake_local_platform.tool_images, update_tool_images=True)]
     fake_dev_env_local.check_image_availability.assert_has_calls(calls)
 
     console = Console(file=io.StringIO())
@@ -150,8 +150,8 @@ def test_dev_env_new_install(mock_DevEnvLocalSetup, mock_DevEnvOrgSetup, mock_De
     # Set the same fake tools for both the local and org instance
     fake_dev_env_org_setup.get_dev_env_by_name.return_value = fake_dev_env_org
 
-    fake_dev_env_local_setup = MagicMock()
-    mock_DevEnvLocalSetup.return_value = fake_dev_env_local_setup
+    fake_local_platform = MagicMock()
+    mock_DevEnvLocalSetup.return_value = fake_local_platform
     fake_dev_env_org.get_local_instance.return_value = None
 
     fake_dev_env_local = MagicMock()
@@ -169,16 +169,16 @@ def test_dev_env_new_install(mock_DevEnvLocalSetup, mock_DevEnvOrgSetup, mock_De
     fake_dev_env_org_setup.get_dev_env_by_name.assert_called_once_with("test_env")
 
     mock_DevEnvLocalSetup.assert_called_once()
-    fake_dev_env_org.get_local_instance.assert_called_once_with(fake_dev_env_local_setup)
+    fake_dev_env_org.get_local_instance.assert_called_once_with(fake_local_platform)
 
     mock_DevEnvLocal.assert_called_once_with(dev_env_org=fake_dev_env_org)
-    fake_dev_env_local_setup.dev_envs.append.assert_called_once_with(fake_dev_env_local)
-    fake_dev_env_local_setup.update_json.assert_called_once()
+    fake_local_platform.dev_envs.append.assert_called_once_with(fake_dev_env_local)
+    fake_local_platform.flush_to_file.assert_called_once()
 
-    fake_dev_env_local_setup.pull_images.assert_called_once_with(fake_dev_env_local.tools)
+    fake_local_platform.pull_images.assert_called_once_with(fake_dev_env_local.tools)
 
-    calls = [call(fake_dev_env_local_setup.tool_images), 
-             call(fake_dev_env_local_setup.tool_images, update_tool_images=True)]
+    calls = [call(fake_local_platform.tool_images), 
+             call(fake_local_platform.tool_images, update_tool_images=True)]
     fake_dev_env_local.check_image_availability.assert_has_calls(calls)
     
     assert 0 == runner_result.exit_code

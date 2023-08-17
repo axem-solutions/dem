@@ -10,6 +10,6 @@ def execute(dev_env_name_to_rename: str, new_dev_env_name: str) -> None:
 
     if dev_env_to_rename is not None:
         dev_env_to_rename.name = new_dev_env_name
-        dev_env_local_setup.update_json()
+        dev_env_local_setup.flush_to_file()
     else:
         stderr.print("[red]Error: The input Development Environment does not exist.[/]")

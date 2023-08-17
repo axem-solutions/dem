@@ -37,8 +37,8 @@ def get_expected_table(expected_tools: list[list[str]]) ->str:
 @patch("dem.cli.command.info_cmd.DevEnvOrgSetup")
 def test_info_local_dev_env_demo(mock_DevEnvOrgSetup, mock_DevEnvLocalSetup):
     # Test setup
-    fake_dev_env_local_setup = MagicMock()
-    mock_DevEnvLocalSetup.return_value = fake_dev_env_local_setup
+    fake_local_platform = MagicMock()
+    mock_DevEnvLocalSetup.return_value = fake_local_platform
     fake_dev_env = MagicMock()
     fake_dev_env.tools = [
         {
@@ -67,7 +67,7 @@ def test_info_local_dev_env_demo(mock_DevEnvOrgSetup, mock_DevEnvLocalSetup):
             "image_version": "latest" 
         },
     ]
-    fake_dev_env_local_setup.get_dev_env_by_name.return_value = fake_dev_env
+    fake_local_platform.get_dev_env_by_name.return_value = fake_dev_env
     def stub_check_image_availability(*args, **kwargs):
         for tool in fake_dev_env.tools:
             tool["image_status"] = ToolImages.LOCAL_AND_REGISTRY
@@ -82,8 +82,8 @@ def test_info_local_dev_env_demo(mock_DevEnvOrgSetup, mock_DevEnvLocalSetup):
 
     mock_DevEnvLocalSetup.assert_called_once()
     mock_DevEnvOrgSetup.assert_not_called()
-    fake_dev_env_local_setup.get_dev_env_by_name.assert_called_once_with(test_dev_env_name)
-    fake_dev_env.check_image_availability.assert_called_once_with(fake_dev_env_local_setup.tool_images)
+    fake_local_platform.get_dev_env_by_name.assert_called_once_with(test_dev_env_name)
+    fake_dev_env.check_image_availability.assert_called_once_with(fake_local_platform.tool_images)
 
     expected_tools = [
         ["build system", "axemsolutions/make_gnu_arm:latest", "Image is available locally and in the registry."],
@@ -98,8 +98,8 @@ def test_info_local_dev_env_demo(mock_DevEnvOrgSetup, mock_DevEnvLocalSetup):
 @patch("dem.cli.command.info_cmd.DevEnvOrgSetup")
 def test_info_local_dev_env_nagy_cica_project(mock_DevEnvOrgSetup, mock_DevEnvLocalSetup):
     # Test setup
-    fake_dev_env_local_setup = MagicMock()
-    mock_DevEnvLocalSetup.return_value = fake_dev_env_local_setup
+    fake_local_platform = MagicMock()
+    mock_DevEnvLocalSetup.return_value = fake_local_platform
     fake_dev_env = MagicMock()
     fake_dev_env.tools = [
         {
@@ -128,7 +128,7 @@ def test_info_local_dev_env_nagy_cica_project(mock_DevEnvOrgSetup, mock_DevEnvLo
             "image_version": "latest" 
         },
     ]
-    fake_dev_env_local_setup.get_dev_env_by_name.return_value = fake_dev_env
+    fake_local_platform.get_dev_env_by_name.return_value = fake_dev_env
     def stub_check_image_availability(*args, **kwargs):
         fake_dev_env.tools[0]["image_status"] = ToolImages.NOT_AVAILABLE
         fake_dev_env.tools[1]["image_status"] = ToolImages.NOT_AVAILABLE
@@ -146,8 +146,8 @@ def test_info_local_dev_env_nagy_cica_project(mock_DevEnvOrgSetup, mock_DevEnvLo
 
     mock_DevEnvLocalSetup.assert_called_once()
     mock_DevEnvOrgSetup.assert_not_called()
-    fake_dev_env_local_setup.get_dev_env_by_name.assert_called_once_with(test_dev_env_name)
-    fake_dev_env.check_image_availability.assert_called_once_with(fake_dev_env_local_setup.tool_images)
+    fake_local_platform.get_dev_env_by_name.assert_called_once_with(test_dev_env_name)
+    fake_dev_env.check_image_availability.assert_called_once_with(fake_local_platform.tool_images)
 
     expected_tools = [
         ["build system", "axemsolutions/bazel:latest", "[red]Error: Image is not available.[/]"],
@@ -162,9 +162,9 @@ def test_info_local_dev_env_nagy_cica_project(mock_DevEnvOrgSetup, mock_DevEnvLo
 @patch("dem.cli.command.info_cmd.DevEnvOrgSetup")
 def test_info_dev_env_invalid(mock_DevEnvOrgSetup, mock_DevEnvLocalSetup):
     # Test setup
-    fake_dev_env_local_setup = MagicMock()
-    mock_DevEnvLocalSetup.return_value = fake_dev_env_local_setup
-    fake_dev_env_local_setup.get_dev_env_by_name.return_value = None
+    fake_local_platform = MagicMock()
+    mock_DevEnvLocalSetup.return_value = fake_local_platform
+    fake_local_platform.get_dev_env_by_name.return_value = None
 
     fake_dev_env_org_setup = MagicMock()
     mock_DevEnvOrgSetup.return_value = fake_dev_env_org_setup
@@ -178,7 +178,7 @@ def test_info_dev_env_invalid(mock_DevEnvOrgSetup, mock_DevEnvLocalSetup):
     assert runner_result.exit_code == 0
 
     mock_DevEnvLocalSetup.assert_called_once()
-    fake_dev_env_local_setup.get_dev_env_by_name.assert_called_once_with(test_dev_env_name)
+    fake_local_platform.get_dev_env_by_name.assert_called_once_with(test_dev_env_name)
 
     mock_DevEnvOrgSetup.assert_called_once()
     fake_dev_env_org_setup.get_dev_env_by_name.assert_called_once_with(test_dev_env_name)
@@ -192,9 +192,9 @@ def test_info_dev_env_invalid(mock_DevEnvOrgSetup, mock_DevEnvLocalSetup):
 @patch("dem.cli.command.info_cmd.DevEnvOrgSetup")
 def test_info_org_dev_env(mock_DevEnvOrgSetup, mock_DevEnvLocalSetup):
     # Test setup
-    fake_dev_env_local_setup = MagicMock()
-    mock_DevEnvLocalSetup.return_value = fake_dev_env_local_setup
-    fake_dev_env_local_setup.get_dev_env_by_name.return_value = None
+    fake_local_platform = MagicMock()
+    mock_DevEnvLocalSetup.return_value = fake_local_platform
+    fake_local_platform.get_dev_env_by_name.return_value = None
 
     fake_dev_env_org_setup = MagicMock()
     mock_DevEnvOrgSetup.return_value = fake_dev_env_org_setup
@@ -240,7 +240,7 @@ def test_info_org_dev_env(mock_DevEnvOrgSetup, mock_DevEnvLocalSetup):
     assert runner_result.exit_code == 0
 
     mock_DevEnvLocalSetup.assert_called_once()
-    fake_dev_env_local_setup.get_dev_env_by_name.assert_called_once_with(test_dev_env_name)
+    fake_local_platform.get_dev_env_by_name.assert_called_once_with(test_dev_env_name)
 
     mock_DevEnvOrgSetup.assert_called_once()
     fake_dev_env_org_setup.get_dev_env_by_name.assert_called_once_with(test_dev_env_name)

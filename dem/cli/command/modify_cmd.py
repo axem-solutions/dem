@@ -152,7 +152,7 @@ def handle_user_confirm(confirmation: str, dev_env_local: DevEnvLocal,
         dev_env_local_setup.dev_envs.append(new_dev_env)
 
     # Update the json file if the user confirms or saves as a new Dev Env.
-    dev_env_local_setup.update_json()
+    dev_env_local_setup.flush_to_file()
 
 def execute(dev_env_name: str) -> None:
     dev_env_local_setup = DevEnvLocalSetup()

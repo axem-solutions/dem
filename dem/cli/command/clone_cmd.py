@@ -1,4 +1,4 @@
-"""rename CLI command implementation."""
+"""clone CLI command implementation."""
 # dem/cli/command/rename_cmd.py
 
 import copy
@@ -26,12 +26,12 @@ def clone_given_dev_env(dev_env_local_setup: DevEnvLocalSetup, dev_env_to_clone:
     new_dev_env = copy.deepcopy(dev_env_to_clone)
     new_dev_env.name = new_dev_env_name
     dev_env_local_setup.dev_envs.append(new_dev_env)
-    dev_env_local_setup.update_json()
+    dev_env_local_setup.flush_to_file()
 
 def execute(dev_env_to_clone_name: str, new_dev_env_name: str) -> None:
-    dev_env_local_setup = DevEnvLocalSetup()
-    dev_env_to_clone = get_dev_env_to_clone(dev_env_local_setup, dev_env_to_clone_name)
+    local_platform = DevEnvLocalSetup()
+    dev_env_to_clone = get_dev_env_to_clone(local_platform, dev_env_to_clone_name)
 
     if (dev_env_to_clone is not None and
-        check_new_dev_env_name_taken(dev_env_local_setup,new_dev_env_name) is False):
-        clone_given_dev_env(dev_env_local_setup, dev_env_to_clone, new_dev_env_name)
+        check_new_dev_env_name_taken(local_platform,new_dev_env_name) is False):
+        clone_given_dev_env(local_platform, dev_env_to_clone, new_dev_env_name)

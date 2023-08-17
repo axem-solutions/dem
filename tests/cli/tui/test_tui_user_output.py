@@ -172,6 +172,19 @@ def test_TUIUserOutput_msg_is_title(mock_stdout_rule: MagicMock):
     # Check expectations
     mock_stdout_rule.assert_called_once_with(test_text)
 
+@patch("dem.cli.tui.tui_user_output.stderr.print")
+def test_TUIUserOutput_error(mock_stderr_print: MagicMock):
+    # Test setup
+    test_text = "test_text"
+
+    test_tui_user_output = tui_user_output.TUIUserOutput()
+
+    # Run unit under test
+    test_tui_user_output.error(test_text)
+
+    # Check expectations
+    mock_stderr_print.assert_called_once_with("[red]" + test_text + "[/]")
+
 @patch("dem.cli.tui.tui_user_output.typer.confirm")
 @patch("dem.cli.tui.tui_user_output.stdout.print")
 def test_TUIUserOutput_get_confirm(mock_stdout_print: MagicMock, mock_confirm: MagicMock):

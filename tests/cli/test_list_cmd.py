@@ -28,8 +28,8 @@ runner = CliRunner(mix_stderr=False)
 @patch("dem.cli.command.list_cmd.dev_env_setup.DevEnvLocalSetup")
 def test_is_dev_env_org_installed_locally_true(mock_DevEnvLocalSetup):
     # Test setup
-    fake_dev_env_local_setup = MagicMock()
-    mock_DevEnvLocalSetup.return_value = fake_dev_env_local_setup
+    fake_local_platform = MagicMock()
+    mock_DevEnvLocalSetup.return_value = fake_local_platform
 
     fake_dev_env_org = MagicMock()
     fake_dev_env_org.get_local_instance.return_value = MagicMock()
@@ -41,13 +41,13 @@ def test_is_dev_env_org_installed_locally_true(mock_DevEnvLocalSetup):
     assert actual_is_installed is True
 
     mock_DevEnvLocalSetup.assert_called_once()
-    fake_dev_env_org.get_local_instance.assert_called_once_with(fake_dev_env_local_setup)
+    fake_dev_env_org.get_local_instance.assert_called_once_with(fake_local_platform)
 
 @patch("dem.cli.command.list_cmd.dev_env_setup.DevEnvLocalSetup")
 def test_is_dev_env_org_installed_locally_false(mock_DevEnvLocalSetup):
     # Test setup
-    fake_dev_env_local_setup = MagicMock()
-    mock_DevEnvLocalSetup.return_value = fake_dev_env_local_setup
+    fake_local_platform = MagicMock()
+    mock_DevEnvLocalSetup.return_value = fake_local_platform
 
     fake_dev_env_org = MagicMock()
     fake_dev_env_org.get_local_instance.return_value = None
@@ -59,14 +59,14 @@ def test_is_dev_env_org_installed_locally_false(mock_DevEnvLocalSetup):
     assert actual_is_installed is False
 
     mock_DevEnvLocalSetup.assert_called_once()
-    fake_dev_env_org.get_local_instance.assert_called_once_with(fake_dev_env_local_setup)
+    fake_dev_env_org.get_local_instance.assert_called_once_with(fake_local_platform)
 
 ## Test listing the local dev envs.
 
 @patch("dem.cli.command.list_cmd.dev_env_setup.DevEnvLocalSetup")
 def test_with_valid_dev_env_json(mock_DevEnvLocalSetup):
     # Test setup
-    fake_dev_env_local_setup = MagicMock()
+    fake_local_platform = MagicMock()
     expected_dev_env_list = [
         ["demo", "Installed."],
         ["nagy_cica_project", "[red]Error: Required image is not available![/]"]
@@ -81,8 +81,8 @@ def test_with_valid_dev_env_json(mock_DevEnvLocalSetup):
         fake_dev_env.name = expected_dev_env[0]
         fake_dev_env.check_image_availability.return_value = fake_image_statuses[idx]
         fake_dev_envs.append(fake_dev_env)
-    fake_dev_env_local_setup.dev_envs = fake_dev_envs
-    mock_DevEnvLocalSetup.return_value = fake_dev_env_local_setup
+    fake_local_platform.dev_envs = fake_dev_envs
+    mock_DevEnvLocalSetup.return_value = fake_local_platform
 
     # Run unit under test
     runner_result = runner.invoke(main.typer_cli, ["list", "--local", "--env"])
