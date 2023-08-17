@@ -13,13 +13,12 @@ import json
 from dem.core.exceptions import InvalidDevEnvJson
 from dem.core.tool_images import ToolImages
 
-@patch.object(dev_env_setup.DevEnvLocalSetup, "json", new_callable=PropertyMock)
-def test_dev_env_json_with_invalid_tool_type_expect_error(mock_json_attribute):
+@patch("dem.core.dev_env_setup.LocalDevEnvJSON")
+def test_dev_env_json_with_invalid_tool_type_expect_error(mock_LocalDevEnvJSON: MagicMock):
     # Test setup
     mock_json = MagicMock()
-    mock_json.read.return_value = json.loads(fake_data.invalid_dev_env_json)
-    mock_json.deserialized = mock_json.read.return_value
-    mock_json_attribute.return_value = mock_json
+    mock_LocalDevEnvJSON.return_value = mock_json
+    mock_json.deserialized = json.loads(fake_data.invalid_dev_env_json)
 
     with pytest.raises(InvalidDevEnvJson) as exported_exception_info:
         # Run unit under test
@@ -30,13 +29,12 @@ def test_dev_env_json_with_invalid_tool_type_expect_error(mock_json_attribute):
         assert str(exported_exception_info.value) == excepted_error_message
 
 @patch("dem.core.dev_env_setup.__supported_dev_env_major_version__", 0)
-@patch.object(dev_env_setup.DevEnvLocalSetup, "json", new_callable=PropertyMock)
-def test_dev_env_json_with_invalid_version_expect_error(mock_json_attribute):
+@patch("dem.core.dev_env_setup.LocalDevEnvJSON")
+def test_dev_env_json_with_invalid_version_expect_error(mock_LocalDevEnvJSON: MagicMock):
     # Test setup
     mock_json = MagicMock()
-    mock_json.read.return_value = json.loads(fake_data.invalid_version_dev_env_json)
-    mock_json.deserialized = mock_json.read.return_value
-    mock_json_attribute.return_value = mock_json
+    mock_LocalDevEnvJSON.return_value = mock_json
+    mock_json.deserialized = json.loads(fake_data.invalid_version_dev_env_json)
 
     with pytest.raises(InvalidDevEnvJson) as exported_exception_info:
         # Run unit under test
@@ -47,13 +45,12 @@ def test_dev_env_json_with_invalid_version_expect_error(mock_json_attribute):
         assert str(exported_exception_info.value) == excepted_error_message
 
 @patch("dem.core.dev_env_setup.__supported_dev_env_major_version__", 0)
-@patch.object(dev_env_setup.DevEnvLocalSetup, "json", new_callable=PropertyMock)
-def test_valid_dev_env_json_expect_no_error(mock_json_attribute):
+@patch("dem.core.dev_env_setup.LocalDevEnvJSON")
+def test_valid_dev_env_json_expect_no_error(mock_LocalDevEnvJSON: MagicMock):
     # Test setup
     mock_json = MagicMock()
-    mock_json.read.return_value = json.loads(fake_data.dev_env_json)
-    mock_json.deserialized = mock_json.read.return_value
-    mock_json_attribute.return_value = mock_json
+    mock_LocalDevEnvJSON.return_value = mock_json
+    mock_json.deserialized = json.loads(fake_data.dev_env_json)
 
     # Run unit under test
     dev_env_setup.DevEnvLocalSetup()
@@ -82,13 +79,12 @@ def test_get_dev_env_by_name_no_match():
     # Check expectations
     assert actual_dev_env is None
 
-def common_test_check_image_availability(mock_json_attribute: PropertyMock, with_update: bool,
+def common_test_check_image_availability(mock_LocalDevEnvJSON: MagicMock, with_update: bool,
                                          local_only: bool) -> None:
     # Test setup
     mock_json = MagicMock()
-    mock_json.read.return_value = json.loads(fake_data.dev_env_json)
-    mock_json.deserialized = mock_json.read.return_value
-    mock_json_attribute.return_value = mock_json
+    mock_LocalDevEnvJSON.return_value = mock_json
+    mock_json.deserialized = json.loads(fake_data.dev_env_json)
 
     test_dev_env_setup = dev_env_setup.DevEnvLocalSetup()
     test_dev_env = test_dev_env_setup.get_dev_env_by_name("demo")
@@ -133,22 +129,22 @@ def common_test_check_image_availability(mock_json_attribute: PropertyMock, with
     for idx, tool in enumerate(test_dev_env.tools):
         assert tool["image_status"] == expected_image_statuses[idx]
 
-@patch.object(dev_env_setup.DevEnvLocalSetup, "json", new_callable=PropertyMock)
-def test_check_image_availability_without_update(mock_json_attribute):
-    common_test_check_image_availability(mock_json_attribute, False, False)
+@patch("dem.core.dev_env_setup.LocalDevEnvJSON")
+def test_check_image_availability_without_update(mock_LocalDevEnvJSON: MagicMock):
+    common_test_check_image_availability(mock_LocalDevEnvJSON, False, False)
 
-@patch.object(dev_env_setup.DevEnvLocalSetup, "json", new_callable=PropertyMock)
-def test_check_image_availability_with_update(mock_json_attribute):
-    common_test_check_image_availability(mock_json_attribute, True, False)
+@patch("dem.core.dev_env_setup.LocalDevEnvJSON")
+def test_check_image_availability_with_update(mock_LocalDevEnvJSON: MagicMock):
+    common_test_check_image_availability(mock_LocalDevEnvJSON, True, False)
 
-@patch.object(dev_env_setup.DevEnvLocalSetup, "json", new_callable=PropertyMock)
-def test_check_image_availability_with_update_and_local_only(mock_json_attribute):
-    common_test_check_image_availability(mock_json_attribute, True, True)
+@patch("dem.core.dev_env_setup.LocalDevEnvJSON")
+def test_check_image_availability_with_update_and_local_only(mock_LocalDevEnvJSON: MagicMock):
+    common_test_check_image_availability(mock_LocalDevEnvJSON, True, True)
 
 @patch.object(dev_env_setup.DevEnvSetup, "get_deserialized")
 @patch.object(dev_env_setup.DevEnvSetup, "__init__")
-@patch.object(dev_env_setup.DevEnvLocalSetup, "json", new_callable=PropertyMock)
-def test_DevEnvLocalSetup_flush_to_file(mock_json_attribute: MagicMock, 
+@patch("dem.core.dev_env_setup.LocalDevEnvJSON")
+def test_DevEnvLocalSetup_flush_to_file(mock_LocalDevEnvJSON: MagicMock, 
                                         mock_super__init__: MagicMock, 
                                         mock_get_deserialized: MagicMock):
     # Test setup
@@ -156,7 +152,7 @@ def test_DevEnvLocalSetup_flush_to_file(mock_json_attribute: MagicMock,
     mock_json.deserialized = {
         "development_environments": []
     }
-    mock_json_attribute.return_value = mock_json
+    mock_LocalDevEnvJSON.return_value = mock_json
     mock_get_deserialized.return_value = mock_json.deserialized
 
     test_local_platform = dev_env_setup.DevEnvLocalSetup()
@@ -173,15 +169,15 @@ def test_DevEnvLocalSetup_flush_to_file(mock_json_attribute: MagicMock,
 
 @patch.object(dev_env_setup.Core, "user_output")
 @patch.object(dev_env_setup.DevEnvLocalSetup, "_container_engine", new_callable=PropertyMock)
-@patch.object(dev_env_setup.DevEnvLocalSetup, "json", new_callable=PropertyMock)
-def test_DevEnvLocalSetup_pull_images(mock_json_attribute: MagicMock, 
+@patch("dem.core.dev_env_setup.LocalDevEnvJSON")
+def test_DevEnvLocalSetup_pull_images(mock_LocalDevEnvJSON: MagicMock, 
                                       mock_container_engine_attribute: MagicMock,
                                       mock_user_output: MagicMock):
     # Test setup
     mock_json = MagicMock()
     mock_json.read.return_value = json.loads(fake_data.dev_env_json)
     mock_json.deserialized = mock_json.read.return_value
-    mock_json_attribute.return_value = mock_json
+    mock_LocalDevEnvJSON.return_value = mock_json
 
     mock_container_engine = MagicMock()
     mock_container_engine_attribute.return_value = mock_container_engine
@@ -210,11 +206,11 @@ def test_DevEnvLocalSetup_pull_images(mock_json_attribute: MagicMock,
     ]
     test_dev_env_local_setup.container_engine.pull.assert_has_calls(pull_calls, any_order=True)
 
-@patch.object(dev_env_setup.DevEnvLocalSetup, "json")
+@patch("dem.core.dev_env_setup.LocalDevEnvJSON")
 @patch.object(dev_env_setup.DevEnvLocalSetup, "_container_engine", new_callable=PropertyMock)
 @patch.object(dev_env_setup.DevEnvSetup, "__init__")
 def test_DevEnvLocalSetup_run_container(mock_super__init__, mock_container_engine_attribute, 
-                                        mock_json):
+                                        mock_LocalDevEnvJSON: MagicMock):
     # Test setup
     test_tool_image = "test_tool_image"
     test_workspace_path = "test_workspace_path"
@@ -222,9 +218,11 @@ def test_DevEnvLocalSetup_run_container(mock_super__init__, mock_container_engin
     test_privileged = False
     mock_container_engine = MagicMock()
     mock_container_engine_attribute.return_value = mock_container_engine
+    mock_json = MagicMock()
     mock_json.deserialized = {
         "development_environments": []
     }
+    mock_LocalDevEnvJSON.return_value = mock_json
 
     test_dev_env_local_setup = dev_env_setup.DevEnvLocalSetup()
 

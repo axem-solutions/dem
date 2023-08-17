@@ -134,7 +134,7 @@ def test_LocalDevEnvJSON(mock___init__: MagicMock, mock_PurePath: MagicMock):
 
     # Check expectations
     assert local_dev_env_json._path is mock_pure_path
-    assert local_dev_env_json._defaul_json == """{
+    assert local_dev_env_json._default_json == """{
     "version": "0.1",
     "org_name": "axem",
     "registry": "registry-1.docker.io",

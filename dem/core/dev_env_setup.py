@@ -217,24 +217,14 @@ class DevEnvLocal(DevEnv):
             self.tools = dev_env_org.tools
 
 class DevEnvLocalSetup(DevEnvSetup):
-    """ The local development setup.
-
-    Class attributes:
-        json -- deserialized json representing the local setup
-        invalid_json_cb -- the user can be noted through this callback when something is wrong with
-                           the dev_env.json file
-        msg_cb -- a generic callback to send messages for the user
-        pull_progress_cb -- a generator is provided for this callback to note the user of the 
-                            current status of the pull process
-    """
-    json = LocalDevEnvJSON()
-
+    """ The Local Development Platform. """
     def __init__(self) -> None:
         """ Store the local Development Environments.
 
         Extends the DevEnvSetup super class by populating the list of Development Environments with 
         DevEnvLocal objects.
         """
+        self.json = LocalDevEnvJSON()
         super().__init__(self.json.deserialized)
 
         for dev_env_descriptor in self.json.deserialized["development_environments"]:

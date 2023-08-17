@@ -71,7 +71,7 @@ class LocalDevEnvJSON(BaseJSON):
     def __init__(self) -> None:
         """ Init the class."""
         self._path = PurePath(self._config_dir + "/dev_env.json")
-        self._defaul_json = """{
+        self._default_json = """{
     "version": "0.1",
     "org_name": "axem",
     "registry": "registry-1.docker.io",
