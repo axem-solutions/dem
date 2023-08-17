@@ -75,3 +75,12 @@ class Registries(Core):
             Returns with the list of the available registries.
         """
         return self._config_file.registries
+
+    def delete_registry(self, registry: dict) -> None:
+        """ Delete the registry.
+        
+            Args:
+                registry -- the registry to delete
+        """
+        self._config_file.registries.remove(registry)
+        self._config_file.flush()

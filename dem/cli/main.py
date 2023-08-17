@@ -5,7 +5,7 @@ import typer, importlib.metadata
 from dem import __command__, __app_name__
 from dem.cli.command import info_cmd, list_cmd, pull_cmd, create_cmd, modify_cmd, delete_cmd, \
                             rename_cmd, clone_cmd, run_cmd, export_cmd, load_cmd, add_reg_cmd, \
-                            list_reg_cmd
+                            list_reg_cmd, del_reg_cmd
 from dem.cli.console import stdout
 
 typer_cli = typer.Typer(rich_markup_mode="rich")
@@ -118,7 +118,7 @@ def run(dev_env_name: str = typer.Argument(..., help="Name of the Development En
     run_cmd.execute(dev_env_name, tool_type, workspace_path, command, privileged)
 
 @typer_cli.command()
-def add_reg(name: str = typer.Argument(..., help="Name or IP address of the registry"), 
+def add_reg(name: str = typer.Argument(..., help="Name or IP address of the registry to add"), 
             url: str = typer.Argument(..., help="API URL of the registry")) -> None:
     """
     Add a new registry.
@@ -131,6 +131,13 @@ def list_reg() -> None:
     List the available registries.
     """
     list_reg_cmd.execute()
+
+@typer_cli.command()
+def del_reg(registry_name: str = typer.Argument(..., help="Name or IP address of the registry to delete.")) -> None:
+    """
+    Delete a registry.
+    """
+    del_reg_cmd.execute(registry_name)
 
 def _version_callback(value: bool) -> None:
     if value:
