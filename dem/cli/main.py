@@ -4,7 +4,8 @@
 import typer, importlib.metadata
 from dem import __command__, __app_name__
 from dem.cli.command import info_cmd, list_cmd, pull_cmd, create_cmd, modify_cmd, delete_cmd, \
-                            rename_cmd, clone_cmd, run_cmd, export_cmd, load_cmd, add_reg_cmd
+                            rename_cmd, clone_cmd, run_cmd, export_cmd, load_cmd, add_reg_cmd, \
+                            list_reg_cmd
 from dem.cli.console import stdout
 
 typer_cli = typer.Typer(rich_markup_mode="rich")
@@ -123,6 +124,13 @@ def add_reg(name: str = typer.Argument(..., help="Name or IP address of the regi
     Add a new registry.
     """
     add_reg_cmd.execute(name, url)
+
+@typer_cli.command()
+def list_reg() -> None:
+    """
+    List the available registries.
+    """
+    list_reg_cmd.execute()
 
 def _version_callback(value: bool) -> None:
     if value:
