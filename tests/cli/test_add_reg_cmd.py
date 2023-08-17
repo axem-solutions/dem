@@ -1,5 +1,5 @@
 """Tests for the add_reg CLI command."""
-# tests/cli/test_clone_cmd.py
+# tests/cli/test_add_reg_cmd.py
 
 # Unit under test:
 import dem.cli.main as main
@@ -14,9 +14,8 @@ from unittest.mock import patch, MagicMock
 runner = CliRunner(mix_stderr=False)
 
 ## Test cases
-@patch("dem.cli.command.add_reg_cmd.stdout.print")
 @patch("dem.cli.command.add_reg_cmd.DevEnvLocalSetup")
-def test_add_reg(mock_DevEnvLocalSetup: MagicMock, mock_stdout_print: MagicMock):
+def test_add_reg(mock_DevEnvLocalSetup: MagicMock):
     # Test setup
     mock_local_platform = MagicMock()
     mock_DevEnvLocalSetup.return_value = mock_local_platform
@@ -32,6 +31,7 @@ def test_add_reg(mock_DevEnvLocalSetup: MagicMock, mock_stdout_print: MagicMock)
     # Check expectations
     assert runner_result.exit_code == 0
 
+    mock_DevEnvLocalSetup.assert_called_once()
     mock_local_platform.registries.list_registries.assert_called_once()
     expected_registry = {
             "name": test_name,
@@ -60,5 +60,6 @@ def test_add_reg_already_added(mock_DevEnvLocalSetup: MagicMock, mock_stdout_pri
     # Check expectations
     assert runner_result.exit_code == 0
 
+    mock_DevEnvLocalSetup.assert_called_once()
     mock_local_platform.registries.list_registries.assert_called_once()
     mock_stdout_print.assert_called_once_with("[yellow]The input registry is already added.[/]")
