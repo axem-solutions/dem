@@ -127,10 +127,11 @@ def get_modifications_from_user(dev_env: DevEnvLocal, tool_image_list: list[list
 
     dev_env.tools = []
     for tool_type, tool_image in tool_selection.items():
+        registry, image = tool_image.split("/")
         tool_descriptor = {
             "type": tool_type,
-            "image_name": tool_image.split(":")[0],
-            "image_version": tool_image.split(":")[1]
+            "image_name": registry + '/' + image.split(":")[0],
+            "image_version": image.split(":")[1]
         }
         dev_env.tools.append(tool_descriptor)
 
