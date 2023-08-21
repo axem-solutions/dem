@@ -10,7 +10,7 @@ jobs:
         uses: actions/checkout@v2 
       - name: Install dependencies
         run: |          
-          pip install --user poetry
+          pip install --user poetry==1.4.2
           poetry install                   
 
       - name: execute tests
