@@ -1,5 +1,5 @@
 """CLI command implementation for listing the available registries."""
-# dem/cli/command/add_reg_cmd.py
+# dem/cli/command/list_reg_cmd.py
 
 from dem.core.dev_env_setup import DevEnvLocalSetup
 from dem.cli.console import stdout

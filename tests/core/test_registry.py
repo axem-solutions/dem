@@ -242,3 +242,22 @@ def test_list_registries():
 
     # Check expectations
     assert actual_registry_list is mock_config_file.registries
+
+def test_delete_registry():
+    # Test setup
+    mock_container_engine = MagicMock()
+    mock_config_file = MagicMock()
+    mock_config_file.registries = [{
+        "name": "test_registry_name",
+        "url": "https://registry.hub.docker.com/v2/"
+    }]
+
+    test_registries = registry.Registries(mock_container_engine, mock_config_file)
+
+    # Run unit under test
+    test_registries.delete_registry(mock_config_file.registries[0])
+
+    # Check expectations
+    assert not mock_config_file.registries
+
+    mock_config_file.flush.assert_called_once()
