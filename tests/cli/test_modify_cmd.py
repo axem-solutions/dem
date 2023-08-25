@@ -74,15 +74,16 @@ def test_handle_user_confirm_confirmed():
 
 @patch("dem.cli.command.modify_cmd.typer.prompt")
 def test_handle_user_confirm_save_as(mock_prompt):
-    # Test setup
+    # Test setup    
     mock_prompt.return_value = "test new name"
     mock_deserialized_local_dev_env = MagicMock()
     mock_local_platform = MagicMock()
     mock_local_platform.get_deserialized.return_value = mock_deserialized_local_dev_env
+    mock_local_platform.get_dev_env_by_name.return_value = None
     mock_dev_env_local = MagicMock()
     mock_dev_env_local.name = "fake dev env"
     mock_local_platform.dev_envs = [mock_dev_env_local]
-
+    
     # Run unit under test
     modify_cmd.handle_user_confirm("save as", mock_dev_env_local, mock_local_platform)
 
@@ -92,6 +93,23 @@ def test_handle_user_confirm_save_as(mock_prompt):
 
     assert "fake dev env" == mock_local_platform.dev_envs[0].name
     assert "test new name" == mock_local_platform.dev_envs[1].name
+
+@patch("dem.cli.command.modify_cmd.typer.prompt")
+def test_handle_user_confirm_save_as_already_exist(mock_prompt):
+    # Test setup    
+    mock_prompt.return_value = "test new name"
+    mock_deserialized_local_dev_env = MagicMock()
+    mock_local_platform = MagicMock()
+    mock_local_platform.get_deserialized.return_value = mock_deserialized_local_dev_env
+    mock_local_platform.get_dev_env_by_name.return_value = True
+    mock_dev_env_local = MagicMock()
+    mock_dev_env_local.name = "fake dev env"
+    mock_local_platform.dev_envs = [mock_dev_env_local]
+    
+    # Run unit under test
+    with pytest.raises(typer.Abort):
+        modify_cmd.handle_user_confirm("save as", mock_dev_env_local, mock_local_platform)
+
 
 def test_handle_user_confirm_cancel():
     # Test setup
