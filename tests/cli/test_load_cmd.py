@@ -74,8 +74,6 @@ def test_json_decode_error(mock_DevEnvLocalSetup,mock_json):
     
     assert retval_dev_env_cant_load is False
 
-
-
 def test_wo_path():
 
     # Run unit under test
