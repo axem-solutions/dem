@@ -149,7 +149,15 @@ def handle_user_confirm(confirmation: str, dev_env_local: DevEnvLocal,
     if confirmation == "save as":
         new_dev_env = copy.deepcopy(dev_env_local)
         new_dev_env.name = typer.prompt("Name of the new Development Environment")
-        dev_env_local_setup.dev_envs.append(new_dev_env)
+        
+        check_for_new_dev_env = dev_env_local_setup.get_dev_env_by_name(new_dev_env.name)
+
+        if check_for_new_dev_env is None:            
+            dev_env_local_setup.dev_envs.append(new_dev_env)
+        else:
+            stderr.print("[red]The Development Environment already exist.")
+            raise(typer.Abort())
+
 
     # Update the json file if the user confirms or saves as a new Dev Env.
     dev_env_local_setup.flush_to_file()    
