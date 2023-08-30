@@ -12,7 +12,7 @@ from typer.testing import CliRunner
 from unittest.mock import patch, MagicMock, call, PropertyMock
 from rich.console import Console
 
-from dem.core.dev_env_setup import DevEnvLocalSetup
+from dem.core.dev_env import DevEnvLocalSetup
 import tests.fake_data as fake_data
 
 import json

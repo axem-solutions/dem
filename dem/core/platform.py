@@ -1,87 +1,15 @@
-"""This module represents the Development Environments."""
-# dem/core/dev_env_setup.py
-
+"""This repesents the Development Platform. The platform resources can be access through this 
+    interface.
+"""
 from dem.core.core import Core
-from dem.core.exceptions import InvalidDevEnvJson
 from dem.core.properties import __supported_dev_env_major_version__
-from dem.core.tool_images import ToolImages
-from dem.core.data_management import LocalDevEnvJSON, OrgDevEnvJSON, ConfigFile
+from dem.core.exceptions import InvalidDevEnvJson
+from dem.core.dev_env_catalog import DevEnvCatalogs
+from dem.core.data_management import LocalDevEnvJSON, ConfigFile
 from dem.core.container_engine import ContainerEngine
 from dem.core.registry import Registries
-
-class DevEnv(Core):
-    """ A Development Environment."""
-    supported_tool_types = ( 
-        "build system",
-        "toolchain",
-        "debugger",
-        "deployer",
-        "test framework",
-        "CI/CD server",
-    )
-
-    def _check_tool_type_support(self, descriptor: dict) -> None:
-        """ Check that the Dev Env doesn't contain an unsupported tool type.
-        
-            Private function that gets called on instantiation.
-            Args:
-                descriptor -- the description of the Development Environment from the dev_env.json 
-                              file
-        """
-        for tool in descriptor["tools"]:
-            if tool["type"] not in self.supported_tool_types:
-                raise InvalidDevEnvJson("The following tool type is not supported: " + tool["type"])
-
-    def __init__(self, descriptor: dict) -> None:
-        """ Init the DevEnv class.
-        
-            Args:
-                descriptor -- the description of the Development Environment from the dev_env.json 
-                              file
-        """
-        self._check_tool_type_support(descriptor)
-        self.name = descriptor["name"]
-        self.tools = descriptor["tools"]
-
-    def check_image_availability(self, tool_images: ToolImages, update_tool_images: bool = False,
-                                 local_only: bool = False) -> list:
-        """ Checks the tool image's availability.
-        
-            Updates the "image_status" key for the tool dictionary.
-            Returns with the statuses of the Dev Env tool images.
-
-            Args:
-                tool_images -- the images the Dev Envs can access
-                update_tool_images -- update the list of available tool images
-                local_only -- only local images are used
-        """
-        if update_tool_images == True:
-            tool_images.local.update()
-            if local_only is False:
-                tool_images.registry.update()
-
-        local_tool_images = tool_images.local.elements
-
-        if local_only is True:
-            registry_tool_images = []
-        else:
-            registry_tool_images = tool_images.registry.elements
-
-        image_statuses = []
-        for tool in self.tools:
-            tool_image_name = tool["image_name"] + ':' + tool["image_version"]
-            if (tool_image_name in local_tool_images) and (tool_image_name in registry_tool_images):
-                image_status = ToolImages.LOCAL_AND_REGISTRY
-            elif (tool_image_name in local_tool_images):
-                image_status = ToolImages.LOCAL_ONLY
-            elif (tool_image_name in registry_tool_images):
-                image_status = ToolImages.REGISTRY_ONLY
-            else:
-                image_status = ToolImages.NOT_AVAILABLE
-            image_statuses.append(image_status)
-            tool["image_status"] = image_status
-
-        return image_statuses
+from dem.core.tool_images import ToolImages
+from dem.core.dev_env import DevEnvLocal, DevEnv, DevEnv
 
 class DevEnvSetup(Core):
     """Representation of the development setup:
@@ -120,7 +48,8 @@ class DevEnvSetup(Core):
         """
         self.version = dev_env_json_deserialized["version"]
         self._dev_env_json_version_check()
-        self.dev_envs = []
+        self.local_dev_envs: list[DevEnv] = []
+        self._dev_env_catalogs: DevEnvCatalogs | None = None
 
     @classmethod
     @property
@@ -174,12 +103,19 @@ class DevEnvSetup(Core):
 
         return cls._config_file
 
+    @property
+    def dev_env_catalogs(self) -> DevEnvCatalogs:
+        if self._dev_env_catalogs is None:
+            self._dev_env_catalogs = DevEnvCatalogs(self.config_file)
+
+        return self._dev_env_catalogs
+
     def get_deserialized(self) -> dict:
         """ Create the deserialized json. """
         dev_env_json_deserialized = {}
         dev_env_json_deserialized["version"] = self.version
         dev_env_descriptors = []
-        for dev_env in self.dev_envs:
+        for dev_env in self.local_dev_envs:
             dev_env_descriptor = {}
             dev_env_descriptor["name"] = dev_env.name
             dev_env_descriptor["tools"] = dev_env.tools
@@ -187,7 +123,7 @@ class DevEnvSetup(Core):
         dev_env_json_deserialized["development_environments"] = dev_env_descriptors
         return dev_env_json_deserialized
 
-    def get_dev_env_by_name(self, dev_env_name: str) -> ("DevEnvOrg | DevEnvLocal | None"):
+    def get_dev_env_by_name(self, dev_env_name: str) -> ("DevEnv | DevEnvLocal | None"):
         """Get the Development Environment by name.
         
         Args:
@@ -195,26 +131,20 @@ class DevEnvSetup(Core):
         Returns with the instance representing the Development Environment. If the Development 
         Environment doesn't exist in the setup, the function returns with None.
         """
-        for dev_env in self.dev_envs:
+        for dev_env in self.local_dev_envs:
             if dev_env.name == dev_env_name:
                 return dev_env
 
-class DevEnvLocal(DevEnv):
-    """ Local Development Environment """
-    def __init__(self, descriptor: dict | None = None, dev_env_org: "DevEnvOrg | None" = None):
-        """Init a local DevEnv class
+    def get_local_dev_env(self, catalog_dev_env: DevEnv) -> DevEnv | None:
+        """ Check if this Development Enviroment already installed locally.
 
-        The class can be initialized either based on the Dev Env descriptor from the dev_env.json 
-        file or on an already existing DevEnvOrg object.
         Args:
-            dev_env_json_deserialized -- a deserialized representation of the dev_env.json file
-            dev_env_org -- the DevEnvOrg object to make a copy from (note: forward reference)
+            dev_env_setup_local -- the locally installed Development Environments
+        Returns the local Dev Env object if available. None if not yet installed.
         """
-        if descriptor is not None:
-            super().__init__(descriptor)
-        else:
-            self.name = dev_env_org.name
-            self.tools = dev_env_org.tools
+        for local_dev_env in self.local_dev_envs:
+            if catalog_dev_env.name == local_dev_env.name:
+                return local_dev_env
 
 class DevEnvLocalSetup(DevEnvSetup):
     """ The Local Development Platform. """
@@ -228,7 +158,7 @@ class DevEnvLocalSetup(DevEnvSetup):
         super().__init__(self.json.deserialized)
 
         for dev_env_descriptor in self.json.deserialized["development_environments"]:
-            self.dev_envs.append(DevEnvLocal(descriptor=dev_env_descriptor))
+            self.local_dev_envs.append(DevEnvLocal(descriptor=dev_env_descriptor))
 
     def flush_to_file(self) -> None:
         """ Writes the deserialized json to the dev_env.json file."""
@@ -265,35 +195,3 @@ class DevEnvLocalSetup(DevEnvSetup):
             priviliged -- give extended priviliges to the container
         """
         self.container_engine.run(tool_image, workspace_path, command, privileged)
-
-class DevEnvOrg(DevEnv):
-    """ A Development Environment available for the organization."""
-    def get_local_instance(self, dev_env_setup_local: DevEnvLocalSetup) -> (DevEnvLocal | None):
-        """ Check if this Development Enviroment already installed locally.
-
-        Args:
-            dev_env_setup_local -- the locally installed Development Environments
-        Returns the local Dev Env object if available. None if not yet installed.
-        """
-        for dev_env_local in dev_env_setup_local.dev_envs:
-            if self.name == dev_env_local.name:
-                return dev_env_local
-
-class DevEnvOrgSetup(DevEnvSetup):
-    """ The organization's development setup. The user can install Dev Envs listed in this class.
-
-    Class attributes:
-        json -- deserialized json representing the organization's setup 
-    """
-    json = OrgDevEnvJSON()
-
-    def __init__(self) -> None:
-        """Store the Development Environments available for the organization.
-
-        Extends the DevEnvSetup super class by populating the list of Development Environments with 
-        DevEnvOrg objects.
-        """
-        super().__init__(self.json.read())
-
-        for dev_env_descriptor in self.json.deserialized["development_environments"]:
-            self.dev_envs.append(DevEnvOrg(descriptor=dev_env_descriptor))

@@ -1,7 +1,8 @@
 """load CLI command implementation."""
 # dem/cli/command/load_cmd.py
 
-from dem.core.dev_env_setup import DevEnvLocal, DevEnvLocalSetup
+from dem.core.dev_env import DevEnvLocal
+from dem.core.platform import DevEnvLocalSetup
 from dem.cli.console import stderr
 import json, os
 
@@ -22,7 +23,7 @@ def load_dev_env_to_dev_env_json(dev_env_local_setup: DevEnvLocalSetup,path_to_d
             return False                       
         else:        
             new_dev_env = DevEnvLocal(dev_env)
-            dev_env_local_setup.dev_envs.append(new_dev_env)
+            dev_env_local_setup.local_dev_envs.append(new_dev_env)
             new_dev_env.check_image_availability(dev_env_local_setup.tool_images)
             dev_env_local_setup.pull_images(new_dev_env.tools)
     except json.decoder.JSONDecodeError:
@@ -33,12 +34,12 @@ def load_dev_env_to_dev_env_json(dev_env_local_setup: DevEnvLocalSetup,path_to_d
         return True
 
 def execute(path_to_dev_env: str) -> None:
-    dev_env_local_setup = DevEnvLocalSetup()    
+    platform = DevEnvLocalSetup()    
 
     if check_is_file_exist(path_to_dev_env) is True:                
-        retval = load_dev_env_to_dev_env_json(dev_env_local_setup,path_to_dev_env)        
+        retval = load_dev_env_to_dev_env_json(platform,path_to_dev_env)        
         if retval == True:
-            dev_env_local_setup.flush_to_file()
+            platform.flush_to_file()
         else:
             stderr.print("[red]Error: Something went wrong.[/]")    
     else:

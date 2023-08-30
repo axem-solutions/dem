@@ -1,7 +1,8 @@
 """list CLI command implementation."""
 # dem/cli/list_cmd.py
 
-from dem.core import dev_env_setup
+from dem.core.platform import DevEnvLocalSetup
+from dem.core.dev_env import DevEnv
 from dem.core.tool_images import ToolImages
 from dem.cli.console import stdout, stderr
 from rich.table import Table
@@ -32,66 +33,63 @@ dev_env_local_status_messages = {
     DEV_ENV_LOCAL_INSTALLED: "Installed.",
 }
 
-def is_dev_env_org_installed_locally(dev_env_org: dev_env_setup.DevEnvOrg) -> bool:
-    dev_env_local_setup_obj = dev_env_setup.DevEnvLocalSetup()
-    return dev_env_org.get_local_instance(dev_env_local_setup_obj) is not None
-
-def get_dev_env_status(dev_env: (dev_env_setup.DevEnvLocal | dev_env_setup.DevEnvOrg), 
-                       tool_images: ToolImages) -> str:
-    image_statuses = dev_env.check_image_availability(tool_images)
-    dev_env_status = ""
-    if isinstance(dev_env, dev_env_setup.DevEnvOrg):
-        if (ToolImages.NOT_AVAILABLE in image_statuses) or (ToolImages.LOCAL_ONLY in image_statuses):
-            dev_env_status = dev_env_org_status_messages[DEV_ENV_ORG_NOT_IN_REGISTRY]
-        elif (image_statuses.count(ToolImages.LOCAL_AND_REGISTRY) == len(image_statuses)) and \
-                (is_dev_env_org_installed_locally(dev_env) == True):
-            dev_env_status = dev_env_org_status_messages[DEV_ENV_ORG_INSTALLED_LOCALLY]
-        else:
-            if (is_dev_env_org_installed_locally(dev_env) == True):
-                dev_env_status = dev_env_org_status_messages[DEV_ENV_ORG_REAINSTALL]
-            else:
-                dev_env_status = dev_env_org_status_messages[DEV_ENV_ORG_READY]
+def get_catalog_dev_env_status(platform: DevEnvLocalSetup, dev_env: DevEnv) -> str:
+    image_statuses = dev_env.check_image_availability(platform.tool_images)
+    if (ToolImages.NOT_AVAILABLE in image_statuses) or (ToolImages.LOCAL_ONLY in image_statuses):
+        dev_env_status = dev_env_org_status_messages[DEV_ENV_ORG_NOT_IN_REGISTRY]
+    elif (image_statuses.count(ToolImages.LOCAL_AND_REGISTRY) == len(image_statuses)) and \
+            (platform.get_local_dev_env(dev_env) is not None):
+        dev_env_status = dev_env_org_status_messages[DEV_ENV_ORG_INSTALLED_LOCALLY]
     else:
-        if (ToolImages.NOT_AVAILABLE in image_statuses):
-            dev_env_status = dev_env_local_status_messages[DEV_ENV_LOCAL_NOT_AVAILABLE]
-        elif (ToolImages.REGISTRY_ONLY in image_statuses):
-            dev_env_status = dev_env_local_status_messages[DEV_ENV_LOCAL_REINSTALL]
+        if (platform.get_local_dev_env(dev_env) is not None):
+            dev_env_status = dev_env_org_status_messages[DEV_ENV_ORG_REAINSTALL]
         else:
-            dev_env_status = dev_env_local_status_messages[DEV_ENV_LOCAL_INSTALLED]
+            dev_env_status = dev_env_org_status_messages[DEV_ENV_ORG_READY]
     return dev_env_status
 
-def list_dev_envs(local: bool, org: bool)-> None:
-    dev_env_setup_obj = None
+def get_local_dev_env_status(dev_env: DevEnv, tool_images: ToolImages) -> str:
+    image_statuses = dev_env.check_image_availability(tool_images)
+    if (ToolImages.NOT_AVAILABLE in image_statuses):
+        dev_env_status = dev_env_local_status_messages[DEV_ENV_LOCAL_NOT_AVAILABLE]
+    elif (ToolImages.REGISTRY_ONLY in image_statuses):
+        dev_env_status = dev_env_local_status_messages[DEV_ENV_LOCAL_REINSTALL]
+    else:
+        dev_env_status = dev_env_local_status_messages[DEV_ENV_LOCAL_INSTALLED]
+    return dev_env_status
+
+def list_dev_envs(platform: DevEnvLocalSetup, local: bool, org: bool)-> None:
+    table = Table()
+    table.add_column("Development Environment")
+    table.add_column("Status")
+
     if ((local == True) and (org == False)):
-        dev_env_setup_obj = dev_env_setup.DevEnvLocalSetup()
-        if not dev_env_setup_obj.dev_envs:
+        if not platform.local_dev_envs:
             stdout.print("[yellow]No installed Development Environments.[/]")
             return
+        else:
+            for dev_env in platform.local_dev_envs:
+                table.add_row(dev_env.name, get_local_dev_env_status(dev_env, platform.tool_images))
     elif((local == False) and (org == True)):
-        dev_env_setup_obj = dev_env_setup.DevEnvOrgSetup()
-        if not dev_env_setup_obj.dev_envs:
-            stdout.print("[yellow]No Development Environment in your organization.[/]")
-            return
+        for catalog in platform.dev_env_catalogs.catalogs:
+            if not catalog.dev_envs:
+                stdout.print("[yellow]No Development Environment in the catalogs.[/]")
+                return
+            else:
+                for dev_env in catalog.dev_envs:
+                    table.add_row(dev_env.name, get_catalog_dev_env_status(platform, dev_env))
     else:
         stderr.print("[red]Error: Invalid options.[/]")
         return
 
-    table = Table()
-    table.add_column("Development Environment")
-    table.add_column("Status")
-    for dev_env in dev_env_setup_obj.dev_envs:
-        table.add_row(dev_env.name, get_dev_env_status(dev_env, dev_env_setup_obj.tool_images))
-
     stdout.print(table)
 
-def list_tool_images(local: bool, org: bool) -> None:
+def list_tool_images(platform: DevEnvLocalSetup, local: bool, org: bool) -> None:
     """ List tool images
     
     Args:
         local -- list local tool images
         org -- list the tool catalog
     """
-    platform = dev_env_setup.DevEnvLocalSetup()
     if (local == True) and (org == False):        
         local_images = platform.container_engine.get_local_tool_images()
 
@@ -110,10 +108,11 @@ def list_tool_images(local: bool, org: bool) -> None:
         stdout.print(table)
 
 def execute(local: bool, org: bool, env: bool, tool: bool) -> None:
+    platform = DevEnvLocalSetup()
     if ((local == True) or (org == True)) and (env == True) and (tool == False):
-        list_dev_envs(local, org)
+        list_dev_envs(platform, local, org)
     elif ((local == True) or (org == True)) and (env == False) and (tool == True):
-        list_tool_images(local, org)
+        list_tool_images(platform, local, org)
     else:
         stderr.print(\
 """Usage: dem list [OPTIONS]

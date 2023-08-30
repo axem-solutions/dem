@@ -2,8 +2,9 @@
 # dem/cli/command/info_cmd.py
 
 from dem.core.tool_images import ToolImages
-from dem.core.dev_env_setup import DevEnvLocal, DevEnvOrg, DevEnvLocalSetup, DevEnvOrgSetup
+from dem.core.dev_env import DevEnvLocal, DevEnv
 from dem.cli.console import stdout, stderr
+from dem.core.platform import DevEnvLocalSetup
 from rich.table import Table
 
 image_status_messages = {
@@ -13,7 +14,8 @@ image_status_messages = {
     ToolImages.LOCAL_AND_REGISTRY: "Image is available locally and in the registry.",
 }
 
-def print_info(dev_env: (DevEnvLocal | DevEnvOrg)) -> None:
+def print_info(dev_env: (DevEnvLocal | DevEnv)) -> None:
+
     tool_info_table = Table()
     tool_info_table.add_column("Type")
     tool_info_table.add_column("Image")
@@ -28,12 +30,14 @@ def execute(arg_dev_env_name: str) -> None:
     dev_env = dev_env_setup.get_dev_env_by_name(arg_dev_env_name)
 
     if dev_env is None:
-        dev_env_setup = DevEnvOrgSetup()
-        dev_env = dev_env_setup.get_dev_env_by_name(arg_dev_env_name)
-
-    if dev_env is None:
-        stderr.print("[red]Error: Unknown Development Environment: " + arg_dev_env_name + "[/]")
-        return
+        for catalog in dev_env_setup.dev_env_catalogs.catalogs:
+            dev_env = catalog.get_dev_env_by_name(arg_dev_env_name)
+            if dev_env is not None:
+                dev_env.check_image_availability(dev_env_setup.tool_images)
+                print_info(dev_env)
     else:
         dev_env.check_image_availability(dev_env_setup.tool_images)
         print_info(dev_env)
+
+    if dev_env is None:
+        stderr.print("[red]Error: Unknown Development Environment: " + arg_dev_env_name + "[/]")

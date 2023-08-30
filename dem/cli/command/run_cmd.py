@@ -1,7 +1,8 @@
 """run CLI command implementation."""
 # dem/cli/command/run_cmd.py
 
-from dem.core.dev_env_setup import DevEnvLocalSetup, DevEnvLocal
+from dem.core.dev_env import DevEnvLocal
+from dem.core.platform import DevEnvLocalSetup
 from dem.cli.console import stdout, stderr
 import typer
 
@@ -27,7 +28,7 @@ def handle_invalid_tool_type(tool_type: str, dev_env_name: str) -> None:
     raise(typer.Abort)
 
 def handle_missing_tool_images(missing_tool_images: set[str], dev_env_local: DevEnvLocal,
-                               dev_env_local_setup: DevEnvLocalSetup) -> None:
+                               platform: DevEnvLocalSetup) -> None:
     """
     Report an error to the user that some images are not available. Ask them if the DEM should try
     to fix the Dev Env: abort if no, pull the missing tool images if yes.
@@ -42,9 +43,9 @@ def handle_missing_tool_images(missing_tool_images: set[str], dev_env_local: Dev
         stderr.print("[red]" + missing_tool_image + "[/]")
     typer.confirm("Should DEM try to fix the faulty Development Environment?", abort=True)
 
-    dev_env_local.check_image_availability(dev_env_local_setup.tool_images, 
+    dev_env_local.check_image_availability(platform.tool_images, 
                                         update_tool_images=True)
-    dev_env_local_setup.pull_images(dev_env_local.tools)
+    platform.pull_images(dev_env_local.tools)
     stdout.print("[green]DEM fixed the " + dev_env_local.name + "![/]")
 
 def execute(dev_env_name: str, tool_type: str, workspace_path: str, command: str, privileged: bool) -> None:
@@ -58,8 +59,8 @@ def execute(dev_env_name: str, tool_type: str, workspace_path: str, command: str
         command -- command to be passed to the assigned tool image
         priviliged -- give extended priviliges to the container
     """
-    dev_env_local_setup = DevEnvLocalSetup()
-    dev_env_local = dev_env_local_setup.get_dev_env_by_name(dev_env_name)
+    platform = DevEnvLocalSetup()
+    dev_env_local = platform.get_dev_env_by_name(dev_env_name)
 
     if dev_env_local is None:
         handle_invalid_dev_env(dev_env_name)
@@ -67,7 +68,7 @@ def execute(dev_env_name: str, tool_type: str, workspace_path: str, command: str
         # Update the tool images manually.
         DevEnvLocalSetup.update_tool_images_on_instantiation = False
         # Only the local images are needed.
-        dev_env_local_setup.tool_images.local.update()
+        platform.tool_images.local.update()
 
         tool_image_to_run = ""
         missing_tool_images = set()
@@ -75,7 +76,7 @@ def execute(dev_env_name: str, tool_type: str, workspace_path: str, command: str
             tool_image = tool["image_name"] + ":" + tool["image_version"]
 
             # Check if the required tool image exists locally.
-            if tool_image not in dev_env_local_setup.tool_images.local.elements:
+            if tool_image not in platform.tool_images.local.elements:
                 missing_tool_images.add(tool_image)
 
             if tool["type"] == tool_type:
@@ -85,6 +86,6 @@ def execute(dev_env_name: str, tool_type: str, workspace_path: str, command: str
             handle_invalid_tool_type(tool_type, dev_env_name)
 
         if missing_tool_images:
-            handle_missing_tool_images(missing_tool_images, dev_env_local, dev_env_local_setup)
+            handle_missing_tool_images(missing_tool_images, dev_env_local, platform)
 
-        dev_env_local_setup.run_container(tool_image_to_run, workspace_path, command, privileged)
+        platform.run_container(tool_image_to_run, workspace_path, command, privileged)

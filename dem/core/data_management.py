@@ -86,23 +86,11 @@ class ConfigFile(BaseJSON):
         """ Init the class."""
         self._path = PurePath(self._config_dir + "/config.json")
         self._default_json = """{
-    "registries": []
+    "registries": [],
+    "catalogs": []
 }"""
         super().__init__()
 
         self.registries = []
         self.registries = self.deserialized["registries"]
-
-class OrgDevEnvJSON():
-    """ Deserialize the dev_env_org.json file."""
-    def __init__(self) -> None:
-        """ Init the class with an empty placeholder for the deserialized dev_env_org.json file. 
-            Later this variable can be used to access the deserialized data. 
-        """
-        self.deserialized = []
-
-    def read(self) -> dict:
-        """ Read the deserialized dev_env_org.json from the axemsolutions domain."""
-        response = requests.get("https://axemsolutions.io/dem/dev_env_org_2.json")
-        self.deserialized = response.json()
-        return self.deserialized
+        self.catalogs = self.deserialized["catalogs"]

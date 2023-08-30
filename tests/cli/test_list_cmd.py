@@ -14,7 +14,7 @@ from rich.console import Console
 from rich.table import Table
 import json
 import tests.fake_data as fake_data
-from dem.core.dev_env_setup import DevEnvLocal, DevEnvOrg
+from dem.core.dev_env import DevEnvLocal, DevEnv
 from dem.core.tool_images import ToolImages
 
 ## Global test variables
@@ -158,7 +158,7 @@ def test_with_valid_dev_env_org_json(mock_DevEnvOrgSetup, mock_is_dev_env_org_in
     ]
     fake_org_dev_envs = []
     for idx, expected_dev_env in enumerate(expected_dev_env_list):
-        fake_dev_env = MagicMock(spec=DevEnvOrg)
+        fake_dev_env = MagicMock(spec=DevEnv)
         fake_dev_env.name = expected_dev_env[0]
         fake_dev_env.check_image_availability.return_value = fake_image_statuses[idx]
         fake_org_dev_envs.append(fake_dev_env)

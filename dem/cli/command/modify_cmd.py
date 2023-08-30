@@ -2,10 +2,11 @@
 # dem/cli/command/modify_cmd
 
 import copy, typer
-from dem.core.dev_env_setup import DevEnvLocalSetup, DevEnvLocal, DevEnv
+from dem.core.dev_env import DevEnvLocal, DevEnv
+from dem.core.tool_images import ToolImages
+from dem.core.platform import DevEnvLocalSetup
 from dem.cli.console import stderr
 from dem.cli.tui.renderable.menu import SelectMenu
-from dem.core.tool_images import ToolImages
 from dem.cli.tui.panel.tool_type_selector import ToolTypeSelectorPanel
 from dem.cli.tui.panel.tool_image_selector import ToolImageSelectorPanel
 
@@ -154,7 +155,7 @@ def handle_user_confirm(confirmation: str, dev_env_local: DevEnvLocal,
         check_for_new_dev_env = dev_env_local_setup.get_dev_env_by_name(new_dev_env.name)
 
         if check_for_new_dev_env is None:            
-            dev_env_local_setup.dev_envs.append(new_dev_env)
+            dev_env_local_setup.local_dev_envs.append(new_dev_env)
         else:
             stderr.print("[red]The Development Environment already exist.")
             raise(typer.Abort())
@@ -167,13 +168,13 @@ def handle_user_confirm(confirmation: str, dev_env_local: DevEnvLocal,
 
 
 def execute(dev_env_name: str) -> None:
-    dev_env_local_setup = DevEnvLocalSetup()
-    dev_env_local = dev_env_local_setup.get_dev_env_by_name(dev_env_name)
+    platform = DevEnvLocalSetup()
+    dev_env_local = platform.get_dev_env_by_name(dev_env_name)
 
     if dev_env_local is None:
         stderr.print("[red]The Development Environment doesn't exist.")
     else:
-        tool_image_list = get_tool_image_list(dev_env_local_setup.tool_images)
+        tool_image_list = get_tool_image_list(platform.tool_images)
         get_modifications_from_user(dev_env_local, tool_image_list)
         confirmation = get_confirm_from_user()
-        handle_user_confirm(confirmation, dev_env_local, dev_env_local_setup)
+        handle_user_confirm(confirmation, dev_env_local, platform)
