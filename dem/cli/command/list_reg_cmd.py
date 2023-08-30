@@ -13,7 +13,7 @@ def execute() -> None:
     table.add_column("name")
     table.add_column("url")
 
-    for registry in platform.registries.list_registries():
+    for registry in platform.registries.list_registry_configs():
         table.add_row(registry["name"], registry["url"])
     
     if registry is None:

@@ -2,11 +2,11 @@
 # dem/cli/command/rename_cmd.py
 
 import copy
-from dem.core.dev_env import DevEnvLocal
+from dem.core.dev_env import DevEnv
 from dem.core.platform import DevEnvLocalSetup
 from dem.cli.console import stderr
 
-def get_dev_env_to_clone(platform: DevEnvLocalSetup, dev_env_name: str) -> (DevEnvLocal | None):
+def get_dev_env_to_clone(platform: DevEnvLocalSetup, dev_env_name: str) -> (DevEnv | None):
     dev_env_to_clone = platform.get_dev_env_by_name(dev_env_name) 
 
     if dev_env_to_clone is None:
@@ -22,12 +22,12 @@ def check_new_dev_env_name_taken(dev_env_local_setup: DevEnvLocalSetup, new_dev_
     else:
         return False
 
-def clone_given_dev_env(dev_env_local_setup: DevEnvLocalSetup, dev_env_to_clone: DevEnvLocal,
+def clone_given_dev_env(platform: DevEnvLocalSetup, dev_env_to_clone: DevEnv,
                         new_dev_env_name: str):
     new_dev_env = copy.deepcopy(dev_env_to_clone)
     new_dev_env.name = new_dev_env_name
-    dev_env_local_setup.local_dev_envs.append(new_dev_env)
-    dev_env_local_setup.flush_to_file()
+    platform.local_dev_envs.append(new_dev_env)
+    platform.flush_to_file()
 
 def execute(dev_env_to_clone_name: str, new_dev_env_name: str) -> None:
     platform = DevEnvLocalSetup()

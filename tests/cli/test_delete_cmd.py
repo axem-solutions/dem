@@ -126,16 +126,16 @@ def test_remove_unused_tool_images(mock_try_to_delete_tool_image):
             "image_version": "latest"
         }
     ]
-    mock_dev_env_local_setup = MagicMock()
-    mock_dev_env_local_setup.dev_envs = [mock_dev_env1, mock_dev_env2]
+    mock_platform = MagicMock()
+    mock_platform.local_dev_envs = [mock_dev_env1, mock_dev_env2]
 
     # Run unit under test
-    delete_cmd.remove_unused_tool_images(mock_deleted_dev_env, mock_dev_env_local_setup)
+    delete_cmd.remove_unused_tool_images(mock_deleted_dev_env, mock_platform)
 
     # Check expectations
     calls = [
-        call("not_required_tool_image_to_delete:latest", mock_dev_env_local_setup),
-        call("not_required_tool_image_to_keep:latest", mock_dev_env_local_setup)
+        call("not_required_tool_image_to_delete:latest", mock_platform),
+        call("not_required_tool_image_to_keep:latest", mock_platform)
     ]
     mock_try_to_delete_tool_image.assert_has_calls(calls, any_order=True)
 
@@ -147,10 +147,10 @@ def test_delete_dev_env_valid_name(mock_DevEnvLocalSetup, mock_remove_unused_too
     fake_dev_env1 = MagicMock()
     fake_dev_env_to_delete = MagicMock()
     fake_dev_env_to_delete.name = "dev_env"
-    fake_local_platform = MagicMock()
-    fake_local_platform.dev_envs = [fake_dev_env1, fake_dev_env_to_delete]
-    mock_DevEnvLocalSetup.return_value = fake_local_platform
-    fake_local_platform.get_dev_env_by_name.return_value = fake_dev_env_to_delete
+    mock_platform = MagicMock()
+    mock_platform.local_dev_envs = [fake_dev_env1, fake_dev_env_to_delete]
+    mock_DevEnvLocalSetup.return_value = mock_platform
+    mock_platform.get_dev_env_by_name.return_value = fake_dev_env_to_delete
     
     # Run unit under test
     runner_result = runner.invoke(main.typer_cli, ["delete", fake_dev_env_to_delete.name], color=True)
@@ -159,13 +159,13 @@ def test_delete_dev_env_valid_name(mock_DevEnvLocalSetup, mock_remove_unused_too
     assert 0 == runner_result.exit_code
 
     mock_DevEnvLocalSetup.assert_called_once()
-    fake_local_platform.get_dev_env_by_name.assert_called_once_with(fake_dev_env_to_delete.name)
-    fake_local_platform.flush_to_file.assert_called_once()
+    mock_platform.get_dev_env_by_name.assert_called_once_with(fake_dev_env_to_delete.name)
+    mock_platform.flush_to_file.assert_called_once()
     mock_remove_unused_tool_images.assert_called_once_with(fake_dev_env_to_delete,
-                                                           fake_local_platform)
+                                                           mock_platform)
 
-    assert fake_dev_env1 in fake_local_platform.dev_envs
-    assert fake_dev_env_to_delete not in fake_local_platform.dev_envs
+    assert fake_dev_env1 in mock_platform.local_dev_envs
+    assert fake_dev_env_to_delete not in mock_platform.local_dev_envs
 
 @patch("dem.cli.command.delete_cmd.stderr.print")
 @patch("dem.cli.command.delete_cmd.DevEnvLocalSetup")

@@ -1,12 +1,16 @@
-"""This module represents the Development Environments."""
-# dem/core/dev_env_setup.py
+"""This module represents a Development Environment."""
+# dem/core/dev_env.py
 
 from dem.core.core import Core
 from dem.core.exceptions import InvalidDevEnvJson
 from dem.core.tool_images import ToolImages
 
 class DevEnv(Core):
-    """ A Development Environment."""
+    """ A Development Environment.
+        
+        Class variables:
+            supported_tool_types -- supported tool types
+    """
     supported_tool_types = ( 
         "build system",
         "toolchain",
@@ -28,16 +32,23 @@ class DevEnv(Core):
             if tool["type"] not in self.supported_tool_types:
                 raise InvalidDevEnvJson("The following tool type is not supported: " + tool["type"])
 
-    def __init__(self, descriptor: dict) -> None:
-        """ Init the DevEnv class.
+    def __init__(self, descriptor: dict | None = None, 
+                 dev_env_to_copy: "DevEnv | None" = None) -> None:
+        """ Init the DevEnv class. A new instance can be create from a descriptor or from an already
+            existing DevEnv instance.
         
             Args:
                 descriptor -- the description of the Development Environment from the dev_env.json 
                               file
+                dev_env_to_copy -- the DevEnv instance to copy
         """
-        self._check_tool_type_support(descriptor)
-        self.name = descriptor["name"]
-        self.tools = descriptor["tools"]
+        if descriptor:
+            self._check_tool_type_support(descriptor)
+            self.name = descriptor["name"]
+            self.tools = descriptor["tools"]
+        else:
+            self.name = dev_env_to_copy.name
+            self.tools = dev_env_to_copy.tools
 
     def check_image_availability(self, tool_images: ToolImages, update_tool_images: bool = False,
                                  local_only: bool = False) -> list:
@@ -78,20 +89,3 @@ class DevEnv(Core):
             tool["image_status"] = image_status
 
         return image_statuses
-
-class DevEnvLocal(DevEnv):
-    """ Local Development Environment """
-    def __init__(self, descriptor: dict | None = None, dev_env_org: "DevEnv | None" = None):
-        """Init a local DevEnv class
-
-        The class can be initialized either based on the Dev Env descriptor from the dev_env.json 
-        file or on an already existing DevEnvOrg object.
-        Args:
-            dev_env_json_deserialized -- a deserialized representation of the dev_env.json file
-            dev_env_org -- the DevEnvOrg object to make a copy from (note: forward reference)
-        """
-        if descriptor is not None:
-            super().__init__(descriptor)
-        else:
-            self.name = dev_env_org.name
-            self.tools = dev_env_org.tools

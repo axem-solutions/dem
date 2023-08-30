@@ -1,13 +1,13 @@
 """load CLI command implementation."""
 # dem/cli/command/load_cmd.py
 
-from dem.core.dev_env import DevEnvLocal
+from dem.core.dev_env import DevEnv
 from dem.core.platform import DevEnvLocalSetup
 from dem.cli.console import stderr
 import json, os
 
-def check_is_file_exist(param: str) -> bool:
-    if None != param:
+def check_is_file_exist(param: str | None) -> bool:
+    if param is not None:
         return(os.path.isfile(param))     
     else:
         return False
@@ -22,7 +22,7 @@ def load_dev_env_to_dev_env_json(dev_env_local_setup: DevEnvLocalSetup,path_to_d
             stderr.print("[red]Error: The Development Environment exist.[/]")
             return False                       
         else:        
-            new_dev_env = DevEnvLocal(dev_env)
+            new_dev_env = DevEnv(dev_env)
             dev_env_local_setup.local_dev_envs.append(new_dev_env)
             new_dev_env.check_image_availability(dev_env_local_setup.tool_images)
             dev_env_local_setup.pull_images(new_dev_env.tools)

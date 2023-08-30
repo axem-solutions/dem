@@ -1,7 +1,7 @@
 """run CLI command implementation."""
 # dem/cli/command/run_cmd.py
 
-from dem.core.dev_env import DevEnvLocal
+from dem.core.dev_env import DevEnv
 from dem.core.platform import DevEnvLocalSetup
 from dem.cli.console import stdout, stderr
 import typer
@@ -27,7 +27,7 @@ def handle_invalid_tool_type(tool_type: str, dev_env_name: str) -> None:
     stderr.print("[red]Error: There is no [b]" + tool_type + "[/b] in [b]" + dev_env_name + "[/]")
     raise(typer.Abort)
 
-def handle_missing_tool_images(missing_tool_images: set[str], dev_env_local: DevEnvLocal,
+def handle_missing_tool_images(missing_tool_images: set[str], dev_env_local: DevEnv,
                                platform: DevEnvLocalSetup) -> None:
     """
     Report an error to the user that some images are not available. Ask them if the DEM should try

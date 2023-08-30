@@ -16,7 +16,7 @@ def execute(name: str, url:str) -> None:
         "name": name,
         "url": url
     }
-    if registry not in platform.registries.list_registries():
+    if registry not in platform.registries.list_registry_configs():
         platform.registries.add_registry(registry)
     else:
         stdout.print("[yellow]The input registry is already added.[/]")

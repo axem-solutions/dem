@@ -1,7 +1,7 @@
 """delete CLI command implementation."""
 # dem/cli/command/delete_cmd.py
 
-from dem.core.dev_env import DevEnvLocal
+from dem.core.dev_env import DevEnv
 from dem.core.platform import DevEnvLocalSetup
 from dem.cli.console import stderr, stdout
 import typer
@@ -19,7 +19,7 @@ def try_to_delete_tool_image(tool_image: str, dev_env_local_setup: DevEnvLocalSe
         else:
             stdout.print("[green]Successfully removed![/]\n")
 
-def remove_unused_tool_images(deleted_dev_env: DevEnvLocal, dev_env_local_setup: DevEnvLocalSetup) -> None:
+def remove_unused_tool_images(deleted_dev_env: DevEnv, dev_env_local_setup: DevEnvLocalSetup) -> None:
     all_required_tool_images = set()
     for dev_env in dev_env_local_setup.local_dev_envs:
         for tool in dev_env.tools:

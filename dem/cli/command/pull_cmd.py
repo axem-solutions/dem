@@ -3,7 +3,7 @@
 
 from dem.core.tool_images import ToolImages
 from dem.core.platform import DevEnvLocalSetup
-from dem.core.dev_env import DevEnv, DevEnvLocal
+from dem.core.dev_env import DevEnv, DevEnv
 from dem.cli.console import stdout, stderr
 
 def install_to_dev_env_json(local_dev_env: DevEnv | None, catalog_dev_env: DevEnv, 
@@ -24,7 +24,7 @@ def install_to_dev_env_json(local_dev_env: DevEnv | None, catalog_dev_env: DevEn
     """
     if local_dev_env is None:
         # If not available, install it.
-        local_dev_env = DevEnvLocal(dev_env_org=catalog_dev_env)
+        local_dev_env = DevEnv(dev_env_to_copy=catalog_dev_env)
         platform.local_dev_envs.append(local_dev_env)
         platform.flush_to_file()
     elif local_dev_env.tools != catalog_dev_env.tools:

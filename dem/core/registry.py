@@ -209,10 +209,10 @@ class Registries(Core):
         self._config_file.registries.append(registry_config)
         self._config_file.flush()
 
-    def list_registries(self) -> list[dict]:
-        """ List the available registries.
+    def list_registry_configs(self) -> list[dict]:
+        """ List the registry configs. (As stored in the config file.)
         
-            Returns with the list of the available registries.
+            Returns with the list of the available registry configurations.
         """
         return self._config_file.registries
 

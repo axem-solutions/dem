@@ -2,7 +2,7 @@
 # dem/cli/command/info_cmd.py
 
 from dem.core.tool_images import ToolImages
-from dem.core.dev_env import DevEnvLocal, DevEnv
+from dem.core.dev_env import DevEnv, DevEnv
 from dem.cli.console import stdout, stderr
 from dem.core.platform import DevEnvLocalSetup
 from rich.table import Table
@@ -14,7 +14,7 @@ image_status_messages = {
     ToolImages.LOCAL_AND_REGISTRY: "Image is available locally and in the registry.",
 }
 
-def print_info(dev_env: (DevEnvLocal | DevEnv)) -> None:
+def print_info(dev_env: (DevEnv | DevEnv)) -> None:
 
     tool_info_table = Table()
     tool_info_table.add_column("Type")
@@ -26,17 +26,17 @@ def print_info(dev_env: (DevEnvLocal | DevEnv)) -> None:
     stdout.print(tool_info_table)
 
 def execute(arg_dev_env_name: str) -> None:
-    dev_env_setup = DevEnvLocalSetup()
-    dev_env = dev_env_setup.get_dev_env_by_name(arg_dev_env_name)
+    platform = DevEnvLocalSetup()
+    dev_env = platform.get_dev_env_by_name(arg_dev_env_name)
 
     if dev_env is None:
-        for catalog in dev_env_setup.dev_env_catalogs.catalogs:
+        for catalog in platform.dev_env_catalogs.catalogs:
             dev_env = catalog.get_dev_env_by_name(arg_dev_env_name)
             if dev_env is not None:
-                dev_env.check_image_availability(dev_env_setup.tool_images)
+                dev_env.check_image_availability(platform.tool_images)
                 print_info(dev_env)
     else:
-        dev_env.check_image_availability(dev_env_setup.tool_images)
+        dev_env.check_image_availability(platform.tool_images)
         print_info(dev_env)
 
     if dev_env is None:

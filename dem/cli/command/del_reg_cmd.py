@@ -11,7 +11,7 @@ def execute(registry_name: str) -> None:
     """
     platform = DevEnvLocalSetup()
 
-    for registry in platform.registries.list_registries():
+    for registry in platform.registries.list_registry_configs():
         if registry["name"] == registry_name:
             platform.registries.delete_registry(registry)
             stdout.print("[green]The input registry has been successfully deleted.")

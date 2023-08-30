@@ -91,6 +91,5 @@ class ConfigFile(BaseJSON):
 }"""
         super().__init__()
 
-        self.registries = []
-        self.registries = self.deserialized["registries"]
-        self.catalogs = self.deserialized["catalogs"]
+        self.registries: list[dict] = self.deserialized["registries"]
+        self.catalogs: list[dict] = self.deserialized["catalogs"]

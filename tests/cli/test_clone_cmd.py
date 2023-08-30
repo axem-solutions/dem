@@ -79,20 +79,20 @@ def test_check_new_dev_env_name_taken(mock_stderr_print):
 
 def test_clone_given_dev_env():
     # Test setup
-    fake_local_platform = MagicMock()
+    mock_platform = MagicMock()
     fake_dev_env_to_clone = MagicMock()
 
     test_new_name = "test_cloned"
 
-    fake_local_platform.dev_envs = []
+    mock_platform.local_dev_envs = []
 
     # Run unit under test
-    clone_cmd.clone_given_dev_env(fake_local_platform, fake_dev_env_to_clone, test_new_name)
+    clone_cmd.clone_given_dev_env(mock_platform, fake_dev_env_to_clone, test_new_name)
 
     # Check expectations
-    assert fake_local_platform.dev_envs[0].name is test_new_name
+    assert mock_platform.local_dev_envs[0].name is test_new_name
 
-    fake_local_platform.flush_to_file.assert_called_once()
+    mock_platform.flush_to_file.assert_called_once()
 
 @patch("dem.cli.command.clone_cmd.DevEnvLocalSetup")
 @patch("dem.cli.command.clone_cmd.get_dev_env_to_clone")

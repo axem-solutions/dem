@@ -56,23 +56,23 @@ def test_overwrite_existing_dev_env():
     # Check expectations
     assert mock_original_dev_env.tools == mock_tools
 
-@patch("dem.cli.command.create_cmd.DevEnvLocal")
+@patch("dem.cli.command.create_cmd.DevEnv")
 def test_create_new_dev_env(mock_DevEnvLocal):
     # Test setup
     mock_new_dev_env = MagicMock()
     mock_DevEnvLocal.return_value = mock_new_dev_env
 
-    mock_dev_env_local_setup = MagicMock()
+    mock_platform = MagicMock()
     mock_new_dev_env_descriptor = MagicMock()
 
     # Run unit under test
-    actual_new_dev_env = create_cmd.create_new_dev_env(mock_dev_env_local_setup, 
+    actual_new_dev_env = create_cmd.create_new_dev_env(mock_platform, 
                                                        mock_new_dev_env_descriptor)
 
     # Check expectations
     assert actual_new_dev_env == mock_new_dev_env
     mock_DevEnvLocal.assert_called_once_with(mock_new_dev_env_descriptor)
-    mock_dev_env_local_setup.dev_envs.append.assert_called_once_with(mock_new_dev_env)
+    mock_platform.local_dev_envs.append.assert_called_once_with(mock_new_dev_env)
 
 @patch("dem.cli.command.create_cmd.create_new_dev_env")
 @patch("dem.cli.command.create_cmd.get_dev_env_descriptor_from_user")

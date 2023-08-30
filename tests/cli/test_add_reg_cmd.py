@@ -17,13 +17,13 @@ runner = CliRunner(mix_stderr=False)
 @patch("dem.cli.command.add_reg_cmd.DevEnvLocalSetup")
 def test_add_reg(mock_DevEnvLocalSetup: MagicMock):
     # Test setup
-    mock_local_platform = MagicMock()
-    mock_DevEnvLocalSetup.return_value = mock_local_platform
+    mock_platform = MagicMock()
+    mock_DevEnvLocalSetup.return_value = mock_platform
 
     test_name = "test_name"
     test_url = "test_url"
 
-    mock_local_platform.registries.list_registries.return_value = []
+    mock_platform.registries.list_registry_configs.return_value = []
 
     # Run unit under test
     runner_result = runner.invoke(main.typer_cli, ["add-reg", test_name, test_url], color=True)
@@ -32,24 +32,24 @@ def test_add_reg(mock_DevEnvLocalSetup: MagicMock):
     assert runner_result.exit_code == 0
 
     mock_DevEnvLocalSetup.assert_called_once()
-    mock_local_platform.registries.list_registries.assert_called_once()
+    mock_platform.registries.list_registry_configs.assert_called_once()
     expected_registry = {
             "name": test_name,
             "url": test_url
         }
-    mock_local_platform.registries.add_registry.assert_called_once_with(expected_registry)
+    mock_platform.registries.add_registry.assert_called_once_with(expected_registry)
 
 @patch("dem.cli.command.add_reg_cmd.stdout.print")
 @patch("dem.cli.command.add_reg_cmd.DevEnvLocalSetup")
 def test_add_reg_already_added(mock_DevEnvLocalSetup: MagicMock, mock_stdout_print: MagicMock):
     # Test setup
-    mock_local_platform = MagicMock()
-    mock_DevEnvLocalSetup.return_value = mock_local_platform
+    mock_platform = MagicMock()
+    mock_DevEnvLocalSetup.return_value = mock_platform
 
     test_name = "test_name"
     test_url = "test_url"
 
-    mock_local_platform.registries.list_registries.return_value = [{
+    mock_platform.registries.list_registry_configs.return_value = [{
         "name": test_name,
         "url": test_url
     }]
@@ -61,5 +61,5 @@ def test_add_reg_already_added(mock_DevEnvLocalSetup: MagicMock, mock_stdout_pri
     assert runner_result.exit_code == 0
 
     mock_DevEnvLocalSetup.assert_called_once()
-    mock_local_platform.registries.list_registries.assert_called_once()
+    mock_platform.registries.list_registry_configs.assert_called_once()
     mock_stdout_print.assert_called_once_with("[yellow]The input registry is already added.[/]")

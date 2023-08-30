@@ -2,7 +2,7 @@
 # dem/cli/command/create_cmd.py
 
 import typer
-from dem.core.dev_env import DevEnv, DevEnvLocal
+from dem.core.dev_env import DevEnv, DevEnv
 from dem.core.tool_images import ToolImages
 from dem.core.platform import DevEnvLocalSetup
 from dem.cli.console import stdout, stderr
@@ -134,16 +134,16 @@ def get_dev_env_descriptor_from_user(dev_env_name: str, tool_image_list: list[li
 
     return dev_env_descriptor
 
-def overwrite_existing_dev_env(original_dev_env: DevEnvLocal, new_dev_env_descriptor: dict) -> None:
+def overwrite_existing_dev_env(original_dev_env: DevEnv, new_dev_env_descriptor: dict) -> None:
     original_dev_env.tools = new_dev_env_descriptor["tools"]
 
-def create_new_dev_env(dev_env_local_setup: DevEnvLocalSetup, new_dev_env_descriptor: dict) -> DevEnvLocal:
-    new_dev_env = DevEnvLocal(new_dev_env_descriptor)
-    dev_env_local_setup.local_dev_envs.append(new_dev_env)
+def create_new_dev_env(platform: DevEnvLocalSetup, new_dev_env_descriptor: dict) -> DevEnv:
+    new_dev_env = DevEnv(new_dev_env_descriptor)
+    platform.local_dev_envs.append(new_dev_env)
 
     return new_dev_env
 
-def create_dev_env(platform: DevEnvLocalSetup, dev_env_name: str) -> DevEnvLocal:
+def create_dev_env(platform: DevEnvLocalSetup, dev_env_name: str) -> DevEnv:
     dev_env_original = platform.get_dev_env_by_name(dev_env_name)
     if dev_env_original is not None:
         typer.confirm("The input name is already used by a Development Environment. Overwrite it?", 

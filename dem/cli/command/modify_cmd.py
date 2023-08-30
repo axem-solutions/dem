@@ -2,7 +2,7 @@
 # dem/cli/command/modify_cmd
 
 import copy, typer
-from dem.core.dev_env import DevEnvLocal, DevEnv
+from dem.core.dev_env import DevEnv, DevEnv
 from dem.core.tool_images import ToolImages
 from dem.core.platform import DevEnvLocalSetup
 from dem.cli.console import stderr
@@ -63,7 +63,7 @@ def handle_tool_image_selector_panel(tool_image_selector_panel: ToolImageSelecto
         tool_image_selector_panel.tool_image_menu.is_selected = False
         return tool_image_selector_panel.tool_image_menu.get_selected_tool_image()
 
-def get_modifications_from_user(dev_env: DevEnvLocal, tool_image_list: list[list[str]]) -> None:
+def get_modifications_from_user(dev_env: DevEnv, tool_image_list: list[list[str]]) -> None:
     already_selected_tool_types = []
     tool_selection = {}
     for tool in dev_env.tools:
@@ -143,7 +143,7 @@ def get_confirm_from_user() -> str:
     select_menu.wait_for_user()
     return select_menu.get_selected()
 
-def handle_user_confirm(confirmation: str, dev_env_local: DevEnvLocal,
+def handle_user_confirm(confirmation: str, dev_env_local: DevEnv,
                         dev_env_local_setup: DevEnvLocalSetup) -> None:
     if confirmation == "cancel":
         raise(typer.Abort())

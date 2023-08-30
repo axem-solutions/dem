@@ -20,8 +20,8 @@ runner = CliRunner(mix_stderr=False)
 def test_list_reg(mock_DevEnvLocalSetup: MagicMock, mock_stdout_print: MagicMock, 
                   mock_Table: MagicMock):
     # Test setup
-    mock_local_platform = MagicMock()
-    mock_DevEnvLocalSetup.return_value = mock_local_platform
+    mock_platform = MagicMock()
+    mock_DevEnvLocalSetup.return_value = mock_platform
     test_registries = [
         {
             "name": "test_name1",
@@ -32,7 +32,7 @@ def test_list_reg(mock_DevEnvLocalSetup: MagicMock, mock_stdout_print: MagicMock
             "url": "test_url2"
         },
     ]
-    mock_local_platform.registries.list_registries.return_value = test_registries
+    mock_platform.registries.list_registry_configs.return_value = test_registries
     mock_table = MagicMock()
     mock_Table.return_value = mock_table
 
@@ -48,7 +48,7 @@ def test_list_reg(mock_DevEnvLocalSetup: MagicMock, mock_stdout_print: MagicMock
     calls = [call("name"), call("url")]
     mock_table.add_column.assert_has_calls(calls)
 
-    mock_local_platform.registries.list_registries.assert_called_once()
+    mock_platform.registries.list_registry_configs.assert_called_once()
     
     calls = []
     for registry in test_registries:
@@ -63,9 +63,9 @@ def test_list_reg(mock_DevEnvLocalSetup: MagicMock, mock_stdout_print: MagicMock
 def test_list_reg_non_available(mock_DevEnvLocalSetup: MagicMock, mock_stdout_print: MagicMock, 
                                 mock_Table):
     # Test setup
-    mock_local_platform = MagicMock()
-    mock_DevEnvLocalSetup.return_value = mock_local_platform
-    mock_local_platform.registries.list_registries.return_value = []
+    mock_platform = MagicMock()
+    mock_DevEnvLocalSetup.return_value = mock_platform
+    mock_platform.registries.list_registry_configs.return_value = []
     mock_table = MagicMock()
     mock_Table.return_value = mock_table
 
@@ -81,6 +81,6 @@ def test_list_reg_non_available(mock_DevEnvLocalSetup: MagicMock, mock_stdout_pr
     calls = [call("name"), call("url")]
     mock_table.add_column.assert_has_calls(calls)
 
-    mock_local_platform.registries.list_registries.assert_called_once()
+    mock_platform.registries.list_registry_configs.assert_called_once()
     
     mock_stdout_print.assert_called_once_with("[yellow]No available registries![/]")
