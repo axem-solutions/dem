@@ -86,8 +86,18 @@ class ConfigFile(BaseJSON):
         """ Init the class."""
         self._path = PurePath(self._config_dir + "/config.json")
         self._default_json = """{
-    "registries": [],
-    "catalogs": []
+    "registries": [
+        {
+            "name": "axemsolutions",
+            "url": "https://registry.hub.docker.com"
+        }
+    ],
+    "catalogs": [
+        {
+            "name": "axem",
+            "url": "https://axemsolutions.io/dem/dev_env_org.json"
+        }
+    ]
 }"""
         super().__init__()
 
