@@ -232,3 +232,45 @@ def test_execute_install_failed(mock_DevEnvLocalSetup: MagicMock,
     mock_local_dev_env.check_image_availability.assert_has_calls(calls)
     mock_platform.pull_images.assert_called_once_with(mock_tools)
     mock_stderr_print.assert_called_once_with("The installation failed.")
+
+@patch("dem.cli.command.pull_cmd.stderr.print")
+@patch("dem.cli.command.pull_cmd.DevEnvLocalSetup")
+def test_execute_no_catalogs(mock_DevEnvLocalSetup: MagicMock, mock_stderr_print: MagicMock):
+    # Test setup
+    mock_platform = MagicMock()
+    mock_DevEnvLocalSetup.return_value = mock_platform
+    mock_platform.dev_env_catalogs.catalogs = []
+
+    test_env_name =  "test_env"
+
+    # Run unit under test
+    runner_result = runner.invoke(main.typer_cli, ["pull", test_env_name], color=True)
+
+    # Check expectations
+    assert 0 == runner_result.exit_code
+
+    mock_DevEnvLocalSetup.assert_called_once()
+    mock_stderr_print.assert_called_once_with("[red]Error: No Development Environment Catalogs are available to pull the image from![/]")
+
+@patch("dem.cli.command.pull_cmd.stderr.print")
+@patch("dem.cli.command.pull_cmd.DevEnvLocalSetup")
+def test_execute_dev_env_not_available_in_catalog(mock_DevEnvLocalSetup: MagicMock, 
+                                                  mock_stderr_print: MagicMock):
+    # Test setup
+    mock_platform = MagicMock()
+    mock_DevEnvLocalSetup.return_value = mock_platform
+    mock_catalog = MagicMock()
+    mock_catalog.get_dev_env_by_name.return_value = None
+    mock_platform.dev_env_catalogs.catalogs = [mock_catalog]
+
+    test_env_name =  "test_env"
+
+    # Run unit under test
+    runner_result = runner.invoke(main.typer_cli, ["pull", test_env_name], color=True)
+
+    # Check expectations
+    assert 0 == runner_result.exit_code
+
+    mock_DevEnvLocalSetup.assert_called_once()
+    mock_catalog.get_dev_env_by_name.assert_called_once_with(test_env_name)
+    mock_stderr_print.assert_called_once_with("[red]Error: The input Development Environment is not available for the organization.[/]")

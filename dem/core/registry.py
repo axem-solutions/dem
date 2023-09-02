@@ -43,8 +43,8 @@ class Registry(Core, ABC):
                 repo -- get the tags of this repository
         """
         try:
-            response = requests.get(self._get_tag_endpoint_url(repo))
-        except requests.exceptions.MissingSchema as e:
+            response = requests.get(self._get_tag_endpoint_url(repo), timeout=1)
+        except Exception as e:
             self.user_output.error(str(e))
         else:
             if response.status_code == requests.codes.ok:
@@ -135,7 +135,7 @@ class DockerRegistry(Registry):
         repo_endpoint = self._registry_config["url"] + "/v2/_catalog"
 
         try:
-            response = requests.get(repo_endpoint)
+            response = requests.get(repo_endpoint, timeout=1)
         except Exception as e:
             self.user_output.error(str(e))
         else:
@@ -194,7 +194,11 @@ class Registries(Core):
         repo_list: list[str] = []
 
         for registry in self.registries:
-            repo_list.extend(registry.repos)
+            try:
+                repo_list.extend(registry.repos)
+            except Exception as e:
+                self.user_output.error(str(e))
+                self.user_output.error("[red]Error: The " + registry._registry_config["name"] + " registry is not available.[/]")
 
         return repo_list
 

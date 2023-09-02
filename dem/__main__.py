@@ -30,8 +30,6 @@ def main():
             stdout.print("\nHint: The input repository might not exist in the registry.")
         elif "400" in str(e):
             stdout.print("\nHint: The input parameters might not be valid.")
-        else:
-            stdout.print("\nHint: Probably something is wrong with your Docker Engine installation. Try to reinstall it.")
 
 # Call the main() when run as `python -m`
 if __name__ == "__main__":

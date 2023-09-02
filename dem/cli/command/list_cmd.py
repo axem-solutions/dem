@@ -70,9 +70,12 @@ def list_dev_envs(platform: DevEnvLocalSetup, local: bool, org: bool)-> None:
             for dev_env in platform.local_dev_envs:
                 table.add_row(dev_env.name, get_local_dev_env_status(dev_env, platform.tool_images))
     elif((local == False) and (org == True)):
+        if not platform.dev_env_catalogs.catalogs:
+            stdout.print("[yellow]No Development Environment Catalogs are available!")
+            return
         for catalog in platform.dev_env_catalogs.catalogs:
             if not catalog.dev_envs:
-                stdout.print("[yellow]No Development Environment in the catalogs.[/]")
+                stdout.print("[yellow]No Development Environments are available in the catalogs.[/]")
                 return
             else:
                 for dev_env in catalog.dev_envs:
@@ -99,13 +102,19 @@ def list_tool_images(platform: DevEnvLocalSetup, local: bool, org: bool) -> None
             table.add_row(local_image)
         stdout.print(table)
     elif (local == False) and (org == True):
-        registry_images = platform.registries.list_repos()
+        if not platform.registries.registries:
+            stdout.print("[yellow]No registries are available!")
+            return
 
-        table = Table()
-        table.add_column("Repository")
-        for registry_image in registry_images:
-            table.add_row(registry_image)
-        stdout.print(table)
+        registry_images = platform.registries.list_repos()
+        if registry_images:
+            table = Table()
+            table.add_column("Repository")
+            for registry_image in registry_images:
+                table.add_row(registry_image)
+            stdout.print(table)
+        else:
+            stdout.print("[yellow]No images are available in the registries!")
 
 def execute(local: bool, org: bool, env: bool, tool: bool) -> None:
     platform = DevEnvLocalSetup()
