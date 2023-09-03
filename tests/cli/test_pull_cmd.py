@@ -20,19 +20,21 @@ runner = CliRunner(mix_stderr=False)
 ## Test helpers
 ## Test cases
 
-@patch("dem.cli.command.pull_cmd.dev_env_setup.DevEnvOrgSetup")
-def test_dev_env_not_available_in_org(mock_DevEnvOrgSetup):
+@patch("dem.cli.command.pull_cmd.DevEnvLocalSetup")
+def test_dev_env_not_available_in_org(mock_DevEnvLocalSetup: MagicMock):
     # Test setup
-    fake_dev_env_org_setup = MagicMock()
-    mock_DevEnvOrgSetup.return_value = fake_dev_env_org_setup
-    fake_dev_env_org_setup.get_dev_env_by_name.return_value = None
+    mock_platform = MagicMock()
+    mock_DevEnvLocalSetup.return_value = mock_platform
+    mock_catalog = MagicMock()
+    mock_platform.dev_env_catalogs.catalogs = [mock_catalog]
+    mock_catalog.get_dev_env_by_name.return_value = None
 
     # Run unit under test
     runner_result = runner.invoke(main.typer_cli, ["pull", "not existing env"], color=True)
 
     # Check expectations
-    mock_DevEnvOrgSetup.assert_called_once()
-    fake_dev_env_org_setup.get_dev_env_by_name.assert_called_once_with("not existing env")
+    mock_DevEnvLocalSetup.assert_called_once()
+    mock_catalog.get_dev_env_by_name.assert_called_once_with("not existing env")
 
     assert 0 == runner_result.exit_code
 
@@ -40,149 +42,193 @@ def test_dev_env_not_available_in_org(mock_DevEnvOrgSetup):
     console.print("[red]Error: The input Development Environment is not available for the organization.[/]")
     assert console.file.getvalue() == runner_result.stderr
 
-@patch("dem.cli.command.pull_cmd.dev_env_setup.DevEnvOrgSetup")
-@patch("dem.cli.command.pull_cmd.dev_env_setup.DevEnvLocalSetup")
-def test_dev_env_already_installed(mock_DevEnvLocalSetup, mock_DevEnvOrgSetup):
+@patch("dem.cli.command.pull_cmd.DevEnvLocalSetup")
+def test_dev_env_already_installed(mock_DevEnvLocalSetup: MagicMock):
     # Test setup
-    fake_tools = MagicMock()
-    fake_dev_env_org_setup = MagicMock()
-    mock_DevEnvOrgSetup.return_value = fake_dev_env_org_setup
-    fake_dev_env_org = MagicMock()
-    # Set the same fake tools for both the local and org instance
-    fake_dev_env_org.tools = fake_tools
-    fake_dev_env_org_setup.get_dev_env_by_name.return_value = fake_dev_env_org
+    mock_platform = MagicMock()
+    mock_DevEnvLocalSetup.return_value = mock_platform
+    mock_catalog = MagicMock()
+    mock_platform.dev_env_catalogs.catalogs = [mock_catalog]
 
-    fake_local_platform = MagicMock()
-    mock_DevEnvLocalSetup.return_value = fake_local_platform
-    fake_dev_env_local = MagicMock()
-    # Set the same fake tools for both the local and org instance
-    fake_dev_env_local.tools = fake_tools
-    fake_dev_env_local.name = "test_env"
-    fake_dev_env_org.get_local_instance.return_value = fake_dev_env_local
+    mock_catalog_dev_env = MagicMock()
+    mock_tools = MagicMock()
+    mock_catalog.get_dev_env_by_name.return_value = mock_catalog_dev_env
+
+    mock_local_dev_env = MagicMock()
+    mock_local_dev_env.name = "test_env"
+    mock_platform.get_local_dev_env.return_value = mock_local_dev_env
+
+    # Set the same tools for both the catalog and the local instance
+    mock_catalog_dev_env.tools = mock_tools
+    mock_local_dev_env.tools = mock_tools
 
     def stub_check_image_availability(*args, **kwargs):
         image_statuses = []
-        for tool in fake_dev_env_local.tools:
+        for tool in mock_local_dev_env.tools:
             tool["image_status"] = ToolImages.LOCAL_AND_REGISTRY
             image_statuses.append(ToolImages.LOCAL_AND_REGISTRY)
         return image_statuses
-    fake_dev_env_local.check_image_availability.side_effect = stub_check_image_availability
+    mock_local_dev_env.check_image_availability.side_effect = stub_check_image_availability
+
+    test_env_name =  "test_env"
 
     # Run unit under test
-    runner_result = runner.invoke(main.typer_cli, ["pull", "test_env"], color=True)
+    runner_result = runner.invoke(main.typer_cli, ["pull", test_env_name], color=True)
 
     # Check expectations
     assert 0 == runner_result.exit_code
 
-    mock_DevEnvOrgSetup.assert_called_once()
-    fake_dev_env_org_setup.get_dev_env_by_name.assert_called_once_with("test_env")
-
     mock_DevEnvLocalSetup.assert_called_once()
-    fake_dev_env_org.get_local_instance.assert_called_once_with(fake_local_platform)
-    fake_local_platform.pull_images.assert_called_once_with(fake_dev_env_local.tools)
-    calls = [call(fake_local_platform.tool_images), 
-             call(fake_local_platform.tool_images, update_tool_images=True)]
-    fake_dev_env_local.check_image_availability.assert_has_calls(calls)
+    mock_catalog.get_dev_env_by_name.assert_called_once_with(test_env_name)
+
+    mock_platform.get_local_dev_env.assert_called_once_with(mock_catalog_dev_env)
+    mock_platform.pull_images.assert_called_once_with(mock_local_dev_env.tools)
+    calls = [call(mock_platform.tool_images), 
+             call(mock_platform.tool_images, update_tool_images=True)]
+    mock_local_dev_env.check_image_availability.assert_has_calls(calls)
 
     console = Console(file=io.StringIO())
     console.print("The [yellow]test_env[/] Development Environment is ready!")
     assert console.file.getvalue() == runner_result.stdout
 
-@patch("dem.cli.command.pull_cmd.dev_env_setup.DevEnvOrgSetup")
-@patch("dem.cli.command.pull_cmd.dev_env_setup.DevEnvLocalSetup")
-def test_dev_env_installed_but_different(mock_DevEnvLocalSetup,
-                                         mock_DevEnvOrgSetup):
+@patch("dem.cli.command.pull_cmd.DevEnvLocalSetup")
+def test_dev_env_installed_but_different(mock_DevEnvLocalSetup: MagicMock):
     # Test setup
-    fake_tools = MagicMock()
-    fake_dev_env_org_setup = MagicMock()
-    mock_DevEnvOrgSetup.return_value = fake_dev_env_org_setup
-    fake_dev_env_org = MagicMock()
-    # Set the same fake tools for both the local and org instance
-    fake_dev_env_org.tools = fake_tools
-    fake_dev_env_org_setup.get_dev_env_by_name.return_value = fake_dev_env_org
+    mock_platform = MagicMock()
+    mock_DevEnvLocalSetup.return_value = mock_platform
+    mock_catalog = MagicMock()
+    mock_platform.dev_env_catalogs.catalogs = [mock_catalog]
 
-    fake_local_platform = MagicMock()
-    mock_DevEnvLocalSetup.return_value = fake_local_platform
-    fake_dev_env_local = MagicMock()
-    fake_dev_env_local.name = "test_env"
-    fake_dev_env_org.get_local_instance.return_value = fake_dev_env_local
+    mock_catalog_dev_env = MagicMock()
+    mock_tools = MagicMock()
+    mock_catalog_dev_env.tools = mock_tools
+    mock_catalog.get_dev_env_by_name.return_value = mock_catalog_dev_env
+
+    mock_local_dev_env = MagicMock()
+    mock_local_dev_env.name = "test_env"
+    mock_platform.get_local_dev_env.return_value = mock_local_dev_env
 
     def stub_check_image_availability(*args, **kwargs):
         image_statuses = []
-        for tool in fake_dev_env_local.tools:
+        for tool in mock_local_dev_env.tools:
             tool["image_status"] = ToolImages.LOCAL_AND_REGISTRY
             image_statuses.append(ToolImages.LOCAL_AND_REGISTRY)
         return image_statuses
-    fake_dev_env_local.check_image_availability.side_effect = stub_check_image_availability
+    mock_local_dev_env.check_image_availability.side_effect = stub_check_image_availability
+
+    test_env_name =  "test_env"
 
     # Run unit under test
-    runner_result = runner.invoke(main.typer_cli, ["pull", "test_env"], color=True)
+    runner_result = runner.invoke(main.typer_cli, ["pull", test_env_name], color=True)
 
     # Check expectations
     assert 0 == runner_result.exit_code
-
-    mock_DevEnvOrgSetup.assert_called_once()
-    fake_dev_env_org_setup.get_dev_env_by_name.assert_called_once_with("test_env")
+    assert mock_local_dev_env.tools is mock_catalog_dev_env.tools
 
     mock_DevEnvLocalSetup.assert_called_once()
-    fake_dev_env_org.get_local_instance.assert_called_once_with(fake_local_platform)
+    mock_catalog.get_dev_env_by_name.assert_called_once_with(test_env_name)
 
-    assert fake_dev_env_local.tools == fake_dev_env_org.tools
-    fake_local_platform.flush_to_file.assert_called_once()
-    fake_local_platform.pull_images.assert_called_once_with(fake_dev_env_local.tools)
-
-    calls = [call(fake_local_platform.tool_images), 
-             call(fake_local_platform.tool_images, update_tool_images=True)]
-    fake_dev_env_local.check_image_availability.assert_has_calls(calls)
+    mock_platform.get_local_dev_env.assert_called_once_with(mock_catalog_dev_env)
+    mock_platform.flush_to_file.assert_called_once()
+    mock_platform.pull_images.assert_called_once_with(mock_local_dev_env.tools)
+    calls = [call(mock_platform.tool_images), 
+             call(mock_platform.tool_images, update_tool_images=True)]
+    mock_local_dev_env.check_image_availability.assert_has_calls(calls)
 
     console = Console(file=io.StringIO())
     console.print("The [yellow]test_env[/] Development Environment is ready!")
     assert console.file.getvalue() == runner_result.stdout
 
-@patch("dem.cli.command.pull_cmd.dev_env_setup.DevEnvLocal")
-@patch("dem.cli.command.pull_cmd.dev_env_setup.DevEnvOrgSetup")
-@patch("dem.cli.command.pull_cmd.dev_env_setup.DevEnvLocalSetup")
-def test_dev_env_new_install(mock_DevEnvLocalSetup, mock_DevEnvOrgSetup, mock_DevEnvLocal):
+@patch("dem.cli.command.pull_cmd.DevEnv")
+@patch("dem.cli.command.pull_cmd.DevEnvLocalSetup")
+def test_dev_env_new_install(mock_DevEnvLocalSetup: MagicMock, mock_DevEnv: MagicMock):
     # Test setup
-    fake_dev_env_org_setup = MagicMock()
-    mock_DevEnvOrgSetup.return_value = fake_dev_env_org_setup
-    fake_dev_env_org = MagicMock()
-    # Set the same fake tools for both the local and org instance
-    fake_dev_env_org_setup.get_dev_env_by_name.return_value = fake_dev_env_org
+    mock_platform = MagicMock()
+    mock_DevEnvLocalSetup.return_value = mock_platform
+    mock_catalog = MagicMock()
+    mock_platform.dev_env_catalogs.catalogs = [mock_catalog]
 
-    fake_local_platform = MagicMock()
-    mock_DevEnvLocalSetup.return_value = fake_local_platform
-    fake_dev_env_org.get_local_instance.return_value = None
+    mock_catalog_dev_env = MagicMock()
+    mock_tools = MagicMock()
+    mock_catalog_dev_env.tools = mock_tools
+    mock_catalog.get_dev_env_by_name.return_value = mock_catalog_dev_env
+    mock_platform.get_local_dev_env.return_value = None
 
-    fake_dev_env_local = MagicMock()
-    fake_dev_env_local.name = "test_env"
-    mock_DevEnvLocal.return_value = fake_dev_env_local
-
-    fake_dev_env_local.tools = MagicMock()
-    fake_dev_env_local.check_image_availability.return_value = [ToolImages.LOCAL_AND_REGISTRY] * 3
-
-    # Run unit under test
-    runner_result = runner.invoke(main.typer_cli, ["pull", "test_env"], color=True)
-
-    # Check expectations
-    mock_DevEnvOrgSetup.assert_called_once()
-    fake_dev_env_org_setup.get_dev_env_by_name.assert_called_once_with("test_env")
-
-    mock_DevEnvLocalSetup.assert_called_once()
-    fake_dev_env_org.get_local_instance.assert_called_once_with(fake_local_platform)
-
-    mock_DevEnvLocal.assert_called_once_with(dev_env_org=fake_dev_env_org)
-    fake_local_platform.dev_envs.append.assert_called_once_with(fake_dev_env_local)
-    fake_local_platform.flush_to_file.assert_called_once()
-
-    fake_local_platform.pull_images.assert_called_once_with(fake_dev_env_local.tools)
-
-    calls = [call(fake_local_platform.tool_images), 
-             call(fake_local_platform.tool_images, update_tool_images=True)]
-    fake_dev_env_local.check_image_availability.assert_has_calls(calls)
+    mock_local_dev_env = MagicMock()
+    mock_DevEnv.return_value = mock_local_dev_env
     
+    def stub_check_image_availability(*args, **kwargs):
+        image_statuses = []
+        for tool in mock_local_dev_env.tools:
+            tool["image_status"] = ToolImages.LOCAL_AND_REGISTRY
+            image_statuses.append(ToolImages.LOCAL_AND_REGISTRY)
+        return image_statuses
+    mock_local_dev_env.check_image_availability.side_effect = stub_check_image_availability
+    test_env_name =  "test_env"
+    mock_local_dev_env.name = test_env_name
+    mock_platform.local_dev_envs = []
+
+    # Run unit under test
+    runner_result = runner.invoke(main.typer_cli, ["pull", test_env_name], color=True)
+
+    # Check expectations
     assert 0 == runner_result.exit_code
+    assert mock_local_dev_env in mock_platform.local_dev_envs
+
+    mock_DevEnvLocalSetup.assert_called_once()
+    mock_catalog.get_dev_env_by_name.assert_called_once_with(test_env_name)
+    mock_platform.get_local_dev_env.assert_called_once_with(mock_catalog_dev_env)
+    mock_DevEnv.assert_called_once_with(dev_env_to_copy=mock_catalog_dev_env)
+    mock_platform.flush_to_file.assert_called_once()
+    mock_platform.pull_images.assert_called_once_with(mock_local_dev_env.tools)
+    calls = [call(mock_platform.tool_images), 
+             call(mock_platform.tool_images, update_tool_images=True)]
+    mock_local_dev_env.check_image_availability.assert_has_calls(calls)
 
     console = Console(file=io.StringIO())
-    console.print("The [yellow]test_env[/] Development Environment is ready!")
+    console.print("The [yellow]" + test_env_name + "[/] Development Environment is ready!")
     assert console.file.getvalue() == runner_result.stdout
+
+@patch("dem.cli.command.pull_cmd.stderr.print")
+@patch("dem.cli.command.pull_cmd.install_to_dev_env_json")
+@patch("dem.cli.command.pull_cmd.DevEnvLocalSetup")
+def test_execute_install_failed(mock_DevEnvLocalSetup: MagicMock, 
+                                mock_install_to_dev_env_json: MagicMock,
+                                mock_stderr_print: MagicMock):
+    # Test setup
+    mock_platform = MagicMock()
+    mock_DevEnvLocalSetup.return_value = mock_platform
+
+    mock_catalog = MagicMock()
+    mock_platform.dev_env_catalogs.catalogs = [mock_catalog]
+
+    mock_catalog_dev_env = MagicMock()
+    mock_catalog.get_dev_env_by_name.return_value = mock_catalog_dev_env
+    mock_platform.get_local_dev_env.return_value = None
+
+    mock_local_dev_env = MagicMock()
+    mock_platform.get_local_dev_env.return_value = mock_local_dev_env
+    mock_install_to_dev_env_json.return_value = mock_local_dev_env
+
+    mock_local_dev_env.check_image_availability.return_value = [ToolImages.LOCAL_ONLY]
+    test_env_name =  "test_env"
+
+    mock_tools = MagicMock()
+    mock_local_dev_env.tools = mock_tools
+
+    # Run unit under test
+    runner_result = runner.invoke(main.typer_cli, ["pull", test_env_name], color=True)
+
+    # Check expectations
+    assert 0 == runner_result.exit_code
+
+    mock_DevEnvLocalSetup.assert_called_once()
+    mock_catalog.get_dev_env_by_name(test_env_name)
+    mock_platform.get_local_dev_env.assert_called_once_with(mock_catalog_dev_env)
+    mock_install_to_dev_env_json.assert_called_once_with(mock_local_dev_env, mock_catalog_dev_env, 
+                                                         mock_platform)
+    calls = [call(mock_platform.tool_images), 
+             call(mock_platform.tool_images, update_tool_images=True)]
+    mock_local_dev_env.check_image_availability.assert_has_calls(calls)
+    mock_platform.pull_images.assert_called_once_with(mock_tools)
+    mock_stderr_print.assert_called_once_with("The installation failed.")

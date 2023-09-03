@@ -1,8 +1,8 @@
-"""Unit tests for the dev_env_setup."""
-# tests/core/test_dev_env_setup.py
+"""Unit tests for the Development Platform."""
+# tests/core/test_platform.py
 
 # Unit under test:
-import dem.core.dev_env_setup as dev_env_setup
+import dem.core.platform as platform
 
 # Test framework
 import pytest
@@ -13,7 +13,7 @@ import json
 from dem.core.exceptions import InvalidDevEnvJson
 from dem.core.tool_images import ToolImages
 
-@patch("dem.core.dev_env_setup.LocalDevEnvJSON")
+@patch("dem.core.platform.LocalDevEnvJSON")
 def test_dev_env_json_with_invalid_tool_type_expect_error(mock_LocalDevEnvJSON: MagicMock):
     # Test setup
     mock_json = MagicMock()
@@ -22,14 +22,14 @@ def test_dev_env_json_with_invalid_tool_type_expect_error(mock_LocalDevEnvJSON: 
 
     with pytest.raises(InvalidDevEnvJson) as exported_exception_info:
         # Run unit under test
-        dev_env_setup.DevEnvLocalSetup()
+        platform.DevEnvLocalSetup()
 
         # Check expectations
-        excepted_error_message = "Error in dev_env.json: The following tool type is not supported: build_system" 
+        excepted_error_message = "Error in platform.json: The following tool type is not supported: build_system" 
         assert str(exported_exception_info.value) == excepted_error_message
 
-@patch("dem.core.dev_env_setup.__supported_dev_env_major_version__", 0)
-@patch("dem.core.dev_env_setup.LocalDevEnvJSON")
+@patch("dem.core.platform.__supported_dev_env_major_version__", 0)
+@patch("dem.core.platform.LocalDevEnvJSON")
 def test_dev_env_json_with_invalid_version_expect_error(mock_LocalDevEnvJSON: MagicMock):
     # Test setup
     mock_json = MagicMock()
@@ -38,14 +38,14 @@ def test_dev_env_json_with_invalid_version_expect_error(mock_LocalDevEnvJSON: Ma
 
     with pytest.raises(InvalidDevEnvJson) as exported_exception_info:
         # Run unit under test
-        dev_env_setup.DevEnvLocalSetup()
+        platform.DevEnvLocalSetup()
 
         # Check expectations
-        excepted_error_message = "Error in dev_env.json: The dev_env.json version v1.0 is not supported."
+        excepted_error_message = "Error in platform.json: The platform.json version v1.0 is not supported."
         assert str(exported_exception_info.value) == excepted_error_message
 
-@patch("dem.core.dev_env_setup.__supported_dev_env_major_version__", 0)
-@patch("dem.core.dev_env_setup.LocalDevEnvJSON")
+@patch("dem.core.platform.__supported_dev_env_major_version__", 0)
+@patch("dem.core.platform.LocalDevEnvJSON")
 def test_valid_dev_env_json_expect_no_error(mock_LocalDevEnvJSON: MagicMock):
     # Test setup
     mock_json = MagicMock()
@@ -53,15 +53,15 @@ def test_valid_dev_env_json_expect_no_error(mock_LocalDevEnvJSON: MagicMock):
     mock_json.deserialized = json.loads(fake_data.dev_env_json)
 
     # Run unit under test
-    dev_env_setup.DevEnvLocalSetup()
+    platform.DevEnvLocalSetup()
 
 def test_get_dev_env_by_name_match():
     # Test setup
-    test_dev_env_setup = dev_env_setup.DevEnvSetup(json.loads(fake_data.dev_env_json))
+    test_dev_env_setup = platform.DevEnvSetup(json.loads(fake_data.dev_env_json))
     test_name = "dev_env_name"
     expected_dev_env = MagicMock()
     expected_dev_env.name = test_name
-    test_dev_env_setup.dev_envs.append(expected_dev_env)
+    test_dev_env_setup.local_dev_envs.append(expected_dev_env)
 
     # Run unit under test
     actual_dev_env = test_dev_env_setup.get_dev_env_by_name(test_name)
@@ -71,7 +71,7 @@ def test_get_dev_env_by_name_match():
 
 def test_get_dev_env_by_name_no_match():
     # Test setup
-    test_dev_env_setup = dev_env_setup.DevEnvSetup(json.loads(fake_data.dev_env_json))
+    test_dev_env_setup = platform.DevEnvSetup(json.loads(fake_data.dev_env_json))
 
     # Run unit under test
     actual_dev_env = test_dev_env_setup.get_dev_env_by_name("no_matching_name")
@@ -86,7 +86,7 @@ def common_test_check_image_availability(mock_LocalDevEnvJSON: MagicMock, with_u
     mock_LocalDevEnvJSON.return_value = mock_json
     mock_json.deserialized = json.loads(fake_data.dev_env_json)
 
-    test_dev_env_setup = dev_env_setup.DevEnvLocalSetup()
+    test_dev_env_setup = platform.DevEnvLocalSetup()
     test_dev_env = test_dev_env_setup.get_dev_env_by_name("demo")
     mock_tool_images = MagicMock()
     mock_tool_images.local.elements = [
@@ -129,21 +129,21 @@ def common_test_check_image_availability(mock_LocalDevEnvJSON: MagicMock, with_u
     for idx, tool in enumerate(test_dev_env.tools):
         assert tool["image_status"] == expected_image_statuses[idx]
 
-@patch("dem.core.dev_env_setup.LocalDevEnvJSON")
+@patch("dem.core.platform.LocalDevEnvJSON")
 def test_check_image_availability_without_update(mock_LocalDevEnvJSON: MagicMock):
     common_test_check_image_availability(mock_LocalDevEnvJSON, False, False)
 
-@patch("dem.core.dev_env_setup.LocalDevEnvJSON")
+@patch("dem.core.platform.LocalDevEnvJSON")
 def test_check_image_availability_with_update(mock_LocalDevEnvJSON: MagicMock):
     common_test_check_image_availability(mock_LocalDevEnvJSON, True, False)
 
-@patch("dem.core.dev_env_setup.LocalDevEnvJSON")
+@patch("dem.core.platform.LocalDevEnvJSON")
 def test_check_image_availability_with_update_and_local_only(mock_LocalDevEnvJSON: MagicMock):
     common_test_check_image_availability(mock_LocalDevEnvJSON, True, True)
 
-@patch.object(dev_env_setup.DevEnvSetup, "get_deserialized")
-@patch.object(dev_env_setup.DevEnvSetup, "__init__")
-@patch("dem.core.dev_env_setup.LocalDevEnvJSON")
+@patch.object(platform.DevEnvSetup, "get_deserialized")
+@patch.object(platform.DevEnvSetup, "__init__")
+@patch("dem.core.platform.LocalDevEnvJSON")
 def test_DevEnvLocalSetup_flush_to_file(mock_LocalDevEnvJSON: MagicMock, 
                                         mock_super__init__: MagicMock, 
                                         mock_get_deserialized: MagicMock):
@@ -155,7 +155,7 @@ def test_DevEnvLocalSetup_flush_to_file(mock_LocalDevEnvJSON: MagicMock,
     mock_LocalDevEnvJSON.return_value = mock_json
     mock_get_deserialized.return_value = mock_json.deserialized
 
-    test_local_platform = dev_env_setup.DevEnvLocalSetup()
+    test_local_platform = platform.DevEnvLocalSetup()
 
     # Run unit under test
     test_local_platform.flush_to_file()
@@ -167,9 +167,9 @@ def test_DevEnvLocalSetup_flush_to_file(mock_LocalDevEnvJSON: MagicMock,
     mock_get_deserialized.assert_called_once()
     mock_json.flush.assert_called_once()
 
-@patch.object(dev_env_setup.Core, "user_output")
-@patch.object(dev_env_setup.DevEnvLocalSetup, "_container_engine", new_callable=PropertyMock)
-@patch("dem.core.dev_env_setup.LocalDevEnvJSON")
+@patch.object(platform.Core, "user_output")
+@patch.object(platform.DevEnvLocalSetup, "_container_engine", new_callable=PropertyMock)
+@patch("dem.core.platform.LocalDevEnvJSON")
 def test_DevEnvLocalSetup_pull_images(mock_LocalDevEnvJSON: MagicMock, 
                                       mock_container_engine_attribute: MagicMock,
                                       mock_user_output: MagicMock):
@@ -182,8 +182,8 @@ def test_DevEnvLocalSetup_pull_images(mock_LocalDevEnvJSON: MagicMock,
     mock_container_engine = MagicMock()
     mock_container_engine_attribute.return_value = mock_container_engine
 
-    test_dev_env_local_setup = dev_env_setup.DevEnvLocalSetup()
-    test_dev_env = test_dev_env_local_setup.dev_envs[0]
+    test_dev_env_local_setup = platform.DevEnvLocalSetup()
+    test_dev_env = test_dev_env_local_setup.local_dev_envs[0]
 
     for tool in test_dev_env.tools:
         tool["image_status"] = ToolImages.REGISTRY_ONLY
@@ -206,9 +206,9 @@ def test_DevEnvLocalSetup_pull_images(mock_LocalDevEnvJSON: MagicMock,
     ]
     test_dev_env_local_setup.container_engine.pull.assert_has_calls(pull_calls, any_order=True)
 
-@patch("dem.core.dev_env_setup.LocalDevEnvJSON")
-@patch.object(dev_env_setup.DevEnvLocalSetup, "_container_engine", new_callable=PropertyMock)
-@patch.object(dev_env_setup.DevEnvSetup, "__init__")
+@patch("dem.core.platform.LocalDevEnvJSON")
+@patch.object(platform.DevEnvLocalSetup, "_container_engine", new_callable=PropertyMock)
+@patch.object(platform.DevEnvSetup, "__init__")
 def test_DevEnvLocalSetup_run_container(mock_super__init__, mock_container_engine_attribute, 
                                         mock_LocalDevEnvJSON: MagicMock):
     # Test setup
@@ -224,7 +224,7 @@ def test_DevEnvLocalSetup_run_container(mock_super__init__, mock_container_engin
     }
     mock_LocalDevEnvJSON.return_value = mock_json
 
-    test_dev_env_local_setup = dev_env_setup.DevEnvLocalSetup()
+    test_dev_env_local_setup = platform.DevEnvLocalSetup()
 
     # Run unit under test
     test_dev_env_local_setup.run_container(test_tool_image, test_workspace_path, test_command, 

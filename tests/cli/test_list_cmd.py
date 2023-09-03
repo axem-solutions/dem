@@ -7,14 +7,14 @@ import dem.cli.command.list_cmd as list_cmd
 
 # Test framework
 from typer.testing import CliRunner
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch, MagicMock, call
 
 import io
 from rich.console import Console
 from rich.table import Table
 import json
 import tests.fake_data as fake_data
-from dem.core.dev_env_setup import DevEnvLocal, DevEnvOrg
+from dem.core.dev_env import DevEnv, DevEnv
 from dem.core.tool_images import ToolImages
 
 ## Global test variables
@@ -25,48 +25,12 @@ runner = CliRunner(mix_stderr=False)
 
 ## Test cases
 
-@patch("dem.cli.command.list_cmd.dev_env_setup.DevEnvLocalSetup")
-def test_is_dev_env_org_installed_locally_true(mock_DevEnvLocalSetup):
-    # Test setup
-    fake_local_platform = MagicMock()
-    mock_DevEnvLocalSetup.return_value = fake_local_platform
-
-    fake_dev_env_org = MagicMock()
-    fake_dev_env_org.get_local_instance.return_value = MagicMock()
-
-    # Run unit under test
-    actual_is_installed = list_cmd.is_dev_env_org_installed_locally(fake_dev_env_org)
-
-    # Check expectations
-    assert actual_is_installed is True
-
-    mock_DevEnvLocalSetup.assert_called_once()
-    fake_dev_env_org.get_local_instance.assert_called_once_with(fake_local_platform)
-
-@patch("dem.cli.command.list_cmd.dev_env_setup.DevEnvLocalSetup")
-def test_is_dev_env_org_installed_locally_false(mock_DevEnvLocalSetup):
-    # Test setup
-    fake_local_platform = MagicMock()
-    mock_DevEnvLocalSetup.return_value = fake_local_platform
-
-    fake_dev_env_org = MagicMock()
-    fake_dev_env_org.get_local_instance.return_value = None
-
-    # Run unit under test
-    actual_is_installed = list_cmd.is_dev_env_org_installed_locally(fake_dev_env_org)
-
-    # Check expectations
-    assert actual_is_installed is False
-
-    mock_DevEnvLocalSetup.assert_called_once()
-    fake_dev_env_org.get_local_instance.assert_called_once_with(fake_local_platform)
-
 ## Test listing the local dev envs.
 
-@patch("dem.cli.command.list_cmd.dev_env_setup.DevEnvLocalSetup")
-def test_with_valid_dev_env_json(mock_DevEnvLocalSetup):
+@patch("dem.cli.command.list_cmd.DevEnvLocalSetup")
+def test_with_valid_dev_env_json(mock_DevEnvLocalSetup: MagicMock):
     # Test setup
-    fake_local_platform = MagicMock()
+    mock_platform = MagicMock()
     expected_dev_env_list = [
         ["demo", "Installed."],
         ["nagy_cica_project", "[red]Error: Required image is not available![/]"]
@@ -77,12 +41,12 @@ def test_with_valid_dev_env_json(mock_DevEnvLocalSetup):
     ]
     fake_dev_envs = []
     for idx, expected_dev_env in enumerate(expected_dev_env_list):
-        fake_dev_env = MagicMock(spec=DevEnvLocal)
+        fake_dev_env = MagicMock(spec=DevEnv)
         fake_dev_env.name = expected_dev_env[0]
         fake_dev_env.check_image_availability.return_value = fake_image_statuses[idx]
         fake_dev_envs.append(fake_dev_env)
-    fake_local_platform.dev_envs = fake_dev_envs
-    mock_DevEnvLocalSetup.return_value = fake_local_platform
+    mock_platform.local_dev_envs = fake_dev_envs
+    mock_DevEnvLocalSetup.return_value = mock_platform
 
     # Run unit under test
     runner_result = runner.invoke(main.typer_cli, ["list", "--local", "--env"])
@@ -102,12 +66,12 @@ def test_with_valid_dev_env_json(mock_DevEnvLocalSetup):
     expected_output = console.file.getvalue()
     assert expected_output == runner_result.stdout
 
-@patch("dem.cli.command.list_cmd.dev_env_setup.DevEnvLocalSetup")
+@patch("dem.cli.command.list_cmd.DevEnvLocalSetup")
 def test_with_empty_dev_env_json(mock_DevEnvLocalSetup):
     # Test setup
-    fake_dev_env_setup = MagicMock()
-    fake_dev_env_setup.dev_envs = []
-    mock_DevEnvLocalSetup.return_value = fake_dev_env_setup
+    mock_platform = MagicMock()
+    mock_platform.local_dev_envs = []
+    mock_DevEnvLocalSetup.return_value = mock_platform
 
     # Run unit under test
     runner_result = runner.invoke(main.typer_cli, ["list", "--local", "--env"])
@@ -122,12 +86,14 @@ def test_with_empty_dev_env_json(mock_DevEnvLocalSetup):
 
 ## Test listing the org dev envs.
 
-@patch("dem.cli.command.list_cmd.dev_env_setup.DevEnvOrgSetup")
-def test_with_empty_dev_env_org_json(mock_DevEnvOrgSetup):
+@patch("dem.cli.command.list_cmd.DevEnvLocalSetup")
+def test_with_empty_catalog(mock_DevEnvLocalSetup: MagicMock):
     # Test setup
-    fake_dev_env_org = MagicMock()
-    fake_dev_env_org.dev_envs = []
-    mock_DevEnvOrgSetup.return_value = fake_dev_env_org
+    mock_catalog = MagicMock()
+    mock_catalog.dev_envs = []
+    mock_platform = MagicMock()
+    mock_DevEnvLocalSetup.return_value = mock_platform
+    mock_platform.dev_env_catalogs.catalogs = [mock_catalog]
 
     # Run unit under test
     runner_result = runner.invoke(main.typer_cli, ["list", "--all", "--env"])
@@ -135,15 +101,16 @@ def test_with_empty_dev_env_org_json(mock_DevEnvOrgSetup):
     # Check expectations
     assert 0 == runner_result.exit_code
 
+    mock_DevEnvLocalSetup.assert_called_once()
+
     console = Console(file=io.StringIO())
-    console.print("[yellow]No Development Environment in your organization.[/]")
+    console.print("[yellow]No Development Environment in the catalogs.[/]")
     assert console.file.getvalue() == runner_result.stdout
 
-@patch("dem.cli.command.list_cmd.is_dev_env_org_installed_locally")
-@patch("dem.cli.command.list_cmd.dev_env_setup.DevEnvOrgSetup")
-def test_with_valid_dev_env_org_json(mock_DevEnvOrgSetup, mock_is_dev_env_org_installed_locally):
+@patch("dem.cli.command.list_cmd.DevEnvLocalSetup")
+def test_with_valid_dev_env_org_json(mock_DevEnvLocalSetup):
     # Test setup
-    fake_dev_env_org_setup = MagicMock()
+    mock_platform = MagicMock()
     expected_dev_env_list = [
         ["org_only_env", "Ready to be installed."],
         ["demo", "Installed locally."],
@@ -156,22 +123,27 @@ def test_with_valid_dev_env_org_json(mock_DevEnvOrgSetup, mock_is_dev_env_org_in
         [ToolImages.LOCAL_AND_REGISTRY, ToolImages.REGISTRY_ONLY],
         [ToolImages.NOT_AVAILABLE] * 4
     ]
-    fake_org_dev_envs = []
+    fake_catalog_dev_envs = []
     for idx, expected_dev_env in enumerate(expected_dev_env_list):
-        fake_dev_env = MagicMock(spec=DevEnvOrg)
+        fake_dev_env = MagicMock(spec=DevEnv)
         fake_dev_env.name = expected_dev_env[0]
         fake_dev_env.check_image_availability.return_value = fake_image_statuses[idx]
-        fake_org_dev_envs.append(fake_dev_env)
-    fake_dev_env_org_setup.dev_envs = fake_org_dev_envs
-    mock_DevEnvOrgSetup.return_value = fake_dev_env_org_setup
-    mock_is_dev_env_org_installed_locally.side_effect = [False, True, True]
+        fake_catalog_dev_envs.append(fake_dev_env)
+    mock_catalog = MagicMock()
+    mock_platform.dev_env_catalogs.catalogs = [mock_catalog]
+    mock_catalog.dev_envs = fake_catalog_dev_envs
+    mock_DevEnvLocalSetup.return_value = mock_platform
+    mock_platform.get_local_dev_env.side_effect = [None, MagicMock(), MagicMock()]
 
     # Run unit under test
     runner_result = runner.invoke(main.typer_cli, ["list", "--all", "--env"])
 
     # Check expectations
-    mock_DevEnvOrgSetup.assert_called_once()
-    mock_is_dev_env_org_installed_locally.assert_called()
+    mock_DevEnvLocalSetup.assert_called_once()
+    calls = []
+    for fake_dev_env in fake_catalog_dev_envs:
+        calls.append(call(fake_dev_env))
+    mock_platform.get_local_dev_env.has_calls(calls)
 
     expected_table = Table()
     expected_table.add_column("Development Environment")
@@ -211,7 +183,7 @@ def test_with_invalid_option():
 
 ## Test listing the local tool images.
 
-@patch("dem.cli.command.list_cmd.dev_env_setup.DevEnvLocalSetup")
+@patch("dem.cli.command.list_cmd.DevEnvLocalSetup")
 def test_local_tool_images(mock_DevEnvLocalSetup: MagicMock):
     # Test setup
     test_local_tool_images = [
@@ -241,7 +213,7 @@ def test_local_tool_images(mock_DevEnvLocalSetup: MagicMock):
     console.print(expected_table)
     assert console.file.getvalue() == runner_result.stdout
 
-@patch("dem.cli.command.list_cmd.dev_env_setup.DevEnvLocalSetup")
+@patch("dem.cli.command.list_cmd.DevEnvLocalSetup")
 def test_no_local_tool_images(mock_DevEnvLocalSetup: MagicMock):
     # Test setup
     test_local_tool_images = []
@@ -266,7 +238,7 @@ def test_no_local_tool_images(mock_DevEnvLocalSetup: MagicMock):
 
 ## Test listing the local tool images.
 
-@patch("dem.cli.command.list_cmd.dev_env_setup.DevEnvLocalSetup")
+@patch("dem.cli.command.list_cmd.DevEnvLocalSetup")
 def test_registry_tool_images(mock_DevEnvLocalSetup: MagicMock):
     # Test setup
     test_registry_tool_images = [
@@ -295,7 +267,7 @@ def test_registry_tool_images(mock_DevEnvLocalSetup: MagicMock):
     console.print(expected_table)
     assert console.file.getvalue() == runner_result.stdout
 
-@patch("dem.cli.command.list_cmd.dev_env_setup.DevEnvLocalSetup")
+@patch("dem.cli.command.list_cmd.DevEnvLocalSetup")
 def test_empty_repository(mock_DevEnvLocalSetup: MagicMock):
     # Test setup
     test_registry_tool_images = []
@@ -316,3 +288,16 @@ def test_empty_repository(mock_DevEnvLocalSetup: MagicMock):
     console = Console(file=io.StringIO())
     console.print(expected_table)
     assert console.file.getvalue() == runner_result.stdout
+
+def test_get_local_dev_env_status_reinstall():
+    # Test setup
+    mock_dev_env = MagicMock()
+    mock_tool_images = MagicMock()
+
+    mock_dev_env.check_image_availability.return_value = [list_cmd.ToolImages.REGISTRY_ONLY]
+
+    # Run unit under test
+    actual_dev_env_status = list_cmd.get_local_dev_env_status(mock_dev_env, mock_tool_images)
+
+    # Check expectations
+    assert actual_dev_env_status is list_cmd.dev_env_local_status_messages[list_cmd.DEV_ENV_LOCAL_REINSTALL]

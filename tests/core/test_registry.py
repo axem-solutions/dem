@@ -524,7 +524,7 @@ def test_list_registries():
     test_registries = registry.Registries(mock_container_engine, mock_config_file)
 
     # Run unit under test
-    actual_registry_list = test_registries.list_registries()
+    actual_registry_list = test_registries.list_registry_configs()
 
     # Check expectations
     assert actual_registry_list is mock_config_file.registries

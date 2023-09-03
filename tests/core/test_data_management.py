@@ -155,8 +155,10 @@ def test_ConfigFile(mock_PurePath: MagicMock):
     data_management.BaseJSON._config_dir = test_path
 
     mock_registries = MagicMock()
+    mock_catalogs = MagicMock()
     def stub_update(self):
         self.deserialized["registries"] = mock_registries
+        self.deserialized["catalogs"] = mock_catalogs
     data_management.BaseJSON.update = stub_update
 
     # Run unit under test
@@ -165,24 +167,10 @@ def test_ConfigFile(mock_PurePath: MagicMock):
     # Check expectations
     assert local_dev_env_json._path is mock_pure_path
     assert local_dev_env_json._default_json == """{
-    "registries": []
+    "registries": [],
+    "catalogs": []
 }"""
     assert local_dev_env_json.registries is mock_registries
+    assert local_dev_env_json.catalogs is mock_catalogs
 
     mock_PurePath.assert_called_once_with(test_path + "/config.json")
-
-@patch("dem.core.data_management.requests.get")
-def test_read_deserialized_dev_env_org_json(mock_requests_get):
-    # Test setup
-    fake_response = MagicMock()
-    mock_requests_get.return_value = fake_response
-    expected_json = MagicMock()
-    fake_response.json.return_value = expected_json
-
-    # Run unit under test
-    org_dev_env_json = data_management.OrgDevEnvJSON()
-    actual_json = org_dev_env_json.read()
-
-    # Check expectations
-    assert expected_json == actual_json
-    assert expected_json == org_dev_env_json.deserialized
