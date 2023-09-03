@@ -167,8 +167,18 @@ def test_ConfigFile(mock_PurePath: MagicMock):
     # Check expectations
     assert local_dev_env_json._path is mock_pure_path
     assert local_dev_env_json._default_json == """{
-    "registries": [],
-    "catalogs": []
+    "registries": [
+        {
+            "name": "axemsolutions",
+            "url": "https://registry.hub.docker.com"
+        }
+    ],
+    "catalogs": [
+        {
+            "name": "axem",
+            "url": "https://axemsolutions.io/dem/dev_env_org.json"
+        }
+    ]
 }"""
     assert local_dev_env_json.registries is mock_registries
     assert local_dev_env_json.catalogs is mock_catalogs
