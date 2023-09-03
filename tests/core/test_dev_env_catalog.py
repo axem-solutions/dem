@@ -123,6 +123,33 @@ def test_DevEnvCatalogs_add_catalog(mock_DevEnvCatalog: MagicMock):
     mock_DevEnvCatalog.assert_has_calls(calls)
     mock_config_file.flush.assert_called_once()
 
+@patch.object(dev_env_catalog.Core, "user_output")
+@patch("dem.core.dev_env_catalog.DevEnvCatalog")
+def test_DevEnvCatalogs_add_catalog_exception(mock_DevEnvCatalog: MagicMock, 
+                                              mock_user_output: MagicMock):
+    # Test setup
+    mock_config_file = MagicMock()
+    mock_config_file.catalogs = []
+    expected_catalog_config_to_be_added = {
+        "url": "test_url"
+    }
+
+    test_exception_text = "test_exception_text"
+    mock_DevEnvCatalog.side_effect = Exception(test_exception_text)
+
+    test_dev_env_catalogs = dev_env_catalog.DevEnvCatalogs(mock_config_file)
+
+    # Run unit under test
+    test_dev_env_catalogs.add_catalog(expected_catalog_config_to_be_added)
+
+    # Check expectations
+    mock_DevEnvCatalog.assert_called_once_with(expected_catalog_config_to_be_added["url"])
+    calls = [
+        call(test_exception_text),
+        call("Error: Couldn't add this Development Environment Catalog.")
+    ]
+    mock_user_output.error.assert_has_calls(calls)
+
 @patch("dem.core.dev_env_catalog.DevEnvCatalog")
 def test_DevEnvCatalogs_list_catalog_configs(mock_DevEnvCatalog: MagicMock):
     # Test setup

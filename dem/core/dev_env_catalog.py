@@ -3,6 +3,7 @@
 
 from dem.core.dev_env import DevEnv
 from dem.core.data_management import ConfigFile
+from dem.core.core import Core
 import requests
 
 class DevEnvCatalog():
@@ -30,7 +31,7 @@ class DevEnvCatalog():
             if dev_env.name == dev_env_name:
                 return dev_env
 
-class DevEnvCatalogs():
+class DevEnvCatalogs(Core):
     """ List of the available Development Environment Catalogs. """
     def __init__(self, config_file: ConfigFile) -> None:
         """ Init the class with the catalogs from the config file.
@@ -49,10 +50,14 @@ class DevEnvCatalogs():
             Args:
                 catalog_config -- the new catalog to add
         """
-        self.catalogs.append(DevEnvCatalog(catalog_config["url"]))
-
-        self._config_file.catalogs.append(catalog_config)
-        self._config_file.flush()
+        try:
+            self.catalogs.append(DevEnvCatalog(catalog_config["url"]))
+        except Exception as e:
+            self.user_output.error(str(e))
+            self.user_output.error("Error: Couldn't add this Development Environment Catalog.")
+        else:
+            self._config_file.catalogs.append(catalog_config)
+            self._config_file.flush()
 
     def list_catalog_configs(self) -> list[dict]:
         """ List the catalog configs. (As stored in the config file.)
