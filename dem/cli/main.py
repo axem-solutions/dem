@@ -5,7 +5,7 @@ import typer, importlib.metadata
 from dem import __command__, __app_name__
 from dem.cli.command import info_cmd, list_cmd, pull_cmd, create_cmd, modify_cmd, delete_cmd, \
                             rename_cmd, clone_cmd, run_cmd, export_cmd, load_cmd, add_reg_cmd, \
-                            list_reg_cmd, del_reg_cmd, add_cat_cmd, list_cat_cmd
+                            list_reg_cmd, del_reg_cmd, add_cat_cmd, list_cat_cmd, del_cat_cmd
 from dem.cli.console import stdout
 
 typer_cli = typer.Typer(rich_markup_mode="rich")
@@ -153,6 +153,13 @@ def list_cat() -> None:
     List the available catalogs.
     """
     list_cat_cmd.execute()
+
+@typer_cli.command()
+def del_cat(registry_name: str = typer.Argument(..., help="Name of the Development Environment Catalog to delete.")) -> None:
+    """
+    Delete a catalog.
+    """
+    del_cat_cmd.execute(registry_name)
 
 def _version_callback(value: bool) -> None:
     if value:

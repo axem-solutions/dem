@@ -8,15 +8,16 @@ import requests
 
 class DevEnvCatalog():
     """ Development Environment Catalog. """
-    def __init__(self, url: str) -> None:
+    def __init__(self, catalog_config: dict) -> None:
         """ Init the class with the DevEnvs available in the catalog. 
 
             Args:
                 url -- the url of the catalog
         """
-        self.url: str = url
+        self.config: dict = catalog_config
+        self.url: str = catalog_config["url"]
         self.dev_envs: list[DevEnv] = []
-        for dev_env_descriptor in requests.get(url).json()["development_environments"]:
+        for dev_env_descriptor in requests.get(self.url).json()["development_environments"]:
             self.dev_envs.append(DevEnv(descriptor=dev_env_descriptor))
 
     def get_dev_env_by_name(self, dev_env_name: str) -> DevEnv | None:
@@ -42,7 +43,7 @@ class DevEnvCatalogs(Core):
         self._config_file: ConfigFile = config_file
         self.catalogs: list[DevEnvCatalog] = []
         for catalog_config in config_file.catalogs:
-            self.catalogs.append(DevEnvCatalog(catalog_config["url"]))
+            self.catalogs.append(DevEnvCatalog(catalog_config))
 
     def add_catalog(self, catalog_config: dict) -> None:
         """ Add a new catalog.
@@ -51,7 +52,7 @@ class DevEnvCatalogs(Core):
                 catalog_config -- the new catalog to add
         """
         try:
-            self.catalogs.append(DevEnvCatalog(catalog_config["url"]))
+            self.catalogs.append(DevEnvCatalog(catalog_config))
         except Exception as e:
             self.user_output.error(str(e))
             self.user_output.error("Error: Couldn't add this Development Environment Catalog.")
@@ -65,3 +66,16 @@ class DevEnvCatalogs(Core):
             Return with the list of the available catalog configurations.
         """
         return self._config_file.catalogs
+
+    def delete_catalog(self, catalog_config: dict) -> None:
+        """ Delete the catalog.
+        
+            Args:
+                catalog_config -- config of the catalog to delete
+        """
+        for catalog in self.catalogs.copy():
+            if catalog.config == catalog_config:
+                self.catalogs.remove(catalog)
+
+        self._config_file.catalogs.remove(catalog_config)
+        self._config_file.flush()

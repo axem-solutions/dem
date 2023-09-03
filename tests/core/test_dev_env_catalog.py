@@ -23,9 +23,12 @@ def test_DevEnvCatalog(mock_requests: MagicMock, mock_DevEnv: MagicMock):
     mock_DevEnv.side_effect = test_dev_envs
     
     test_url = "test_url"
+    test_catalog_config = {
+        "url": test_url
+    }
 
     # Run unit under test
-    test_dev_env_catalog = dev_env_catalog.DevEnvCatalog(test_url)
+    test_dev_env_catalog = dev_env_catalog.DevEnvCatalog(test_catalog_config)
 
     # Check expectations
     assert test_dev_env_catalog.dev_envs == test_dev_envs
@@ -46,7 +49,7 @@ def test_DevEnvCatalog_get_dev_env_by_name(mock___init__: MagicMock):
 
     mock___init__.return_value = None
 
-    test_dev_env_catalog = dev_env_catalog.DevEnvCatalog("")
+    test_dev_env_catalog = dev_env_catalog.DevEnvCatalog({})
     test_dev_env_catalog.dev_envs = test_dev_envs
 
     # Run unit under test
@@ -79,7 +82,7 @@ def test_DevEnvCatalogs(mock_DevEnvCatalog: MagicMock):
 
     calls = []
     for test_catalog in mock_config_file.catalogs:
-        calls.append(call(test_catalog["url"]))
+        calls.append(call(test_catalog))
     mock_DevEnvCatalog.assert_has_calls(calls)
 
 @patch("dem.core.dev_env_catalog.DevEnvCatalog")
@@ -117,8 +120,8 @@ def test_DevEnvCatalogs_add_catalog(mock_DevEnvCatalog: MagicMock):
 
     calls = []
     for test_catalog in test_default_catalogs:
-        calls.append(call(test_catalog["url"]))
-    calls.append(call(expected_catalog_config_to_be_added["url"]))
+        calls.append(call(test_catalog))
+    calls.append(call(expected_catalog_config_to_be_added))
 
     mock_DevEnvCatalog.assert_has_calls(calls)
     mock_config_file.flush.assert_called_once()
@@ -143,7 +146,7 @@ def test_DevEnvCatalogs_add_catalog_exception(mock_DevEnvCatalog: MagicMock,
     test_dev_env_catalogs.add_catalog(expected_catalog_config_to_be_added)
 
     # Check expectations
-    mock_DevEnvCatalog.assert_called_once_with(expected_catalog_config_to_be_added["url"])
+    mock_DevEnvCatalog.assert_called_once_with(expected_catalog_config_to_be_added)
     calls = [
         call(test_exception_text),
         call("Error: Couldn't add this Development Environment Catalog.")
@@ -175,5 +178,38 @@ def test_DevEnvCatalogs_list_catalog_configs(mock_DevEnvCatalog: MagicMock):
 
     calls = []
     for test_catalog in mock_config_file.catalogs:
-        calls.append(call(test_catalog["url"]))
+        calls.append(call(test_catalog))
     mock_DevEnvCatalog.assert_has_calls(calls)
+
+@patch("dem.core.dev_env_catalog.DevEnvCatalog")
+def test_DevEnvCatalogs_delete_catalog(mock_DevEnvCatalog: MagicMock):
+    # Test setup
+    mock_config_file = MagicMock()
+    catalog_config_to_delete = {
+        "url": "test_url_1"
+    }
+    mock_config_file.catalogs = [
+        catalog_config_to_delete,
+        {
+            "url": "test_url_2"
+        }
+    ]
+    mock_dev_env_catalogs = [MagicMock(), MagicMock()]
+    mock_dev_env_catalogs[0].config = mock_config_file.catalogs[0]
+    mock_dev_env_catalogs[1].config = mock_config_file.catalogs[1]
+    mock_DevEnvCatalog.side_effect = mock_dev_env_catalogs
+
+    test_dev_env_catalogs = dev_env_catalog.DevEnvCatalogs(mock_config_file)
+
+    # Run unit under test
+    test_dev_env_catalogs.delete_catalog(mock_config_file.catalogs[0])
+
+    # Check expectations
+    assert mock_dev_env_catalogs[0] not in test_dev_env_catalogs.catalogs
+    assert catalog_config_to_delete not in mock_config_file.catalogs
+
+    calls = []
+    for test_catalog in mock_config_file.catalogs:
+        calls.append(call(test_catalog))
+    mock_DevEnvCatalog.assert_has_calls(calls)
+    mock_config_file.flush.assert_called_once()
