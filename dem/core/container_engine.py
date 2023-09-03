@@ -2,6 +2,7 @@
 # dem/core/container_engine.py
 
 from dem.core.core import Core
+from dem.core.exceptions import ContainerEngineError
 import docker
 
 class ContainerEngine(Core):
@@ -14,7 +15,7 @@ class ContainerEngine(Core):
     def get_local_tool_images(self) -> list[str]:
         """ Get local tool images.
         
-        Return with the list of the locally avialable tool image names.
+            Return with the list of the locally avialable tool image names.
         """
         local_image_tags = []
 
@@ -28,41 +29,77 @@ class ContainerEngine(Core):
     def pull(self, repository: str) -> None:
         """ Pull a repository from the axemsolutions registry.
         
-        Args:
-            repository -- repository to pull
+            Args:
+                repository -- repository to pull
         """
         resp = self._docker_client.api.pull(repository, stream=True, decode=True)
         self.user_output.progress_generator(resp)
 
-    def run(self, image: str, workspace_path: str, command: str, privileged: bool) -> None:
-        """ Run the image with the given command and directory to mount.
+    def run(self, container_arguments: list[str]) -> None:
+        """ Run the container. 
         
-        Args:
-            image -- container image to run
-            workspace_path -- workspace path
-            command -- command to be passed to the assigned tool image
-            priviliged -- give extended priviliges to the container
+            The function converts the Docker CLI commands to Docker Engine API call parameters.
+
+            Args:
+                container_arguments -- list of arguments to pass to the API call
         """
-        volume_binds = [workspace_path + ":/work"]
-        container = self._docker_client.containers.run(image, command=command, auto_remove=True, 
-                                                       privileged=privileged, stderr=True, 
-                                                       volumes=volume_binds, detach=True)
+        container_arguments_iter = iter(container_arguments)
+
+        image = ""
+        ports = {}
+        name = ""
+        volumes = []
+        command = ""
+        privileged = False
+        auto_remove = False
+
+        for argument in container_arguments_iter:
+            if argument.startswith("-"):
+                match argument:
+                    case "-p":
+                        port_binding = next(container_arguments_iter)
+                        try:
+                            host_port, container_port = port_binding.split(":")
+                        except ValueError:
+                            raise ContainerEngineError("The option -p has invalid argument: " + port_binding)
+                        ports[container_port] = int(host_port)
+                    case "--name":
+                        name = next(container_arguments_iter)
+                    case "-v":
+                        volumes.append(next(container_arguments_iter))
+                    case "--privileged":
+                        privileged = True
+                    case "--rm":
+                        auto_remove = True
+                    case _:
+                        raise ContainerEngineError("The input parameter " + argument + " is not supported!")
+            else:
+                image = argument
+                for argument in container_arguments_iter:
+                    command += argument
+
+        container = self._docker_client.containers.run(image, command=command, 
+                                                       auto_remove=auto_remove, 
+                                                       privileged=privileged, volumes=volumes,
+                                                       ports=ports, name=name, stderr=True, 
+                                                       detach=True)
+
         for line in container.logs(stream=True):
             self.user_output.msg(line.decode().strip())
 
     def remove(self, image: str) -> None:
         """ Remove a tool image.
         
-        Args: 
-            image -- the tool image to remove
+            Args: 
+                image -- the tool image to remove
         """
         self._docker_client.images.remove(image)
 
     def search(self, registry: str) -> list[str]:
         """ Search repository in the axemsolutions registry.
         
-        Args:
-            registry -- registry to search
+            Args:
+                registry -- registry to search
         """
         local_registryimagelist = []
 

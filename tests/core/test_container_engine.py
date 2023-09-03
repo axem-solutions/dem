@@ -5,6 +5,7 @@
 import dem.core.container_engine as container_engine
 
 # Test framework
+import pytest
 from unittest.mock import patch, MagicMock, call
 
 class mockImage:
@@ -103,12 +104,15 @@ def test_pull(mock_docker_from_env, mock_user_output):
 @patch("docker.from_env")
 def test_run(mock_from_env, mock_user_output):
     # Test setup
+    test_container_arguments = [
+        "-p", "8080:8080", "-p", "50000:50000", "--name", "jenkins", "--privileged", "--rm",
+        "-v", "/var/run/docker.sock:/var/run/docker.sock",
+        "-v", "/home/murai/jenkins_home_axem:/var/jenkins_home", 
+		"axemsolutions/jenkins:latest",
+        "command"
+    ]
     mock_docker_client = MagicMock()
     mock_from_env.return_value = mock_docker_client
-    test_image = "test_image"
-    test_workspace_path = "test_workspace_path"
-    test_command = "test_command"
-    test_privileged = False
     mock_container = MagicMock()
     mock_docker_client.containers.run.return_value = mock_container
     fake_log_lines = [
@@ -120,14 +124,23 @@ def test_run(mock_from_env, mock_user_output):
     test_container_engine = container_engine.ContainerEngine()
 
     # Run unit under test
-    test_container_engine.run(test_image, test_workspace_path, test_command, test_privileged)
+    test_container_engine.run(test_container_arguments)
 
     # Check expectations
-    expected_volumes = [test_workspace_path + ":/work"]
-    mock_docker_client.containers.run.assert_called_once_with(test_image, command=test_command, 
+    mock_docker_client.containers.run.assert_called_once_with("axemsolutions/jenkins:latest", 
+                                                              command="command", 
                                                               auto_remove=True, 
-                                                              privileged=test_privileged,
-                                                              stderr=True, volumes=expected_volumes,
+                                                              privileged=True,
+                                                              volumes=[
+                                                                "/var/run/docker.sock:/var/run/docker.sock",
+                                                                "/home/murai/jenkins_home_axem:/var/jenkins_home"
+                                                              ],
+                                                              ports={
+                                                                  "8080": 8080,
+                                                                  "50000": 50000
+                                                              },
+                                                              name="jenkins",
+                                                              stderr=True, 
                                                               detach=True)
     mock_container.logs.assert_called_once_with(stream=True)
     calls = [
@@ -135,6 +148,42 @@ def test_run(mock_from_env, mock_user_output):
         call("log_line_2"),
     ]
     mock_user_output.msg.assert_has_calls(calls)
+
+@patch("docker.from_env")
+def test_run_ValueError(mock_from_env):
+    # Test setup
+    test_container_arguments = [
+        "-p", "80808080"
+    ]
+    mock_docker_client = MagicMock()
+    mock_from_env.return_value = mock_docker_client
+
+    test_container_engine = container_engine.ContainerEngine()
+
+    with pytest.raises(container_engine.ContainerEngineError) as exported_exception_info:
+        # Run unit under test
+        test_container_engine.run(test_container_arguments)
+
+        # Check expectations
+        assert str(exported_exception_info) == "The option -p has invalid argument: 80808080"
+
+@patch("docker.from_env")
+def test_run_not_supported_param(mock_from_env):
+    # Test setup
+    test_container_arguments = [
+        "-x", "80808080"
+    ]
+    mock_docker_client = MagicMock()
+    mock_from_env.return_value = mock_docker_client
+
+    test_container_engine = container_engine.ContainerEngine()
+
+    with pytest.raises(container_engine.ContainerEngineError) as exported_exception_info:
+        # Run unit under test
+        test_container_engine.run(test_container_arguments)
+
+        # Check expectations
+        assert str(exported_exception_info) =="The input parameter -x is not supported!"
 
 @patch("docker.from_env")
 def test_remove(mock_from_env):

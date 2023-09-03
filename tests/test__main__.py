@@ -36,8 +36,8 @@ def test_cli_LookupError(mock_typer_cli: MagicMock, mock_Core: MagicMock,
     # Test setup
     mock_tui_user_output = MagicMock()
     mock_TUIUserOutput.return_value = mock_tui_user_output
-    test_exception = "dummy"
-    mock_typer_cli.side_effect = LookupError(test_exception)
+    test_exception_text = "dummy"
+    mock_typer_cli.side_effect = LookupError(test_exception_text)
 
     # Run unit under test
     __main__.main()
@@ -46,7 +46,7 @@ def test_cli_LookupError(mock_typer_cli: MagicMock, mock_Core: MagicMock,
     mock_TUIUserOutput.assert_called_once()
     mock_Core.set_user_output.assert_called_once_with(mock_tui_user_output)
     mock_typer_cli.assert_called_once_with(prog_name=__command__)
-    mock_stderr_print.assert_called_once_with("[red]" + test_exception + "[/]")
+    mock_stderr_print.assert_called_once_with("[red]" + test_exception_text + "[/]")
 
 @patch("dem.__main__.stderr.print")
 @patch("dem.__main__.TUIUserOutput")
@@ -57,8 +57,8 @@ def test_cli_RegistryError(mock_typer_cli: MagicMock, mock_Core: MagicMock,
     # Test setup
     mock_tui_user_output = MagicMock()
     mock_TUIUserOutput.return_value = mock_tui_user_output
-    test_exception = "dummy"
-    mock_typer_cli.side_effect = RegistryError(test_exception)
+    test_exception_text = "dummy"
+    mock_typer_cli.side_effect = RegistryError(test_exception_text)
 
     # Run unit under test
     __main__.main()
@@ -67,7 +67,7 @@ def test_cli_RegistryError(mock_typer_cli: MagicMock, mock_Core: MagicMock,
     mock_TUIUserOutput.assert_called_once()
     mock_Core.set_user_output.assert_called_once_with(mock_tui_user_output)
     mock_typer_cli.assert_called_once_with(prog_name=__command__)
-    mock_stderr_print.assert_called_once_with("[red]" + test_exception + "\nUsing local tool images only![/]")
+    mock_stderr_print.assert_called_once_with("[red]" + test_exception_text + "\nUsing local tool images only![/]")
 
 @patch("dem.__main__.stdout.print")
 @patch("dem.__main__.stderr.print")
@@ -81,8 +81,8 @@ def test_cli_DockerException_permission_denied(mock_typer_cli: MagicMock, mock_C
     # Test setup
     mock_tui_user_output = MagicMock()
     mock_TUIUserOutput.return_value = mock_tui_user_output
-    test_exception = "Permission denied"
-    mock_typer_cli.side_effect = docker.errors.DockerException(test_exception)
+    test_exception_text = "Permission denied"
+    mock_typer_cli.side_effect = docker.errors.DockerException(test_exception_text)
 
     # Run unit under test
     __main__.main()
@@ -91,7 +91,7 @@ def test_cli_DockerException_permission_denied(mock_typer_cli: MagicMock, mock_C
     mock_TUIUserOutput.assert_called_once()
     mock_Core.set_user_output.assert_called_once_with(mock_tui_user_output)
     mock_typer_cli.assert_called_once_with(prog_name=__command__)
-    mock_stderr_print.assert_called_once_with("[red]" + test_exception + "[/]")
+    mock_stderr_print.assert_called_once_with("[red]" + test_exception_text + "[/]")
     mock_stdout_print.assert_called_once_with("\nHint: Is your user part of the docker group?")
 
 @patch("dem.__main__.stdout.print")
@@ -107,8 +107,8 @@ def test_cli_DockerException_invalid_reference_format(mock_typer_cli: MagicMock,
     # Test setup
     mock_tui_user_output = MagicMock()
     mock_TUIUserOutput.return_value = mock_tui_user_output
-    test_exception = "invalid reference format"
-    mock_typer_cli.side_effect = docker.errors.DockerException(test_exception)
+    test_exception_text = "invalid reference format"
+    mock_typer_cli.side_effect = docker.errors.DockerException(test_exception_text)
 
     # Run unit under test
     __main__.main()
@@ -117,7 +117,7 @@ def test_cli_DockerException_invalid_reference_format(mock_typer_cli: MagicMock,
     mock_TUIUserOutput.assert_called_once()
     mock_Core.set_user_output.assert_called_once_with(mock_tui_user_output)
     mock_typer_cli.assert_called_once_with(prog_name=__command__)
-    mock_stderr_print.assert_called_once_with("[red]" + test_exception + "[/]")
+    mock_stderr_print.assert_called_once_with("[red]" + test_exception_text + "[/]")
     mock_stdout_print.assert_called_once_with("\nHint: The input repository might not exist in the registry.")
 
 @patch("dem.__main__.stdout.print")
@@ -131,8 +131,8 @@ def test_cli_DockerException_400(mock_typer_cli: MagicMock, mock_Core: MagicMock
     # Test setup
     mock_tui_user_output = MagicMock()
     mock_TUIUserOutput.return_value = mock_tui_user_output
-    test_exception = "400"
-    mock_typer_cli.side_effect = docker.errors.DockerException(test_exception)
+    test_exception_text = "400"
+    mock_typer_cli.side_effect = docker.errors.DockerException(test_exception_text)
 
     # Run unit under test
     __main__.main()
@@ -141,7 +141,7 @@ def test_cli_DockerException_400(mock_typer_cli: MagicMock, mock_Core: MagicMock
     mock_TUIUserOutput.assert_called_once()
     mock_Core.set_user_output.assert_called_once_with(mock_tui_user_output)
     mock_typer_cli.assert_called_once_with(prog_name=__command__)
-    mock_stderr_print.assert_called_once_with("[red]" + test_exception + "[/]")
+    mock_stderr_print.assert_called_once_with("[red]" + test_exception_text + "[/]")
     mock_stdout_print.assert_called_once_with("\nHint: The input parameters might not be valid.")
 
 @patch("dem.__main__.stderr.print")
@@ -153,8 +153,8 @@ def test_cli_DockerException_unknown(mock_typer_cli: MagicMock, mock_Core: Magic
     # Test setup
     mock_tui_user_output = MagicMock()
     mock_TUIUserOutput.return_value = mock_tui_user_output
-    test_exception = "unknown"
-    mock_typer_cli.side_effect = docker.errors.DockerException(test_exception)
+    test_exception_text = "unknown"
+    mock_typer_cli.side_effect = docker.errors.DockerException(test_exception_text)
 
     # Run unit under test
     __main__.main()
@@ -163,4 +163,25 @@ def test_cli_DockerException_unknown(mock_typer_cli: MagicMock, mock_Core: Magic
     mock_TUIUserOutput.assert_called_once()
     mock_Core.set_user_output.assert_called_once_with(mock_tui_user_output)
     mock_typer_cli.assert_called_once_with(prog_name=__command__)
-    mock_stderr_print.assert_called_once_with("[red]" + test_exception + "[/]")
+    mock_stderr_print.assert_called_once_with("[red]" + test_exception_text + "[/]")
+
+@patch("dem.__main__.stderr.print")
+@patch("dem.__main__.TUIUserOutput")
+@patch("dem.__main__.Core")
+@patch("dem.__main__.dem.cli.main.typer_cli")
+def test_cli_ContainerEngineError(mock_typer_cli: MagicMock, mock_Core: MagicMock, 
+                                  mock_TUIUserOutput: MagicMock, mock_stderr_print: MagicMock):
+    # Test setup
+    mock_tui_user_output = MagicMock()
+    mock_TUIUserOutput.return_value = mock_tui_user_output
+    test_exception_text = "unknown"
+    mock_typer_cli.side_effect = __main__.ContainerEngineError(test_exception_text)
+
+    # Run unit under test
+    __main__.main()
+
+    # Check expectations
+    mock_TUIUserOutput.assert_called_once()
+    mock_Core.set_user_output.assert_called_once_with(mock_tui_user_output)
+    mock_typer_cli.assert_called_once_with(prog_name=__command__)
+    mock_stderr_print.assert_called_once_with("[red]" + test_exception_text + "[/]")
