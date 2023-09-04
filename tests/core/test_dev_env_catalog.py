@@ -33,7 +33,7 @@ def test_DevEnvCatalog(mock_requests: MagicMock, mock_DevEnv: MagicMock):
     # Check expectations
     assert test_dev_env_catalog.dev_envs == test_dev_envs
 
-    mock_requests.get.assert_called_once_with(test_url)
+    mock_requests.get.assert_called_once_with(test_url, timeout=1)
     mock_response.json.assert_called_once()
 
     calls = [call(descriptor=test_dev_env_descriptor) for test_dev_env_descriptor in test_dev_env_descriptors]

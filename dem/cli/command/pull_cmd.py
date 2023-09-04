@@ -39,6 +39,10 @@ def execute(dev_env_name: str) -> None:
     platform = DevEnvLocalSetup()
     catalog_dev_env: DevEnv | None = None
 
+    if not platform.dev_env_catalogs.catalogs:
+        stderr.print("[red]Error: No Development Environment Catalogs are available to pull the image from![/]")
+        return
+
     for catalog in platform.dev_env_catalogs.catalogs:
         catalog_dev_env = catalog.get_dev_env_by_name(dev_env_name)
         if catalog_dev_env is not None:

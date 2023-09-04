@@ -86,6 +86,23 @@ def test_with_empty_dev_env_json(mock_DevEnvLocalSetup):
 
 ## Test listing the org dev envs.
 
+@patch("dem.cli.command.list_cmd.stdout.print")
+@patch("dem.cli.command.list_cmd.DevEnvLocalSetup")
+def test_without_avialable_catalogs(mock_DevEnvLocalSetup: MagicMock, mock_stdout_print: MagicMock):
+    # Test setup
+    mock_platform = MagicMock()
+    mock_DevEnvLocalSetup.return_value = mock_platform
+    mock_platform.dev_env_catalogs.catalogs = []
+
+    # Run unit under test
+    runner_result = runner.invoke(main.typer_cli, ["list", "--all", "--env"])
+
+    # Check expectations
+    assert 0 == runner_result.exit_code
+
+    mock_DevEnvLocalSetup.assert_called_once()
+    mock_stdout_print.assert_called_once_with("[yellow]No Development Environment Catalogs are available!")
+
 @patch("dem.cli.command.list_cmd.DevEnvLocalSetup")
 def test_with_empty_catalog(mock_DevEnvLocalSetup: MagicMock):
     # Test setup
@@ -104,7 +121,7 @@ def test_with_empty_catalog(mock_DevEnvLocalSetup: MagicMock):
     mock_DevEnvLocalSetup.assert_called_once()
 
     console = Console(file=io.StringIO())
-    console.print("[yellow]No Development Environment in the catalogs.[/]")
+    console.print("[yellow]No Development Environments are available in the catalogs.[/]")
     assert console.file.getvalue() == runner_result.stdout
 
 @patch("dem.cli.command.list_cmd.DevEnvLocalSetup")
@@ -267,8 +284,9 @@ def test_registry_tool_images(mock_DevEnvLocalSetup: MagicMock):
     console.print(expected_table)
     assert console.file.getvalue() == runner_result.stdout
 
+@patch("dem.cli.command.list_cmd.stdout.print")
 @patch("dem.cli.command.list_cmd.DevEnvLocalSetup")
-def test_empty_repository(mock_DevEnvLocalSetup: MagicMock):
+def test_empty_repository(mock_DevEnvLocalSetup: MagicMock, mock_stdout_print: MagicMock):
     # Test setup
     test_registry_tool_images = []
     mock_platform = MagicMock()
@@ -282,12 +300,24 @@ def test_empty_repository(mock_DevEnvLocalSetup: MagicMock):
     assert 0 == runner_result.exit_code
 
     mock_platform.registries.list_repos.assert_called_once()
-    
-    expected_table = Table()
-    expected_table.add_column("Repository")
-    console = Console(file=io.StringIO())
-    console.print(expected_table)
-    assert console.file.getvalue() == runner_result.stdout
+    mock_stdout_print.assert_called_once_with("[yellow]No images are available in the registries!")
+
+@patch("dem.cli.command.list_cmd.stdout.print")
+@patch("dem.cli.command.list_cmd.DevEnvLocalSetup")
+def test_no_registries_available(mock_DevEnvLocalSetup: MagicMock, mock_stdout_print: MagicMock):
+    # Test setup
+    mock_platform = MagicMock()
+    mock_platform.registries.registries = []
+    mock_DevEnvLocalSetup.return_value = mock_platform
+
+    # Run unit under test
+    runner_result = runner.invoke(main.typer_cli, ["list", "--all", "--tool"])
+
+    # Check expectations
+    assert 0 == runner_result.exit_code
+
+    mock_DevEnvLocalSetup.assert_called_once()
+    mock_stdout_print.assert_called_once_with("[yellow]No registries are available!")
 
 def test_get_local_dev_env_status_reinstall():
     # Test setup

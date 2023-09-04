@@ -118,10 +118,18 @@ def run(dev_env_name: str = typer.Argument(..., help="Name of the Development En
     run_cmd.execute(dev_env_name, tool_type, workspace_path, command, privileged)
 
 @typer_cli.command()
-def add_reg(name: str = typer.Argument(..., help="Name or IP address of the registry to add"), 
+def add_reg(name: str = typer.Argument(..., help="Name of the registry to add"), 
             url: str = typer.Argument(..., help="API URL of the registry")) -> None:
     """
     Add a new registry.
+
+    The name of the registry is what you would normally use to pull an image. 
+    Examples:
+        - If the full image tag: repository/image:tag -> the name should be repository.
+        - If the full image tag: 192.168.1.1:5000/image:tag -> the name should be 192.168.1.1:5000
+
+    The URL should point to the registry's REST API. For the Docker Hub its 
+    https://registry.hub.docker.com, or it can be http://localhost:5000 for a self-hosted one.
     """
     add_reg_cmd.execute(name, url)
 
@@ -144,6 +152,10 @@ def add_cat(name: str = typer.Argument(..., help="Name of the Development Enviro
             url: str = typer.Argument(..., help="URL of the Development Environment Catalog's JSON file")) -> None:
     """
     Add a new catalog.
+
+    You can name the catalog as you wish. 
+    
+    The URL must point to an HTTP(S) server where the Catalog json file is available.
     """
     add_cat_cmd.execute(name, url)
 

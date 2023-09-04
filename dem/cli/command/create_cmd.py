@@ -124,10 +124,15 @@ def get_dev_env_descriptor_from_user(dev_env_name: str, tool_image_list: list[li
     }
 
     for tool_type, tool_image in tool_selection.items():
-        registry, image = tool_image.split("/")
+        if "/" in tool_image:
+            registry, image = tool_image.split("/")
+            image_name = registry + '/' + image.split(":")[0]
+        else:
+            image = tool_image
+            image_name = image.split(":")[0]
         tool_descriptor = {
             "type": tool_type,
-            "image_name": registry + '/' + image.split(":")[0],
+            "image_name": image_name,
             "image_version": image.split(":")[1]
         }
         dev_env_descriptor["tools"].append(tool_descriptor)

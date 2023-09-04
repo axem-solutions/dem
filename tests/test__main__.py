@@ -144,14 +144,12 @@ def test_cli_DockerException_400(mock_typer_cli: MagicMock, mock_Core: MagicMock
     mock_stderr_print.assert_called_once_with("[red]" + test_exception + "[/]")
     mock_stdout_print.assert_called_once_with("\nHint: The input parameters might not be valid.")
 
-@patch("dem.__main__.stdout.print")
 @patch("dem.__main__.stderr.print")
 @patch("dem.__main__.TUIUserOutput")
 @patch("dem.__main__.Core")
 @patch("dem.__main__.dem.cli.main.typer_cli")
 def test_cli_DockerException_unknown(mock_typer_cli: MagicMock, mock_Core: MagicMock, 
-                                     mock_TUIUserOutput: MagicMock, mock_stderr_print: MagicMock,
-                                     mock_stdout_print: MagicMock):
+                                     mock_TUIUserOutput: MagicMock, mock_stderr_print: MagicMock):
     # Test setup
     mock_tui_user_output = MagicMock()
     mock_TUIUserOutput.return_value = mock_tui_user_output
@@ -166,4 +164,3 @@ def test_cli_DockerException_unknown(mock_typer_cli: MagicMock, mock_Core: Magic
     mock_Core.set_user_output.assert_called_once_with(mock_tui_user_output)
     mock_typer_cli.assert_called_once_with(prog_name=__command__)
     mock_stderr_print.assert_called_once_with("[red]" + test_exception + "[/]")
-    mock_stdout_print.assert_called_once_with("\nHint: Probably something is wrong with your Docker Engine installation. Try to reinstall it.")
