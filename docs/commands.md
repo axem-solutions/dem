@@ -4,13 +4,13 @@
 
 ## **`dem list [OPTIONS]`**
 
-List the Development Environments available locally or for the organization.
+List the Development Environments installed locally or available in the catalog.
 
 Options:
 
 - Level 1:
     - `--local` Scope is the local host.
-    - `--all` Scope is the organization.
+    - `--all` Scope is the catalog.
 - Level 2:
     - `--env` List the Development Environments.
     - `--tool` List the tool images.
@@ -18,11 +18,13 @@ Options:
 !!! abstract "The following option combinations are supported:"
 
     `--local --env` -> List the local Development Environments.  
-    `--all --env` -> List the organization's Development Environments.  
+    `--all --env` -> List the catalog Development Environments.  
     `--local --tool` -> List the local tool images.  
-    `--all --tool` -> List the tool images available in the organization's registry.  
+    `--all --tool` -> List the tool images available in the registries.
 
 ---
+
+# Development Environment management
 
 ## **`dem info DEV_ENV_NAME`**
 
@@ -36,13 +38,13 @@ Arguments:
 
 ## **`dem pull DEV_ENV_NAME`**
 
-Pull all the required containerized tools (which are not yet available on the host PC) from the 
+Pull all the required containerized tools (which are not yet available on the host PC) from the
 registry and install the Development Environment locally.
 
-    If a Development Environment with the same name, but different description has been already 
+    If a Development Environment with the same name, but a different description has been already
     available on the host PC, it gets overwritten with the new one.
-    If the same Development Environment is already installed, but the installation is not complete, 
-    the missing tool images get obtained from the registry.
+    If the same Development Environment is already installed, but the installation is not complete,
+    the missing tool images are obtained from the registry.
 
 Arguments:
 
@@ -54,17 +56,17 @@ Arguments:
 
 Create a new Development Environment.
 
-Running this command will open up an interactive UI on the command line. Follow the steps below to 
+Running this command will open up an interactive UI on the command line. Follow the steps below to
 configure the new Environment.
 
-1. First you need to select the tool types. You can navigate with the :material-arrow-up: and 
-:material-arrow-down: or :material-alpha-k: and :material-alpha-j: keys. Select the required 
+1. First you need to select the tool types. You can navigate with the :material-arrow-up: and
+:material-arrow-down: or :material-alpha-k: and :material-alpha-j: keys. Select the required
 tool types with :material-keyboard-space:. Select next if you finished the selection.
 
     ![tool select](wp-content/tool_select.png)
 
-2. Assign the required tool images for the selected types. You can navigate with the 
-:material-arrow-up: and :material-arrow-down: or :material-alpha-k: and :material-alpha-j: keys. 
+2. Assign the required tool images for the selected types. You can navigate with the
+:material-arrow-up: and :material-arrow-down: or :material-alpha-k: and :material-alpha-j: keys.
 Select the required tool image and press :material-keyboard-return:.
 
     ![image select](wp-content/image_select.png)
@@ -81,7 +83,7 @@ Rename the Development Environment.
 
 Arguments:
 
-`DEV_ENV_NAME`      Name of the Development Environment to rename. [required]  
+`DEV_ENV_NAME`      Name of the Development Environment to rename. [required]
 `NEW_DEV_ENV_NAME`  The new name.  [required]
 
 ---
@@ -90,16 +92,16 @@ Arguments:
 
 Modify the tool types and required tool images of an existing Development Environment.
 
-1. The dem shows a list of the already selected tools. You can modify the selection. You can 
-navigate with the :material-arrow-up: and :material-arrow-down: or :material-alpha-k: and 
-:material-alpha-j: keys. Modify the required tool types with :material-keyboard-space:. Select next 
+1. The dem shows a list of the already selected tools. You can modify the selection. You can
+navigate with the :material-arrow-up: and :material-arrow-down: or :material-alpha-k: and
+:material-alpha-j: keys. Modify the required tool types with :material-keyboard-space:. Select next
 when you're done with the selection.
 
     ![tool select](wp-content/tool_select.png)
 
-2. Assign the required tool images for the selected types. You can navigate with the 
-:material-arrow-up: and :material-arrow-down: or :material-alpha-k: and :material-alpha-j: keys. 
-Select the required tool image and press :material-keyboard-return:.  
+2. Assign the required tool images for the selected types. You can navigate with the
+:material-arrow-up: and :material-arrow-down: or :material-alpha-k: and :material-alpha-j: keys.
+Select the required tool image and press :material-keyboard-return:.
 
     ![image select](wp-content/image_select.png)
 
@@ -111,8 +113,8 @@ Arguments:
 
 ## **`dem delete DEV_ENV_NAME`**
 
-Delete the selected Development Environment. After the deletion, dem checks whether a tool image is 
-required or not by any of the remaining local Development Environments. In case the tool image is 
+Delete the selected Development Environment. After the deletion, dem checks whether a tool image is
+required or not by any of the remaining local Development Environments. In case the tool image is
 not required anymore, the dem asks the user if they prefer to delete it or keep it.
 
 Arguments:
@@ -133,22 +135,131 @@ Arguments:
 
 ---
 
-## **`dem run [OPTIONS] DEV_ENV_NAME TOOL_TYPE WORKSPACE_PATH COMMAND`**
+## **`dem run DEV_ENV_NAME *`**
 
-Run the image assigned to the tool type with the given command.
+Run a container in the context of a Development Environment.
 
-:warning: Current restriction: put all parameters into quotes(")
+This command works the same way as the `docker run`, but with some restrictions, and the first
+argument is the name of the Development Environment.
+
+:warning: The supported docker run parameters: `-p, --name, -v, --privileged, --rm, --name, -d,
+[IMAGE], [COMMAND]`
+See the [Docker documentation](https://docs.docker.com/engine/reference/commandline/run/) for more
+info.
 
 Arguments:
 
-`DEV_ENV_NAME` Name of the Development Environment [required]
+`DEV_ENV_NAME` Name of the Development Environment. [required]
 
-`TOOL_TYPE` Tool type to run. [required]
+`*` Variable-length argument list that will be passed to the `docker run` command.
 
-`WORKSPACE_PATH` Workspace path. [required]
+---
 
-`COMMAND` Command to be passed to the assigned tool image. [required]
+## **`dem export DEV_ENV_NAME [PATH_TO_EXPORT]`**
 
-Options:
+Export a Development Environment descriptor in JSON format. This file can be imported with the 
+`load` command on another host. 
 
-`--privileged` Give extended priviliges to the container.
+The way the JSON file gets exported can be set by the PATH_TO_EXPORT argument:
+
+1. If it's not set, the file gets saved to the current directory with the name of the Development 
+Environment.
+2. If only a name is set, the file gets saved with that name to the current directory.
+3. If the argument is a directory path, the file gets saved there with the name of the Development 
+Environment.
+4. If the argument is a path with the file name, then the exported content gets saved into that file.
+
+!!! Note
+
+    The exported file only contains the Development Environment descriptor. For a successful import
+    the DEM needs access to all the registries where the required images are stored.
+
+Arguments:
+
+`DEV_ENV_NAME` The name of the Development Environment to export.
+`[PATH_TO_EXPORT]` Where to save the exported JSON file. If not set, the current directory will be
+used.
+
+---
+
+## **`dem load PATH_TO_EXPORT`**
+
+Imports a Development Environment.
+
+!!! Note
+
+    The file to import only contains the Development Environment descriptor. For a successful import
+    the DEM needs access to all the registries where the required images are stored.
+
+Arguments:
+
+`PATH_TO_DEV_ENV` Path of the JSON file to iport. Can be an absolute path or a relative path to the 
+current directory.
+
+---
+
+# Development Environment Catalog management
+
+## **`dem list-cat`**
+
+List the available catalogs.
+
+---
+
+## **`dem add-cat NAME URL`**
+
+Add a new catalog.
+You can name the catalog as you wish.
+The URL must point to an HTTP(S) server where the Catalog JSON file is available.
+
+Arguments:
+
+`NAME` Name of the catalog to add. [required]
+`URL` URL of the catalog file. [required]
+
+---
+
+## **`dem del-cat NAME`**
+
+Delete a catalog.
+
+Arguments:
+
+`NAME` Name of the catalog to delete. [required]
+
+---
+
+# Registry management
+
+## **`dem list-reg`**
+
+List the available registries.
+
+---
+
+## **`dem add-reg NAME URL`**
+
+Add a new registry.
+The name of the registry is what you would normally use to pull an image.
+Examples:
+
+- If the full image tag is: repository/image:tag -> the name should be repository.
+- If the full image tag is: 192.168.1.1:5000/image:tag -> the name should be 192.168.1.1:5000
+
+The URL should point to the registry's API. For the Docker Hub https://registry.hub.docker.com, 
+or it can be http://localhost:5000 for a self-hosted one.
+
+Arguments:
+
+`NAME` Name of the registry to add. [required]
+`URL` API URL of the registry. [required]
+
+---
+
+## **`dem del-reg NAME`**
+
+Delete a registry.
+
+Arguments:
+
+`NAME` Name of the registry to delete. [required]
