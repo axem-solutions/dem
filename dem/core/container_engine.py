@@ -40,6 +40,11 @@ class ContainerEngine(Core):
         
             The function converts the Docker CLI commands to Docker Engine API call parameters.
 
+            The container always gets started in detach mode. If the -d option is enabled the 
+            function returns after the container has been started. If not enabled the DEM streams 
+            the logs from the container to the user output while it is running. This effectively 
+            results in the same behivour as the docker docker run command's -d option.
+
             Args:
                 container_arguments -- list of arguments to pass to the API call
         """
@@ -52,6 +57,7 @@ class ContainerEngine(Core):
         command = ""
         privileged = False
         auto_remove = False
+        stream_logs = True
 
         for argument in container_arguments_iter:
             if argument.startswith("-"):
@@ -71,6 +77,8 @@ class ContainerEngine(Core):
                         privileged = True
                     case "--rm":
                         auto_remove = True
+                    case "-d":
+                        stream_logs = False
                     case _:
                         raise ContainerEngineError("The input parameter " + argument + " is not supported!")
             else:
@@ -78,14 +86,15 @@ class ContainerEngine(Core):
                 for argument in container_arguments_iter:
                     command += argument
 
-        container = self._docker_client.containers.run(image, command=command, 
-                                                       auto_remove=auto_remove, 
-                                                       privileged=privileged, volumes=volumes,
-                                                       ports=ports, name=name, stderr=True, 
-                                                       detach=True)
+        run_result = self._docker_client.containers.run(image, command=command, 
+                                                        auto_remove=auto_remove, 
+                                                        privileged=privileged, volumes=volumes,
+                                                        ports=ports, name=name, stderr=True, 
+                                                        detach=True)
 
-        for line in container.logs(stream=True):
-            self.user_output.msg(line.decode().strip())
+        if stream_logs:
+            for line in run_result.logs(stream=True):
+                self.user_output.msg(line.decode().strip())
 
     def remove(self, image: str) -> None:
         """ Remove a tool image.

@@ -113,13 +113,13 @@ def test_run(mock_from_env, mock_user_output):
     ]
     mock_docker_client = MagicMock()
     mock_from_env.return_value = mock_docker_client
-    mock_container = MagicMock()
-    mock_docker_client.containers.run.return_value = mock_container
+    mock_run_result = MagicMock()
+    mock_docker_client.containers.run.return_value = mock_run_result
     fake_log_lines = [
         b"log_line_1\n", 
         b"log_line_2\n",
     ]
-    mock_container.logs.return_value = fake_log_lines
+    mock_run_result.logs.return_value = fake_log_lines
 
     test_container_engine = container_engine.ContainerEngine()
 
@@ -142,12 +142,47 @@ def test_run(mock_from_env, mock_user_output):
                                                               name="jenkins",
                                                               stderr=True, 
                                                               detach=True)
-    mock_container.logs.assert_called_once_with(stream=True)
+    mock_run_result.logs.assert_called_once_with(stream=True)
     calls = [
         call("log_line_1"), 
         call("log_line_2"),
     ]
     mock_user_output.msg.assert_has_calls(calls)
+
+@patch("docker.from_env")
+def test_run_d(mock_from_env):
+    # Test setup
+    test_container_arguments = [
+        "-p", "8080:8080", "-p", "50000:50000", "--name", "jenkins", "--privileged", "--rm", "-d",
+        "-v", "/var/run/docker.sock:/var/run/docker.sock",
+        "-v", "/home/murai/jenkins_home_axem:/var/jenkins_home", 
+		"axemsolutions/jenkins:latest",
+        "command"
+    ]
+    mock_docker_client = MagicMock()
+    mock_from_env.return_value = mock_docker_client
+
+    test_container_engine = container_engine.ContainerEngine()
+
+    # Run unit under test
+    test_container_engine.run(test_container_arguments)
+
+    # Check expectations
+    mock_docker_client.containers.run.assert_called_once_with("axemsolutions/jenkins:latest", 
+                                                              command="command", 
+                                                              auto_remove=True, 
+                                                              privileged=True,
+                                                              volumes=[
+                                                                "/var/run/docker.sock:/var/run/docker.sock",
+                                                                "/home/murai/jenkins_home_axem:/var/jenkins_home"
+                                                              ],
+                                                              ports={
+                                                                  "8080": 8080,
+                                                                  "50000": 50000
+                                                              },
+                                                              name="jenkins",
+                                                              stderr=True, 
+                                                              detach=True)
 
 @patch("docker.from_env")
 def test_run_ValueError(mock_from_env):
