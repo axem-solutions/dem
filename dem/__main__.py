@@ -3,7 +3,7 @@
 
 from dem import __command__
 from dem.cli.console import stderr, stdout
-from dem.core.exceptions import RegistryError
+from dem.core.exceptions import RegistryError, ContainerEngineError
 import dem.cli.main
 import docker.errors
 from dem.core.core import Core
@@ -30,6 +30,8 @@ def main():
             stdout.print("\nHint: The input repository might not exist in the registry.")
         elif "400" in str(e):
             stdout.print("\nHint: The input parameters might not be valid.")
+    except ContainerEngineError as e:
+        stderr.print("[red]" + str(e) + "[/]")
 
 # Call the main() when run as `python -m`
 if __name__ == "__main__":

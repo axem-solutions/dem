@@ -2,16 +2,17 @@
 # dem/cli/main.py
 
 import typer, importlib.metadata
+from typing import Optional
 from dem import __command__, __app_name__
 from dem.cli.command import info_cmd, list_cmd, pull_cmd, create_cmd, modify_cmd, delete_cmd, \
                             rename_cmd, clone_cmd, run_cmd, export_cmd, load_cmd, add_reg_cmd, \
                             list_reg_cmd, del_reg_cmd, add_cat_cmd, list_cat_cmd, del_cat_cmd
-from dem.cli.console import stdout
+from dem.cli.console import stdout, stderr
 
 typer_cli = typer.Typer(rich_markup_mode="rich")
 
-@typer_cli.command()
-def list(local: bool = typer.Option(False, help="Scope is the local host."),
+@typer_cli.command("list")
+def list_(local: bool = typer.Option(False, help="Scope is the local host."),
          all: bool = typer.Option(False, help="Scope is the organization."),
          env: bool = typer.Option(False, help="List the environments."),
          tool: bool = typer.Option(False, help="List the tool images.")) -> None:
@@ -104,18 +105,21 @@ def delete(dev_env_name: str = typer.Argument(...,
     """
     delete_cmd.execute(dev_env_name)
 
-@typer_cli.command()
-def run(dev_env_name: str = typer.Argument(..., help="Name of the Development Environment"),
-        tool_type: str = typer.Argument(..., help="Tool type to run."),
-        workspace_path: str = typer.Argument(..., help="Workspace path."),
-        command: str = typer.Argument(..., help="Command to be passed to the assigned tool image."),
-        privileged: bool = typer.Option(False, help="Give extended priviliges to the container.")) -> None:
+@typer_cli.command(context_settings={"allow_extra_args": True, "ignore_unknown_options": True})
+def run(dev_env_name: str = typer.Argument(..., 
+                                           help="Run the container in this Development Environment context"),
+        ctx: typer.Context = typer.Option(None)) -> None:
     """
-    Run the image assigned to the tool type with the given command.
+    Run the Docker run command in the Development Environment context. If something is wrong with 
+    the Dev Env the DEM can try to fix it.
+    
+    This command can be used as the docker CLI one, except as first argument the name of the 
+    Development Environment must be set. 
+    Example: dem run dev_env --name test test_image_name:latest ls -la
 
-    :warning: Current restriction: put all parameters into quotes(")
+    See the documentation for the list of currently supported docker run parameters.
     """
-    run_cmd.execute(dev_env_name, tool_type, workspace_path, command, privileged)
+    run_cmd.execute(dev_env_name, ctx.args)
 
 @typer_cli.command()
 def add_reg(name: str = typer.Argument(..., help="Name of the registry to add"), 

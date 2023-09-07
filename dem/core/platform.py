@@ -203,14 +203,3 @@ class DevEnvLocalSetup(DevEnvSetup):
         for tool_image in tool_images_to_pull:
             self.user_output.msg("\nPulling image "+ tool_image, is_title=True)
             self.container_engine.pull(tool_image)
-
-    def run_container(self, tool_image: str, workspace_path: str, command: str, privileged: bool) -> None:
-        """ Run the tool image.
-
-        Args:
-            tool_image -- tool image to run
-            workspace_path -- workspace path
-            command -- command to be passed to the assigned tool image
-            priviliged -- give extended priviliges to the container
-        """
-        self.container_engine.run(tool_image, workspace_path, command, privileged)

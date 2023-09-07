@@ -12,3 +12,7 @@ class InvalidDevEnvJson(Exception):
 class RegistryError(Exception):
     """Raised when the communication with registry fails."""
     pass
+
+class ContainerEngineError(Exception):
+    """Raised when there is a problem with the container engine."""
+    pass

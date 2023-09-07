@@ -205,32 +205,3 @@ def test_DevEnvLocalSetup_pull_images(mock_LocalDevEnvJSON: MagicMock,
         call("axemsolutions/stlink_org:latest"),
     ]
     test_dev_env_local_setup.container_engine.pull.assert_has_calls(pull_calls, any_order=True)
-
-@patch("dem.core.platform.LocalDevEnvJSON")
-@patch.object(platform.DevEnvLocalSetup, "_container_engine", new_callable=PropertyMock)
-@patch.object(platform.DevEnvSetup, "__init__")
-def test_DevEnvLocalSetup_run_container(mock_super__init__, mock_container_engine_attribute, 
-                                        mock_LocalDevEnvJSON: MagicMock):
-    # Test setup
-    test_tool_image = "test_tool_image"
-    test_workspace_path = "test_workspace_path"
-    test_command = "test_command"
-    test_privileged = False
-    mock_container_engine = MagicMock()
-    mock_container_engine_attribute.return_value = mock_container_engine
-    mock_json = MagicMock()
-    mock_json.deserialized = {
-        "development_environments": []
-    }
-    mock_LocalDevEnvJSON.return_value = mock_json
-
-    test_dev_env_local_setup = platform.DevEnvLocalSetup()
-
-    # Run unit under test
-    test_dev_env_local_setup.run_container(test_tool_image, test_workspace_path, test_command, 
-                                           test_privileged)
-
-    # Check expectations
-    mock_super__init__.assert_called_once_with(mock_json.deserialized)
-    mock_container_engine.run.assert_called_once_with(test_tool_image, test_workspace_path, 
-                                                      test_command, test_privileged)
