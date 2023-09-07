@@ -43,7 +43,7 @@ class ContainerEngine(Core):
             The container always gets started in detach mode. If the -d option is enabled the 
             function returns after the container has been started. If not enabled the DEM streams 
             the logs from the container to the user output while it is running. This effectively 
-            results in the same behivour as the docker docker run command's -d option.
+            results in the same behaviour as the docker run command's -d option.
 
             Args:
                 container_arguments -- list of arguments to pass to the API call
