@@ -1,16 +1,25 @@
 # Manage your containerized Development Environments with ease
 
+<p align="center">
+    <img alt="GitHub tag (with filter)" src="https://img.shields.io/github/v/tag/axem-solutions/dem?logo=github&color=79A7B5&link=https%3A%2F%2Fgithub.com%2Faxem-solutions%2Fdem%2Freleases">
+    <img alt="GitHub issues" src="https://img.shields.io/github/issues/axem-solutions/dem?logo=github&color=2ea087&link=https%3A%2F%2Fgithub.com%2Faxem-solutions%2Fdem%2Fissues">
+</p>
+
 ## Overview
-The DEM is a command line tool that provides an easy, reproduceable and scalable way to set up 
+The DEM is a command line tool that provides an easy, reproducible, and scalable way to set up 
 Development Environments for embedded software development.
 
-> **Warning**
-> The DEM is currently in pre-alpha state.
-
-:warning: Currently offline usage is not supported, but will be available in the next release 
-(v0.2.0)
-
 :star2: Contributors and early adopters are welcome! :star2:
+
+> The DEM can be used locally, but it is in alpha state, so expect major new features!
+
+<p align="center">
+<strong>
+<font size="4">
+<a href="https://www.axemsolutions.io/dem_doc/index.html">Documentation</a> • <a href="https://www.axemsolutions.io/tutorial/index.html">Tutorial</a> 
+</font>
+</strong>
+</p>
 
 ## Prerequisites
 
@@ -23,43 +32,29 @@ To be able to use the DEM on your PC, you need to have the following software in
 
 ## Installation
 
-DEM is available in the PyPI repository. Install it with:
+DEM is available in the [PyPI repository](https://pypi.org/project/axem-dem/). Install it with:
 
     pip install axem-dem
 
 :information_source: The package name is axem-dem, but the command is `dem`.
 
-## Useful
-### [Documentation](https://www.axemsolutions.io/dem_doc/index.html)
-### [Tutorial](https://www.axemsolutions.io/tutorial/index.html)
+## Quick start
 
-## Source
+Installation of a preconfigured Development Environment can be done with a single command:
 
-You can use DEM as a python module. To do this, you need to add the `-m` flag to your command.
+    dem pull DEV_ENV_NAME
 
-For example:
+Creating a new Development Environment is also very simple:
 
-    python -m dem list --local --env
+    dem create DEV_ENV_NAME
 
-We use [poetry](https://python-poetry.org/) to manage dependencies. To ensure that you use the 
-correct version of the required modules, you should enter the preconfigured virtual environment.
+For more detailed instructions please refer to the 
+[Documentation](https://www.axemsolutions.io/dem_doc/index.html)
 
-First install the environment with the required dependencies:
+## Key features
 
-    poetry install
-
-Enter the virtual environment:
-
-    poetry shell
-
-
-
-## Running Unit Tests
-
-Run unit tests:
-
-    python -m pytest tests
-
-Run unit tests with coverage information:
-
-    python -m pytest --cov-report=html --cov=dem tests/
+- Create scalable, reliable, and reproducible containerized Development Environments
+- Manage your containerized tools
+- Install preconfigured Development Environments from catalogs
+- Ensure that everyone in the team works with the same toolset
+- Share Development Environments outside of your organization

@@ -1,13 +1,13 @@
 # Introduction
 
-**dem** (Development Environment Manager) is an open source command line tool to **manage 
+**DEM** (Development Environment Manager) is an open source command line tool to **manage 
 containerized Development Environments.**
 
 !!! info
 
-    Currently only the Linux operating system and the Docker Container Engine is supported.
+    Currently, only the Linux operating system and the Docker Container Engine is supported.
 
-    Feel free to ask any question at
+    Feel free to ask any questions at
     [discussions](https://github.com/axem-solutions/dem/discussions).
 
 !!! example "Example Tutorial"
@@ -18,19 +18,17 @@ containerized Development Environments.**
 ## Developing Embedded Software
 
 Writing software for other architectures than our host usually requires a lot of different tools.
-The tools used for a specific project can be grouped together and they form a 
+The software tools used for a specific project can be grouped and they form a 
 **Development Environment**. To make it simpler to work with these tools, they are typically bundled 
-together into an Integrated Development Environments.
+together into an IDE (Integrated Development Environment).
 
 ## Concept
 
 ### :unlock: Loose coupling between tools
-One of the biggest disadvantages of IDEs, is that sometimes it is hard to use the underlying 
-integrated tools separately. They might depend on the IDE or each other, so standalone usage can be 
-difficult and the whole IDE installation is required.
+One of the biggest disadvantages of IDEs is that sometimes it is hard to use the underlying 
+integrated tools separately. They might depend on the IDE itself or each other, so standalone usage can be difficult and the whole IDE installation is required.
 
-dem's goal is to **reduce these dependencies** and provide the possibility of standalone usage of 
-tools for embedded developers.
+DEM's goal is to **reduce these dependencies** and provide the possibility of standalone usage.
 
 ### :octicons-container-24: Separated environments for the tools
 In a generic setup, the used tools can interfere with each other or the underlying host system,
@@ -50,13 +48,18 @@ lifecycle. DEM makes the change easy by providing a way to **quickly swap tool i
 - to use a completely different tool
 
 Containerization ensures the **safe coexistence** of the same tools with different version numbers.  
-Adding a new tool is as simple as to change one, making the Development Environment **scalable**.
+Adding a new tool is as simple as to change one, making the Development Environment very 
+**scalable**.
 
 ### :material-share: Reliable Development Environment sharing
 To **create software predictively and effectively**, it is crucial to have a **consistent**
 Development Environment **for every developer** in the organization.  
-With dem, you can **easily share** the exact same environment with every coworker.
+With DEM, you can **easily share** the same environment with every coworker.
 
-### :rocket: Quick setup
-Before starting to work on a project, setting up the required tools can be a time consuming task. 
+### :rocket: Quick and reproducible setup
+Before starting to work on a project, setting up the required tools can be a time-consuming task. 
 Using DEM to **install a new Development Environment** is a **single command**.
+
+If some modifications must be added to an old project no one worked on for a while, installing the 
+required toolset can be an exhausting task. With DEM the Development Environments can be stored in a
+Catalog and can be reinstalled whenever needed.

@@ -15,11 +15,13 @@ dem is available in the PyPI repository. Install it with:
 
     pip install axem-dem
 
+And that's it! Now you should be able to use the `dem` command.
+
 !!! info
 
     The package name is axem-dem, but the command is `dem`.
 
-## Source
+## Optional: Use the source code
 
 The dem is [open source](https://github.com/axem-solutions/dem), so you can use it as a python 
 module. To do this, you need to add the `-m` flag to your command.
