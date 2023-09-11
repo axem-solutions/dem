@@ -84,7 +84,8 @@ class ContainerEngine(Core):
             else:
                 image = argument
                 for argument in container_arguments_iter:
-                    command += argument
+                    command += argument + " "
+                command = command[:-1]
 
         run_result = self._docker_client.containers.run(image, command=command, 
                                                         auto_remove=auto_remove, 
