@@ -99,7 +99,7 @@ DEM provides a TUI for creating a new Development Environment that can be starte
 
 See the [`dem create`](commands.md#dem-create-dev_env_name) command for more details.
 
-### Load a Development Environment
+### **Load a Development Environment**
 A locally already available Development Environment can be exported in JSON format with the 
 `dem export` command. The exported JSON describes the required tool images and the location of the 
 registries where they stores. This file can be shared and on another PC can be imported with the 
