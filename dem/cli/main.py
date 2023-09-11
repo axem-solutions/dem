@@ -110,9 +110,8 @@ def run(dev_env_name: str = typer.Argument(...,
                                            help="Run the container in this Development Environment context"),
         ctx: typer.Context = typer.Option(None)) -> None:
     """
-    Run the Docker run command in the Development Environment context. If something is wrong with 
-    the Dev Env the DEM can try to fix it.
-    
+    Run the `docker run` command in the Development Environment's context with the given parameters.  
+
     This command can be used as the docker CLI one, except as first argument the name of the 
     Development Environment must be set. 
     Example: dem run dev_env --name test test_image_name:latest ls -la

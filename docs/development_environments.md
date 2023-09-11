@@ -28,13 +28,17 @@ To put it simply, a container image is a set of software components alongside it
 which can be run in a container. The idea is to build the tools from a Development Environment into 
 their own images, so they can run isolatedly.
 
-Tool images can be put into a storage called a registry. The registry can store the images, so they
-don't take up space. Images from a registry can be easily shared with others, which helps to ensure
-that everybody working on the same project uses the exact same tools.
+## Registry
+
+A registry can serve as a storage for tool images, where they can be kept without occupying space on 
+the developer's computer. This storage enables convenient sharing of images with others, ensuring 
+uniform tool usage among all collaborators on the same project.
+When an image is uploaded to a registry, it initiates the creation of a repository. This repository 
+is responsible for keeping track of the various versions of the image.
 
 !!! Note
 
-    An image repository stores the different versions of the same image.
+    An image repository stores the different versions of the same image.  
     An image registry is a collection of image repositories.
 
 The DEM also uses registries in the background to store the tool images. To list the currently 
@@ -50,21 +54,29 @@ can be used to add or delete registries.
     [new descussion](https://github.com/axem-solutions/dem/discussions/categories/regsitry).
 
 ## Development Environment Catalogs
-A catalog is a collection of Development Environments available to install. The DEM can handle 
-multiple catalogs. To list the currently available ones use the `dem list-cat` command. The 
-`dem add-cat` and `dem del-cat` commands can be used to add or delete catalogs.
+A catalog is a collection of Development Environment descriptors available to install.  A descriptor 
+stores the location of the required tool images.  The DEM can handle multiple catalogs. To list the 
+currently available ones use the `dem list-cat` command. The `dem add-cat` and `dem del-cat` 
+commands can be used to add or delete catalogs.
 
 !!! Note
 
-    By default, the DEM has the axem registry registered. 
+    axem has its own catalog, which is by default available for DEM.
+
+## Development Platform
+The collection of the available catalogs and registries is the Development Platform. The users can 
+install new Development Environments in a self-service manner, which are available in the Platform.
+
+![platform](wp-content/platform.png){: .center}
 
 ## Getting a Development Environment
 There are three ways to get a Development Environment: 
+
 - install one from a Catalog 
 - create a new one locally
 - load an exported Development Environment descriptor
 
-### Installing from a catalog
+### **Installing from a catalog**
 An organization can create a Development Environment Catalog and share it with its members. This 
 **guarantees** that each and every member uses the **same toolset** in the **same environment**. 
 
@@ -81,7 +93,7 @@ Use the `dem pull` command to install the selected Development Environment.
 
 See the [`dem pull`](commands.md#dem-pull-dev_env_name) command for more details.
 
-### Creating a new Development Environment locally
+### **Creating a new Development Environment locally**
 DEM provides a TUI for creating a new Development Environment that can be started with the 
 `dem create` command.
 

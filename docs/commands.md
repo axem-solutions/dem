@@ -137,13 +137,15 @@ Arguments:
 
 ## **`dem run DEV_ENV_NAME *`**
 
+:warning: Experimental feature!
+
 Run a container in the context of a Development Environment.
 
 This command works the same way as the `docker run`, but with some restrictions, and the first
 argument is the name of the Development Environment.
 
-:warning: The supported docker run parameters: `-p, --name, -v, --privileged, --rm, --name, -d,
-[IMAGE], [COMMAND]`
+:warning: The supported docker run options:  
+`-p, --name, -v, --privileged, --rm, --name, -d`  
 See the [Docker documentation](https://docs.docker.com/engine/reference/commandline/run/) for more
 info.
 
