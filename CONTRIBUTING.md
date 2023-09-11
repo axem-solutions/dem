@@ -19,7 +19,7 @@ We use [poetry](https://python-poetry.org/) to manage dependencies and create a 
 for DEM. To ensure that you use the correct version of the required modules, you should enter the 
 preconfigured virtual environment.
 
-First install the environment with the required dependencies:
+First, install the environment with the required dependencies:
 
     poetry install
 
@@ -37,6 +37,6 @@ Run unit tests with coverage information as HTML:
 
     pytest --cov-report=html --cov=dem tests/
 
-If you' like the coverate results right in your terminal:
+If you'd like the coverage results right in your terminal:
 
     pytest --cov-report term-missing --cov=dem tests/

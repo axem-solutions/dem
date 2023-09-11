@@ -6,7 +6,7 @@ title: Development Environments
 A set of software tools used for a development project is called a **Development Environment**.
 
 ## Tool types
-Currently the following tool types are supported:
+Currently, the following tool types are supported:
 
     - Build system
     - Toolchain
@@ -20,11 +20,11 @@ assign the required tools to them.
 
 !!! warning
 
-    In the v0.3.0 we are going to change this behaviour and let the users to define their own tool 
+    In the v0.3.0 we are going to change this behavior and let the users to define their own tool 
     types.
 
 ## Tool images
-To put it simply, a container image is a set of software components alongside with its dependencies, 
+To put it simply, a container image is a set of software components alongside its dependencies, 
 which can be run in a container. The idea is to build the tools from a Development Environment into 
 their own images, so they can run isolatedly.
 
@@ -37,7 +37,7 @@ that everybody working on the same project uses the exact same tools.
     An image repository stores the different versions of the same image.
     An image registry is a collection of image repositories.
 
-The DEM also uses registries in the backgroud to store the tool images. To list the currently 
+The DEM also uses registries in the background to store the tool images. To list the currently 
 available registries use the `dem list-reg` command. The `dem add-reg` and `dem del-reg` commands 
 can be used to add or delete registries.
 
@@ -66,7 +66,7 @@ There are three ways to get a Development Environment:
 
 ### Installing from a catalog
 An organization can create a Development Environment Catalog and share it with its members. This 
-**granatees** that each and every member uses the **same toolset** in the **same environment**. 
+**guarantees** that each and every member uses the **same toolset** in the **same environment**. 
 
 ![organization](wp-content/organization.png){: .center}
 
@@ -88,8 +88,8 @@ DEM provides a TUI for creating a new Development Environment that can be starte
 See the [`dem create`](commands.md#dem-create-dev_env_name) command for more details.
 
 ### Load a Development Environment
-A locally already available Development Environment can be exported in a json format with the 
-`dem export` command. The exported json describes the required tool images and location of the 
+A locally already available Development Environment can be exported in JSON format with the 
+`dem export` command. The exported JSON describes the required tool images and the location of the 
 registries where they stores. This file can be shared and on another PC can be imported with the 
 `dem load` command. After the DEM loaded the descriptor, it will pull the required tool images.
 
