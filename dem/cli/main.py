@@ -70,14 +70,14 @@ def export(dev_env_name: str = typer.Argument(...,help="Name of the Development 
     """
     Export the Development Environment.
     """
-    export_cmd.execute(dev_env_name,path_to_export)    
+    export_cmd.execute(dev_env_name,path_to_export)
 
 @typer_cli.command()
-def load(path_to_dev_env: str = typer.Argument(...,help="Path to load Dev Env to load.")) -> None:
+def load(path_to_dev_env: str = typer.Argument(...,help="Path to the Dev Env to import.")) -> None:
     """
-    Load Development Environment.
+    Import the Development Environment.
     """
-    load_cmd.execute(path_to_dev_env)   
+    load_cmd.execute(path_to_dev_env)
 
 @typer_cli.command()
 def rename(dev_env_name: str = typer.Argument(...,help="Name of the Development Environment to rename."),
