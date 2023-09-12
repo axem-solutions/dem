@@ -109,7 +109,7 @@ def test_run(mock_from_env, mock_user_output):
         "-v", "/var/run/docker.sock:/var/run/docker.sock",
         "-v", "/home/murai/jenkins_home_axem:/var/jenkins_home", 
 		"axemsolutions/jenkins:latest",
-        "command"
+        "command1 command2"
     ]
     mock_docker_client = MagicMock()
     mock_from_env.return_value = mock_docker_client
@@ -128,7 +128,7 @@ def test_run(mock_from_env, mock_user_output):
 
     # Check expectations
     mock_docker_client.containers.run.assert_called_once_with("axemsolutions/jenkins:latest", 
-                                                              command="command", 
+                                                              command="command1 command2", 
                                                               auto_remove=True, 
                                                               privileged=True,
                                                               volumes=[
