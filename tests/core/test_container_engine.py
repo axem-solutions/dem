@@ -221,6 +221,24 @@ def test_run_not_supported_param(mock_from_env):
         assert str(exported_exception_info) =="The input parameter -x is not supported!"
 
 @patch("docker.from_env")
+def test_run_StopIteration(mock_from_env):
+    # Test setup
+    test_container_arguments = [
+        "--name"
+    ]
+    mock_docker_client = MagicMock()
+    mock_from_env.return_value = mock_docker_client
+
+    test_container_engine = container_engine.ContainerEngine()
+
+    with pytest.raises(container_engine.ContainerEngineError) as exported_exception_info:
+        # Run unit under test
+        test_container_engine.run(test_container_arguments)
+
+        # Check expectations
+        assert str(exported_exception_info) =="Invalid input parameter!"
+
+@patch("docker.from_env")
 def test_remove(mock_from_env):
     # Test setup
     fake_docker_client = MagicMock()

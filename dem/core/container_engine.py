@@ -59,33 +59,36 @@ class ContainerEngine(Core):
         auto_remove = False
         stream_logs = True
 
-        for argument in container_arguments_iter:
-            if argument.startswith("-"):
-                match argument:
-                    case "-p":
-                        port_binding = next(container_arguments_iter)
-                        try:
-                            host_port, container_port = port_binding.split(":")
-                        except ValueError:
-                            raise ContainerEngineError("The option -p has invalid argument: " + port_binding)
-                        ports[container_port] = int(host_port)
-                    case "--name":
-                        name = next(container_arguments_iter)
-                    case "-v":
-                        volumes.append(next(container_arguments_iter))
-                    case "--privileged":
-                        privileged = True
-                    case "--rm":
-                        auto_remove = True
-                    case "-d":
-                        stream_logs = False
-                    case _:
-                        raise ContainerEngineError("The input parameter " + argument + " is not supported!")
-            else:
-                image = argument
-                for argument in container_arguments_iter:
-                    command += argument + " "
-                command = command[:-1]
+        try:
+            for argument in container_arguments_iter:
+                if argument.startswith("-"):
+                    match argument:
+                        case "-p":
+                            port_binding = next(container_arguments_iter)
+                            try:
+                                host_port, container_port = port_binding.split(":")
+                            except ValueError:
+                                raise ContainerEngineError("The option -p has invalid argument: " + port_binding)
+                            ports[container_port] = int(host_port)
+                        case "--name":
+                            name = next(container_arguments_iter)
+                        case "-v":
+                            volumes.append(next(container_arguments_iter))
+                        case "--privileged":
+                            privileged = True
+                        case "--rm":
+                            auto_remove = True
+                        case "-d":
+                            stream_logs = False
+                        case _:
+                            raise ContainerEngineError("The input parameter " + argument + " is not supported!")
+                else:
+                    image = argument
+                    for argument in container_arguments_iter:
+                        command += argument + " "
+                    command = command[:-1]
+        except StopIteration:
+            raise ContainerEngineError("Invalid input parameter!")
 
         run_result = self._docker_client.containers.run(image, command=command, 
                                                         auto_remove=auto_remove, 

@@ -184,4 +184,4 @@ def test_cli_ContainerEngineError(mock_typer_cli: MagicMock, mock_Core: MagicMoc
     mock_TUIUserOutput.assert_called_once()
     mock_Core.set_user_output.assert_called_once_with(mock_tui_user_output)
     mock_typer_cli.assert_called_once_with(prog_name=__command__)
-    mock_stderr_print.assert_called_once_with("[red]" + test_exception_text + "[/]")
+    mock_stderr_print.assert_called_once_with("[red]Container engine error: " + test_exception_text + "[/]")

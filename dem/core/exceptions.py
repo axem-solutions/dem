@@ -15,4 +15,8 @@ class RegistryError(Exception):
 
 class ContainerEngineError(Exception):
     """Raised when there is a problem with the container engine."""
-    pass
+
+    base_message = "Container engine error: "
+
+    def __init__(self, message: str) -> None:
+        super().__init__(self.base_message + message)
