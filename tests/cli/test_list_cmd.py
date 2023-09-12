@@ -131,7 +131,7 @@ def test_with_valid_dev_env_org_json(mock_DevEnvLocalSetup):
     expected_dev_env_list = [
         ["org_only_env", "Ready to be installed."],
         ["demo", "Installed locally."],
-        ["nagy_cica_project", "Incomplete local install. Reinstall needed."],
+        ["nagy_cica_project", "Incomplete local install. The missing images are available in the registry. Use `dem pull` to reinstall."],
         ["unavailable_image_env", "[red]Error: Required image is not available in the registry![/]"]
     ]
     fake_image_statuses = [
