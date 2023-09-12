@@ -184,7 +184,7 @@ used.
 
 ---
 
-## **`dem load PATH_TO_EXPORT`**
+## **`dem load PATH_TO_DEV_ENV`**
 
 Imports a Development Environment.
 
@@ -195,7 +195,7 @@ Imports a Development Environment.
 
 Arguments:
 
-`PATH_TO_DEV_ENV` Path of the JSON file to iport. Can be an absolute path or a relative path to the 
+`PATH_TO_DEV_ENV` Path of the JSON file to import. Can be an absolute path or a relative path to the 
 current directory.
 
 ---
