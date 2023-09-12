@@ -159,28 +159,31 @@ Arguments:
 
 ## **`dem export DEV_ENV_NAME [PATH_TO_EXPORT]`**
 
-Export a Development Environment descriptor in JSON format. This file can be imported with the 
-`load` command on another host. 
+Export a Development Environment descriptor in JSON format to a text file. This file can be imported with the `load` command on another host. 
 
-The way the JSON file gets exported can be set by the PATH_TO_EXPORT argument:
+The way the file gets named can be set by the PATH_TO_EXPORT argument:
 
 1. If it's not set, the file gets saved to the current directory with the name of the Development 
-Environment.
-2. If only a name is set, the file gets saved with that name to the current directory.
+Environment and without extension.
+2. If only a name is set, the file gets saved with that name to the current directory, optionally 
+with the set extension.
 3. If the argument is a directory path, the file gets saved there with the name of the Development 
-Environment.
+Environment, without extension.
 4. If the argument is a path with the file name, then the exported content gets saved into that file.
+The extension can be set with the file name.
 
 !!! Note
 
-    The exported file only contains the Development Environment descriptor. For a successful import
-    the DEM needs access to all the registries where the required images are stored.
+    The exported file only contains the Development Environment descriptor in JSON format. For a 
+    successful import the DEM needs access to all the registries where the required images are 
+    stored.
 
 Arguments:
 
 `DEV_ENV_NAME` The name of the Development Environment to export.
-`[PATH_TO_EXPORT]` Where to save the exported JSON file. If not set, the current directory will be
-used.
+
+`[PATH_TO_EXPORT]` Where to save the exported descriptor in JSON format. If not set, the current 
+directory will be used.
 
 ---
 
@@ -217,6 +220,7 @@ The URL must point to an HTTP(S) server where the Catalog JSON file is available
 Arguments:
 
 `NAME` Name of the catalog to add. [required]
+
 `URL` URL of the catalog file. [required]
 
 ---
@@ -254,6 +258,7 @@ or it can be http://localhost:5000 for a self-hosted one.
 Arguments:
 
 `NAME` Name of the registry to add. [required]
+
 `URL` API URL of the registry. [required]
 
 ---
