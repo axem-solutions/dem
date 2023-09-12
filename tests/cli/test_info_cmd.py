@@ -146,8 +146,8 @@ def test_info_local_dev_env_nagy_cica_project(mock_DevEnvLocalSetup):
     fake_dev_env.check_image_availability.assert_called_once_with(fake_platform.tool_images)
 
     expected_tools = [
-        ["build system", "axemsolutions/bazel:latest", "[red]Error: Image is not available.[/]"],
-        ["toolchain", "axemsolutions/gnu_arm:latest", "[red]Error: Image is not available.[/]"],
+        ["build system", "axemsolutions/bazel:latest", "[red]Error: Required image is not available![/]"],
+        ["toolchain", "axemsolutions/gnu_arm:latest", "[red]Error: Required image is not available![/]"],
         ["debugger", "axemsolutions/jlink:latest", "Image is available locally."],
         ["deployer", "axemsolutions/jlink:latest", "Image is available locally."],
         ["test framework", "axemsolutions/cpputest:latest", "Image is available locally and in the registry."],

@@ -10,7 +10,7 @@ from rich.table import Table
 (
     DEV_ENV_ORG_NOT_IN_REGISTRY,
     DEV_ENV_ORG_INSTALLED_LOCALLY,
-    DEV_ENV_ORG_REAINSTALL,
+    DEV_ENV_ORG_REINSTALL,
     DEV_ENV_ORG_READY,
 ) = range(4)
 
@@ -23,13 +23,13 @@ from rich.table import Table
 dev_env_org_status_messages = {
     DEV_ENV_ORG_NOT_IN_REGISTRY: "[red]Error: Required image is not available in the registry![/]",
     DEV_ENV_ORG_INSTALLED_LOCALLY: "Installed locally.",
-    DEV_ENV_ORG_REAINSTALL: "Incomplete local install. Reinstall needed.",
+    DEV_ENV_ORG_REINSTALL: "Incomplete local install. The missing images are available in the registry. Use `dem pull` to reinstall.",
     DEV_ENV_ORG_READY: "Ready to be installed.",
 }
 
 dev_env_local_status_messages = {
     DEV_ENV_LOCAL_NOT_AVAILABLE: "[red]Error: Required image is not available![/]",
-    DEV_ENV_LOCAL_REINSTALL: "Incopmlete local install. Reinstall needed.",
+    DEV_ENV_LOCAL_REINSTALL: "Incomplete local install. The missing images are available in the registry. Use `dem pull` to reinstall.",
     DEV_ENV_LOCAL_INSTALLED: "Installed.",
 }
 
@@ -42,7 +42,7 @@ def get_catalog_dev_env_status(platform: DevEnvLocalSetup, dev_env: DevEnv) -> s
         dev_env_status = dev_env_org_status_messages[DEV_ENV_ORG_INSTALLED_LOCALLY]
     else:
         if (platform.get_local_dev_env(dev_env) is not None):
-            dev_env_status = dev_env_org_status_messages[DEV_ENV_ORG_REAINSTALL]
+            dev_env_status = dev_env_org_status_messages[DEV_ENV_ORG_REINSTALL]
         else:
             dev_env_status = dev_env_org_status_messages[DEV_ENV_ORG_READY]
     return dev_env_status

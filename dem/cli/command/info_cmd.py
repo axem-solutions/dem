@@ -8,7 +8,7 @@ from dem.core.platform import DevEnvLocalSetup
 from rich.table import Table
 
 image_status_messages = {
-    ToolImages.NOT_AVAILABLE: "[red]Error: Image is not available.[/]",
+    ToolImages.NOT_AVAILABLE: "[red]Error: Required image is not available![/]",
     ToolImages.LOCAL_ONLY: "Image is available locally.",
     ToolImages.REGISTRY_ONLY: "Image is available in the registry.",
     ToolImages.LOCAL_AND_REGISTRY: "Image is available locally and in the registry.",
