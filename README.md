@@ -1,4 +1,7 @@
-# Manage your containerized Development Environments with ease
+# Containerized Development Environment Manager for embedded development
+<p align="center"><font size="4">
+    Manage your containerized Development Environments with ease
+</font></p>
 
 <p align="center">
     <img alt="GitHub tag (with filter)" src="https://img.shields.io/github/v/tag/axem-solutions/dem?logo=github&color=79A7B5&link=https%3A%2F%2Fgithub.com%2Faxem-solutions%2Fdem%2Freleases">
@@ -21,6 +24,34 @@ Development Environments for embedded software development.
 </strong>
 </p>
 
+## Concept
+A Development Environment is a set of tools used for a development project (e.g. build system, 
+debugger, toolchain, etc.).  The tools are separately packed into container images, which are stored 
+in registries.
+
+Each Development Environment has a descriptor. A descriptor indicates which tools are 
+required in the project and the place their container images are stored. All descriptors are stored 
+in the Development Environment Catalogs. The users can browse these catalogs, and list the available 
+environments and their statuses.  
+A Development Environment can be installed from its catalog by a simple dem command, which means 
+that the required tool images get downloaded from the registries.
+
+The registries, the catalogs, and the development infrastructure form a Development Platform.
+
+The purpose of DEM is the easy management of this platform. The users can install available 
+Development Environments or freely create their own from the tool images available in the registries 
+or locally.
+
+![platform](docs/wp-content/platform.png)
+
+## Key features
+
+- Create scalable, reliable, and reproducible containerized Development Environments
+- Manage your containerized tools
+- Install preconfigured Development Environments from catalogs
+- Ensure that everyone in the team works with the same toolset
+- Share Development Environments outside of your organization
+
 ## Prerequisites
 
 To be able to use the DEM on your PC, you need to have the following software installed:
@@ -28,7 +59,7 @@ To be able to use the DEM on your PC, you need to have the following software in
 - Python 3.10+
 - Docker Engine 24.0+
 
-:information_source: Currently only the Linux operating system is supported.
+:information_source: Currently only the Linux operating system and the Docker Engine are supported.
 
 ## Installation
 
@@ -40,21 +71,32 @@ DEM is available in the [PyPI repository](https://pypi.org/project/axem-dem/). I
 
 ## Quick start
 
-Installation of a preconfigured Development Environment can be done with a single command:
+### Install a preconfigured environment
+
+List the available environments:
+
+    dem list --all --env
+
+You can get information about the Development Environment of your choice:
+
+    dem info DEV_ENV_NAME
+
+Installation of a Development Environment from a catalog can be done with a single command:
 
     dem pull DEV_ENV_NAME
 
-Creating a new Development Environment is also very simple:
+### Create a new environment and add your own tools
+
+Create separate container images for your tools. 
+> There is no need for any specific configuration in your container images to be compatible with 
+DEM.
+
+From the new images and the ones available from the registries, you can create your new Development 
+Environment:
 
     dem create DEV_ENV_NAME
 
-For more detailed instructions please refer to the 
+This command will start a TUI where you can configure your new Development Environment.
+
+For more detailed instructions please refer to the
 [Documentation](https://www.axemsolutions.io/dem_doc/index.html)
-
-## Key features
-
-- Create scalable, reliable, and reproducible containerized Development Environments
-- Manage your containerized tools
-- Install preconfigured Development Environments from catalogs
-- Ensure that everyone in the team works with the same toolset
-- Share Development Environments outside of your organization

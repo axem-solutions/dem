@@ -64,8 +64,8 @@ commands can be used to add or delete catalogs.
     axem has its own catalog, which is by default available for DEM.
 
 ## Development Platform
-The collection of the available catalogs and registries is the Development Platform. The users can 
-install new Development Environments in a self-service manner, which are available in the Platform.
+The registries, the catalogs, and the development infrastructure make up a Development Platform.
+The users can install new Development Environments from the catalogs in a self-service manner.
 
 ![platform](wp-content/platform.png){: .center}
 
@@ -102,7 +102,7 @@ See the [`dem create`](commands.md#dem-create-dev_env_name) command for more det
 ### **Load a Development Environment**
 A locally already available Development Environment can be exported in JSON format with the 
 `dem export` command. The exported JSON describes the required tool images and the location of the 
-registries where they stores. This file can be shared and on another PC can be imported with the 
+registries where they are stored. This file can be shared and on another PC can be imported with the 
 `dem load` command. After the DEM loaded the descriptor, it will pull the required tool images.
 
 See the [`dem export`](commands.md#dem-export-dev_env_name) and 
