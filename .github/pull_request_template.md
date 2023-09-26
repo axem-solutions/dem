@@ -1,12 +1,3 @@
----
-name: PR template
-about: PR template
-title: ""
-labels: ''
-assignees: ''
-
----
-
 ### Checklist:
 
 * [ ] I have read and followed the [contribution guideline](../CONTRIBUTING.md).
