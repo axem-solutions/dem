@@ -1,6 +1,6 @@
 ### Checklist:
 
-* [ ] I have read and followed the [contribution guideline](../CONTRIBUTING.md).
+* [ ] I have read and followed the [contribution guideline](https://github.com/axem-solutions/.github/blob/main/CONTRIBUTING.md).
 * [ ] I have checked to ensure there aren't other open Pull Requests for the same update/change
 * [ ] I have tested these changes and added tests that prove my fix is effective or that my feature works
 * [ ] I have made corresponding changes to the documentation
