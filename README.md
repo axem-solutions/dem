@@ -6,20 +6,25 @@
 <p align="center">
     <img alt="GitHub tag (with filter)" src="https://img.shields.io/github/v/tag/axem-solutions/dem?logo=github&color=79A7B5&link=https%3A%2F%2Fgithub.com%2Faxem-solutions%2Fdem%2Freleases">
     <img alt="GitHub issues" src="https://img.shields.io/github/issues/axem-solutions/dem?logo=github&color=2ea087&link=https%3A%2F%2Fgithub.com%2Faxem-solutions%2Fdem%2Fissues">
+    <img alt="Discord" src="https://img.shields.io/discord/1156270239860920431?logo=discord&color=2C2F33&link=https%3A%2F%2Fdiscord.com%2Finvite%2F5CzxbEZ3">
 </p>
 
 ## Overview
 The DEM is a command line tool that provides an easy, reproducible, and scalable way to set up 
 Development Environments for embedded software development.
 
+<p align="center">
 :star2: Contributors and early adopters are welcome! :star2:
+</p>
 
 > The DEM can be used locally, but it is in alpha state, so expect major new features!
 
 <p align="center">
 <strong>
-<font size="4">
-<a href="https://www.axemsolutions.io/dem_doc/index.html">Documentation</a> • <a href="https://www.axemsolutions.io/tutorial/index.html">Tutorial</a> 
+<font size="5">
+<a href="https://www.axemsolutions.io/dem_doc/index.html">Documentation</a> • <a href="https://www.axemsolutions.io/tutorial/index.html">Tutorial</a> • 
+<a href="https://github.com/axem-solutions/.github/blob/4bdc1be72b0a2c97da19408c59d6dd5d1845a469/CONTRIBUTING.md">Contribution guide</a> • 
+<a href="https://github.com/axem-solutions/.github/blob/4bdc1be72b0a2c97da19408c59d6dd5d1845a469/SUPPORT.md">Support</a>
 </font>
 </strong>
 </p>
