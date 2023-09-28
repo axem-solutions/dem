@@ -10,23 +10,21 @@
 </p>
 
 ## Overview
-The DEM is a command line tool that provides an easy, reproducible, and scalable way to set up 
-Development Environments for embedded software development.
-
-<p align="center">
-:star2: Contributors and early adopters are welcome! :star2:
-</p>
-
-> The DEM can be used locally, but it is in alpha state, so expect major new features!
 
 <p align="center">
 <strong>
-<font size="5">
 <a href="https://www.axemsolutions.io/dem_doc/index.html">Documentation</a> • <a href="https://www.axemsolutions.io/tutorial/index.html">Tutorial</a> • 
 <a href="https://github.com/axem-solutions/.github/blob/4bdc1be72b0a2c97da19408c59d6dd5d1845a469/CONTRIBUTING.md">Contribution guide</a> • 
 <a href="https://github.com/axem-solutions/.github/blob/4bdc1be72b0a2c97da19408c59d6dd5d1845a469/SUPPORT.md">Support</a>
-</font>
 </strong>
+</p>
+
+The DEM is a command line tool that provides an easy, reproducible, and scalable way to set up 
+Development Environments for embedded software development.
+> The DEM can be used locally, but it is in alpha state, so expect major new features!
+
+<p align="center">
+:star2: Contributors and early adopters are welcome! :star2:
 </p>
 
 ## Concept
