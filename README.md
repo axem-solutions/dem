@@ -1,13 +1,36 @@
-# Containerized Development Environment Manager for embedded development
-<p align="center"><font size="4">
-    Manage your containerized Development Environments with ease
-</font></p>
+<h1 align="center">
+    Containerized Development Environment Manager <br /> for <br /> Embedded Development
+</h1>
+
+<h3 align="center">
+Manage your containerized Development Environments with ease
+</h3>
+
+<br />
 
 <p align="center">
     <img alt="GitHub tag (with filter)" src="https://img.shields.io/github/v/tag/axem-solutions/dem?logo=github&color=79A7B5&link=https%3A%2F%2Fgithub.com%2Faxem-solutions%2Fdem%2Freleases">
     <img alt="GitHub issues" src="https://img.shields.io/github/issues/axem-solutions/dem?logo=github&color=2ea087&link=https%3A%2F%2Fgithub.com%2Faxem-solutions%2Fdem%2Fissues">
     <img alt="Discord" src="https://img.shields.io/discord/1156270239860920431?logo=discord&color=2C2F33&link=https%3A%2F%2Fdiscord.com%2Finvite%2F5CzxbEZ3">
 </p>
+<br />
+<h1 align="center">🎉 We're participating in Hacktoberfest 2023! 🎉</h1>
+<br />
+<br />
+
+Interested in participating in Hacktoberfest?  We extend a warm invitation, and you'll also have the chance to contribute to a greener globe! 🌱🌍
+<br />
+The first 50,000 participants to have their first PR/MR accepted will have a tree planted in their name through Tree Nation.
+
+<br /> ⭐️ If you're new to Hacktoberfest, you can learn more and register to participate [here](https://hacktoberfest.com/participation/). Registration is from **September 26th - October 31st**.
+<br />
+
+- Check out Contribution Guideline for [detailed instructions]([https://hacktoberfest.com/](https://github.com/axem-solutions/.github/blob/4bdc1be72b0a2c97da19408c59d6dd5d1845a469/CONTRIBUTING.md)).
+- Join our [Discord and engage with our community](https://discord.com/invite/2a67N75P), get answers to your challenges, learn more about embedded tooling, and stay updated on events and announcements.
+
+<br />
+<br />
+
 
 ## Overview
 
