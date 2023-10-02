@@ -25,7 +25,7 @@ The first 50,000 participants to have their first PR/MR accepted will have a tre
 <br /> ⭐️ If you're new to Hacktoberfest, you can learn more and register to participate [here](https://hacktoberfest.com/participation/). Registration is from **September 26th - October 31st**.
 <br />
 
-- Check out Contribution Guideline for [detailed instructions]([https://hacktoberfest.com/](https://github.com/axem-solutions/.github/blob/4bdc1be72b0a2c97da19408c59d6dd5d1845a469/CONTRIBUTING.md)).
+- Check out our [Contribution Guideline](https://github.com/axem-solutions/.github/blob/4bdc1be72b0a2c97da19408c59d6dd5d1845a469/CONTRIBUTING.md) for detailed instructions.
 - Join our [Discord and engage with our community](https://discord.com/invite/2a67N75P), get answers to your challenges, learn more about embedded tooling, and stay updated on events and announcements.
 
 <br />
