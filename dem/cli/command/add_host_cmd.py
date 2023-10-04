@@ -16,12 +16,22 @@ def execute(name: str, address: str) -> None:
     if not name or not address:
         stdout.print("[red]Error: NAME or ADDRESS cannot be empty.[/]")
         return
+
     config_path = os.path.expanduser("~/.home/axem/dem/config.json")
+    
     try:
         # Check if the config file exists
         if os.path.exists(config_path):
             with open(config_path, 'r') as f:
-                data = json.load(f)
+                file_content = f.read()
+                if not file_content.strip():  # Check if file is empty
+                    data = {"hosts": []}
+                else:
+                    try:
+                        data = json.loads(file_content)
+                    except json.JSONDecodeError:  # Handle invalid JSON
+                        stdout.print("[red]Error: Invalid JSON in config file. Resetting to default.[/]")
+                        data = {"hosts": []}
         else:
             data = {"hosts": []}
         
