@@ -15,7 +15,7 @@ def execute(name: str, address: str) -> None:
     
     if not name or not address:
         stdout.print("[red]Error: NAME or ADDRESS cannot be empty.[/]")
-        return
+        exit(1)
 
     platform = DevEnvLocalSetup()
     data = platform.config_file.deserialized.get("hosts", [])  # this way the data object is a list
@@ -27,12 +27,20 @@ def execute(name: str, address: str) -> None:
         existing_host = next((host for host in data if host["name"] == name), None)
         if existing_host:
             # Ask the user if they want to overwrite the existing host
-            while True:
+            try:
                 choice = input(f"Host with name {name} already exists. Do you want to overwrite it? (yes/no): ")
-                if choice.lower() in ['yes', 'no']:
-                    break
+            except EOFError:
+                stdout.print("[yellow]Host addition cancelled.[/]")
+                exit(1)
+
+            while choice.lower() not in ['yes', 'no']:
                 stdout.print("[yellow]Please enter 'yes' or 'no'.[/]")
-            
+                try:
+                    choice = input(f"Host with name {name} already exists. Do you want to overwrite it? (yes/no): ")
+                except EOFError:
+                    stdout.print("[yellow]Host addition cancelled.[/]")
+                    return
+
             if choice.lower() == 'yes':
                 existing_host["address"] = address
             else:
