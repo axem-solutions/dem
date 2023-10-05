@@ -10,7 +10,7 @@ Manage your containerized Development Environments with ease
 <p align="center">
     <a href="https://github.com/axem-solutions/dem/tags" target="_blank"><img src="https://img.shields.io/github/v/tag/axem-solutions/dem?logo=github&color=79A7B5&link=https%3A%2F%2Fgithub.com%2Faxem-solutions%2Fdem%2Freleases" alt="GitHub tag (with filter)"/></a>
     <a href="https://github.com/axem-solutions/dem/issues" target="_blank"><img src="https://img.shields.io/github/issues/axem-solutions/dem?logo=github&color=2ea087&link=https%3A%2F%2Fgithub.com%2Faxem-solutions%2Fdem%2Fissues" alt="GitHub issues"/></a>
-    <a href="https://discord.com/invite/2a67N75P" target="_blank"><img src="https://img.shields.io/discord/1156270239860920431?logo=discord&color=2C2F33&link=https%3A%2F%2Fdiscord.com%2Finvite%2F5CzxbEZ3" alt="Discord"/></a>
+    <a href="https://discord.com/invite/Nv6hSzXruK" target="_blank"><img src="https://img.shields.io/discord/1156270239860920431?logo=discord&color=2C2F33&link=https%3A%2F%2Fdiscord.com%2Finvite%Nv6hSzXruK" alt="Discord"/></a>
 </p>
 <br />
 <h1 align="center">🎉 We're participating in Hacktoberfest 2023! 🎉</h1>
@@ -25,7 +25,7 @@ The first 50,000 participants to have their first PR/MR accepted will have a tre
 <br />
 
 - Check out our [Contribution Guideline](https://github.com/axem-solutions/.github/blob/4bdc1be72b0a2c97da19408c59d6dd5d1845a469/CONTRIBUTING.md) for detailed instructions.
-- Join our [Discord and engage with our community](https://discord.com/invite/2a67N75P), get answers to your challenges, learn more about embedded tooling, and stay updated on events and announcements.
+- Join our [Discord and engage with our community](https://discord.com/invite/Nv6hSzXruK), get answers to your challenges, learn more about embedded tooling, and stay updated on events and announcements.
 
 <br />
 <br />
