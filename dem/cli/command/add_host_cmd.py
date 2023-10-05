@@ -17,26 +17,14 @@ def execute(name: str, address: str) -> None:
         stdout.print("[red]Error: NAME or ADDRESS cannot be empty.[/]")
         return
 
-    config_path = os.path.expanduser("~/.home/axem/dem/config.json")
-    
-    try:
-        # Check if the config file exists
-        if os.path.exists(config_path):
-            with open(config_path, 'r') as f:
-                file_content = f.read()
-                if not file_content.strip():  # Check if file is empty
-                    data = {"hosts": []}
-                else:
-                    try:
-                        data = json.loads(file_content)
-                    except json.JSONDecodeError:  # Handle invalid JSON
-                        stdout.print("[red]Error: Invalid JSON in config file. Resetting to default.[/]")
-                        data = {"hosts": []}
-        else:
-            data = {"hosts": []}
-        
+    platform = DevEnvLocalSetup()
+    data = platform.config_file.deserialized.get("hosts", [])  # this way the data object is a list
+
+    if not data:
+        platform.config_file.deserialized["hosts"] = [{"name": name, "address": address}]
+    else:
         # Check if the host name already exists
-        existing_host = next((host for host in data["hosts"] if host["name"] == name), None)
+        existing_host = next((host for host in data if host["name"] == name), None)
         if existing_host:
             # Ask the user if they want to overwrite the existing host
             while True:
@@ -51,13 +39,8 @@ def execute(name: str, address: str) -> None:
                 stdout.print("[yellow]Host addition cancelled.[/]")
                 return
         else:
-            data["hosts"].append({"name": name, "address": address})
-        
-        # Save the updated data to the config file
-        with open(config_path, 'w') as f:
-            json.dump(data, f, indent=4)
-        
-        stdout.print("[green]Host added successfully![/]")
-    
-    except Exception as e:
-        stdout.print(f"[red]Error: {e}[/]")
+            data.append({"name": name, "address": address})
+
+    # Save the updated data
+    platform.config_file.flush()
+    stdout.print("[green]Host added successfully![/]")
