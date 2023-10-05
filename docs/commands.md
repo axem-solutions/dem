@@ -270,3 +270,15 @@ Delete a registry.
 Arguments:
 
 `NAME` Name of the registry to delete. [required]
+
+## **`dem add-host NAME ADDRESS`**
+
+Add a new host to the configuration.
+
+Arguments:
+
+`NAME` Name of the host. [required]
+
+`ADDRESS` IP or hostname of the host. [required]
+
+---
