@@ -17,8 +17,6 @@ def main():
 
     try:
         dem.cli.main.typer_cli(prog_name=__command__)
-    except FileNotFoundError as e:
-        stderr.print("[red]" + "Error: Invalid input path.")
     except LookupError as e:
         stderr.print("[red]" + str(e) + "[/]")
     except RegistryError as e:
