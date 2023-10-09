@@ -111,3 +111,33 @@ def test_execute_valid_parameters(mock_DevEnvLocalSetup: MagicMock,
     mock_create_exported_dev_env_json.assert_called_once_with(test_dev_env_name, 
                                                               mock_dev_env_to_export.__dict__,
                                                               test_path_to_export)
+    
+@patch("dem.cli.command.export_cmd.create_exported_dev_env_json", side_effect=FileNotFoundError("FileNotFoundError"))
+@patch("dem.cli.command.export_cmd.DevEnvLocalSetup")
+def test_execute_FileNotFoundError(mock_DevEnvLocalSetup: MagicMock, 
+                                  mock_create_exported_dev_env_json: MagicMock):
+    # Test setup
+    test_dev_env_name = "test_dev_env_name"
+    test_path_to_export = ""
+
+    mock_platform = MagicMock()
+    mock_DevEnvLocalSetup.return_value = mock_platform
+
+    mock_dev_env_to_export = MagicMock()
+    mock_platform.get_dev_env_by_name.return_value = mock_dev_env_to_export
+
+    #Run unit under test
+    runner_result = runner.invoke(main.typer_cli, ["export", test_dev_env_name, 
+                                                   test_path_to_export])
+    assert runner_result.exit_code == 0
+
+    console = Console(file=io.StringIO())
+    console.print("[red]Error: Invalid input path.[/]")
+    assert console.file.getvalue() == runner_result.stderr
+
+    mock_DevEnvLocalSetup.assert_called_once()
+    mock_platform.get_dev_env_by_name.assert_called_once_with(test_dev_env_name)
+    mock_create_exported_dev_env_json.assert_called_once_with(test_dev_env_name, 
+                                                              mock_dev_env_to_export.__dict__,
+                                                              test_path_to_export)
+    
