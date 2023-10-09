@@ -52,6 +52,6 @@ def execute(dev_env_name: str, path_to_export: str) -> None:
         try:
             create_exported_dev_env_json(dev_env_name,dev_env_to_export.__dict__,path_to_export)                
         except FileNotFoundError as e:
-            stderr.print("[red]" + "Error: Invalid input path.")
+            stderr.print("[red]" + "Error: Invalid input path.[/]")
     else:
         stderr.print("[red]Error: The input Development Environment does not exist.[/]")
