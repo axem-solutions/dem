@@ -48,8 +48,10 @@ def create_exported_dev_env_json(dev_env_name: str,dev_env_json: str,given_path:
 def execute(dev_env_name: str, path_to_export: str) -> None:
     platform = DevEnvLocalSetup()
     dev_env_to_export = platform.get_dev_env_by_name(dev_env_name)
-
-    if dev_env_to_export is not None:                
-        create_exported_dev_env_json(dev_env_name,dev_env_to_export.__dict__,path_to_export)                
+    if dev_env_to_export is not None: 
+        try:
+            create_exported_dev_env_json(dev_env_name,dev_env_to_export.__dict__,path_to_export)                
+        except FileNotFoundError:
+            stderr.print("[red]Error: Invalid input path.[/]")
     else:
         stderr.print("[red]Error: The input Development Environment does not exist.[/]")
