@@ -4,8 +4,8 @@
 import typer, importlib.metadata
 from typing import Optional
 from dem import __command__, __app_name__
-from dem.cli.command import info_cmd, list_cmd, pull_cmd, create_cmd, modify_cmd, delete_cmd, \
-                            rename_cmd, clone_cmd, run_cmd, export_cmd, load_cmd, add_reg_cmd, \
+from dem.cli.command import cp_cmd, info_cmd, list_cmd, pull_cmd, create_cmd, modify_cmd, delete_cmd, \
+                            rename_cmd, run_cmd, export_cmd, load_cmd, add_reg_cmd, \
                             list_reg_cmd, del_reg_cmd, add_cat_cmd, list_cat_cmd, del_cat_cmd, \
                             add_host_cmd
 from dem.cli.console import stdout, stderr
@@ -50,12 +50,12 @@ def pull(dev_env_name: str = typer.Argument(...,
     pull_cmd.execute(dev_env_name)
 
 @typer_cli.command()
-def clone(dev_env_name: str = typer.Argument(...,help="Name of the Development Environment to clone."),
+def cp(dev_env_name: str = typer.Argument(...,help="Name of the Development Environment to cp."),
            new_dev_env_name: str = typer.Argument(...,help="Name of the New Development Environment.")) -> None:
     """
-    Clone existing Development Environment locally.
+    cp existing Development Environment locally.
     """
-    clone_cmd.execute(dev_env_name,new_dev_env_name)
+    cp_cmd.execute(dev_env_name,new_dev_env_name)
 
 @typer_cli.command()
 def create(dev_env_name: str = typer.Argument(..., 
