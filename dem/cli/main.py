@@ -50,10 +50,10 @@ def pull(dev_env_name: str = typer.Argument(...,
     pull_cmd.execute(dev_env_name)
 
 @typer_cli.command()
-def cp(dev_env_name: str = typer.Argument(...,help="Name of the Development Environment to clone."),
+def cp(dev_env_name: str = typer.Argument(...,help="Name of the Development Environment to cp."),
            new_dev_env_name: str = typer.Argument(...,help="Name of the New Development Environment.")) -> None:
     """
-    Clone existing Development Environment locally.
+    cp existing Development Environment locally.
     """
     cp_cmd.execute(dev_env_name,new_dev_env_name)
 
