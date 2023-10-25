@@ -10,7 +10,7 @@ class DevEnv(Core):
         
         Class variables:
             supported_tool_types -- supported tool types
-    """
+    """ 
     supported_tool_types = ( 
         "build system",
         "toolchain",
@@ -19,18 +19,6 @@ class DevEnv(Core):
         "test framework",
         "CI/CD server",
     )
-
-    def _check_tool_type_support(self, descriptor: dict) -> None:
-        """ Check that the Dev Env doesn't contain an unsupported tool type.
-        
-            Private function that gets called on instantiation.
-            Args:
-                descriptor -- the description of the Development Environment from the dev_env.json 
-                              file
-        """
-        for tool in descriptor["tools"]:
-            if tool["type"] not in self.supported_tool_types:
-                raise InvalidDevEnvJson("The following tool type is not supported: " + tool["type"])
 
     def __init__(self, descriptor: dict | None = None, 
                  dev_env_to_copy: "DevEnv | None" = None) -> None:
@@ -43,7 +31,6 @@ class DevEnv(Core):
                 dev_env_to_copy -- the DevEnv instance to copy
         """
         if descriptor:
-            self._check_tool_type_support(descriptor)
             self.name = descriptor["name"]
             self.tools = descriptor["tools"]
         else:

@@ -5,11 +5,9 @@
 import dem.core.dev_env as dev_env
 
 # Test framework
-import pytest
-from unittest.mock import patch, MagicMock, call, PropertyMock
+from unittest.mock import MagicMock
 
-@patch.object(dev_env.DevEnv, "_check_tool_type_support")
-def test_DevEnv(mock__check_tool_type_support: MagicMock):
+def test_DevEnv():
     # Test setup
     test_descriptor = {
         "name": "test_name",
@@ -23,8 +21,6 @@ def test_DevEnv(mock__check_tool_type_support: MagicMock):
     assert test_dev_env.name is test_descriptor["name"]
     assert test_dev_env.tools is test_descriptor["tools"]
 
-    mock__check_tool_type_support.assert_called_once_with(test_descriptor)
-
     # Test setup
     mock_base_dev_env = MagicMock()
     mock_base_dev_env.name = "test_name"
@@ -37,32 +33,8 @@ def test_DevEnv(mock__check_tool_type_support: MagicMock):
     assert test_dev_env.name is mock_base_dev_env.name
     assert test_dev_env.tools is mock_base_dev_env.tools
 
-@patch.object(dev_env.DevEnv, "__init__")
-def test_DevEnv__check_tool_type_support(mock___init__: MagicMock):
-    # Test setup
-    test_descriptor = {
-        "tools": [
-            {
-                "type": "invalid type"
-            }
-        ]
-    }
 
-    mock___init__.return_value = None
-
-    test_dev_env = dev_env.DevEnv(test_descriptor)
-
-    with pytest.raises(dev_env.InvalidDevEnvJson) as e:
-        # Run unit under test
-        test_dev_env._check_tool_type_support(test_descriptor)
-
-        # Check expectations
-        assert str(e) == "The following tool type is not supported: " + test_descriptor["tools"][0]["type"]
-
-        mock___init__.assert_called_once()
-
-@patch.object(dev_env.DevEnv, "_check_tool_type_support")
-def test_DevEnv_check_image_availability(mock__check_tool_type_support: MagicMock):
+def test_DevEnv_check_image_availability():
     # Test setup
     test_descriptor = {
         "name": "test_name",
@@ -110,12 +82,12 @@ def test_DevEnv_check_image_availability(mock__check_tool_type_support: MagicMoc
     for idx, tool in enumerate(test_dev_env.tools):
         assert expected_statuses[idx] == tool["image_status"]
 
-    mock__check_tool_type_support.assert_called_once()
+    
     mock_tool_images.local.update.assert_called_once()
     mock_tool_images.registry.update.assert_called_once()
 
-@patch.object(dev_env.DevEnv, "_check_tool_type_support")
-def test_DevEnv_check_image_availability_local_only(mock__check_tool_type_support: MagicMock):
+
+def test_DevEnv_check_image_availability_local_only():
     # Test setup
     test_descriptor = {
         "name": "test_name",
@@ -159,5 +131,5 @@ def test_DevEnv_check_image_availability_local_only(mock__check_tool_type_suppor
     for idx, tool in enumerate(test_dev_env.tools):
         assert expected_statuses[idx] == tool["image_status"]
 
-    mock__check_tool_type_support.assert_called_once()
+    
     mock_tool_images.local.update.assert_called_once()

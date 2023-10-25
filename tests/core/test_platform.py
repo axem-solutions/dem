@@ -4,6 +4,9 @@
 # Unit under test:
 import dem.core.platform as platform
 
+# Unit under test:
+import dem.core.dev_env as dev_env
+
 # Test framework
 import pytest
 from unittest.mock import patch, MagicMock, call, PropertyMock
@@ -14,19 +17,17 @@ from dem.core.exceptions import InvalidDevEnvJson
 from dem.core.tool_images import ToolImages
 
 @patch("dem.core.platform.LocalDevEnvJSON")
-def test_dev_env_json_with_invalid_tool_type_expect_error(mock_LocalDevEnvJSON: MagicMock):
+def test_dev_env_json_with_invalid_tool_type_expect_success(mock_LocalDevEnvJSON: MagicMock):
     # Test setup
     mock_json = MagicMock()
     mock_LocalDevEnvJSON.return_value = mock_json
     mock_json.deserialized = json.loads(fake_data.invalid_dev_env_json)
+    
+    # Run unit under test
+    test_platform = platform.DevEnvLocalSetup()
 
-    with pytest.raises(InvalidDevEnvJson) as exported_exception_info:
-        # Run unit under test
-        platform.DevEnvLocalSetup()
-
-        # Check expectations
-        excepted_error_message = "Error in platform.json: The following tool type is not supported: build_system" 
-        assert str(exported_exception_info.value) == excepted_error_message
+    # Check expectations
+    assert isinstance(test_platform.local_dev_envs[0], dev_env.DevEnv)
 
 @patch("dem.core.platform.__supported_dev_env_major_version__", 0)
 @patch("dem.core.platform.LocalDevEnvJSON")
