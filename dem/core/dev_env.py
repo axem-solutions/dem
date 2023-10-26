@@ -10,7 +10,7 @@ class DevEnv(Core):
         
         Class variables:
             supported_tool_types -- supported tool types
-    """
+    """ 
     supported_tool_types = ( 
         "build system",
         "toolchain",
