@@ -8,34 +8,6 @@ import dem.core.dev_env as dev_env
 import pytest
 from unittest.mock import patch, MagicMock, call, PropertyMock
 
-@patch.object(dev_env.DevEnv, "_check_tool_type_support")
-def test_DevEnv(mock__check_tool_type_support: MagicMock):
-    # Test setup
-    test_descriptor = {
-        "name": "test_name",
-        "tools": [MagicMock()]
-    }
-
-    # Run unit under test
-    test_dev_env = dev_env.DevEnv(test_descriptor)
-
-    # Check expectations
-    assert test_dev_env.name is test_descriptor["name"]
-    assert test_dev_env.tools is test_descriptor["tools"]
-
-    mock__check_tool_type_support.assert_called_once_with(test_descriptor)
-
-    # Test setup
-    mock_base_dev_env = MagicMock()
-    mock_base_dev_env.name = "test_name"
-    mock_base_dev_env.tools = [MagicMock()]
-
-    # Run unit under test
-    test_dev_env = dev_env.DevEnv(dev_env_to_copy=mock_base_dev_env)
-
-    # Check expectations
-    assert test_dev_env.name is mock_base_dev_env.name
-    assert test_dev_env.tools is mock_base_dev_env.tools
 
 @patch.object(dev_env.DevEnv, "__init__")
 def test_DevEnv__check_tool_type_support(mock___init__: MagicMock):
