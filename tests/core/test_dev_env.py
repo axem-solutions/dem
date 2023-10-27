@@ -8,30 +8,34 @@ import dem.core.dev_env as dev_env
 import pytest
 from unittest.mock import patch, MagicMock, call, PropertyMock
 
-
-@patch.object(dev_env.DevEnv, "__init__")
-def test_DevEnv__check_tool_type_support(mock___init__: MagicMock):
+@patch.object(dev_env.DevEnv, "_check_tool_type_support")
+def test_DevEnv(mock__check_tool_type_support: MagicMock):
     # Test setup
     test_descriptor = {
-        "tools": [
-            {
-                "type": "invalid type"
-            }
-        ]
+        "name": "test_name",
+        "tools": [MagicMock()]
     }
 
-    mock___init__.return_value = None
-
+    # Run unit under test
     test_dev_env = dev_env.DevEnv(test_descriptor)
 
-    with pytest.raises(dev_env.InvalidDevEnvJson) as e:
-        # Run unit under test
-        test_dev_env._check_tool_type_support(test_descriptor)
+    # Check expectations
+    assert test_dev_env.name is test_descriptor["name"]
+    assert test_dev_env.tools is test_descriptor["tools"]
 
-        # Check expectations
-        assert str(e) == "The following tool type is not supported: " + test_descriptor["tools"][0]["type"]
+    mock__check_tool_type_support.assert_called_once_with(test_descriptor)
 
-        mock___init__.assert_called_once()
+    # Test setup
+    mock_base_dev_env = MagicMock()
+    mock_base_dev_env.name = "test_name"
+    mock_base_dev_env.tools = [MagicMock()]
+
+    # Run unit under test
+    test_dev_env = dev_env.DevEnv(dev_env_to_copy=mock_base_dev_env)
+
+    # Check expectations
+    assert test_dev_env.name is mock_base_dev_env.name
+    assert test_dev_env.tools is mock_base_dev_env.tools
 
 @patch.object(dev_env.DevEnv, "_check_tool_type_support")
 def test_DevEnv_check_image_availability(mock__check_tool_type_support: MagicMock):
