@@ -8,8 +8,8 @@ import dem.core.dev_env as dev_env
 import pytest
 from unittest.mock import patch, MagicMock, call, PropertyMock
 
-@patch.object(dev_env.DevEnv, "_check_tool_type_support")
-def test_DevEnv(mock__check_tool_type_support: MagicMock):
+
+def test_DevEnv():
     # Test setup
     test_descriptor = {
         "name": "test_name",
@@ -37,8 +37,8 @@ def test_DevEnv(mock__check_tool_type_support: MagicMock):
     assert test_dev_env.name is mock_base_dev_env.name
     assert test_dev_env.tools is mock_base_dev_env.tools
 
-@patch.object(dev_env.DevEnv, "_check_tool_type_support")
-def test_DevEnv_check_image_availability(mock__check_tool_type_support: MagicMock):
+
+def test_DevEnv_check_image_availability():
     # Test setup
     test_descriptor = {
         "name": "test_name",
@@ -86,12 +86,12 @@ def test_DevEnv_check_image_availability(mock__check_tool_type_support: MagicMoc
     for idx, tool in enumerate(test_dev_env.tools):
         assert expected_statuses[idx] == tool["image_status"]
 
-    mock__check_tool_type_support.assert_called_once()
+    
     mock_tool_images.local.update.assert_called_once()
     mock_tool_images.registry.update.assert_called_once()
 
-@patch.object(dev_env.DevEnv, "_check_tool_type_support")
-def test_DevEnv_check_image_availability_local_only(mock__check_tool_type_support: MagicMock):
+
+def test_DevEnv_check_image_availability_local_only():
     # Test setup
     test_descriptor = {
         "name": "test_name",
@@ -135,5 +135,5 @@ def test_DevEnv_check_image_availability_local_only(mock__check_tool_type_suppor
     for idx, tool in enumerate(test_dev_env.tools):
         assert expected_statuses[idx] == tool["image_status"]
 
-    mock__check_tool_type_support.assert_called_once()
+    
     mock_tool_images.local.update.assert_called_once()
