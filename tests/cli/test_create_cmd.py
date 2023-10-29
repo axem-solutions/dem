@@ -224,3 +224,22 @@ def test_execute_failure(mock_DevEnvLocalSetup, mock_create_dev_env, mock_stderr
     mock_dev_env.check_image_availability.assert_called_once_with(mock_dev_env_local_setup.tool_images,
                                                                   update_tool_images=True)
     mock_stderr_print.assert_called_once_with("The installation failed.")
+
+@patch("dem.cli.command.create_cmd.stderr.print")
+def test_create_dev_env_with_whitespace(mock_stderr_print):
+    # Test setup
+    mock_dev_env_local_setup = MagicMock()
+    mock_dev_env_local_setup.get_dev_env_by_name.return_value = None
+
+    mock_tool_images = MagicMock()
+    mock_dev_env_local_setup.tool_images = mock_tool_images
+
+    expected_dev_env_name = "test dev env with space"
+
+    # Run unit under test
+    with pytest.raises(Exception):
+        create_cmd.create_dev_env(mock_dev_env_local_setup, expected_dev_env_name)
+
+    # Check expectations
+    mock_dev_env_local_setup.get_dev_env_by_name.assert_not_called()
+    mock_stderr_print.assert_called_once_with("The name of the Development Environment cannot contain whitespace characters!")
