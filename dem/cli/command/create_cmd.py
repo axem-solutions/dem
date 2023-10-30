@@ -149,6 +149,10 @@ def create_new_dev_env(platform: DevEnvLocalSetup, new_dev_env_descriptor: dict)
     return new_dev_env
 
 def create_dev_env(platform: DevEnvLocalSetup, dev_env_name: str) -> DevEnv:
+    if ' ' in dev_env_name:
+        stderr.print("The name of the Development Environment cannot contain whitespace characters!")
+        raise typer.Abort()
+
     dev_env_original = platform.get_dev_env_by_name(dev_env_name)
     if dev_env_original is not None:
         typer.confirm("The input name is already used by a Development Environment. Overwrite it?", 
