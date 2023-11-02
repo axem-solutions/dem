@@ -67,12 +67,43 @@ def test_create_exported_dev_env_json(mock_os_path_isdir,mock_open):
     mock_open.assert_called_with( dev_env_name , "w")
     mock_os_path_isdir.assert_called()
 
-def test_wo_path():
+@patch("dem.cli.command.export_cmd.json.dump")
+@patch("dem.cli.command.export_cmd.open")
+@patch("dem.cli.command.export_cmd.check_is_path_contains_spec_char")
+@patch("dem.cli.command.export_cmd.check_is_directory")
+@patch("dem.cli.command.export_cmd.DevEnvLocalSetup")
+def test_wo_path(mock_DevEnvLocalSetup: MagicMock, mock_check_is_directory: MagicMock,
+                 mock_check_is_path_contains_spec_char: MagicMock, mock_open: MagicMock,
+                 mock_json_dump: MagicMock):
+    # Test setup
+    mock_platform = MagicMock()
+    mock_DevEnvLocalSetup.return_value = mock_platform
+
+    mock_dev_env_to_export = MagicMock()
+    mock_platform.get_dev_env_by_name.return_value = mock_dev_env_to_export
+
+    mock_check_is_directory.return_value = False
+    mock_check_is_path_contains_spec_char.return_value = False
+
+    mock_exported_file = MagicMock()
+    mock_open.return_value = mock_exported_file
+
+    test_dev_env_name = "test_dev_env_name"
+
     # Run unit under test
-    runner_result = runner.invoke(main.typer_cli, ["export", "Cica"])
+    runner_result = runner.invoke(main.typer_cli, ["export", test_dev_env_name])
 
     # Check expectations
     assert 0 == runner_result.exit_code
+
+    mock_DevEnvLocalSetup.assert_called_once()
+    mock_platform.get_dev_env_by_name.assert_called_once_with(test_dev_env_name)
+    mock_check_is_directory.assert_called_once_with(None)
+    mock_check_is_path_contains_spec_char.assert_called_once_with(None)
+    mock_open.assert_called_once_with(test_dev_env_name, "w")
+    mock_json_dump.assert_called_once_with(mock_dev_env_to_export.__dict__, mock_exported_file, 
+                                           indent=4)
+    mock_exported_file.close.assert_called_once()
 
 def test_with_invalid_devenv():
     # Run unit under test
