@@ -23,15 +23,16 @@ The CLI can communicate with the platform in two ways:
 
 The platform offers the following resources:
 
-1. **Tool images** (`tool_images`): This resource allows you to retrieve both local and registry tool 
-images.
-2. **Container Engine** (`container_engine`): his resource covers various operations related to the 
+1. **Tool images** (`tool_images`): You can use this resource to access tool images from both your 
+local storage and the registries.
+2. **Container Engine** (`container_engine`): This resource covers various operations related to the 
 container engine, including:
     - Pulling images
     - Running containers
     - Removing images
     - Searching for images
 3. **Registries** (`registries`): This resource contains information about the available registries.
+You can perform actions such as:
     - Adding or deleting registries
     - Listing the images stored in a registry
     - Pulling an image from a registry
@@ -46,9 +47,10 @@ catalogs. You can perform the following actions:
 
 ## Core Components
 
-The dependency graph of the core modules is illustrated below:
-
-![dependency_graph](wp-content/core_module_dependency_graph.png)
+<figure markdown>
+  ![dependency_graph](wp-content/core_module_dependency_graph.png)
+  <figcaption>The dependency graph of the core modules</figcaption>
+</figure>
 
 As shown in the diagram, the platform module depends on the rest of the resources. This concept 
 allows for the creation of a unified interface for all internal resources.
@@ -58,26 +60,27 @@ The relationships between classes in the core modules can be observed in the
 
 ## Third-party Modules
 
-### Typer
+### **Typer**
 This module is used to create a framework for the CLI commands. You can add a new command by 
-extending the list of functions in the main.py file and applying the @typer_cli.command() decorator.
+extending the list of functions in the main.py file and applying the `@typer_cli.command()` 
+decorator.
 
-### Rich
+### **Rich**
 Rich is a Python library used for formatting text with colors and styles, displaying advanced 
 content like tables, markdown, and syntax-highlighted code.  
 DEM employs this module to present information to the user in the command line.
 
-### Requests
+### **Requests**
 Requests is an HTTP library for Python.
 
-### Readchar
+### **Readchar**
 This module can be used to capture character inputs. In cases where the Rich module is not suitable, 
 Readchar is a useful tool for obtaining user input. 
 
 For instance, when the Rich module occupies the entire terminal for a TUI panel, Readchar can be 
 used to capture navigation input by reading individual characters.
 
-### Docker
+### **Docker**
 Docker is used to communicate directly with the Docker Engine. (The Docker CLI is not utilized.)
 
 ## Command setup

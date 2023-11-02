@@ -43,12 +43,12 @@ extra:
       - accept
       - reject
   social:
-    - icon: fontawesome/brands/linkedin
-      link: https://www.linkedin.com/company/axemsolutions/
-    - icon: fontawesome/brands/instagram
-      link: https://www.instagram.com/axemsolutions/
     - icon: fontawesome/brands/github
       link: https://github.com/axem-solutions
+    - icon: fontawesome/brands/discord
+      link: https://discord.com/invite/Nv6hSzXruK
+    - icon: fontawesome/brands/linkedin
+      link: https://www.linkedin.com/company/axemsolutions/
   generator: false
   homepage: https://axemsolutions.io
   analytics:
@@ -68,6 +68,7 @@ markdown_extensions:
   - admonition
   - attr_list
   - toc
+  - md_in_html
   - pymdownx.details
   - pymdownx.superfences
   - pymdownx.emoji:
