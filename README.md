@@ -91,6 +91,16 @@ DEM is available in the [PyPI repository](https://pypi.org/project/axem-dem/). I
 
 :information_source: The package name is axem-dem, but the command is `dem`.
 
+
+You can also install it with install-dem.sh from our repository. The installer script checks if the corresponding python version is available and installs the docker and axem-dem pip modul. 
+Download it with the the following command:
+
+    curl 'https://raw.githubusercontent.com/axem-solutions/dem/main/install-dem.sh' > install-dem.sh
+   
+Then execute it:
+
+    ./install-dem.sh
+
 ## Quick start
 
 ### Install a preconfigured environment
