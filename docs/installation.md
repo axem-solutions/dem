@@ -21,6 +21,17 @@ And that's it! Now you should be able to use the `dem` command.
 
     The package name is axem-dem, but the command is `dem`.
 
+
+You can also install it with install-dem.sh from our repository. The installer script checks if the 
+corresponding python version is available and installs the docker and axem-dem pip module.
+Download it with the following command:
+
+    curl 'https://raw.githubusercontent.com/axem-solutions/dem/main/install-dem.sh' > install-dem.sh
+   
+Then execute it:
+
+    ./install-dem.sh
+
 ## Optional: Use the source code
 
 The dem is [open source](https://github.com/axem-solutions/dem), so you can use it as a python 
