@@ -2,6 +2,7 @@ dev_env_json = """{
     "version": "0.1",
     "development_environments": [{
             "name": "demo",
+            "installed": "True",
             "tools": [{
                     "type": "build system",
                     "image_name": "axemsolutions/make_gnu_arm",
@@ -31,6 +32,7 @@ dev_env_json = """{
         },
         {
             "name": "nagy_cica_project",
+            "installed": "True",
             "tools": [{
                     "type": "build system",
                     "image_name": "axemsolutions/bazel",
@@ -72,6 +74,7 @@ invalid_dev_env_json = """{
 	"version": "0.1",
 	"development_environments": [{
 			"name": "demo",
+            "installed": "False",
 			"tools": [{
 					"type": "build_system",
 					"image_name": "axemsolutions/make_gnu_arm",

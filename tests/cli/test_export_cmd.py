@@ -24,6 +24,7 @@ def test_create_exported_dev_env_json(mock_os_path_isdir,mock_open):
     dev_env_name = "dev_env_name"
     dev_env_json = {
                     "name": "Cica",
+                    "installed": "True",
                     "tools": [
                         {
                             "type": "build system",
