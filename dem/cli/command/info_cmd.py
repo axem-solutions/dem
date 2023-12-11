@@ -25,8 +25,7 @@ def print_info(dev_env: (DevEnv | DevEnv)) -> None:
                                 image_status_messages[tool["image_status"]])
     stdout.print(tool_info_table)
 
-def execute(arg_dev_env_name: str) -> None:
-    platform = DevEnvLocalSetup()
+def execute(platform: DevEnvLocalSetup, arg_dev_env_name: str) -> None:
     dev_env = platform.get_dev_env_by_name(arg_dev_env_name)
 
     if dev_env is None:

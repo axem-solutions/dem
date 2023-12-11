@@ -94,18 +94,17 @@ def test_cp_given_dev_env():
 
     mock_platform.flush_to_file.assert_called_once()
 
-@patch("dem.cli.command.cp_cmd.DevEnvLocalSetup")
 @patch("dem.cli.command.cp_cmd.get_dev_env_to_cp")
 @patch("dem.cli.command.cp_cmd.check_new_dev_env_name_taken")
 @patch("dem.cli.command.cp_cmd.cp_given_dev_env")
 def test_cp(mock_cp_given_dev_env, mock_check_new_dev_env_name_taken, 
-               mock_get_dev_env_to_cp, mock_DevEnvLocalSetup):
+               mock_get_dev_env_to_cp):
     # Test setup
-    fake_local_platform = MagicMock()
-    mock_DevEnvLocalSetup.return_value = fake_local_platform
+    mock_platform = MagicMock()
     fake_dev_env_to_cp = MagicMock()
     mock_get_dev_env_to_cp.return_value = fake_dev_env_to_cp
     mock_check_new_dev_env_name_taken.return_value = False
+    main.platform = mock_platform
 
     test_dev_env_to_cp_name = "test_dev_env_to_cp_name"
     test_new_dev_env_name = "test_new_dev_env_name"
@@ -118,10 +117,9 @@ def test_cp(mock_cp_given_dev_env, mock_check_new_dev_env_name_taken,
     # Check expectations
     assert runner_result.exit_code == 0
 
-    mock_DevEnvLocalSetup.assert_called_once()
-    mock_get_dev_env_to_cp.assert_called_once_with(fake_local_platform, 
+    mock_get_dev_env_to_cp.assert_called_once_with(mock_platform, 
                                                       test_dev_env_to_cp_name)
-    mock_check_new_dev_env_name_taken.assert_called_once_with(fake_local_platform, 
+    mock_check_new_dev_env_name_taken.assert_called_once_with(mock_platform, 
                                                               test_new_dev_env_name)
-    mock_cp_given_dev_env.assert_called_once_with(fake_local_platform, 
+    mock_cp_given_dev_env.assert_called_once_with(mock_platform, 
                                                      fake_dev_env_to_cp, test_new_dev_env_name)

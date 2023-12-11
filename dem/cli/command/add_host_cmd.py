@@ -2,23 +2,19 @@
 
 from dem.core.platform import DevEnvLocalSetup
 from dem.cli.console import stdout
-import json
-import os
 
-def execute(name: str, address: str) -> None:
+def execute(platform: DevEnvLocalSetup, name: str, address: str) -> None:
     """ Add a new host.
     
         Args:
             name -- name of the host
             address -- IP or hostname of the host
     """
-    
     if not name or not address:
         stdout.print("[red]Error: NAME or ADDRESS cannot be empty.[/]")
         exit(1)
 
-    platform = DevEnvLocalSetup()
-    data = platform.config_file.deserialized.get("hosts", [])  # this way the data object is a list
+    data = platform.config_file.deserialized.get("hosts", [])
 
     if not data:
         platform.config_file.deserialized["hosts"] = [{"name": name, "address": address}]

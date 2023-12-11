@@ -27,8 +27,7 @@ runner = CliRunner(mix_stderr=False)
 
 ## Test listing the local dev envs.
 
-@patch("dem.cli.command.list_cmd.DevEnvLocalSetup")
-def test_with_valid_dev_env_json(mock_DevEnvLocalSetup: MagicMock):
+def test_with_valid_dev_env_json():
     # Test setup
     mock_platform = MagicMock()
     expected_dev_env_list = [
@@ -46,14 +45,12 @@ def test_with_valid_dev_env_json(mock_DevEnvLocalSetup: MagicMock):
         fake_dev_env.check_image_availability.return_value = fake_image_statuses[idx]
         fake_dev_envs.append(fake_dev_env)
     mock_platform.local_dev_envs = fake_dev_envs
-    mock_DevEnvLocalSetup.return_value = mock_platform
+    main.platform = mock_platform
 
     # Run unit under test
     runner_result = runner.invoke(main.typer_cli, ["list", "--local", "--env"])
 
     # Check expectations
-    mock_DevEnvLocalSetup.assert_called_once()
-
     assert 0 == runner_result.exit_code
 
     expected_table = Table()
@@ -66,12 +63,11 @@ def test_with_valid_dev_env_json(mock_DevEnvLocalSetup: MagicMock):
     expected_output = console.file.getvalue()
     assert expected_output == runner_result.stdout
 
-@patch("dem.cli.command.list_cmd.DevEnvLocalSetup")
-def test_with_empty_dev_env_json(mock_DevEnvLocalSetup):
+def test_with_empty_dev_env_json():
     # Test setup
     mock_platform = MagicMock()
     mock_platform.local_dev_envs = []
-    mock_DevEnvLocalSetup.return_value = mock_platform
+    main.platform = mock_platform
 
     # Run unit under test
     runner_result = runner.invoke(main.typer_cli, ["list", "--local", "--env"])
@@ -87,12 +83,11 @@ def test_with_empty_dev_env_json(mock_DevEnvLocalSetup):
 ## Test listing the org dev envs.
 
 @patch("dem.cli.command.list_cmd.stdout.print")
-@patch("dem.cli.command.list_cmd.DevEnvLocalSetup")
-def test_without_avialable_catalogs(mock_DevEnvLocalSetup: MagicMock, mock_stdout_print: MagicMock):
+def test_without_avialable_catalogs(mock_stdout_print: MagicMock):
     # Test setup
     mock_platform = MagicMock()
-    mock_DevEnvLocalSetup.return_value = mock_platform
     mock_platform.dev_env_catalogs.catalogs = []
+    main.platform = mock_platform
 
     # Run unit under test
     runner_result = runner.invoke(main.typer_cli, ["list", "--all", "--env"])
@@ -100,32 +95,27 @@ def test_without_avialable_catalogs(mock_DevEnvLocalSetup: MagicMock, mock_stdou
     # Check expectations
     assert 0 == runner_result.exit_code
 
-    mock_DevEnvLocalSetup.assert_called_once()
     mock_stdout_print.assert_called_once_with("[yellow]No Development Environment Catalogs are available!")
 
-@patch("dem.cli.command.list_cmd.DevEnvLocalSetup")
-def test_with_empty_catalog(mock_DevEnvLocalSetup: MagicMock):
+def test_with_empty_catalog():
     # Test setup
     mock_catalog = MagicMock()
     mock_catalog.dev_envs = []
     mock_platform = MagicMock()
-    mock_DevEnvLocalSetup.return_value = mock_platform
     mock_platform.dev_env_catalogs.catalogs = [mock_catalog]
+    main.platform = mock_platform
 
     # Run unit under test
     runner_result = runner.invoke(main.typer_cli, ["list", "--all", "--env"])
 
     # Check expectations
     assert 0 == runner_result.exit_code
-
-    mock_DevEnvLocalSetup.assert_called_once()
 
     console = Console(file=io.StringIO())
     console.print("[yellow]No Development Environments are available in the catalogs.[/]")
     assert console.file.getvalue() == runner_result.stdout
 
-@patch("dem.cli.command.list_cmd.DevEnvLocalSetup")
-def test_with_valid_dev_env_org_json(mock_DevEnvLocalSetup):
+def test_with_valid_dev_env_org_json():
     # Test setup
     mock_platform = MagicMock()
     expected_dev_env_list = [
@@ -149,14 +139,13 @@ def test_with_valid_dev_env_org_json(mock_DevEnvLocalSetup):
     mock_catalog = MagicMock()
     mock_platform.dev_env_catalogs.catalogs = [mock_catalog]
     mock_catalog.dev_envs = fake_catalog_dev_envs
-    mock_DevEnvLocalSetup.return_value = mock_platform
     mock_platform.get_local_dev_env.side_effect = [None, MagicMock(), MagicMock()]
+    main.platform = mock_platform
 
     # Run unit under test
     runner_result = runner.invoke(main.typer_cli, ["list", "--all", "--env"])
 
     # Check expectations
-    mock_DevEnvLocalSetup.assert_called_once()
     calls = []
     for fake_dev_env in fake_catalog_dev_envs:
         calls.append(call(fake_dev_env))
@@ -200,8 +189,7 @@ def test_with_invalid_option():
 
 ## Test listing the local tool images.
 
-@patch("dem.cli.command.list_cmd.DevEnvLocalSetup")
-def test_local_tool_images(mock_DevEnvLocalSetup: MagicMock):
+def test_local_tool_images():
     # Test setup
     test_local_tool_images = [
         "axemsolutions/cpputest:latest",
@@ -209,8 +197,8 @@ def test_local_tool_images(mock_DevEnvLocalSetup: MagicMock):
         "axemsolutions/make_gnu_arm:latest",
     ]
     mock_platform = MagicMock()
-    mock_DevEnvLocalSetup.return_value = mock_platform
     mock_platform.container_engine.get_local_tool_images.return_value = test_local_tool_images
+    main.platform = mock_platform
 
     # Run unit under test
     runner_result = runner.invoke(main.typer_cli, ["list", "--local", "--tool"])
@@ -218,7 +206,6 @@ def test_local_tool_images(mock_DevEnvLocalSetup: MagicMock):
     # Check expectations
     assert 0 == runner_result.exit_code
 
-    mock_DevEnvLocalSetup.assert_called_once()
     mock_platform.container_engine.get_local_tool_images.assert_called_once()
 
     expected_table = Table()
@@ -230,13 +217,12 @@ def test_local_tool_images(mock_DevEnvLocalSetup: MagicMock):
     console.print(expected_table)
     assert console.file.getvalue() == runner_result.stdout
 
-@patch("dem.cli.command.list_cmd.DevEnvLocalSetup")
-def test_no_local_tool_images(mock_DevEnvLocalSetup: MagicMock):
+def test_no_local_tool_images():
     # Test setup
     test_local_tool_images = []
     mock_platform = MagicMock()
-    mock_DevEnvLocalSetup.return_value = mock_platform
     mock_platform.container_engine.get_local_tool_images.return_value = test_local_tool_images
+    main.platform = mock_platform
 
     # Run unit under test
     runner_result = runner.invoke(main.typer_cli, ["list", "--local", "--tool"])
@@ -244,7 +230,6 @@ def test_no_local_tool_images(mock_DevEnvLocalSetup: MagicMock):
     # Check expectations
     assert 0 == runner_result.exit_code
 
-    mock_DevEnvLocalSetup.assert_called_once()
     mock_platform.container_engine.get_local_tool_images.assert_called_once()
     
     expected_table = Table()
@@ -255,8 +240,7 @@ def test_no_local_tool_images(mock_DevEnvLocalSetup: MagicMock):
 
 ## Test listing the local tool images.
 
-@patch("dem.cli.command.list_cmd.DevEnvLocalSetup")
-def test_registry_tool_images(mock_DevEnvLocalSetup: MagicMock):
+def test_registry_tool_images():
     # Test setup
     test_registry_tool_images = [
         "axemsolutions/cpputest:latest",
@@ -264,8 +248,8 @@ def test_registry_tool_images(mock_DevEnvLocalSetup: MagicMock):
         "axemsolutions/make_gnu_arm:latest",
     ]
     mock_platform = MagicMock()
-    mock_DevEnvLocalSetup.return_value = mock_platform
     mock_platform.registries.list_repos.return_value = test_registry_tool_images
+    main.platform = mock_platform
 
     # Run unit under test
     runner_result = runner.invoke(main.typer_cli, ["list", "--all", "--tool"])
@@ -285,13 +269,12 @@ def test_registry_tool_images(mock_DevEnvLocalSetup: MagicMock):
     assert console.file.getvalue() == runner_result.stdout
 
 @patch("dem.cli.command.list_cmd.stdout.print")
-@patch("dem.cli.command.list_cmd.DevEnvLocalSetup")
-def test_empty_repository(mock_DevEnvLocalSetup: MagicMock, mock_stdout_print: MagicMock):
+def test_empty_repository(mock_stdout_print: MagicMock):
     # Test setup
     test_registry_tool_images = []
     mock_platform = MagicMock()
-    mock_DevEnvLocalSetup.return_value = mock_platform
     mock_platform.registries.list_repos.return_value = test_registry_tool_images
+    main.platform = mock_platform
 
     # Run unit under test
     runner_result = runner.invoke(main.typer_cli, ["list", "--all", "--tool"])
@@ -303,12 +286,11 @@ def test_empty_repository(mock_DevEnvLocalSetup: MagicMock, mock_stdout_print: M
     mock_stdout_print.assert_called_once_with("[yellow]No images are available in the registries!")
 
 @patch("dem.cli.command.list_cmd.stdout.print")
-@patch("dem.cli.command.list_cmd.DevEnvLocalSetup")
-def test_no_registries_available(mock_DevEnvLocalSetup: MagicMock, mock_stdout_print: MagicMock):
+def test_no_registries_available(mock_stdout_print: MagicMock):
     # Test setup
     mock_platform = MagicMock()
     mock_platform.registries.registries = []
-    mock_DevEnvLocalSetup.return_value = mock_platform
+    main.platform = mock_platform
 
     # Run unit under test
     runner_result = runner.invoke(main.typer_cli, ["list", "--all", "--tool"])
@@ -316,7 +298,6 @@ def test_no_registries_available(mock_DevEnvLocalSetup: MagicMock, mock_stdout_p
     # Check expectations
     assert 0 == runner_result.exit_code
 
-    mock_DevEnvLocalSetup.assert_called_once()
     mock_stdout_print.assert_called_once_with("[yellow]No registries are available!")
 
 def test_get_local_dev_env_status_reinstall():

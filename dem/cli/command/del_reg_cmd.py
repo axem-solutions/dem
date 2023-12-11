@@ -4,13 +4,11 @@
 from dem.core.platform import DevEnvLocalSetup
 from dem.cli.console import stdout, stderr
 
-def execute(registry_name: str) -> None:
+def execute(platform: DevEnvLocalSetup, registry_name: str) -> None:
     """ Delete the registry.
         Args:
             registry_name -- name of the registry to delete
     """
-    platform = DevEnvLocalSetup()
-
     for registry in platform.registries.list_registry_configs():
         if registry["name"] == registry_name:
             platform.registries.delete_registry(registry)

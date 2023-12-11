@@ -4,14 +4,14 @@
 from dem.core.platform import DevEnvLocalSetup
 from dem.cli.console import stdout
 
-def execute(name: str, url:str) -> None:
+def execute(platform: DevEnvLocalSetup, name: str, url:str) -> None:
     """ Add a new Dev Env Catalog.
     
         Args:
             name -- name of the catalog
             url -- URL of the catalog's JSON file
     """
-    platform = DevEnvLocalSetup()
+    
     catalog_config = {
         "name": name,
         "url": url

@@ -17,23 +17,18 @@ from dem.core.tool_images import ToolImages
 # In order to test stdout and stderr separately, the stderr can't be mixed into the stdout.
 runner = CliRunner(mix_stderr=False)
 
-## Test helpers
-## Test cases
-
-@patch("dem.cli.command.pull_cmd.DevEnvLocalSetup")
-def test_dev_env_not_available_in_org(mock_DevEnvLocalSetup: MagicMock):
+def test_dev_env_not_available_in_org():
     # Test setup
     mock_platform = MagicMock()
-    mock_DevEnvLocalSetup.return_value = mock_platform
     mock_catalog = MagicMock()
     mock_platform.dev_env_catalogs.catalogs = [mock_catalog]
     mock_catalog.get_dev_env_by_name.return_value = None
+    main.platform = mock_platform
 
     # Run unit under test
     runner_result = runner.invoke(main.typer_cli, ["pull", "not existing env"], color=True)
 
     # Check expectations
-    mock_DevEnvLocalSetup.assert_called_once()
     mock_catalog.get_dev_env_by_name.assert_called_once_with("not existing env")
 
     assert 0 == runner_result.exit_code
@@ -42,13 +37,12 @@ def test_dev_env_not_available_in_org(mock_DevEnvLocalSetup: MagicMock):
     console.print("[red]Error: The input Development Environment is not available for the organization.[/]")
     assert console.file.getvalue() == runner_result.stderr
 
-@patch("dem.cli.command.pull_cmd.DevEnvLocalSetup")
-def test_dev_env_already_installed(mock_DevEnvLocalSetup: MagicMock):
+def test_dev_env_already_installed():
     # Test setup
     mock_platform = MagicMock()
-    mock_DevEnvLocalSetup.return_value = mock_platform
     mock_catalog = MagicMock()
     mock_platform.dev_env_catalogs.catalogs = [mock_catalog]
+    main.platform = mock_platform
 
     mock_catalog_dev_env = MagicMock()
     mock_tools = MagicMock()
@@ -78,7 +72,6 @@ def test_dev_env_already_installed(mock_DevEnvLocalSetup: MagicMock):
     # Check expectations
     assert 0 == runner_result.exit_code
 
-    mock_DevEnvLocalSetup.assert_called_once()
     mock_catalog.get_dev_env_by_name.assert_called_once_with(test_env_name)
 
     mock_platform.get_local_dev_env.assert_called_once_with(mock_catalog_dev_env)
@@ -91,13 +84,12 @@ def test_dev_env_already_installed(mock_DevEnvLocalSetup: MagicMock):
     console.print("The [yellow]test_env[/] Development Environment is ready!")
     assert console.file.getvalue() == runner_result.stdout
 
-@patch("dem.cli.command.pull_cmd.DevEnvLocalSetup")
-def test_dev_env_installed_but_different(mock_DevEnvLocalSetup: MagicMock):
+def test_dev_env_installed_but_different():
     # Test setup
     mock_platform = MagicMock()
-    mock_DevEnvLocalSetup.return_value = mock_platform
     mock_catalog = MagicMock()
     mock_platform.dev_env_catalogs.catalogs = [mock_catalog]
+    main.platform = mock_platform
 
     mock_catalog_dev_env = MagicMock()
     mock_tools = MagicMock()
@@ -125,7 +117,6 @@ def test_dev_env_installed_but_different(mock_DevEnvLocalSetup: MagicMock):
     assert 0 == runner_result.exit_code
     assert mock_local_dev_env.tools is mock_catalog_dev_env.tools
 
-    mock_DevEnvLocalSetup.assert_called_once()
     mock_catalog.get_dev_env_by_name.assert_called_once_with(test_env_name)
 
     mock_platform.get_local_dev_env.assert_called_once_with(mock_catalog_dev_env)
@@ -140,13 +131,12 @@ def test_dev_env_installed_but_different(mock_DevEnvLocalSetup: MagicMock):
     assert console.file.getvalue() == runner_result.stdout
 
 @patch("dem.cli.command.pull_cmd.DevEnv")
-@patch("dem.cli.command.pull_cmd.DevEnvLocalSetup")
-def test_dev_env_new_install(mock_DevEnvLocalSetup: MagicMock, mock_DevEnv: MagicMock):
+def test_dev_env_new_install(mock_DevEnv: MagicMock):
     # Test setup
     mock_platform = MagicMock()
-    mock_DevEnvLocalSetup.return_value = mock_platform
     mock_catalog = MagicMock()
     mock_platform.dev_env_catalogs.catalogs = [mock_catalog]
+    main.platform = mock_platform
 
     mock_catalog_dev_env = MagicMock()
     mock_tools = MagicMock()
@@ -175,7 +165,6 @@ def test_dev_env_new_install(mock_DevEnvLocalSetup: MagicMock, mock_DevEnv: Magi
     assert 0 == runner_result.exit_code
     assert mock_local_dev_env in mock_platform.local_dev_envs
 
-    mock_DevEnvLocalSetup.assert_called_once()
     mock_catalog.get_dev_env_by_name.assert_called_once_with(test_env_name)
     mock_platform.get_local_dev_env.assert_called_once_with(mock_catalog_dev_env)
     mock_DevEnv.assert_called_once_with(dev_env_to_copy=mock_catalog_dev_env)
@@ -191,13 +180,11 @@ def test_dev_env_new_install(mock_DevEnvLocalSetup: MagicMock, mock_DevEnv: Magi
 
 @patch("dem.cli.command.pull_cmd.stderr.print")
 @patch("dem.cli.command.pull_cmd.install_to_dev_env_json")
-@patch("dem.cli.command.pull_cmd.DevEnvLocalSetup")
-def test_execute_install_failed(mock_DevEnvLocalSetup: MagicMock, 
-                                mock_install_to_dev_env_json: MagicMock,
+def test_execute_install_failed(mock_install_to_dev_env_json: MagicMock,
                                 mock_stderr_print: MagicMock):
     # Test setup
     mock_platform = MagicMock()
-    mock_DevEnvLocalSetup.return_value = mock_platform
+    main.platform = mock_platform
 
     mock_catalog = MagicMock()
     mock_platform.dev_env_catalogs.catalogs = [mock_catalog]
@@ -222,7 +209,6 @@ def test_execute_install_failed(mock_DevEnvLocalSetup: MagicMock,
     # Check expectations
     assert 0 == runner_result.exit_code
 
-    mock_DevEnvLocalSetup.assert_called_once()
     mock_catalog.get_dev_env_by_name(test_env_name)
     mock_platform.get_local_dev_env.assert_called_once_with(mock_catalog_dev_env)
     mock_install_to_dev_env_json.assert_called_once_with(mock_local_dev_env, mock_catalog_dev_env, 
@@ -234,12 +220,11 @@ def test_execute_install_failed(mock_DevEnvLocalSetup: MagicMock,
     mock_stderr_print.assert_called_once_with("The installation failed.")
 
 @patch("dem.cli.command.pull_cmd.stderr.print")
-@patch("dem.cli.command.pull_cmd.DevEnvLocalSetup")
-def test_execute_no_catalogs(mock_DevEnvLocalSetup: MagicMock, mock_stderr_print: MagicMock):
+def test_execute_no_catalogs(mock_stderr_print: MagicMock):
     # Test setup
     mock_platform = MagicMock()
-    mock_DevEnvLocalSetup.return_value = mock_platform
     mock_platform.dev_env_catalogs.catalogs = []
+    main.platform = mock_platform
 
     test_env_name =  "test_env"
 
@@ -249,19 +234,16 @@ def test_execute_no_catalogs(mock_DevEnvLocalSetup: MagicMock, mock_stderr_print
     # Check expectations
     assert 0 == runner_result.exit_code
 
-    mock_DevEnvLocalSetup.assert_called_once()
     mock_stderr_print.assert_called_once_with("[red]Error: No Development Environment Catalogs are available to pull the image from![/]")
 
 @patch("dem.cli.command.pull_cmd.stderr.print")
-@patch("dem.cli.command.pull_cmd.DevEnvLocalSetup")
-def test_execute_dev_env_not_available_in_catalog(mock_DevEnvLocalSetup: MagicMock, 
-                                                  mock_stderr_print: MagicMock):
+def test_execute_dev_env_not_available_in_catalog(mock_stderr_print: MagicMock):
     # Test setup
     mock_platform = MagicMock()
-    mock_DevEnvLocalSetup.return_value = mock_platform
     mock_catalog = MagicMock()
     mock_catalog.get_dev_env_by_name.return_value = None
     mock_platform.dev_env_catalogs.catalogs = [mock_catalog]
+    main.platform = mock_platform
 
     test_env_name =  "test_env"
 
@@ -271,6 +253,5 @@ def test_execute_dev_env_not_available_in_catalog(mock_DevEnvLocalSetup: MagicMo
     # Check expectations
     assert 0 == runner_result.exit_code
 
-    mock_DevEnvLocalSetup.assert_called_once()
     mock_catalog.get_dev_env_by_name.assert_called_once_with(test_env_name)
     mock_stderr_print.assert_called_once_with("[red]Error: The input Development Environment is not available for the organization.[/]")

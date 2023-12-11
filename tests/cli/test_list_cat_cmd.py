@@ -16,12 +16,10 @@ runner = CliRunner(mix_stderr=False)
 ## Test cases
 @patch("dem.cli.command.list_cat_cmd.Table")
 @patch("dem.cli.command.list_cat_cmd.stdout.print")
-@patch("dem.cli.command.list_cat_cmd.DevEnvLocalSetup")
-def test_list_cat(mock_DevEnvLocalSetup: MagicMock, mock_stdout_print: MagicMock, 
-                  mock_Table: MagicMock):
+def test_list_cat(mock_stdout_print: MagicMock, mock_Table: MagicMock):
     # Test setup
     mock_platform = MagicMock()
-    mock_DevEnvLocalSetup.return_value = mock_platform
+    main.platform = mock_platform
     test_catalog_configs = [
         {
             "name": "test_name1",
@@ -42,8 +40,6 @@ def test_list_cat(mock_DevEnvLocalSetup: MagicMock, mock_stdout_print: MagicMock
     # Check expectations
     assert runner_result.exit_code == 0
 
-    mock_DevEnvLocalSetup.assert_called_once()
-
     mock_Table.assert_called_once()
     calls = [call("name"), call("url")]
     mock_table.add_column.assert_has_calls(calls)
@@ -59,12 +55,10 @@ def test_list_cat(mock_DevEnvLocalSetup: MagicMock, mock_stdout_print: MagicMock
 
 @patch("dem.cli.command.list_cat_cmd.Table")
 @patch("dem.cli.command.list_cat_cmd.stdout.print")
-@patch("dem.cli.command.list_cat_cmd.DevEnvLocalSetup")
-def test_list_cat_non_available(mock_DevEnvLocalSetup: MagicMock, mock_stdout_print: MagicMock, 
-                                mock_Table):
+def test_list_cat_non_available(mock_stdout_print: MagicMock, mock_Table):
     # Test setup
     mock_platform = MagicMock()
-    mock_DevEnvLocalSetup.return_value = mock_platform
+    main.platform = mock_platform
     mock_platform.dev_env_catalogs.list_catalog_configs.return_value = []
     mock_table = MagicMock()
     mock_Table.return_value = mock_table
@@ -74,8 +68,6 @@ def test_list_cat_non_available(mock_DevEnvLocalSetup: MagicMock, mock_stdout_pr
 
     # Check expectations
     assert runner_result.exit_code == 0
-
-    mock_DevEnvLocalSetup.assert_called_once()
 
     mock_Table.assert_called_once()
     calls = [call("name"), call("url")]

@@ -4,14 +4,14 @@
 from dem.core.platform import DevEnvLocalSetup
 from dem.cli.console import stdout
 
-def execute(name: str, url:str) -> None:
+def execute(platform: DevEnvLocalSetup, name: str, url:str) -> None:
     """ Add a new registry.
     
         Args:
             name -- name or IP address of the registry
             url -- API URL of the registry 
     """
-    platform = DevEnvLocalSetup()
+    
     registry = {
         "name": name,
         "url": url

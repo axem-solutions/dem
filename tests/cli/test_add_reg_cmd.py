@@ -14,11 +14,10 @@ from unittest.mock import patch, MagicMock
 runner = CliRunner(mix_stderr=False)
 
 ## Test cases
-@patch("dem.cli.command.add_reg_cmd.DevEnvLocalSetup")
-def test_add_reg(mock_DevEnvLocalSetup: MagicMock):
+def test_add_reg():
     # Test setup
     mock_platform = MagicMock()
-    mock_DevEnvLocalSetup.return_value = mock_platform
+    main.platform = mock_platform
 
     test_name = "test_name"
     test_url = "test_url"
@@ -31,7 +30,6 @@ def test_add_reg(mock_DevEnvLocalSetup: MagicMock):
     # Check expectations
     assert runner_result.exit_code == 0
 
-    mock_DevEnvLocalSetup.assert_called_once()
     mock_platform.registries.list_registry_configs.assert_called_once()
     expected_registry = {
             "name": test_name,
@@ -40,11 +38,10 @@ def test_add_reg(mock_DevEnvLocalSetup: MagicMock):
     mock_platform.registries.add_registry.assert_called_once_with(expected_registry)
 
 @patch("dem.cli.command.add_reg_cmd.stdout.print")
-@patch("dem.cli.command.add_reg_cmd.DevEnvLocalSetup")
-def test_add_reg_already_added(mock_DevEnvLocalSetup: MagicMock, mock_stdout_print: MagicMock):
+def test_add_reg_already_added(mock_stdout_print: MagicMock):
     # Test setup
     mock_platform = MagicMock()
-    mock_DevEnvLocalSetup.return_value = mock_platform
+    main.platform = mock_platform
 
     test_name = "test_name"
     test_url = "test_url"
@@ -60,6 +57,5 @@ def test_add_reg_already_added(mock_DevEnvLocalSetup: MagicMock, mock_stdout_pri
     # Check expectations
     assert runner_result.exit_code == 0
 
-    mock_DevEnvLocalSetup.assert_called_once()
     mock_platform.registries.list_registry_configs.assert_called_once()
     mock_stdout_print.assert_called_once_with("[yellow]The input registry is already added.[/]")

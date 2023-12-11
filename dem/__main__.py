@@ -3,14 +3,18 @@
 
 from dem import __command__
 from dem.cli.console import stderr, stdout
-from dem.core.exceptions import RegistryError, ContainerEngineError
+from dem.core.exceptions import RegistryError, ContainerEngineError, InternalError
 import dem.cli.main
 import docker.errors
 from dem.core.core import Core
+from dem.core.platform import DevEnvLocalSetup
 from dem.cli.tui.tui_user_output import TUIUserOutput
 
 def main():
     """ Entry point for the CLI application"""
+
+    # Create the Development Platform
+    dem.cli.main.platform = DevEnvLocalSetup()
 
     # Connect the UI to the user output interface
     Core.set_user_output(TUIUserOutput())
@@ -30,7 +34,7 @@ def main():
             stdout.print("\nHint: The input repository might not exist in the registry.")
         elif "400" in str(e):
             stdout.print("\nHint: The input parameters might not be valid.")
-    except ContainerEngineError as e:
+    except (ContainerEngineError, InternalError) as e:
         stderr.print("[red]" + str(e) + "[/]")
 
 # Call the main() when run as `python -m`

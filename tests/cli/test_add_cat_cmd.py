@@ -14,11 +14,10 @@ from unittest.mock import patch, MagicMock
 runner = CliRunner(mix_stderr=False)
 
 ## Test cases
-@patch("dem.cli.command.add_cat_cmd.DevEnvLocalSetup")
-def test_add_cat(mock_DevEnvLocalSetup: MagicMock):
+def test_add_cat():
     # Test setup
     mock_platform = MagicMock()
-    mock_DevEnvLocalSetup.return_value = mock_platform
+    main.platform = mock_platform
 
     test_name = "test_name"
     test_url = "test_url"
@@ -31,7 +30,6 @@ def test_add_cat(mock_DevEnvLocalSetup: MagicMock):
     # Check expectations
     assert runner_result.exit_code == 0
 
-    mock_DevEnvLocalSetup.assert_called_once()
     mock_platform.dev_env_catalogs.list_catalog_configs.assert_called_once()
     expected_catalog = {
             "name": test_name,
@@ -40,11 +38,10 @@ def test_add_cat(mock_DevEnvLocalSetup: MagicMock):
     mock_platform.dev_env_catalogs.add_catalog.assert_called_once_with(expected_catalog)
 
 @patch("dem.cli.command.add_cat_cmd.stdout.print")
-@patch("dem.cli.command.add_cat_cmd.DevEnvLocalSetup")
-def test_add_cat_already_added(mock_DevEnvLocalSetup: MagicMock, mock_stdout_print: MagicMock):
+def test_add_cat_already_added(mock_stdout_print: MagicMock):
     # Test setup
     mock_platform = MagicMock()
-    mock_DevEnvLocalSetup.return_value = mock_platform
+    main.platform = mock_platform
 
     test_name = "test_name"
     test_url = "test_url"
@@ -60,6 +57,5 @@ def test_add_cat_already_added(mock_DevEnvLocalSetup: MagicMock, mock_stdout_pri
     # Check expectations
     assert runner_result.exit_code == 0
 
-    mock_DevEnvLocalSetup.assert_called_once()
     mock_platform.dev_env_catalogs.list_catalog_configs.assert_called_once()
     mock_stdout_print.assert_called_once_with("[yellow]The input catalog is already added.[/]")

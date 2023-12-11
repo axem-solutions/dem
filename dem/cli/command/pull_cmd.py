@@ -34,9 +34,7 @@ def install_to_dev_env_json(local_dev_env: DevEnv | None, catalog_dev_env: DevEn
 
     return local_dev_env
 
-def execute(dev_env_name: str) -> None:
-    # Get the organization's Dev Env if available.
-    platform = DevEnvLocalSetup()
+def execute(platform: DevEnvLocalSetup, dev_env_name: str) -> None:
     catalog_dev_env: DevEnv | None = None
 
     if not platform.dev_env_catalogs.catalogs:

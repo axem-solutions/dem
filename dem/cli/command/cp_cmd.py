@@ -29,8 +29,7 @@ def cp_given_dev_env(platform: DevEnvLocalSetup, dev_env_to_cp: DevEnv,
     platform.local_dev_envs.append(new_dev_env)
     platform.flush_to_file()
 
-def execute(dev_env_to_cp_name: str, new_dev_env_name: str) -> None:
-    platform = DevEnvLocalSetup()
+def execute(platform: DevEnvLocalSetup, dev_env_to_cp_name: str, new_dev_env_name: str) -> None:
     dev_env_to_cp = get_dev_env_to_cp(platform, dev_env_to_cp_name)
 
     if (dev_env_to_cp is not None and
