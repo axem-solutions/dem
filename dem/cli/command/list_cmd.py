@@ -116,8 +116,7 @@ def list_tool_images(platform: DevEnvLocalSetup, local: bool, org: bool) -> None
         else:
             stdout.print("[yellow]No images are available in the registries!")
 
-def execute(local: bool, org: bool, env: bool, tool: bool) -> None:
-    platform = DevEnvLocalSetup()
+def execute(platform: DevEnvLocalSetup, local: bool, org: bool, env: bool, tool: bool) -> None:
     if ((local == True) or (org == True)) and (env == True) and (tool == False):
         list_dev_envs(platform, local, org)
     elif ((local == True) or (org == True)) and (env == False) and (tool == True):

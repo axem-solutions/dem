@@ -33,13 +33,13 @@ def get_expected_table(expected_tools: list[list[str]]) ->str:
 
 ## Test cases
 
-@patch("dem.cli.command.info_cmd.DevEnvLocalSetup")
-def test_info_local_dev_env_demo(mock_DevEnvLocalSetup):
+def test_info_local_dev_env_demo():
     # Test setup
-    fake_platform = MagicMock()
-    mock_DevEnvLocalSetup.return_value = fake_platform
-    fake_dev_env = MagicMock()
-    fake_dev_env.tools = [
+    mock_platform = MagicMock()
+    main.platform = mock_platform
+
+    mock_dev_env = MagicMock()
+    mock_dev_env.tools = [
         {
             "type": "build system",
             "image_name": "axemsolutions/make_gnu_arm",
@@ -66,11 +66,11 @@ def test_info_local_dev_env_demo(mock_DevEnvLocalSetup):
             "image_version": "latest" 
         },
     ]
-    fake_platform.get_dev_env_by_name.return_value = fake_dev_env
+    mock_platform.get_dev_env_by_name.return_value = mock_dev_env
     def stub_check_image_availability(*args, **kwargs):
-        for tool in fake_dev_env.tools:
+        for tool in mock_dev_env.tools:
             tool["image_status"] = ToolImages.LOCAL_AND_REGISTRY
-    fake_dev_env.check_image_availability.side_effect = stub_check_image_availability
+    mock_dev_env.check_image_availability.side_effect = stub_check_image_availability
 
     # Run unit under test
     test_dev_env_name = "demo"
@@ -79,9 +79,8 @@ def test_info_local_dev_env_demo(mock_DevEnvLocalSetup):
     # Check expectations
     assert runner_result.exit_code == 0
 
-    mock_DevEnvLocalSetup.assert_called_once()
-    fake_platform.get_dev_env_by_name.assert_called_once_with(test_dev_env_name)
-    fake_dev_env.check_image_availability.assert_called_once_with(fake_platform.tool_images)
+    mock_platform.get_dev_env_by_name.assert_called_once_with(test_dev_env_name)
+    mock_dev_env.check_image_availability.assert_called_once_with(mock_platform.tool_images)
 
     expected_tools = [
         ["build system", "axemsolutions/make_gnu_arm:latest", "Image is available locally and in the registry."],
@@ -92,11 +91,11 @@ def test_info_local_dev_env_demo(mock_DevEnvLocalSetup):
     ]
     assert get_expected_table(expected_tools)  == runner_result.stdout
 
-@patch("dem.cli.command.info_cmd.DevEnvLocalSetup")
-def test_info_local_dev_env_nagy_cica_project(mock_DevEnvLocalSetup):
+def test_info_local_dev_env_nagy_cica_project():
     # Test setup
-    fake_platform = MagicMock()
-    mock_DevEnvLocalSetup.return_value = fake_platform
+    mock_platform = MagicMock()
+    main.platform = mock_platform
+
     fake_dev_env = MagicMock()
     fake_dev_env.tools = [
         {
@@ -125,7 +124,7 @@ def test_info_local_dev_env_nagy_cica_project(mock_DevEnvLocalSetup):
             "image_version": "latest" 
         },
     ]
-    fake_platform.get_dev_env_by_name.return_value = fake_dev_env
+    mock_platform.get_dev_env_by_name.return_value = fake_dev_env
     def stub_check_image_availability(*args, **kwargs):
         fake_dev_env.tools[0]["image_status"] = ToolImages.NOT_AVAILABLE
         fake_dev_env.tools[1]["image_status"] = ToolImages.NOT_AVAILABLE
@@ -141,9 +140,8 @@ def test_info_local_dev_env_nagy_cica_project(mock_DevEnvLocalSetup):
     # Check expectations
     assert runner_result.exit_code == 0
 
-    mock_DevEnvLocalSetup.assert_called_once()
-    fake_platform.get_dev_env_by_name.assert_called_once_with(test_dev_env_name)
-    fake_dev_env.check_image_availability.assert_called_once_with(fake_platform.tool_images)
+    mock_platform.get_dev_env_by_name.assert_called_once_with(test_dev_env_name)
+    fake_dev_env.check_image_availability.assert_called_once_with(mock_platform.tool_images)
 
     expected_tools = [
         ["build system", "axemsolutions/bazel:latest", "[red]Error: Required image is not available![/]"],
@@ -154,11 +152,11 @@ def test_info_local_dev_env_nagy_cica_project(mock_DevEnvLocalSetup):
     ]
     assert get_expected_table(expected_tools) == runner_result.stdout
 
-@patch("dem.cli.command.info_cmd.DevEnvLocalSetup")
-def test_info_dev_env_invalid(mock_DevEnvLocalSetup):
+def test_info_dev_env_invalid():
     # Test setup
     mock_platform = MagicMock()
-    mock_DevEnvLocalSetup.return_value = mock_platform
+    main.platform = mock_platform
+
     mock_platform.get_dev_env_by_name.return_value = None
     mock_platform.dev_env_catalogs.catalogs = []
 
@@ -169,7 +167,6 @@ def test_info_dev_env_invalid(mock_DevEnvLocalSetup):
     # Check expectations
     assert runner_result.exit_code == 0
 
-    mock_DevEnvLocalSetup.assert_called_once()
     mock_platform.get_dev_env_by_name.assert_called_once_with(test_dev_env_name)
 
     console = Console(file=io.StringIO())
@@ -177,11 +174,11 @@ def test_info_dev_env_invalid(mock_DevEnvLocalSetup):
     expected_output = console.file.getvalue()
     assert expected_output == runner_result.stderr
 
-@patch("dem.cli.command.info_cmd.DevEnvLocalSetup")
-def test_info_org_dev_env(mock_DevEnvLocalSetup):
+def test_info_org_dev_env():
     # Test setup
     mock_platform = MagicMock()
-    mock_DevEnvLocalSetup.return_value = mock_platform
+    main.platform = mock_platform
+
     mock_platform.get_dev_env_by_name.return_value = None
 
     mock_catalog = MagicMock()
@@ -227,7 +224,6 @@ def test_info_org_dev_env(mock_DevEnvLocalSetup):
     # Check expectations
     assert runner_result.exit_code == 0
 
-    mock_DevEnvLocalSetup.assert_called_once()
     mock_platform.get_dev_env_by_name.assert_called_once_with(test_dev_env_name)
 
     mock_catalog.get_dev_env_by_name.assert_called_once_with(test_dev_env_name)

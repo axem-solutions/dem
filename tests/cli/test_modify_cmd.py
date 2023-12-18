@@ -117,12 +117,11 @@ def test_handle_user_confirm_cancel():
     with pytest.raises(typer.Abort):
         modify_cmd.handle_user_confirm("cancel", MagicMock(), MagicMock())
 
-@patch("dem.cli.command.modify_cmd.DevEnvLocalSetup")
-def test_execute_invalid_name(mock_DevEnvLocalSetup):
+def test_execute_invalid_name():
     # Test setup
-    mock_dev_env_local_setup = MagicMock()
-    mock_DevEnvLocalSetup.return_value = mock_dev_env_local_setup
-    mock_dev_env_local_setup.get_dev_env_by_name.return_value = None
+    mock_platform = MagicMock()
+    main.platform = mock_platform
+    mock_platform.get_dev_env_by_name.return_value = None
     test_dev_env_name =  "not existing env"
 
     # Run unit under test
@@ -131,8 +130,7 @@ def test_execute_invalid_name(mock_DevEnvLocalSetup):
     # Check expectations
     assert 0 == runner_result.exit_code
 
-    mock_DevEnvLocalSetup.assert_called_once()
-    mock_dev_env_local_setup.get_dev_env_by_name.assert_called_once_with(test_dev_env_name)
+    mock_platform.get_dev_env_by_name.assert_called_once_with(test_dev_env_name)
 
     console = Console(file=io.StringIO())
     console.print("[red]The Development Environment doesn't exist.")
@@ -142,15 +140,13 @@ def test_execute_invalid_name(mock_DevEnvLocalSetup):
 @patch("dem.cli.command.modify_cmd.get_confirm_from_user")
 @patch("dem.cli.command.modify_cmd.get_modifications_from_user")
 @patch("dem.cli.command.modify_cmd.get_tool_image_list")
-@patch("dem.cli.command.modify_cmd.DevEnvLocalSetup")
-def test_execute_valid_name(mock_DevEnvLocalSetup, mock_get_tool_image_list, 
-                            mock_get_modifications_from_user, 
+def test_execute_valid_name(mock_get_tool_image_list, mock_get_modifications_from_user, 
                             mock_get_confirm_from_user, mock_handle_user_confirm):
     # Test setup
-    mock_dev_env_local_setup = MagicMock()
-    mock_DevEnvLocalSetup.return_value = mock_dev_env_local_setup
+    mock_platform = MagicMock()
+    main.platform = mock_platform
     mock_dev_env_local = MagicMock()
-    mock_dev_env_local_setup.get_dev_env_by_name.return_value = mock_dev_env_local
+    mock_platform.get_dev_env_by_name.return_value = mock_dev_env_local
 
     mock_tool_image_list = MagicMock()
     mock_get_tool_image_list.return_value = mock_tool_image_list
@@ -165,11 +161,10 @@ def test_execute_valid_name(mock_DevEnvLocalSetup, mock_get_tool_image_list,
     # Check expectations
     assert 0 == runner_result.exit_code
 
-    mock_DevEnvLocalSetup.assert_called_once()
-    mock_dev_env_local_setup.get_dev_env_by_name.assert_called_once_with(test_dev_env_name)
-    mock_get_tool_image_list.assert_called_once_with(mock_dev_env_local_setup.tool_images)
+    mock_platform.get_dev_env_by_name.assert_called_once_with(test_dev_env_name)
+    mock_get_tool_image_list.assert_called_once_with(mock_platform.tool_images)
     mock_get_modifications_from_user.assert_called_once_with(mock_dev_env_local, 
                                                              mock_tool_image_list)
     mock_get_confirm_from_user.assert_called_once()
     mock_handle_user_confirm.assert_called_once_with(mock_confirmation, mock_dev_env_local, 
-                                                     mock_dev_env_local_setup)
+                                                     mock_platform)

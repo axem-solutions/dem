@@ -26,7 +26,7 @@ def handle_missing_tool_images(missing_tool_images: set[str], dev_env_local: Dev
     platform.pull_images(dev_env_local.tools)
     stdout.print("[green]DEM fixed the " + dev_env_local.name + "![/]")
 
-def execute(dev_env_name: str, container_arguments: list[str]) -> None:
+def execute(platform: DevEnvLocalSetup, dev_env_name: str, container_arguments: list[str]) -> None:
     """ Execute the run command in the given Dev Env context. If something is wrong with the Dev 
         Env the DEM can try to fix it.
 
@@ -34,7 +34,7 @@ def execute(dev_env_name: str, container_arguments: list[str]) -> None:
             dev_env_name -- name of the Development Environment
             container_arguments -- arguments passed to the container
     """
-    platform = DevEnvLocalSetup()
+    
     dev_env_local = platform.get_dev_env_by_name(dev_env_name)
 
     if dev_env_local is None:

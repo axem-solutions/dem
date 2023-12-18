@@ -33,8 +33,7 @@ def remove_unused_tool_images(deleted_dev_env: DevEnv, dev_env_local_setup: DevE
         if tool_image not in all_required_tool_images:
             try_to_delete_tool_image(tool_image, dev_env_local_setup)
 
-def execute(dev_env_name: str) -> None:
-    platform = DevEnvLocalSetup()
+def execute(platform: DevEnvLocalSetup, dev_env_name: str) -> None:
     dev_env_to_delete = platform.get_dev_env_by_name(dev_env_name)
 
     if dev_env_to_delete is None:

@@ -11,26 +11,25 @@ To use the DEM on your PC, you need to have the following tools installed:
 
 ## Installation
 
-dem is available in the PyPI repository. Install it with:
+Use the following install script to get the latest version of DEM:
+    curl -fsSL 'https://raw.githubusercontent.com/axem-solutions/dem/main/install-dem.sh' | bash
+
+### Alternative installation
+
+If all the prerequisites are fulfilled, the DEM can be installed from the 
+[PyPI repository](https://pypi.org/project/axem-dem/):
 
     pip install axem-dem
 
-And that's it! Now you should be able to use the `dem` command.
+:information_source: The package name is axem-dem, but the command is `dem`.
 
-!!! info
+### Enable autocompletion
 
-    The package name is axem-dem, but the command is `dem`.
+After installation, you can enable the autocompletion for bash and zsh shells
 
+    dem --install-completion
 
-You can also install it with install-dem.sh from our repository. The installer script checks if the 
-corresponding python version is available and installs the docker and axem-dem pip module.
-Download it with the following command:
-
-    curl 'https://raw.githubusercontent.com/axem-solutions/dem/main/install-dem.sh' > install-dem.sh
-   
-Then execute it:
-
-    ./install-dem.sh
+> Note for zsh users: `compinit` must be called from your .zshrc.
 
 ## Optional: Use the source code
 

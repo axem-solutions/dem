@@ -10,16 +10,16 @@ documentation = "https://axemsolutions.io/dem_doc/"
 repository = "https://github.com/axem-solutions/dem"
 keywords = ["iot", "embedded", "edge", "devops", "tools", "containers"]
 classifiers = [
-	"Development Status :: 3 - Alpha",
-	"Environment :: Console",
-	"Intended Audience :: Developers",
-	"Natural Language :: English",
-	"Topic :: Software Development",
-	"Topic :: Software Development :: Build Tools",
-	"Topic :: Software Development :: Compilers",
-	"Topic :: Software Development :: Debuggers",
-	"Topic :: Software Development :: Embedded Systems",
-	"Topic :: Software Development :: Testing"
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Natural Language :: English",
+    "Topic :: Software Development",
+    "Topic :: Software Development :: Build Tools",
+    "Topic :: Software Development :: Compilers",
+    "Topic :: Software Development :: Debuggers",
+    "Topic :: Software Development :: Embedded Systems",
+    "Topic :: Software Development :: Testing"
 ]
 packages = [{include = "dem"}]
 
@@ -50,13 +50,19 @@ pytest-cov = "^4.1.0"
 [tool.coverage.report]
 # Regexes for lines to exclude from consideration
 exclude_also = [
-	"if __name__ == .__main__.:",
-	]
+    "if __name__ == .__main__.:",
+]
+
 [tool.coverage.run]
-omit =[
-	# Tests are not needed for the absract base class.
-	"dem/core/user_output.py",
-	]
+omit = [
+    # Tests are not needed for the absract base class.
+    "dem/core/user_output.py",
+]
+
+[tool.pytest.ini_options]
+filterwarnings = [
+    "ignore::DeprecationWarning",
+]
 
 [build-system]
 requires = ["poetry-core"]

@@ -20,3 +20,7 @@ class ContainerEngineError(Exception):
 
     def __init__(self, message: str) -> None:
         super().__init__(self.base_message + message)
+
+class InternalError(Exception):
+    """Raised when an object is used incorrectly."""
+    pass

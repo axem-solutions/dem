@@ -169,11 +169,10 @@ def test_execute_abort(mock_confirm, mock_get_dev_env_descriptor_from_user):
 
 @patch("dem.cli.command.create_cmd.stdout.print")
 @patch("dem.cli.command.create_cmd.create_dev_env")
-@patch("dem.cli.command.create_cmd.DevEnvLocalSetup")
-def test_execute(mock_DevEnvLocalSetup, mock_create_dev_env, mock_stdout_print):
+def test_execute(mock_create_dev_env, mock_stdout_print):
     # Test setup
-    mock_dev_env_local_setup = MagicMock()
-    mock_DevEnvLocalSetup.return_value = mock_dev_env_local_setup
+    mock_platform = MagicMock()
+    main.platform = mock_platform
 
     mock_dev_env = MagicMock()
     expected_dev_env_name = "test_dev_env"
@@ -189,21 +188,19 @@ def test_execute(mock_DevEnvLocalSetup, mock_create_dev_env, mock_stdout_print):
     # Check expectations
     assert 0 == runner_result.exit_code
 
-    mock_DevEnvLocalSetup.assert_called_once()
-    mock_create_dev_env.assert_called_once_with(mock_dev_env_local_setup, expected_dev_env_name)
-    mock_dev_env.check_image_availability.assert_called_once_with(mock_dev_env_local_setup.tool_images,
+    mock_create_dev_env.assert_called_once_with(mock_platform, expected_dev_env_name)
+    mock_dev_env.check_image_availability.assert_called_once_with(mock_platform.tool_images,
                                                                   update_tool_images=True)
 
     mock_stdout_print.assert_called_once_with("The [yellow]" + expected_dev_env_name + "[/] Development Environment is ready!")
-    mock_dev_env_local_setup.update_json()
+    mock_platform.update_json()
 
 @patch("dem.cli.command.create_cmd.stderr.print")
 @patch("dem.cli.command.create_cmd.create_dev_env")
-@patch("dem.cli.command.create_cmd.DevEnvLocalSetup")
-def test_execute_failure(mock_DevEnvLocalSetup, mock_create_dev_env, mock_stderr_print):
+def test_execute_failure(mock_create_dev_env, mock_stderr_print):
     # Test setup
-    mock_dev_env_local_setup = MagicMock()
-    mock_DevEnvLocalSetup.return_value = mock_dev_env_local_setup
+    mock_platform = MagicMock()
+    main.platform = mock_platform
 
     mock_dev_env = MagicMock()
     mock_create_dev_env.return_value = mock_dev_env
@@ -219,9 +216,8 @@ def test_execute_failure(mock_DevEnvLocalSetup, mock_create_dev_env, mock_stderr
     # Check expectations
     assert 0 == runner_result.exit_code
 
-    mock_DevEnvLocalSetup.assert_called_once()
-    mock_create_dev_env.assert_called_once_with(mock_dev_env_local_setup, expected_dev_env_name)
-    mock_dev_env.check_image_availability.assert_called_once_with(mock_dev_env_local_setup.tool_images,
+    mock_create_dev_env.assert_called_once_with(mock_platform, expected_dev_env_name)
+    mock_dev_env.check_image_availability.assert_called_once_with(mock_platform.tool_images,
                                                                   update_tool_images=True)
     mock_stderr_print.assert_called_once_with("The installation failed.")
 

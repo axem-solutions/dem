@@ -43,7 +43,7 @@ Development Environments for embedded software development.
 > The DEM can be used locally, but it is in alpha state, so expect major new features!
 
 <p align="center">
-:star2: Contributors and early adopters are welcome! :star2:
+Contributors and early adopters are welcome!
 </p>
 
 ## Concept
@@ -85,21 +85,25 @@ To be able to use the DEM on your PC, you need to have the following software in
 
 ## Installation
 
-DEM is available in the [PyPI repository](https://pypi.org/project/axem-dem/). Install it with:
+Use the following install script to get the latest version of DEM:
+    curl -fsSL 'https://raw.githubusercontent.com/axem-solutions/dem/main/install-dem.sh' | bash
+
+### Alternative installation
+
+If all the prerequisites are fulfilled, the DEM can be installed from the 
+[PyPI repository](https://pypi.org/project/axem-dem/):
 
     pip install axem-dem
 
 :information_source: The package name is axem-dem, but the command is `dem`.
 
+### Enable autocompletion
 
-You can also install it with install-dem.sh from our repository. The installer script checks if the corresponding python version is available and installs the docker and axem-dem pip module. 
-Download it with the following command:
+After installation, you can enable the autocompletion for bash and zsh shells
 
-    curl 'https://raw.githubusercontent.com/axem-solutions/dem/main/install-dem.sh' > install-dem.sh
-   
-Then execute it:
+    dem --install-completion
 
-    ./install-dem.sh
+> Note for zsh users: `compinit` must be called from your .zshrc.
 
 ## Quick start
 

@@ -172,8 +172,7 @@ def create_dev_env(platform: DevEnvLocalSetup, dev_env_name: str) -> DevEnv:
 
     return new_dev_env
 
-def execute(dev_env_name: str) -> None:
-    platform = DevEnvLocalSetup()
+def execute(platform: DevEnvLocalSetup, dev_env_name: str) -> None:
     dev_env = create_dev_env(platform, dev_env_name)
 
     # Validate the Dev Env creation

@@ -33,9 +33,7 @@ def load_dev_env_to_dev_env_json(dev_env_local_setup: DevEnvLocalSetup,path_to_d
         raw_file.close()
         return True
 
-def execute(path_to_dev_env: str) -> None:
-    platform = DevEnvLocalSetup()    
-
+def execute(platform: DevEnvLocalSetup, path_to_dev_env: str) -> None:
     if check_is_file_exist(path_to_dev_env) is True:                
         retval = load_dev_env_to_dev_env_json(platform,path_to_dev_env)        
         if retval == True:

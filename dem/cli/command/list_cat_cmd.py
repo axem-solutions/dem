@@ -5,9 +5,8 @@ from dem.core.platform import DevEnvLocalSetup
 from dem.cli.console import stdout
 from rich.table import Table
 
-def execute() -> None:
+def execute(platform: DevEnvLocalSetup) -> None:
     """ List available Development Environment Catalogs."""
-    platform = DevEnvLocalSetup()
     catalog_config = None
     table = Table()
     table.add_column("name")

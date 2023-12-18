@@ -172,8 +172,7 @@ def handle_user_confirm(confirmation: str, dev_env_local: DevEnv,
     dev_env_local_setup.pull_images(dev_env_local.tools)        
 
 
-def execute(dev_env_name: str) -> None:
-    platform = DevEnvLocalSetup()
+def execute(platform: DevEnvLocalSetup, dev_env_name: str) -> None:
     dev_env_local = platform.get_dev_env_by_name(dev_env_name)
 
     if dev_env_local is None:

@@ -14,14 +14,13 @@ from unittest.mock import patch, MagicMock
 runner = CliRunner(mix_stderr=False)
 
 ## Test cases
-@patch("dem.cli.command.rename_cmd.DevEnvLocalSetup")
-def test_rename_success(mock_DevEnvLocalSetup):
+def test_rename_success():
     # Test setup
     original_dev_env_name = "original_dev_env_name"
     new_dev_env_name = "new_dev_env_name"
 
     fake_local_platform = MagicMock()
-    mock_DevEnvLocalSetup.return_value = fake_local_platform
+    main.platform = fake_local_platform
     
     fake_dev_env_to_rename = MagicMock()
     fake_local_platform.get_dev_env_by_name.return_value = fake_dev_env_to_rename
@@ -34,21 +33,18 @@ def test_rename_success(mock_DevEnvLocalSetup):
     assert 0 == runner_result.exit_code
     assert fake_dev_env_to_rename.name is new_dev_env_name
 
-    mock_DevEnvLocalSetup.assert_called_once()
     fake_local_platform.get_dev_env_by_name.assert_called_once_with(original_dev_env_name)
     fake_local_platform.flush_to_file.assert_called_once()
 
 @patch("dem.cli.command.rename_cmd.stderr.print")
-@patch("dem.cli.command.rename_cmd.DevEnvLocalSetup")
-def test_rename_non_existing(mock_DevEnvLocalSetup, mock_stderr_print):
+def test_rename_non_existing(mock_stderr_print):
     # Test setup
     original_dev_env_name = "original_dev_env_name"
     new_dev_env_name = "new_dev_env_name"
 
-    fake_local_platform = MagicMock()
-    mock_DevEnvLocalSetup.return_value = fake_local_platform
-    
-    fake_local_platform.get_dev_env_by_name.return_value = None
+    mock_platform = MagicMock()
+    mock_platform.get_dev_env_by_name.return_value = None
+    main.platform = mock_platform
 
     # Run unit under test
     runner_result = runner.invoke(main.typer_cli, 
@@ -57,6 +53,5 @@ def test_rename_non_existing(mock_DevEnvLocalSetup, mock_stderr_print):
     # Check expectations
     assert 0 == runner_result.exit_code
 
-    mock_DevEnvLocalSetup.assert_called_once()
-    fake_local_platform.get_dev_env_by_name.assert_called_once_with(original_dev_env_name)
+    mock_platform.get_dev_env_by_name.assert_called_once_with(original_dev_env_name)
     mock_stderr_print.assert_called_once_with("[red]Error: The input Development Environment does not exist.[/]")

@@ -19,23 +19,20 @@ runner = CliRunner(mix_stderr=False)
 
 ## Test cases
 @patch("dem.cli.command.run_cmd.stderr.print")
-@patch("dem.cli.command.run_cmd.DevEnvLocalSetup")
-def test_handle_invalid_dev_env(mock_DevEnvLocalSetup: MagicMock, mock_stderr_print: MagicMock):
+def test_handle_invalid_dev_env(mock_stderr_print: MagicMock):
     # Test setup
     mock_platform = MagicMock()
-    mock_DevEnvLocalSetup.return_value = mock_platform
     mock_platform.get_dev_env_by_name.return_value = None
     test_dev_env_name = "test_dev_env_name"
 
     # Run unit under test
     with pytest.raises(typer.Abort):
         # execute() gets tested directly to see if the exception is raised
-        run_cmd.execute(test_dev_env_name, [])
+        run_cmd.execute(mock_platform, test_dev_env_name, [])
 
         # Check expectations
         mock_stderr_print.assert_called_once_with("[red]Error: Unknown Development Environment: " + test_dev_env_name + "[/]")
 
-        mock_DevEnvLocalSetup.assert_called_once()
         mock_platform.get_dev_env_by_name.assert_called_once_with(test_dev_env_name)
 
 
@@ -98,8 +95,7 @@ def test_handle_missing_tool_images_do_fix(mock_stderr_print, mock_confirm, mock
     mock_stdout_print.assert_called_once_with("[green]DEM fixed the " + mock_dev_env_local.name + "![/]")
 
 @patch("dem.cli.command.run_cmd.handle_missing_tool_images")
-@patch("dem.cli.command.run_cmd.DevEnvLocalSetup")
-def test_execute(mock_DevEnvLocalSetup, mock_handle_missing_tool_images):
+def test_execute(mock_handle_missing_tool_images):
     # Test setup
     test_dev_env_name = "test_dev_env_name"
     test_tool_type = "test_tool_type"
@@ -109,11 +105,11 @@ def test_execute(mock_DevEnvLocalSetup, mock_handle_missing_tool_images):
     
     mock_platform = MagicMock()
     mock_platform.tool_images.local.elements = ["test_image_name:test_image_version"]
-    mock_DevEnvLocalSetup.return_value = mock_platform
+    main.platform = mock_platform
     mock_dev_env_local = MagicMock()
     mock_platform.get_dev_env_by_name.return_value = mock_dev_env_local
 
-    mock_DevEnvLocalSetup.update_tool_images_on_instantiation = True
+    main.DevEnvLocalSetup.update_tool_images_on_instantiation = True
 
     mock_dev_env_local.tools = [
         {
@@ -133,9 +129,8 @@ def test_execute(mock_DevEnvLocalSetup, mock_handle_missing_tool_images):
 
     # Check expectations
     assert 0 == runner_result.exit_code
-    assert mock_DevEnvLocalSetup.update_tool_images_on_instantiation is False
+    assert main.DevEnvLocalSetup.update_tool_images_on_instantiation is False
 
-    mock_DevEnvLocalSetup.assert_called_once()
     mock_platform.get_dev_env_by_name.assert_called_once_with(test_dev_env_name)
     mock_platform.tool_images.local.update.assert_called_once()
 

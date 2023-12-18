@@ -4,8 +4,7 @@
 from dem.core.platform import DevEnvLocalSetup
 from dem.cli.console import stderr
 
-def execute(dev_env_name_to_rename: str, new_dev_env_name: str) -> None:
-    platform = DevEnvLocalSetup()
+def execute(platform: DevEnvLocalSetup, dev_env_name_to_rename: str, new_dev_env_name: str) -> None:
     dev_env_to_rename = platform.get_dev_env_by_name(dev_env_name_to_rename)
 
     if dev_env_to_rename is not None:
