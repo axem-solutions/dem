@@ -7,6 +7,12 @@ from dem.core.dev_env import DevEnv
 from dem.cli.console import stdout, stderr
 
 def handle_existing_local_dev_env(platform: DevEnvLocalSetup, local_dev_env: DevEnv) -> None:
+    """ Handle the case when the Dev Env already exists locally.
+
+        Args:
+            platform -- the platform
+            local_dev_env -- the existing Dev Env
+    """
     stdout.print("[yellow]The Dev Env already exists. By continuing the local Dev Env will be uninstalled.[/]")
     typer.confirm("Continue with overwrite?", abort=True)
     
@@ -14,6 +20,14 @@ def handle_existing_local_dev_env(platform: DevEnvLocalSetup, local_dev_env: Dev
     platform.local_dev_envs.remove(local_dev_env)
 
 def execute(platform: DevEnvLocalSetup, dev_env_name: str) -> None:
+    """ Copy the Dev Env's descriptor from the catalog to the local descriptor storage.
+
+        If the Dev Env already exists locally, the user will be asked to confirm the overwrite.
+
+        Args:
+            platform -- the platform
+            dev_env_name -- name of the Dev Env to clone
+    """
     catalog_dev_env: DevEnv | None = None
 
     if not platform.dev_env_catalogs.catalogs:
