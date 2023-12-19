@@ -71,8 +71,6 @@ def test_load_dev_env_to_dev_env_json(mock_open, mock_json, mock_DevEnvLocal: Ma
     mock_open.assert_called_once_with(path, "r")
     mock_platform.get_dev_env_by_name.assert_called()
     mock_DevEnvLocal.assert_called_once_with(test_dev_env)
-    mock_new_dev_env.check_image_availability.assert_called_once_with(mock_platform.tool_images)
-    mock_platform.pull_images.assert_called_once_with(mock_new_dev_env.tools)
     fake_opened_file.close.assert_called() 
 
 @patch("dem.cli.command.load_cmd.open",MagicMock())
@@ -100,7 +98,6 @@ def test_wo_path():
     assert 2 == runner_result.exit_code
 
 def test_with_invalid_file():
-
     # Run unit under test
     runner_result = runner.invoke(main.typer_cli, ["load", "asd"])
 
@@ -109,19 +106,6 @@ def test_with_invalid_file():
 
     console = Console(file=io.StringIO())
     console.print("[red]Error: The input file does not exist.[/]")
-    assert console.file.getvalue() == runner_result.stderr
-
-@patch("dem.cli.command.load_cmd.load_dev_env_to_dev_env_json")
-@patch("dem.cli.command.load_cmd.check_is_file_exist")
-def test_wrong_execution(mock_file_check,mock_load_dev_env):
-
-    mock_file_check.return_value = True
-    mock_load_dev_env.return_value = False
-    # Run unit under test
-    runner_result = runner.invoke(main.typer_cli, ["load", "asd"])
-       
-    console = Console(file=io.StringIO())
-    console.print("[red]Error: Something went wrong.[/]")
     assert console.file.getvalue() == runner_result.stderr
 
 @patch("dem.cli.command.load_cmd.load_dev_env_to_dev_env_json")

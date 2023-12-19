@@ -1,7 +1,7 @@
 """list CLI command implementation."""
 # dem/cli/list_cmd.py
 
-from dem.core.platform import DevEnvLocalSetup
+from dem.core.platform import Platform
 from dem.core.dev_env import DevEnv
 from dem.core.tool_images import ToolImages
 from dem.cli.console import stdout, stderr
@@ -33,15 +33,15 @@ dev_env_local_status_messages = {
     DEV_ENV_LOCAL_INSTALLED: "Installed.",
 }
 
-def get_catalog_dev_env_status(platform: DevEnvLocalSetup, dev_env: DevEnv) -> str:
+def get_catalog_dev_env_status(platform: Platform, dev_env: DevEnv) -> str:
     image_statuses = dev_env.check_image_availability(platform.tool_images)
     if (ToolImages.NOT_AVAILABLE in image_statuses) or (ToolImages.LOCAL_ONLY in image_statuses):
         dev_env_status = dev_env_org_status_messages[DEV_ENV_ORG_NOT_IN_REGISTRY]
     elif (image_statuses.count(ToolImages.LOCAL_AND_REGISTRY) == len(image_statuses)) and \
-            (platform.get_local_dev_env(dev_env) is not None):
+            platform.get_dev_env_by_name(dev_env.name):
         dev_env_status = dev_env_org_status_messages[DEV_ENV_ORG_INSTALLED_LOCALLY]
     else:
-        if (platform.get_local_dev_env(dev_env) is not None):
+        if platform.get_dev_env_by_name(dev_env.name):
             dev_env_status = dev_env_org_status_messages[DEV_ENV_ORG_REINSTALL]
         else:
             dev_env_status = dev_env_org_status_messages[DEV_ENV_ORG_READY]
@@ -57,7 +57,7 @@ def get_local_dev_env_status(dev_env: DevEnv, tool_images: ToolImages) -> str:
         dev_env_status = dev_env_local_status_messages[DEV_ENV_LOCAL_INSTALLED]
     return dev_env_status
 
-def list_dev_envs(platform: DevEnvLocalSetup, local: bool, org: bool)-> None:
+def list_dev_envs(platform: Platform, local: bool, org: bool)-> None:
     table = Table()
     table.add_column("Development Environment")
     table.add_column("Status")
@@ -86,7 +86,7 @@ def list_dev_envs(platform: DevEnvLocalSetup, local: bool, org: bool)-> None:
 
     stdout.print(table)
 
-def list_tool_images(platform: DevEnvLocalSetup, local: bool, org: bool) -> None:
+def list_tool_images(platform: Platform, local: bool, org: bool) -> None:
     """ List tool images
     
     Args:
@@ -116,7 +116,7 @@ def list_tool_images(platform: DevEnvLocalSetup, local: bool, org: bool) -> None
         else:
             stdout.print("[yellow]No images are available in the registries!")
 
-def execute(platform: DevEnvLocalSetup, local: bool, org: bool, env: bool, tool: bool) -> None:
+def execute(platform: Platform, local: bool, org: bool, env: bool, tool: bool) -> None:
     if ((local == True) or (org == True)) and (env == True) and (tool == False):
         list_dev_envs(platform, local, org)
     elif ((local == True) or (org == True)) and (env == False) and (tool == True):

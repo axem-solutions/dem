@@ -89,9 +89,7 @@ def test_handle_missing_tool_images_do_fix(mock_stderr_print, mock_confirm, mock
         calls.append(call("[red]" + missing_tool_image + "[/]"))
     mock_stderr_print.assert_has_calls(calls)
     mock_confirm.assert_called_once_with("Should DEM try to fix the faulty Development Environment?", abort=True)
-    mock_dev_env_local.check_image_availability.assert_called_once_with(mock_platform.tool_images,
-                                                                        update_tool_images=True)
-    mock_platform.pull_images.assert_called_once_with(mock_dev_env_local.tools)
+    mock_platform.install_dev_env.assert_called_once_with(mock_dev_env_local)
     mock_stdout_print.assert_called_once_with("[green]DEM fixed the " + mock_dev_env_local.name + "![/]")
 
 @patch("dem.cli.command.run_cmd.handle_missing_tool_images")
@@ -109,7 +107,7 @@ def test_execute(mock_handle_missing_tool_images):
     mock_dev_env_local = MagicMock()
     mock_platform.get_dev_env_by_name.return_value = mock_dev_env_local
 
-    main.DevEnvLocalSetup.update_tool_images_on_instantiation = True
+    main.Platform.update_tool_images_on_instantiation = True
 
     mock_dev_env_local.tools = [
         {
@@ -129,7 +127,7 @@ def test_execute(mock_handle_missing_tool_images):
 
     # Check expectations
     assert 0 == runner_result.exit_code
-    assert main.DevEnvLocalSetup.update_tool_images_on_instantiation is False
+    assert main.Platform.update_tool_images_on_instantiation is False
 
     mock_platform.get_dev_env_by_name.assert_called_once_with(test_dev_env_name)
     mock_platform.tool_images.local.update.assert_called_once()

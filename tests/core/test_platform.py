@@ -4,205 +4,456 @@
 # Unit under test:
 import dem.core.platform as platform
 
-# Unit under test:
-import dem.core.dev_env as dev_env
-
 # Test framework
 import pytest
-from unittest.mock import patch, MagicMock, call, PropertyMock
+from unittest.mock import patch, MagicMock, call
 
-import tests.fake_data as fake_data
-import json
 from dem.core.exceptions import InvalidDevEnvJson
-from dem.core.tool_images import ToolImages
 
+@patch("dem.core.platform.DevEnv")
 @patch("dem.core.platform.LocalDevEnvJSON")
-def test_dev_env_json_with_invalid_tool_type_expect_success(mock_LocalDevEnvJSON: MagicMock):
+def test_Platform_creation(mock_LocalDevEnvJSON: MagicMock, mock_DevEnv: MagicMock) -> None:
     # Test setup
-    mock_json = MagicMock()
-    mock_LocalDevEnvJSON.return_value = mock_json
-    mock_json.deserialized = json.loads(fake_data.invalid_dev_env_json)
-    
+    mock_local_dev_env_json = MagicMock()
+    mock_LocalDevEnvJSON.return_value = mock_local_dev_env_json
+    mock_dev_env = MagicMock()
+    mock_DevEnv.return_value = mock_dev_env
+    test_major_version = 0
+    platform.__supported_dev_env_major_version__ = test_major_version
+    test_dev_env_descriptor = {
+        "name": "test_dev_env_name"
+    }
+    mock_local_dev_env_json.deserialized = {
+        "version": "0.0",
+        "development_environments": [
+            test_dev_env_descriptor
+        ]
+    }
+
     # Run unit under test
-    test_platform = platform.DevEnvLocalSetup()
+    test_platform = platform.Platform()
 
     # Check expectations
-    assert isinstance(test_platform.local_dev_envs[0], dev_env.DevEnv)
+    mock_LocalDevEnvJSON.assert_called_once()
+    mock_DevEnv.assert_called_once_with(descriptor=test_dev_env_descriptor)
 
-@patch("dem.core.platform.__supported_dev_env_major_version__", 0)
+    assert test_platform.local_dev_envs[0] is mock_dev_env
+    assert test_platform.version == mock_local_dev_env_json.deserialized["version"]
+
 @patch("dem.core.platform.LocalDevEnvJSON")
-def test_dev_env_json_with_invalid_version_expect_error(mock_LocalDevEnvJSON: MagicMock):
+def test_Platfrom_invalid_version_expect_error(mock_LocalDevEnvJSON: MagicMock) -> None:
     # Test setup
-    mock_json = MagicMock()
-    mock_LocalDevEnvJSON.return_value = mock_json
-    mock_json.deserialized = json.loads(fake_data.invalid_version_dev_env_json)
-
-    with pytest.raises(InvalidDevEnvJson) as exported_exception_info:
-        # Run unit under test
-        platform.DevEnvLocalSetup()
-
-        # Check expectations
-        excepted_error_message = "Error in platform.json: The platform.json version v1.0 is not supported."
-        assert str(exported_exception_info.value) == excepted_error_message
-
-@patch("dem.core.platform.__supported_dev_env_major_version__", 0)
-@patch("dem.core.platform.LocalDevEnvJSON")
-def test_valid_dev_env_json_expect_no_error(mock_LocalDevEnvJSON: MagicMock):
-    # Test setup
-    mock_json = MagicMock()
-    mock_LocalDevEnvJSON.return_value = mock_json
-    mock_json.deserialized = json.loads(fake_data.dev_env_json)
+    mock_local_dev_env_json = MagicMock()
+    mock_LocalDevEnvJSON.return_value = mock_local_dev_env_json
+    test_major_version = 1
+    platform.__supported_dev_env_major_version__ = test_major_version
+    mock_local_dev_env_json.deserialized = {
+        "version": "0.0"
+    }
 
     # Run unit under test
-    platform.DevEnvLocalSetup()
+    with pytest.raises(InvalidDevEnvJson) as exported_exception_info:
+        platform.Platform()
 
-def test_get_dev_env_by_name_match():
+    # Check expectations
+    excepted_error_message = "Error in dev_env.json: The dev_env.json version v1.0 is not supported."
+    assert str(exported_exception_info.value) == excepted_error_message
+
+@patch("dem.core.platform.ToolImages")
+@patch.object(platform.Platform, "__init__")
+def test_Platform_tool_images(mock___init__: MagicMock, mock_ToolImages: MagicMock) -> None:
     # Test setup
-    test_dev_env_setup = platform.DevEnvSetup(json.loads(fake_data.dev_env_json))
+    mock___init__.return_value = None
+
+    mock_container_engine = MagicMock()
+    mock_registries = MagicMock()
+    test_update_tool_images_on_instantiation = True
+
+    test_platform = platform.Platform()
+    test_platform._container_engine = mock_container_engine
+    test_platform._registries = mock_registries
+    test_platform.update_tool_images_on_instantiation = test_update_tool_images_on_instantiation
+    test_platform._tool_images = None
+
+    mock_tool_images = MagicMock()
+    mock_ToolImages.return_value = mock_tool_images
+
+    # Run unit under test
+    actual_tool_images = test_platform.tool_images
+
+    # Check expectations
+    assert actual_tool_images is mock_tool_images
+    assert test_platform._tool_images is mock_tool_images
+
+    mock___init__.assert_called_once()
+    mock_ToolImages.assert_called_once_with(mock_container_engine, mock_registries, 
+                                            test_update_tool_images_on_instantiation)
+
+@patch("dem.core.platform.ContainerEngine")
+@patch.object(platform.Platform, "__init__")
+def test_Platform_container_engine(mock___init__: MagicMock, mock_ContainerEngine: MagicMock) -> None:
+    # Test setup
+    mock___init__.return_value = None
+
+    test_platform = platform.Platform()
+    test_platform._container_engine = None
+
+    mock_container_engine = MagicMock()
+    mock_ContainerEngine.return_value = mock_container_engine
+
+    # Run unit under test
+    actual_container_engine = test_platform.container_engine
+
+    # Check expectations
+    assert actual_container_engine is mock_container_engine
+    assert test_platform._container_engine is mock_container_engine
+
+    mock___init__.assert_called_once()
+    mock_ContainerEngine.assert_called_once()
+
+@patch("dem.core.platform.Registries")
+@patch.object(platform.Platform, "__init__")
+def test_Platform_registries(mock___init__: MagicMock, mock_Registries: MagicMock) -> None:
+    # Test setup
+    mock___init__.return_value = None
+
+    test_platform = platform.Platform()
+    test_platform._registries = None
+
+    mock_container_engine = MagicMock()
+    mock_config_file = MagicMock()
+    test_platform._container_engine = mock_container_engine
+    test_platform._config_file = mock_config_file
+
+    mock_registries = MagicMock()
+    mock_Registries.return_value = mock_registries
+
+    # Run unit under test
+    actual_registries = test_platform.registries
+
+    # Check expectations
+    assert actual_registries is mock_registries
+    assert test_platform._registries is mock_registries
+
+    mock___init__.assert_called_once()
+    mock_Registries.assert_called_once_with(mock_container_engine, mock_config_file)
+
+@patch("dem.core.platform.ConfigFile")
+@patch.object(platform.Platform, "__init__")
+def test_Platform_config_file(mock___init__: MagicMock, mock_ConfigFile: MagicMock) -> None:
+    # Test setup
+    mock___init__.return_value = None
+
+    test_platform = platform.Platform()
+    test_platform._config_file = None
+
+    mock_config_file = MagicMock()
+    mock_ConfigFile.return_value = mock_config_file
+
+    # Run unit under test
+    actual_config_file = test_platform.config_file
+
+    # Check expectations
+    assert actual_config_file is mock_config_file
+    assert test_platform._config_file is mock_config_file
+
+    mock___init__.assert_called_once()
+    mock_ConfigFile.assert_called_once()
+
+@patch("dem.core.platform.DevEnvCatalogs")
+@patch.object(platform.Platform, "__init__")
+def test_Platform_dev_env_catalogs(mock___init__: MagicMock, mock_DevEnvCatalogs: MagicMock) -> None:
+    # Test setup
+    mock___init__.return_value = None
+
+    test_platform = platform.Platform()
+    test_platform._dev_env_catalogs = None
+
+    mock_config_file = MagicMock()
+    test_platform._config_file = mock_config_file
+
+    mock_dev_env_catalogs = MagicMock()
+    mock_DevEnvCatalogs.return_value = mock_dev_env_catalogs
+
+    # Run unit under test
+    actual_dev_env_catalogs = test_platform.dev_env_catalogs
+
+    # Check expectations
+    assert actual_dev_env_catalogs is mock_dev_env_catalogs
+    assert test_platform._dev_env_catalogs is mock_dev_env_catalogs
+
+    mock___init__.assert_called_once()
+    mock_DevEnvCatalogs.assert_called_once_with(mock_config_file)
+
+@patch.object(platform.Platform, "__init__")
+def test_Platform_get_deserialized(mock___init__: MagicMock) -> None:
+    # Test setup
+    mock___init__.return_value = None
+    
+    test_plaform = platform.Platform()
+    test_plaform.version = "0.0"
+
+    mock_dev_env1 = MagicMock()
+    mock_dev_env1.name = "test_dev_env_name1"
+    mock_dev_env1.is_installed = "True"
+    mock_dev_env1.tools = []
+    mock_dev_env2 = MagicMock()
+    mock_dev_env2.name = "test_dev_env_name2"
+    mock_dev_env2.is_installed = "True"
+    mock_dev_env2.tools = []
+
+    test_plaform.local_dev_envs = [
+        mock_dev_env1, mock_dev_env2
+    ]
+
+    # Run unit under test
+    actual_deserialized = test_plaform.get_deserialized()
+
+    # Check expectations
+    expected_deserialized = {
+        "version": test_plaform.version,
+        "development_environments": [
+            {
+                "name": mock_dev_env1.name,
+                "installed": mock_dev_env1.is_installed,
+                "tools": mock_dev_env1.tools
+            },
+            {
+                "name": mock_dev_env2.name,
+                "installed": mock_dev_env2.is_installed,
+                "tools": mock_dev_env2.tools
+            }
+        ]
+    }
+    assert actual_deserialized == expected_deserialized
+
+    mock___init__.assert_called_once()
+
+@patch.object(platform.Platform, "__init__")
+def test_Platform_get_dev_env_by_name_match(mock___init__: MagicMock) -> None:
+    # Test setup
+    mock___init__.return_value = None
+    
+    test_plaform = platform.Platform()
     test_name = "dev_env_name"
     expected_dev_env = MagicMock()
     expected_dev_env.name = test_name
-    test_dev_env_setup.local_dev_envs.append(expected_dev_env)
+    test_plaform.local_dev_envs = [expected_dev_env]
 
     # Run unit under test
-    actual_dev_env = test_dev_env_setup.get_dev_env_by_name(test_name)
+    actual_dev_env = test_plaform.get_dev_env_by_name(test_name)
 
     # Check expectations
     assert actual_dev_env == expected_dev_env
 
-def test_get_dev_env_by_name_no_match():
+    mock___init__.assert_called_once()
+
+@patch.object(platform.Platform, "__init__")
+def test_Platform_get_dev_env_by_name_no_match(mock___init__: MagicMock) -> None:
     # Test setup
-    test_dev_env_setup = platform.DevEnvSetup(json.loads(fake_data.dev_env_json))
+    mock___init__.return_value = None
+    
+    test_plaform = platform.Platform()
+    test_name = "dev_env_name"
+    expected_dev_env = MagicMock()
+    expected_dev_env.name = test_name
+    test_plaform.local_dev_envs = [expected_dev_env]
 
     # Run unit under test
-    actual_dev_env = test_dev_env_setup.get_dev_env_by_name("no_matching_name")
+    actual_dev_env = test_plaform.get_dev_env_by_name("not_existing_name")
 
     # Check expectations
     assert actual_dev_env is None
 
-def common_test_check_image_availability(mock_LocalDevEnvJSON: MagicMock, with_update: bool,
-                                         local_only: bool) -> None:
-    # Test setup
-    mock_json = MagicMock()
-    mock_LocalDevEnvJSON.return_value = mock_json
-    mock_json.deserialized = json.loads(fake_data.dev_env_json)
+    mock___init__.assert_called_once()
 
-    test_dev_env_setup = platform.DevEnvLocalSetup()
-    test_dev_env = test_dev_env_setup.get_dev_env_by_name("demo")
-    mock_tool_images = MagicMock()
-    mock_tool_images.local.elements = [
-        "axemsolutions/make_gnu_arm:latest",
-    ]
-    mock_tool_images.registry.elements = [
-        "axemsolutions/make_gnu_arm:latest",
-        "axemsolutions/stlink_org:latest",
-    ]
+@patch.object(platform.Platform, "tool_images")
+@patch.object(platform.Platform, "container_engine")
+@patch.object(platform.Platform, "user_output")
+@patch.object(platform.Platform, "__init__")
+def test_Platform_install_dev_env(mock___init__: MagicMock, mock_user_input: MagicMock, 
+                                  mock_container_engine: MagicMock, mock_tool_images) -> None:
+    # Test setup
+    mock___init__.return_value = None
+
+    test_dev_env = MagicMock()
+    test_registry_only_tool_images: list[str] = ["test_image_name1:test_image_version1", 
+                                                 "test_image_name2:test_image_version2"]
+    test_dev_env.get_registry_only_tool_images.return_value = test_registry_only_tool_images
+
+    test_platform = platform.Platform()
 
     # Run unit under test
-    actual_image_statuses = test_dev_env.check_image_availability(mock_tool_images, 
-                                                                  update_tool_images=with_update,
-                                                                  local_only=local_only)
+    test_platform.install_dev_env(test_dev_env)
 
     # Check expectations
-    if with_update == True:
-        mock_tool_images.local.update.assert_called_once()
-        if local_only is False:
-            mock_tool_images.registry.update.assert_called_once()
+    mock___init__.assert_called_once()
 
-    if local_only is False:
-        expected_image_statuses = [
-            ToolImages.LOCAL_AND_REGISTRY,
-            ToolImages.LOCAL_AND_REGISTRY,
-            ToolImages.REGISTRY_ONLY,
-            ToolImages.REGISTRY_ONLY,
-            ToolImages.NOT_AVAILABLE
-        ]
-    else:
-        expected_image_statuses = [
-            ToolImages.LOCAL_ONLY,
-            ToolImages.LOCAL_ONLY,
-            ToolImages.NOT_AVAILABLE,
-            ToolImages.NOT_AVAILABLE,
-            ToolImages.NOT_AVAILABLE
-        ]
-    assert expected_image_statuses == actual_image_statuses
+    test_dev_env.get_registry_only_tool_images.assert_called_once_with(mock_tool_images, False)
+    mock_user_input.msg.assert_has_calls([
+        call(f"\nPulling image {test_registry_only_tool_images[0]}", is_title=True),
+        call(f"\nPulling image {test_registry_only_tool_images[1]}", is_title=True)
+    ])
+    mock_container_engine.pull.assert_has_calls([
+        call(test_registry_only_tool_images[0]),
+        call(test_registry_only_tool_images[1])
+    ])
 
-    for idx, tool in enumerate(test_dev_env.tools):
-        assert tool["image_status"] == expected_image_statuses[idx]
-
-@patch("dem.core.platform.LocalDevEnvJSON")
-def test_check_image_availability_without_update(mock_LocalDevEnvJSON: MagicMock):
-    common_test_check_image_availability(mock_LocalDevEnvJSON, False, False)
-
-@patch("dem.core.platform.LocalDevEnvJSON")
-def test_check_image_availability_with_update(mock_LocalDevEnvJSON: MagicMock):
-    common_test_check_image_availability(mock_LocalDevEnvJSON, True, False)
-
-@patch("dem.core.platform.LocalDevEnvJSON")
-def test_check_image_availability_with_update_and_local_only(mock_LocalDevEnvJSON: MagicMock):
-    common_test_check_image_availability(mock_LocalDevEnvJSON, True, True)
-
-@patch.object(platform.DevEnvSetup, "get_deserialized")
-@patch.object(platform.DevEnvSetup, "__init__")
-@patch("dem.core.platform.LocalDevEnvJSON")
-def test_DevEnvLocalSetup_flush_to_file(mock_LocalDevEnvJSON: MagicMock, 
-                                        mock_super__init__: MagicMock, 
-                                        mock_get_deserialized: MagicMock):
+@patch.object(platform.Platform, "flush_descriptors")
+@patch.object(platform.Platform, "container_engine")
+@patch.object(platform.Platform, "user_output")
+@patch.object(platform.Platform, "__init__")
+def test_Platform_uninstall_dev_env_success(mock___init__: MagicMock, mock_user_output: MagicMock,
+                                            mock_container_engine: MagicMock, 
+                                            mock_flush_descriptors: MagicMock) -> None:
     # Test setup
-    mock_json = MagicMock()
-    mock_json.deserialized = {
-        "development_environments": []
-    }
-    mock_LocalDevEnvJSON.return_value = mock_json
-    mock_get_deserialized.return_value = mock_json.deserialized
+    mock___init__.return_value = None
 
-    test_local_platform = platform.DevEnvLocalSetup()
+    test_platform = platform.Platform()
+    mock_dev_env1 = MagicMock()
+    mock_dev_env2 = MagicMock()
+    mock_dev_env_to_uninstall = MagicMock()
+    test_platform.local_dev_envs = [
+        mock_dev_env1, mock_dev_env2, mock_dev_env_to_uninstall
+    ]
+    mock_dev_env1.tools = [
+        {
+            "image_name": "test_image_name1",
+            "image_version": "test_image_version1"
+        },
+        {
+            "image_name": "test_image_name2",
+            "image_version": "test_image_version2"
+        }
+    ]
+    mock_dev_env1.is_installed = "True"
+    mock_dev_env2.tools = [
+        {
+            "image_name": "test_image_name3",
+            "image_version": "test_image_version3"
+        }
+    ]
+    mock_dev_env2.is_installed = "True"
+    mock_dev_env_to_uninstall.tools = [
+        {
+            "image_name": "test_image_name1",
+            "image_version": "test_image_version1"
+        },
+        {
+            "image_name": "test_image_name3",
+            "image_version": "test_image_version3"
+        },
+        {
+            "image_name": "test_image_name4",
+            "image_version": "test_image_version4"
+        }
+    ]
+    mock_dev_env_to_uninstall.is_installed = "True"
+
+    mock_container_engine.remove.return_value = True
 
     # Run unit under test
-    test_local_platform.flush_to_file()
+    test_platform.uninstall_dev_env(mock_dev_env_to_uninstall)
 
     # Check expectations
-    assert test_local_platform.json.deserialized is mock_json.deserialized
+    mock___init__.assert_called_once()
 
-    mock_super__init__.assert_called_once_with(mock_json.deserialized)
+    assert mock_dev_env_to_uninstall.is_installed == "False"
+
+    mock_user_output.msg.assert_has_calls([
+        call(f"\nThe tool image [bold]test_image_name1:test_image_version1[/bold] is required by another Development Environment. It won't be deleted."),
+        call(f"\nThe tool image [bold]test_image_name3:test_image_version3[/bold] is required by another Development Environment. It won't be deleted."),
+    ])
+    mock_container_engine.remove.asssert_called_once_with("test_image_name4:test_image_version4")
+    mock_flush_descriptors.assert_called_once()
+
+@patch.object(platform.Platform, "container_engine")
+@patch.object(platform.Platform, "user_output")
+@patch.object(platform.Platform, "__init__")
+def test_Platform_uninstall_dev_env_failure(mock___init__: MagicMock, mock_user_output: MagicMock,
+                                            mock_container_engine: MagicMock) -> None:
+    # Test setup
+    mock___init__.return_value = None
+
+    test_platform = platform.Platform()
+    mock_dev_env1 = MagicMock()
+    mock_dev_env2 = MagicMock()
+    mock_dev_env_to_uninstall = MagicMock()
+    test_platform.local_dev_envs = [
+        mock_dev_env1, mock_dev_env2, mock_dev_env_to_uninstall
+    ]
+    mock_dev_env1.tools = [
+        {
+            "image_name": "test_image_name1",
+            "image_version": "test_image_version1"
+        },
+        {
+            "image_name": "test_image_name2",
+            "image_version": "test_image_version2"
+        }
+    ]
+    mock_dev_env1.is_installed = "True"
+    mock_dev_env2.tools = [
+        {
+            "image_name": "test_image_name3",
+            "image_version": "test_image_version3"
+        }
+    ]
+    mock_dev_env2.is_installed = "True"
+    mock_dev_env_to_uninstall.tools = [
+        {
+            "image_name": "test_image_name1",
+            "image_version": "test_image_version1"
+        },
+        {
+            "image_name": "test_image_name3",
+            "image_version": "test_image_version3"
+        },
+        {
+            "image_name": "test_image_name4",
+            "image_version": "test_image_version4"
+        }
+    ]
+    mock_dev_env_to_uninstall.is_installed = "True"
+
+    mock_container_engine.remove.side_effect = platform.ContainerEngineError("")
+
+    # Run unit under test
+    with pytest.raises(platform.PlatformError) as exported_exception_info:
+        test_platform.uninstall_dev_env(mock_dev_env_to_uninstall)
+
+        # Check expectations
+        mock___init__.assert_called_once()
+
+        assert str(exported_exception_info) == "Platform error: Dev Env uninstall failed."
+        assert mock_dev_env_to_uninstall.is_installed == "True"
+
+        mock_user_output.msg.assert_has_calls([
+            call(f"\nThe tool image [bold]test_image_name1:test_image_version1[/bold] is required by another Development Environment. It won't be deleted."),
+            call(f"\nThe tool image [bold]test_image_name3:test_image_version3[/bold] is required by another Development Environment. It won't be deleted."),
+        ])
+        mock_container_engine.remove.asssert_called_once_with("test_image_name4:test_image_version4")
+
+@patch.object(platform.Platform, "get_deserialized")
+@patch.object(platform.Platform, "__init__")
+def test_Platform_flush_descriptors(mock___init__: MagicMock, 
+                                    mock_get_deserialized: MagicMock) -> None:
+    # Test setup
+    mock___init__.return_value = None
+
+    test_platform = platform.Platform()
+    test_platform.dev_env_json = MagicMock()
+
+    mock_deserialized = MagicMock()
+    mock_get_deserialized.return_value = mock_deserialized
+
+    # Run unit under test
+    test_platform.flush_descriptors()
+
+    # Check expectations
+    mock___init__.assert_called_once()
+
     mock_get_deserialized.assert_called_once()
-    mock_json.flush.assert_called_once()
+    test_platform.dev_env_json.flush.assert_called_once()
 
-@patch.object(platform.Core, "user_output")
-@patch.object(platform.DevEnvLocalSetup, "_container_engine", new_callable=PropertyMock)
-@patch("dem.core.platform.LocalDevEnvJSON")
-def test_DevEnvLocalSetup_pull_images(mock_LocalDevEnvJSON: MagicMock, 
-                                      mock_container_engine_attribute: MagicMock,
-                                      mock_user_output: MagicMock):
-    # Test setup
-    mock_json = MagicMock()
-    mock_json.read.return_value = json.loads(fake_data.dev_env_json)
-    mock_json.deserialized = mock_json.read.return_value
-    mock_LocalDevEnvJSON.return_value = mock_json
-
-    mock_container_engine = MagicMock()
-    mock_container_engine_attribute.return_value = mock_container_engine
-
-    test_dev_env_local_setup = platform.DevEnvLocalSetup()
-    test_dev_env = test_dev_env_local_setup.local_dev_envs[0]
-
-    for tool in test_dev_env.tools:
-        tool["image_status"] = ToolImages.REGISTRY_ONLY
-
-    # Run unit under test
-    test_dev_env_local_setup.pull_images(test_dev_env.tools)
-
-    # Check expectations
-    msg_calls = [
-        call("\nPulling image axemsolutions/cpputest:latest", is_title=True),
-        call("\nPulling image axemsolutions/make_gnu_arm:latest", is_title=True),
-        call("\nPulling image axemsolutions/stlink_org:latest", is_title=True),
-    ]
-    mock_user_output.msg.assert_has_calls(msg_calls, any_order=True)
-
-    pull_calls = [
-        call("axemsolutions/cpputest:latest"),
-        call("axemsolutions/make_gnu_arm:latest"),
-        call("axemsolutions/stlink_org:latest"),
-    ]
-    test_dev_env_local_setup.container_engine.pull.assert_has_calls(pull_calls, any_order=True)
+    assert test_platform.dev_env_json.deserialized == mock_deserialized

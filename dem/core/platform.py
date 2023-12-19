@@ -2,17 +2,15 @@
 """
 from dem.core.core import Core
 from dem.core.properties import __supported_dev_env_major_version__
-from dem.core.exceptions import InvalidDevEnvJson
+from dem.core.exceptions import InvalidDevEnvJson, PlatformError, ContainerEngineError
 from dem.core.dev_env_catalog import DevEnvCatalogs
 from dem.core.data_management import LocalDevEnvJSON, ConfigFile
 from dem.core.container_engine import ContainerEngine
 from dem.core.registry import Registries
 from dem.core.tool_images import ToolImages
-from dem.core.dev_env import DevEnv, DevEnv, DevEnv
+from dem.core.dev_env import DevEnv
 
-import docker.errors
-
-class DevEnvSetup(Core):
+class Platform(Core):
     """ Representation of the Development Platform:
         - The available tool images.
         - The available Development Environments.
@@ -25,10 +23,6 @@ class DevEnvSetup(Core):
             _config_file -- contains the DEM configuration
             update_tool_images_on_instantiation -- can be used to disable tool update if not needed
     """
-    _tool_images = None
-    _container_engine = None
-    _registries = None
-    _config_file = None
     update_tool_images_on_instantiation = True
 
     def _dev_env_json_version_check(self) -> None:
@@ -41,80 +35,65 @@ class DevEnvSetup(Core):
         if dev_env_json_major_version != __supported_dev_env_major_version__:
             raise InvalidDevEnvJson("The dev_env.json version v1.0 is not supported.")
 
-    def __init__(self, dev_env_json_deserialized: dict) -> None:
-        """ Init the class, by creating a list of the Development Environments.
+    def __init__(self) -> None:
+        """ Init the class, by creating a list of the Development Environments."""
 
-            Args:
-                dev_env_json_deserialized -- a deserialized representation of the dev_env.json file 
-        """
-        self.version = dev_env_json_deserialized["version"]
+        self.dev_env_json = LocalDevEnvJSON()
+        self.version: str = self.dev_env_json.deserialized["version"]
         self._dev_env_json_version_check()
-        self.local_dev_envs: list[DevEnv] = []
-        self._dev_env_catalogs: DevEnvCatalogs | None = None
+        self._dev_env_catalogs = None
+        self._tool_images = None
+        self._container_engine = None
+        self._registries = None
+        self._config_file = None
 
-    @classmethod
+        self.local_dev_envs: list[DevEnv] = []
+        for dev_env_descriptor in self.dev_env_json.deserialized["development_environments"]:
+            self.local_dev_envs.append(DevEnv(descriptor=dev_env_descriptor))
+
     @property
-    def tool_images(cls) -> ToolImages:
+    def tool_images(self) -> ToolImages:
         """ The tool images.
 
-            The class variable can be accessed through a getter, so the ToolImages() gets instantiated 
-            only at the first access.
-
-            Args:
-                cls - the class object
+            The ToolImages() gets instantiated only at the first access.
         """
-        if cls._tool_images is None:
-            cls._tool_images = ToolImages(cls.container_engine, cls.registries,
-                                          cls.update_tool_images_on_instantiation)
-        return cls._tool_images
-
-    @classmethod
+        if self._tool_images is None:
+            self._tool_images = ToolImages(self.container_engine, self.registries,
+                                          self.update_tool_images_on_instantiation)
+        return self._tool_images
+    
     @property
-    def container_engine(cls) -> ContainerEngine:
+    def container_engine(self) -> ContainerEngine:
         """ The container engine.
 
-            The class variable can be accessed through a getter, so the ContainerEngine() gets 
-            instantiated only at the first access.
-
-            Args:
-                cls - the class object
+            The ContainerEngine() gets instantiated only at the first access.
         """
-        if cls._container_engine is None:
-            cls._container_engine = ContainerEngine()
+        if self._container_engine is None:
+            self._container_engine = ContainerEngine()
 
-        return cls._container_engine
+        return self._container_engine
 
-    @classmethod
     @property
-    def registries(cls) -> Registries:
+    def registries(self) -> Registries:
         """ The registries.
 
-            The class variable can be accessed through a getter, so the Registries() gets instantiated 
-            only at the first access.
-
-            Args:
-                cls - the class object
+            The Registries() gets instantiated only at the first access.
         """
-        if cls._registries is None:
-            cls._registries = Registries(cls.container_engine, cls.config_file)
+        if self._registries is None:
+            self._registries = Registries(self.container_engine, self.config_file)
 
-        return cls._registries
+        return self._registries
 
-    @classmethod
     @property
-    def config_file(cls) -> ConfigFile:
+    def config_file(self) -> ConfigFile:
         """ The config file.
 
-            The class variable can be accessed through a getter, so the ConfigFile() gets instantiated 
-            only at the first access.
-
-            Args:
-                cls - the class object
+            The ConfigFile() gets instantiated only at the first access.
         """
-        if cls._config_file is None:
-            cls._config_file = ConfigFile()
+        if self._config_file is None:
+            self._config_file = ConfigFile()
 
-        return cls._config_file
+        return self._config_file
 
     @property
     def dev_env_catalogs(self) -> DevEnvCatalogs:
@@ -128,23 +107,24 @@ class DevEnvSetup(Core):
         return self._dev_env_catalogs
 
     def get_deserialized(self) -> dict:
-        """ Create the deserialized json. 
-        
-            Return with the dev_env.json as a dict.
-        """
-        dev_env_json_deserialized = {}
-        dev_env_json_deserialized["version"] = self.version
-        dev_env_descriptors = []
-        for dev_env in self.local_dev_envs:
-            dev_env_descriptor = {}
-            dev_env_descriptor["name"] = dev_env.name
-            dev_env_descriptor["installed"] = dev_env.installed
-            dev_env_descriptor["tools"] = dev_env.tools
-            dev_env_descriptors.append(dev_env_descriptor)
-        dev_env_json_deserialized["development_environments"] = dev_env_descriptors
-        return dev_env_json_deserialized
+            """ Create the deserialized json. 
+            
+                Return the dev_env.json as a dict.
+            """
+            dev_env_json_deserialized = {
+                "version": self.version,
+                "development_environments": [
+                    {
+                        "name": dev_env.name,
+                        "installed": dev_env.is_installed,
+                        "tools": dev_env.tools
+                    }
+                    for dev_env in self.local_dev_envs
+                ]
+            }
+            return dev_env_json_deserialized
 
-    def get_dev_env_by_name(self, dev_env_name: str) -> ("DevEnv | DevEnv | None"):
+    def get_dev_env_by_name(self, dev_env_name: str) -> DevEnv | None:
         """ Get the Development Environment by name.
         
             Args:
@@ -156,114 +136,47 @@ class DevEnvSetup(Core):
         for dev_env in self.local_dev_envs:
             if dev_env.name == dev_env_name:
                 return dev_env
-            
-    def get_dev_env_status_by_name(self, dev_env_name: str) -> ("DevEnv | DevEnv | None"):
-        """ Get the Development Environment status by name.
+
+    def install_dev_env(self, dev_env_to_install: DevEnv) -> None:
+        """ Install the Dev Env by pulling the required images.
         
             Args:
-                dev_env_name -- name of the Development Environment to get
-
-            Return with the instance representing the Development Environment. If the Development 
-            Environment doesn't exist in the setup, return with None.
+                dev_env_to_install -- the Development Environment to install
         """
-        for dev_env in self.local_dev_envs:
-            if dev_env.name == dev_env_name:
-                return dev_env.installed      
+        for tool_image in dev_env_to_install.get_registry_only_tool_images(self.tool_images, False):
+            self.user_output.msg(f"\nPulling image {tool_image}", is_title=True)
+            self.container_engine.pull(tool_image)
 
-    def set_dev_env_status_by_name(self, dev_env_name: str, status: str) -> ("DevEnv | DevEnv | None"):
-        """ Set the Development Environment status by name.
+    def uninstall_dev_env(self, dev_env_to_uninstall: DevEnv) -> None:
+        """ Uninstall the Dev Env by removing the images not required anymore.
+
+            Exceptions:
+                PlatformError -- if the uninstall fails
         
             Args:
-                dev_env_name -- name of the Development Environment to set
-                status -- status of the Development Environment            
+                dev_env_to_uninstall -- the Development Environment to uninstall
         """
-        for dev_env in self.local_dev_envs:
-            if dev_env.name == dev_env_name:
-                dev_env.installed = status
-
-    def get_local_dev_env(self, catalog_dev_env: DevEnv) -> DevEnv | None:
-        """ Get the local copy of the catalog's Dev Env if exists.
-
-            Args:
-                catalog_dev_env -- try to get the local copy of this catalog
-
-            Return the local Dev Env object if available, None if not yet installed.
-        """
-        for local_dev_env in self.local_dev_envs:
-            if catalog_dev_env.name == local_dev_env.name:
-                return local_dev_env
-            
-
-    def try_to_remove_tool_images(self, uninstalled_dev_env: DevEnv) -> None:
-        retVal=True
         all_required_tool_images = set()
         for dev_env in self.local_dev_envs:
-            for tool in dev_env.tools:                            
-                if (dev_env.installed == "True") and (dev_env.name != uninstalled_dev_env.name) :                
+            if (dev_env is not dev_env_to_uninstall) and (dev_env.is_installed == "True"):
+                for tool in dev_env.tools:
                     all_required_tool_images.add(tool["image_name"] + ":" + tool["image_version"])
-                    
-        uninstalled_dev_env_tool_images = set()
-        for tool in uninstalled_dev_env.tools:
-            uninstalled_dev_env_tool_images.add(tool["image_name"] + ":" + tool["image_version"])
-            
 
-        for tool_image in uninstalled_dev_env_tool_images:
-            if tool_image in all_required_tool_images:            
-                self.user_output.msg("[yellow] Can't delete" + tool_image + "tool images!")
+        for tool in dev_env_to_uninstall.tools:
+            tool_image = tool["image_name"] + ":" + tool["image_version"]
+            if tool_image in all_required_tool_images:
+                self.user_output.msg(f"\nThe tool image [bold]{tool_image}[/bold] is required by another Development Environment. It won't be deleted.")
             else:
-                retVal = self.delete_tool_image(tool_image)
-            if retVal == False:
-                return retVal
-            else:
-                retVal = True
-                
+                try:
+                    self.container_engine.remove(tool_image)
+                except ContainerEngineError:
+                    raise PlatformError("Dev Env uninstall failed.")
             
-        return retVal
+        dev_env_to_uninstall.is_installed = "False"
+        self.flush_descriptors()
 
-    def delete_tool_image(self, tool_image: str) -> bool:
-        self.user_output.msg("\nThe tool image [bold]" + tool_image + "[/bold] is not required by any Development Environment anymore.")
-        retVal=self.container_engine.remove(tool_image)
-        return retVal
-
-    def update_dev_env_status_in_json(self, uninstalled_dev_env: DevEnv):
-        listindex = self.local_dev_envs.index(uninstalled_dev_env)                
-        self.local_dev_envs[listindex].installed = "False"
-        self.flush_to_file()            
-
-class DevEnvLocalSetup(DevEnvSetup):
-    def __init__(self) -> None:
-        """ Store the local Development Environments.
-
-        Extends the DevEnvSetup super class by populating the list of Development Environments with 
-        DevEnv objects.
-        """
-        self.json = LocalDevEnvJSON()
-        super().__init__(self.json.deserialized)
-
-        for dev_env_descriptor in self.json.deserialized["development_environments"]:
-            self.local_dev_envs.append(DevEnv(descriptor=dev_env_descriptor))
-
-    def flush_to_file(self) -> None:
+    def flush_descriptors(self) -> None:
         """ Writes the deserialized json to the dev_env.json file."""
         # Get the up-to-date deserialized data.
-        self.json.deserialized = self.get_deserialized()
-        self.json.flush()
-
-    def pull_images(self, tools: list) -> None:
-        """ Pull images that are only present in the registry.
-        
-        Args:
-            tools -- the tool images to pull (with any status, this function will filter the 
-                     registry only ones)
-        """
-
-        # Remove the duplications and the locally already available tools
-        tool_images_to_pull = set()
-        for tool in tools:
-            tool_image = tool["image_name" ] + ':' + tool["image_version"]
-            if (tool["image_status"] == ToolImages.REGISTRY_ONLY):
-                tool_images_to_pull.add(tool_image)
-
-        for tool_image in tool_images_to_pull:
-            self.user_output.msg("\nPulling image "+ tool_image, is_title=True)
-            self.container_engine.pull(tool_image)
+        self.dev_env_json.deserialized = self.get_deserialized()
+        self.dev_env_json.flush()

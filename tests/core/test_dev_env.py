@@ -136,3 +136,47 @@ def test_DevEnv_check_image_availability_local_only():
 
     
     mock_tool_images.local.update.assert_called_once()
+
+def test_DevEnv_get_registry_only_tool_images() -> None:
+    # Test setup
+    test_descriptor = {
+        "name": "test_name",
+        "installed": "False",
+        "tools": [
+            {
+                "image_name": "test_image_name1",
+                "image_version": "test_image_tag1"
+            },
+            {
+                "image_name": "test_image_name2",
+                "image_version": "test_image_tag2"
+            },
+            {
+                "image_name": "test_image_name3",
+                "image_version": "test_image_tag3"
+            },
+            {
+                "image_name": "test_image_name4",
+                "image_version": "test_image_tag4"
+            },
+        ]
+    }
+    mock_tool_images = MagicMock()
+    mock_tool_images.local.elements = [
+        "test_image_name1:test_image_tag1",
+        "test_image_name2:test_image_tag2"
+    ]
+    mock_tool_images.registry.elements = [
+        "test_image_name1:test_image_tag1",
+        "test_image_name3:test_image_tag3"
+    ]
+    test_dev_env = dev_env.DevEnv(test_descriptor)
+
+    # Run unit under test
+    actual_registry_onnly_tool_images = test_dev_env.get_registry_only_tool_images(mock_tool_images, True)
+
+    # Check expectations
+    expected_registry_only_tool_images = {
+        "test_image_name3:test_image_tag3",
+    }
+    assert expected_registry_only_tool_images == actual_registry_onnly_tool_images

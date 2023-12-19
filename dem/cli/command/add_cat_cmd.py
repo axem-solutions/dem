@@ -1,10 +1,10 @@
 """CLI command implementation for adding a catalog."""
 # dem/cli/command/add_cat_cmd.py
 
-from dem.core.platform import DevEnvLocalSetup
+from dem.core.platform import Platform
 from dem.cli.console import stdout
 
-def execute(platform: DevEnvLocalSetup, name: str, url:str) -> None:
+def execute(platform: Platform, name: str, url:str) -> None:
     """ Add a new Dev Env Catalog.
     
         Args:

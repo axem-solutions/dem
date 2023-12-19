@@ -92,7 +92,7 @@ def test_cp_given_dev_env():
     # Check expectations
     assert mock_platform.local_dev_envs[0].name is test_new_name
 
-    mock_platform.flush_to_file.assert_called_once()
+    mock_platform.flush_descriptors.assert_called_once()
 
 @patch("dem.cli.command.cp_cmd.get_dev_env_to_cp")
 @patch("dem.cli.command.cp_cmd.check_new_dev_env_name_taken")

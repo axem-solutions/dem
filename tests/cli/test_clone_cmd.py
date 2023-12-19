@@ -87,4 +87,4 @@ def test_execute_success(mock_handle_existing_local_dev_env: MagicMock) -> None:
     mock_platform.get_dev_env_by_name.assert_called_once_with(test_dev_env_name)
     mock_handle_existing_local_dev_env.assert_called_once_with(mock_platform, mock_local_dev_env)
     mock_platform.local_dev_envs.append.assert_called_once_with(mock_catalog_dev_env)
-    mock_platform.flush_to_file.assert_called_once_with()
+    mock_platform.flush_descriptors.assert_called_once_with()

@@ -1,10 +1,10 @@
 """CLI command implementation for deleting a Dev Env Catalog."""
 # dem/cli/command/del_cat_cmd.py
 
-from dem.core.platform import DevEnvLocalSetup
+from dem.core.platform import Platform
 from dem.cli.console import stdout, stderr
 
-def execute(platform: DevEnvLocalSetup, catalog_name: str) -> None:
+def execute(platform: Platform, catalog_name: str) -> None:
     """ Delete the Dev Env Catalog.
         Args:
             catalog_name -- name of the catalog to delete

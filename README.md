@@ -108,32 +108,51 @@ After installation, you can enable the autocompletion for bash and zsh shells
 
 ## Quick start
 
-### Install a preconfigured environment
+We got you covered in all scenarios:
 
-List the available environments:
+### I'd like to start with a template...
+
+Here at axem we'd like to create a template for every target out there. List the currently available
+ones with:
 
     dem list --all --env
 
-You can get information about the Development Environment of your choice:
+You can clone the selected template with:
 
-    dem info DEV_ENV_NAME
+    dem clone DEV_ENV_NAME
 
-Installation of a Development Environment from a catalog can be done with a single command:
+### I'd like to work on a project already configured with DEM...
 
-    dem pull DEV_ENV_NAME
+In this case you only need to initialize the Dev Env with:
 
-### Create a new environment and add your own tools
+    dem init
 
-Create separate container images for your tools. 
-> There is no need for any specific configuration in your container images to be compatible with 
-DEM.
+### I'd like to use a Dev Env someone shared with me...
 
-From the new images and the ones available from the registries, you can create your new Development 
-Environment:
+You can import a Dev Env descriptor JSON with: 
+
+    dem load DEV_ENV_NAME
+
+### I'd like to create my own Dev Env from scratch...
+
+Create a brand new Dev Env with the following command:
 
     dem create DEV_ENV_NAME
 
-This command will start a TUI where you can configure your new Development Environment.
 
-For more detailed instructions please refer to the
+Now you have the Dev Env descriptor in your local catalog, but you might want to set a few things:
+- Add/remove tools.
+- Change the tool image for a given tool.
+- Set the host where the image should be placed.
+
+You can edit it the Dev Env with:
+
+    dem modify DEV_ENV_NAME
+
+
+Finally, if you are ready to use it, you can initialize it with:
+
+    dem install DEV_ENV_NAME
+
+>For more detailed instructions please refer to the
 [Documentation](https://www.axemsolutions.io/dem_doc/index.html)

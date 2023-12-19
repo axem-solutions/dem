@@ -3,7 +3,7 @@
 
 
 import re
-from dem.core.platform import DevEnvLocalSetup
+from dem.core.platform import Platform
 from dem.cli.console import stderr
 import json, os
 
@@ -45,7 +45,7 @@ def create_exported_dev_env_json(dev_env_name: str,dev_env_json: str,given_path:
     json.dump(dev_env_json, exported_file, indent=4)
     exported_file.close()        
 
-def execute(platform: DevEnvLocalSetup, dev_env_name: str, path_to_export: str) -> None:
+def execute(platform: Platform, dev_env_name: str, path_to_export: str) -> None:
     dev_env_to_export = platform.get_dev_env_by_name(dev_env_name)
     if dev_env_to_export is not None: 
         try:

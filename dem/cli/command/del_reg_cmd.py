@@ -1,10 +1,10 @@
 """CLI command implementation for deleting a registry."""
 # dem/cli/command/del_reg_cmd.py
 
-from dem.core.platform import DevEnvLocalSetup
+from dem.core.platform import Platform
 from dem.cli.console import stdout, stderr
 
-def execute(platform: DevEnvLocalSetup, registry_name: str) -> None:
+def execute(platform: Platform, registry_name: str) -> None:
     """ Delete the registry.
         Args:
             registry_name -- name of the registry to delete

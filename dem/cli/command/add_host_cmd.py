@@ -1,9 +1,9 @@
 """CLI command implementation for adding a host."""
 
-from dem.core.platform import DevEnvLocalSetup
+from dem.core.platform import Platform
 from dem.cli.console import stdout
 
-def execute(platform: DevEnvLocalSetup, name: str, address: str) -> None:
+def execute(platform: Platform, name: str, address: str) -> None:
     """ Add a new host.
     
         Args:

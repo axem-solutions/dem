@@ -1,8 +1,8 @@
 """CLI command implementation for listing the available hosts."""
 # dem/cli/command/list_host_cmd.py
 
-from dem.core.platform import DevEnvLocalSetup
-from dem.cli.console import stdout, stderr
+from dem.core.platform import Platform
+from dem.cli.console import stdout
 from rich.table import Table
 
 def execute(platform) -> None:

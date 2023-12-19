@@ -50,7 +50,7 @@ def test_dev_env_already_installed():
 
     mock_local_dev_env = MagicMock()
     mock_local_dev_env.name = "test_env"
-    mock_platform.get_local_dev_env.return_value = mock_local_dev_env
+    mock_platform.get_dev_env_by_name.return_value = mock_local_dev_env
 
     # Set the same tools for both the catalog and the local instance
     mock_catalog_dev_env.tools = mock_tools
@@ -74,11 +74,10 @@ def test_dev_env_already_installed():
 
     mock_catalog.get_dev_env_by_name.assert_called_once_with(test_env_name)
 
-    mock_platform.get_local_dev_env.assert_called_once_with(mock_catalog_dev_env)
-    mock_platform.pull_images.assert_called_once_with(mock_local_dev_env.tools)
-    calls = [call(mock_platform.tool_images), 
-             call(mock_platform.tool_images, update_tool_images=True)]
-    mock_local_dev_env.check_image_availability.assert_has_calls(calls)
+    mock_platform.get_dev_env_by_name.assert_called_once_with(mock_catalog_dev_env.name)
+    mock_platform.install_dev_env.assert_called_once_with(mock_local_dev_env)
+    mock_local_dev_env.check_image_availability.assert_called_once_with(mock_platform.tool_images, 
+                                                                         update_tool_image_store=True)
 
     console = Console(file=io.StringIO())
     console.print("The [yellow]test_env[/] Development Environment is ready!")
@@ -98,7 +97,7 @@ def test_dev_env_installed_but_different():
 
     mock_local_dev_env = MagicMock()
     mock_local_dev_env.name = "test_env"
-    mock_platform.get_local_dev_env.return_value = mock_local_dev_env
+    mock_platform.get_dev_env_by_name.return_value = mock_local_dev_env
 
     def stub_check_image_availability(*args, **kwargs):
         image_statuses = []
@@ -119,12 +118,11 @@ def test_dev_env_installed_but_different():
 
     mock_catalog.get_dev_env_by_name.assert_called_once_with(test_env_name)
 
-    mock_platform.get_local_dev_env.assert_called_once_with(mock_catalog_dev_env)
-    mock_platform.flush_to_file.assert_called_once()
-    mock_platform.pull_images.assert_called_once_with(mock_local_dev_env.tools)
-    calls = [call(mock_platform.tool_images), 
-             call(mock_platform.tool_images, update_tool_images=True)]
-    mock_local_dev_env.check_image_availability.assert_has_calls(calls)
+    mock_platform.get_dev_env_by_name.assert_called_once_with(mock_catalog_dev_env.name)
+    mock_platform.flush_descriptors.assert_called_once()
+    mock_platform.install_dev_env.assert_called_once_with(mock_local_dev_env)
+    mock_local_dev_env.check_image_availability.assert_called_once_with(mock_platform.tool_images, 
+                                                                         update_tool_image_store=True)
 
     console = Console(file=io.StringIO())
     console.print("The [yellow]test_env[/] Development Environment is ready!")
@@ -142,7 +140,7 @@ def test_dev_env_new_install(mock_DevEnv: MagicMock):
     mock_tools = MagicMock()
     mock_catalog_dev_env.tools = mock_tools
     mock_catalog.get_dev_env_by_name.return_value = mock_catalog_dev_env
-    mock_platform.get_local_dev_env.return_value = None
+    mock_platform.get_dev_env_by_name.return_value = None
 
     mock_local_dev_env = MagicMock()
     mock_DevEnv.return_value = mock_local_dev_env
@@ -166,21 +164,20 @@ def test_dev_env_new_install(mock_DevEnv: MagicMock):
     assert mock_local_dev_env in mock_platform.local_dev_envs
 
     mock_catalog.get_dev_env_by_name.assert_called_once_with(test_env_name)
-    mock_platform.get_local_dev_env.assert_called_once_with(mock_catalog_dev_env)
+    mock_platform.get_dev_env_by_name.assert_called_once_with(mock_catalog_dev_env.name)
     mock_DevEnv.assert_called_once_with(dev_env_to_copy=mock_catalog_dev_env)
-    mock_platform.flush_to_file.assert_called_once()
-    mock_platform.pull_images.assert_called_once_with(mock_local_dev_env.tools)
-    calls = [call(mock_platform.tool_images), 
-             call(mock_platform.tool_images, update_tool_images=True)]
-    mock_local_dev_env.check_image_availability.assert_has_calls(calls)
+    mock_platform.flush_descriptors.assert_called_once()
+    mock_platform.install_dev_env.assert_called_once_with(mock_local_dev_env)
+    mock_local_dev_env.check_image_availability.assert_called_once_with(mock_platform.tool_images, 
+                                                                         update_tool_image_store=True)
 
     console = Console(file=io.StringIO())
     console.print("The [yellow]" + test_env_name + "[/] Development Environment is ready!")
     assert console.file.getvalue() == runner_result.stdout
 
 @patch("dem.cli.command.pull_cmd.stderr.print")
-@patch("dem.cli.command.pull_cmd.install_to_dev_env_json")
-def test_execute_install_failed(mock_install_to_dev_env_json: MagicMock,
+@patch("dem.cli.command.pull_cmd.create_dev_env")
+def test_execute_install_failed(mock_create_dev_env: MagicMock,
                                 mock_stderr_print: MagicMock):
     # Test setup
     mock_platform = MagicMock()
@@ -191,11 +188,11 @@ def test_execute_install_failed(mock_install_to_dev_env_json: MagicMock,
 
     mock_catalog_dev_env = MagicMock()
     mock_catalog.get_dev_env_by_name.return_value = mock_catalog_dev_env
-    mock_platform.get_local_dev_env.return_value = None
+    mock_platform.get_dev_env_by_name.return_value = None
 
     mock_local_dev_env = MagicMock()
-    mock_platform.get_local_dev_env.return_value = mock_local_dev_env
-    mock_install_to_dev_env_json.return_value = mock_local_dev_env
+    mock_platform.get_dev_env_by_name.return_value = mock_local_dev_env
+    mock_create_dev_env.return_value = mock_local_dev_env
 
     mock_local_dev_env.check_image_availability.return_value = [ToolImages.LOCAL_ONLY]
     test_env_name =  "test_env"
@@ -210,13 +207,12 @@ def test_execute_install_failed(mock_install_to_dev_env_json: MagicMock,
     assert 0 == runner_result.exit_code
 
     mock_catalog.get_dev_env_by_name(test_env_name)
-    mock_platform.get_local_dev_env.assert_called_once_with(mock_catalog_dev_env)
-    mock_install_to_dev_env_json.assert_called_once_with(mock_local_dev_env, mock_catalog_dev_env, 
+    mock_platform.get_dev_env_by_name.assert_called_once_with(mock_catalog_dev_env.name)
+    mock_create_dev_env.assert_called_once_with(mock_local_dev_env, mock_catalog_dev_env, 
                                                          mock_platform)
-    calls = [call(mock_platform.tool_images), 
-             call(mock_platform.tool_images, update_tool_images=True)]
-    mock_local_dev_env.check_image_availability.assert_has_calls(calls)
-    mock_platform.pull_images.assert_called_once_with(mock_tools)
+    mock_local_dev_env.check_image_availability.assert_called_once_with(mock_platform.tool_images, 
+                                                                         update_tool_image_store=True)
+    mock_platform.install_dev_env.assert_called_once_with(mock_local_dev_env)
     mock_stderr_print.assert_called_once_with("The installation failed.")
 
 @patch("dem.cli.command.pull_cmd.stderr.print")
