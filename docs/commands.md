@@ -77,6 +77,21 @@ Arguments:
 
 ---
 
+## **`dem clone DEV_ENV_NAME`
+
+Clone a Development Environment descriptor from the catalogs. 
+
+Only the Development Environment descriptor gets cloned, the required tool images are not pulled. To
+pull the required tool images, use the `install` command.  
+If a Development Environment with the same name has been already available on the host PC, the user
+will be asked if they want to overwrite it or not.
+
+Arguments:
+
+`DEV_ENV_NAME` Name of the Development Environment, whose descriptor to clone. [required]
+
+---
+
 ## **`dem rename DEV_ENV_NAME NEW_DEV_ENV_NAME`**
 
 Rename the Development Environment.

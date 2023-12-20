@@ -133,6 +133,7 @@ def test_platform_not_initialized():
         main.create: [test_dev_env_name],
         main.export: [test_dev_env_name],
         main.load: [test_path],
+        main.clone: [test_dev_env_name],
         main.rename: [test_dev_env_name, test_dev_env_name],
         main.modify: [test_dev_env_name],
         main.delete: [test_dev_env_name],

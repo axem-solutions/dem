@@ -6,7 +6,7 @@ from typing import Generator
 from typing_extensions import Annotated
 from dem import __command__, __app_name__
 from dem.cli.command import cp_cmd, info_cmd, list_cmd, pull_cmd, create_cmd, modify_cmd, delete_cmd, \
-                            rename_cmd, run_cmd, export_cmd, load_cmd, add_reg_cmd, \
+                            rename_cmd, run_cmd, export_cmd, load_cmd, clone_cmd, add_reg_cmd, \
                             list_reg_cmd, del_reg_cmd, add_cat_cmd, list_cat_cmd, del_cat_cmd, \
                             add_host_cmd
 from dem.cli.console import stdout
@@ -75,7 +75,7 @@ def list_(local: Annotated[bool, typer.Option(help="Scope is the local host.")] 
 
         --all --tool -> List the tool images available in the axemsolutions registry.
     """
-    if platform is not None:
+    if platform:
         list_cmd.execute(platform, local, all, env, tool)
     else:
         raise InternalError("Error: The platform hasn't been initialized properly!")
@@ -88,7 +88,7 @@ def info(dev_env_name: Annotated[str, typer.Argument(help="Name of the Developme
 
     Note: Autocomplete only works with the locally avialable Dev Envs.
     """
-    if platform is not None:
+    if platform:
         info_cmd.execute(platform, dev_env_name)
     else:
         raise InternalError("Error: The platform hasn't been initialized properly!")
@@ -99,7 +99,7 @@ def pull(dev_env_name: Annotated[str, typer.Argument(help="Name of the Developme
     Pull all the required tool images from the registry and install the Development Environment
     locally.
     """
-    if platform is not None:
+    if platform:
         pull_cmd.execute(platform, dev_env_name)
     else:
         raise InternalError("Error: The platform hasn't been initialized properly!")
@@ -111,7 +111,7 @@ def cp(dev_env_name: Annotated[str, typer.Argument(help="Name of the Development
     """
     Create a copy of a local Dev Env.
     """
-    if platform is not None:
+    if platform:
         cp_cmd.execute(platform, dev_env_name, new_dev_env_name)
     else:
         raise InternalError("Error: The platform hasn't been initialized properly!")
@@ -121,7 +121,7 @@ def create(dev_env_name: Annotated[str, typer.Argument(help="Name of the Develop
     """
     Create a new Development Environment.
     """
-    if platform is not None:
+    if platform:
         create_cmd.execute(platform, dev_env_name)
     else:
         raise InternalError("Error: The platform hasn't been initialized properly!")
@@ -133,7 +133,7 @@ def export(dev_env_name: Annotated[str, typer.Argument(help="Name of the Develop
     """
     Export the Development Environment.
     """
-    if platform is not None:
+    if platform:
         export_cmd.execute(platform, dev_env_name,path_to_export)
     else:
         raise InternalError("Error: The platform hasn't been initialized properly!")
@@ -143,8 +143,18 @@ def load(path_to_dev_env: Annotated[str, typer.Argument(help="Path to the Dev En
     """
     Import the Development Environment.
     """
-    if platform is not None:
+    if platform:
         load_cmd.execute(platform, path_to_dev_env)
+    else:
+        raise InternalError("Error: The platform hasn't been initialized properly!")
+
+@typer_cli.command()
+def clone(dev_env_name: Annotated[str, typer.Argument(help="Name of the Dev Env to clone.")]) -> None:
+    """
+    Copy the Dev Env's descriptor from the catalog to the local descriptor storage.
+    """
+    if platform:
+        clone_cmd.execute(platform, dev_env_name)
     else:
         raise InternalError("Error: The platform hasn't been initialized properly!")
 
@@ -155,7 +165,7 @@ def rename(dev_env_name: Annotated[str, typer.Argument(help="Name of the Develop
     """
     Rename the Development Environment.
     """
-    if platform is not None:
+    if platform:
         rename_cmd.execute(platform, dev_env_name,new_dev_env_name)
     else:
         raise InternalError("Error: The platform hasn't been initialized properly!")
@@ -166,7 +176,7 @@ def modify(dev_env_name: Annotated[str, typer.Argument(help="Name of the Develop
     """
     Modify the tool types and required tool images for an existing Development Environment.
     """
-    if platform is not None:
+    if platform:
         modify_cmd.execute(platform, dev_env_name)
     else:
         raise InternalError("Error: The platform hasn't been initialized properly!")
@@ -179,7 +189,7 @@ def delete(dev_env_name: Annotated[str, typer.Argument(help="Name of the Develop
     anymore by any of the available local Development Environments, the DEM asks the user whether
     they want to delete that image or not.
     """
-    if platform is not None:
+    if platform:
         delete_cmd.execute(platform, dev_env_name)
     else:
         raise InternalError("Error: The platform hasn't been initialized properly!")
@@ -197,7 +207,7 @@ def run(dev_env_name: Annotated[str, typer.Argument(help="Run the container in t
 
     See the documentation for the list of currently supported docker run parameters.
     """
-    if platform is not None:
+    if platform:
         run_cmd.execute(platform, dev_env_name, ctx.args)
     else:
         raise InternalError("Error: The platform hasn't been initialized properly!")
@@ -216,7 +226,7 @@ def add_reg(name: Annotated[str, typer.Argument(help="Name of the registry to ad
     The URL should point to the registry's REST API. For the Docker Hub its 
     https://registry.hub.docker.com, or it can be http://localhost:5000 for a self-hosted one.
     """
-    if platform is not None:
+    if platform:
         add_reg_cmd.execute(platform, name, url)
     else:
         raise InternalError("Error: The platform hasn't been initialized properly!")
@@ -226,7 +236,7 @@ def list_reg() -> None:
     """
     List the available registries.
     """
-    if platform is not None:
+    if platform:
         list_reg_cmd.execute(platform)
     else:
         raise InternalError("Error: The platform hasn't been initialized properly!")
@@ -237,7 +247,7 @@ def del_reg(registry_name: Annotated[str, typer.Argument(help="Name or IP addres
     """
     Delete a registry.
     """
-    if platform is not None:
+    if platform:
         del_reg_cmd.execute(platform, registry_name)
     else:
         raise InternalError("Error: The platform hasn't been initialized properly!")
@@ -252,7 +262,7 @@ def add_cat(name: Annotated[str, typer.Argument(help="Name of the Development En
     
     The URL must point to an HTTP(S) server where the Catalog json file is available.
     """
-    if platform is not None:
+    if platform:
         add_cat_cmd.execute(platform, name, url)
     else:
         raise InternalError("Error: The platform hasn't been initialized properly!")
@@ -262,7 +272,7 @@ def list_cat() -> None:
     """
     List the available catalogs.
     """
-    if platform is not None:
+    if platform:
         list_cat_cmd.execute(platform)
     else:
         raise InternalError("Error: The platform hasn't been initialized properly!")
@@ -273,7 +283,7 @@ def del_cat(catalog_name: Annotated[str, typer.Argument(help="Name of the Develo
     """
     Delete a catalog.
     """
-    if platform is not None:
+    if platform:
         del_cat_cmd.execute(platform, catalog_name)
     else:
         raise InternalError("Error: The platform hasn't been initialized properly!")
@@ -284,7 +294,7 @@ def add_host(name: Annotated[str, typer.Argument(help="Name of the host")],
     """
     Add a new host.
     """
-    if platform is not None:
+    if platform:
         add_host_cmd.execute(platform, name, address)
     else:
         raise InternalError("Error: The platform hasn't been initialized properly!")

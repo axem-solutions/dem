@@ -103,6 +103,7 @@ After installation, you can enable the autocompletion for bash and zsh shells
 
     dem --install-completion
 
+> If the command didn't work, supply your shell type as input parameter (bash or zsh)
 > Note for zsh users: `compinit` must be called from your .zshrc.
 
 ## Quick start
