@@ -316,7 +316,10 @@ def list_host() -> None:
     """
     List the available hosts.
     """
-    list_host_cmd.execute()
+    if platform is not None:
+        list_host_cmd.execute(platform)
+    else:
+        raise InternalError("Error: The platform hasn't been initialized properly!")
 
 
 def _version_callback(value: bool) -> None:
