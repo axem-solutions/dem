@@ -8,7 +8,7 @@ from dem import __command__, __app_name__
 from dem.cli.command import cp_cmd, info_cmd, list_cmd, pull_cmd, create_cmd, modify_cmd, delete_cmd, \
                             rename_cmd, run_cmd, export_cmd, load_cmd, clone_cmd, add_reg_cmd, \
                             list_reg_cmd, del_reg_cmd, add_cat_cmd, list_cat_cmd, del_cat_cmd, \
-                            add_host_cmd
+                            add_host_cmd, uninstall_cmd
 from dem.cli.console import stdout
 from dem.core.platform import DevEnvLocalSetup
 from dem.core.exceptions import InternalError
@@ -193,6 +193,18 @@ def delete(dev_env_name: Annotated[str, typer.Argument(help="Name of the Develop
         delete_cmd.execute(platform, dev_env_name)
     else:
         raise InternalError("Error: The platform hasn't been initialized properly!")
+
+@typer_cli.command()
+def uninstall(dev_env_name: Annotated[str, typer.Argument(help="Name of the Development Environment to uninstall.",
+                                                       autocompletion=autocomplete_dev_env_name)]) -> None:
+    """
+    Uninstall the Development Environment from the local setup. If a tool image is not required
+    anymore by any of the available local Development Environments, the DEM will delete it.
+    """
+    if platform is not None:
+        uninstall_cmd.execute(platform, dev_env_name)
+    else:
+        raise InternalError("Error: The platform hasn't been initialized properly!")  
 
 @typer_cli.command(context_settings={"allow_extra_args": True, "ignore_unknown_options": True})
 def run(dev_env_name: Annotated[str, typer.Argument(help="Run the container in this Development Environment context",

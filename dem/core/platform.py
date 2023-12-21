@@ -10,6 +10,8 @@ from dem.core.registry import Registries
 from dem.core.tool_images import ToolImages
 from dem.core.dev_env import DevEnv, DevEnv, DevEnv
 
+import docker.errors
+
 class DevEnvSetup(Core):
     """ Representation of the Development Platform:
         - The available tool images.
@@ -136,6 +138,7 @@ class DevEnvSetup(Core):
         for dev_env in self.local_dev_envs:
             dev_env_descriptor = {}
             dev_env_descriptor["name"] = dev_env.name
+            dev_env_descriptor["installed"] = dev_env.installed
             dev_env_descriptor["tools"] = dev_env.tools
             dev_env_descriptors.append(dev_env_descriptor)
         dev_env_json_deserialized["development_environments"] = dev_env_descriptors
@@ -153,6 +156,30 @@ class DevEnvSetup(Core):
         for dev_env in self.local_dev_envs:
             if dev_env.name == dev_env_name:
                 return dev_env
+            
+    def get_dev_env_status_by_name(self, dev_env_name: str) -> ("DevEnv | DevEnv | None"):
+        """ Get the Development Environment status by name.
+        
+            Args:
+                dev_env_name -- name of the Development Environment to get
+
+            Return with the instance representing the Development Environment. If the Development 
+            Environment doesn't exist in the setup, return with None.
+        """
+        for dev_env in self.local_dev_envs:
+            if dev_env.name == dev_env_name:
+                return dev_env.installed      
+
+    def set_dev_env_status_by_name(self, dev_env_name: str, status: str) -> ("DevEnv | DevEnv | None"):
+        """ Set the Development Environment status by name.
+        
+            Args:
+                dev_env_name -- name of the Development Environment to set
+                status -- status of the Development Environment            
+        """
+        for dev_env in self.local_dev_envs:
+            if dev_env.name == dev_env_name:
+                dev_env.installed = status
 
     def get_local_dev_env(self, catalog_dev_env: DevEnv) -> DevEnv | None:
         """ Get the local copy of the catalog's Dev Env if exists.
@@ -165,6 +192,43 @@ class DevEnvSetup(Core):
         for local_dev_env in self.local_dev_envs:
             if catalog_dev_env.name == local_dev_env.name:
                 return local_dev_env
+            
+
+    def try_to_remove_tool_images(self, uninstalled_dev_env: DevEnv) -> None:
+        retVal=True
+        all_required_tool_images = set()
+        for dev_env in self.local_dev_envs:
+            for tool in dev_env.tools:                            
+                if (dev_env.installed == "True") and (dev_env.name != uninstalled_dev_env.name) :                
+                    all_required_tool_images.add(tool["image_name"] + ":" + tool["image_version"])
+                    
+        uninstalled_dev_env_tool_images = set()
+        for tool in uninstalled_dev_env.tools:
+            uninstalled_dev_env_tool_images.add(tool["image_name"] + ":" + tool["image_version"])
+            
+
+        for tool_image in uninstalled_dev_env_tool_images:
+            if tool_image in all_required_tool_images:            
+                self.user_output.msg("[yellow] Can't delete" + tool_image + "tool images!")
+            else:
+                retVal = self.delete_tool_image(tool_image)
+            if retVal == False:
+                return retVal
+            else:
+                retVal = True
+                
+            
+        return retVal
+
+    def delete_tool_image(self, tool_image: str) -> bool:
+        self.user_output.msg("\nThe tool image [bold]" + tool_image + "[/bold] is not required by any Development Environment anymore.")
+        retVal=self.container_engine.remove(tool_image)
+        return retVal
+
+    def update_dev_env_status_in_json(self, uninstalled_dev_env: DevEnv):
+        listindex = self.local_dev_envs.index(uninstalled_dev_env)                
+        self.local_dev_envs[listindex].installed = "False"
+        self.flush_to_file()            
 
 class DevEnvLocalSetup(DevEnvSetup):
     def __init__(self) -> None:

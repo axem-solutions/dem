@@ -11,6 +11,7 @@ def test_DevEnv():
     # Test setup
     test_descriptor = {
         "name": "test_name",
+        "installed": "True",
         "tools": [MagicMock()]
     }
 
@@ -38,6 +39,7 @@ def test_DevEnv_check_image_availability():
     # Test setup
     test_descriptor = {
         "name": "test_name",
+        "installed": "True",
         "tools": [
             {
                 "image_name": "test_image_name1",
@@ -91,6 +93,7 @@ def test_DevEnv_check_image_availability_local_only():
     # Test setup
     test_descriptor = {
         "name": "test_name",
+        "installed": "True",
         "tools": [
             {
                 "image_name": "test_image_name1",

@@ -33,6 +33,7 @@ class DevEnv(Core):
         if descriptor:
             self.name = descriptor["name"]
             self.tools = descriptor["tools"]
+            self.installed = descriptor["installed"]            
         else:
             self.name = dev_env_to_copy.name
             self.tools = dev_env_to_copy.tools

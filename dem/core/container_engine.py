@@ -106,7 +106,19 @@ class ContainerEngine(Core):
             Args: 
                 image -- the tool image to remove
         """
-        self._docker_client.images.remove(image)
+        retVal=True        
+        try:
+             self._docker_client.images.remove(image)
+        except docker.errors.ImageNotFound:
+            self.user_output.error("[yellow]" + image + " doesn't exist. Unable to remove it.[/]\n")
+            retVal=False
+        except docker.errors.APIError:
+            self.user_output.error("[red]Error: " + image + " is used by a container. Unable to remove it.[/]\n")
+            retVal=False
+        else:
+            self.user_output.msg("[green]Successfully removed![/]\n")
+            retVal=True
+        return retVal
 
     def search(self, registry: str) -> list[str]:
         """ Search repository in the axemsolutions registry.

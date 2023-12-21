@@ -297,3 +297,15 @@ Arguments:
 `ADDRESS` IP or hostname of the host. [required]
 
 ---
+
+## **`dem uninstall DEV_ENV_NAME`**
+
+Uninstall the selected Development Environment. Set installed flag to False if it was True. Dem checks whether a tool image is
+required or not by any of the remaining installed local Development Environments. In case the tool image is
+not required anymore, the dem delete it. 
+
+Arguments:
+
+`DEV_ENV_NAME` Name of the Development Environment to uninstall. [required]
+
+---
