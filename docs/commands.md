@@ -296,8 +296,11 @@ Arguments:
 
 `ADDRESS` IP or hostname of the host. [required]
 
----
+## **`dem list-host`**
 
+List the available hosts from the config file.
+
+---
 ## **`dem uninstall DEV_ENV_NAME`**
 
 Uninstall the selected Development Environment. Set installed flag to False if it was True. Dem checks whether a tool image is
