@@ -4,7 +4,7 @@
 import typer
 from dem.core.dev_env import DevEnv, DevEnv
 from dem.core.tool_images import ToolImages
-from dem.core.platform import DevEnvLocalSetup
+from dem.core.platform import Platform
 from dem.cli.console import stdout, stderr
 from dem.cli.tui.panel.tool_type_selector import ToolTypeSelectorPanel
 from dem.cli.tui.panel.tool_image_selector import ToolImageSelectorPanel
@@ -142,13 +142,13 @@ def get_dev_env_descriptor_from_user(dev_env_name: str, tool_image_list: list[li
 def overwrite_existing_dev_env(original_dev_env: DevEnv, new_dev_env_descriptor: dict) -> None:
     original_dev_env.tools = new_dev_env_descriptor["tools"]
 
-def create_new_dev_env(platform: DevEnvLocalSetup, new_dev_env_descriptor: dict) -> DevEnv:
+def create_new_dev_env(platform: Platform, new_dev_env_descriptor: dict) -> DevEnv:
     new_dev_env = DevEnv(new_dev_env_descriptor)
     platform.local_dev_envs.append(new_dev_env)
 
     return new_dev_env
 
-def create_dev_env(platform: DevEnvLocalSetup, dev_env_name: str) -> DevEnv:
+def create_dev_env(platform: Platform, dev_env_name: str) -> DevEnv:
     if ' ' in dev_env_name:
         stderr.print("The name of the Development Environment cannot contain whitespace characters!")
         raise typer.Abort()
@@ -167,20 +167,18 @@ def create_dev_env(platform: DevEnvLocalSetup, dev_env_name: str) -> DevEnv:
     else:
         new_dev_env = create_new_dev_env(platform, new_dev_env_descriptor)
 
-    new_dev_env.check_image_availability(platform.tool_images)
-    platform.pull_images(new_dev_env.tools)
-
     return new_dev_env
 
-def execute(platform: DevEnvLocalSetup, dev_env_name: str) -> None:
+def execute(platform: Platform, dev_env_name: str) -> None:
     dev_env = create_dev_env(platform, dev_env_name)
 
     # Validate the Dev Env creation
     image_statuses = dev_env.check_image_availability(platform.tool_images, 
-                                                      update_tool_images=True)
+                                                      update_tool_image_store=True)
 
     if (ToolImages.NOT_AVAILABLE in image_statuses) or (ToolImages.REGISTRY_ONLY in image_statuses):
         stderr.print("The installation failed.")
     else:
-        stdout.print("The [yellow]" + dev_env.name + "[/] Development Environment is ready!")
-        platform.flush_to_file()
+        platform.flush_descriptors()
+        stdout.print(f"The [green]{dev_env_name}[/] Development Environment has been created!")
+        stdout.print("Run [italic]dem install[/] to install it.")

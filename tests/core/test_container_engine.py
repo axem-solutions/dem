@@ -238,11 +238,13 @@ def test_run_StopIteration(mock_from_env):
         # Check expectations
         assert str(exported_exception_info) =="Invalid input parameter!"
 
+@patch.object(container_engine.ContainerEngine, "user_output")
 @patch("docker.from_env")
-def test_remove(mock_from_env):
+def test_remove(mock_from_env: MagicMock, mock_user_output: MagicMock) -> None:
     # Test setup
-    fake_docker_client = MagicMock()
-    mock_from_env.return_value = fake_docker_client
+    mock_docker_client = MagicMock()
+    mock_from_env.return_value = mock_docker_client
+
     test_image_to_remove = "test_image_to_remove:latest"
 
     test_container_engine = container_engine.ContainerEngine()
@@ -251,7 +253,48 @@ def test_remove(mock_from_env):
     test_container_engine.remove(test_image_to_remove)
 
     # Check expectations
-    fake_docker_client.images.remove.assert_called_once_with(test_image_to_remove)
+    mock_docker_client.images.remove.assert_called_once_with(test_image_to_remove)
+    mock_user_output.msg.assert_called_once_with(f"[green]Successfully removed the {test_image_to_remove}![/]\n")
+
+@patch.object(container_engine.ContainerEngine, "user_output")
+@patch("docker.from_env")
+def test_remove_ImageNotFound(mock_from_env: MagicMock, mock_user_output: MagicMock) -> None:
+    # Test setup
+    mock_docker_client = MagicMock()
+    mock_from_env.return_value = mock_docker_client
+
+    test_image_to_remove = "test_image_to_remove:latest"
+    mock_docker_client.images.remove.side_effect = container_engine.docker.errors.ImageNotFound("")
+
+    test_container_engine = container_engine.ContainerEngine()
+
+    # Run unit under test
+    with pytest.raises(container_engine.ContainerEngineError):
+        test_container_engine.remove(test_image_to_remove)
+
+        # Check expectations
+        mock_docker_client.images.remove.assert_called_once_with(test_image_to_remove)
+        mock_user_output.msg.assert_called_once_with(f"[yellow]The {test_image_to_remove} doesn't exist. Unable to remove it.[/]\n")
+
+@patch.object(container_engine.ContainerEngine, "user_output")
+@patch("docker.from_env")
+def test_remove_APIError(mock_from_env: MagicMock, mock_user_output: MagicMock) -> None:
+    # Test setup
+    mock_docker_client = MagicMock()
+    mock_from_env.return_value = mock_docker_client
+
+    test_image_to_remove = "test_image_to_remove:latest"
+    mock_docker_client.images.remove.side_effect = container_engine.docker.errors.APIError("")
+
+    test_container_engine = container_engine.ContainerEngine()
+
+    # Run unit under test
+    with pytest.raises(container_engine.ContainerEngineError):
+        test_container_engine.remove(test_image_to_remove)
+
+        # Check expectations
+        mock_docker_client.images.remove.assert_called_once_with(test_image_to_remove)
+        mock_user_output.error.assert_called_once_with(f"[red]Error: The {test_image_to_remove} is used by a container. Unable to remove it.[/]\n")
 
 @patch("docker.from_env")
 def test_search(mock_from_env):

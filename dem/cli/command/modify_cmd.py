@@ -4,7 +4,7 @@
 import copy, typer
 from dem.core.dev_env import DevEnv, DevEnv
 from dem.core.tool_images import ToolImages
-from dem.core.platform import DevEnvLocalSetup
+from dem.core.platform import Platform
 from dem.cli.console import stderr
 from dem.cli.tui.renderable.menu import SelectMenu
 from dem.cli.tui.panel.tool_type_selector import ToolTypeSelectorPanel
@@ -148,8 +148,7 @@ def get_confirm_from_user() -> str:
     select_menu.wait_for_user()
     return select_menu.get_selected()
 
-def handle_user_confirm(confirmation: str, dev_env_local: DevEnv,
-                        dev_env_local_setup: DevEnvLocalSetup) -> None:
+def handle_user_confirm(confirmation: str, dev_env_local: DevEnv, platform: Platform) -> None:
     if confirmation == "cancel":
         raise(typer.Abort())
 
@@ -157,22 +156,17 @@ def handle_user_confirm(confirmation: str, dev_env_local: DevEnv,
         new_dev_env = copy.deepcopy(dev_env_local)
         new_dev_env.name = typer.prompt("Name of the new Development Environment")
         
-        check_for_new_dev_env = dev_env_local_setup.get_dev_env_by_name(new_dev_env.name)
+        check_for_new_dev_env = platform.get_dev_env_by_name(new_dev_env.name)
 
         if check_for_new_dev_env is None:            
-            dev_env_local_setup.local_dev_envs.append(new_dev_env)
+            platform.local_dev_envs.append(new_dev_env)
         else:
             stderr.print("[red]The Development Environment already exist.")
             raise(typer.Abort())
 
+    platform.flush_descriptors()
 
-    # Update the json file if the user confirms or saves as a new Dev Env.
-    dev_env_local_setup.flush_to_file()    
-    dev_env_local.check_image_availability(dev_env_local_setup.tool_images)
-    dev_env_local_setup.pull_images(dev_env_local.tools)        
-
-
-def execute(platform: DevEnvLocalSetup, dev_env_name: str) -> None:
+def execute(platform: Platform, dev_env_name: str) -> None:
     dev_env_local = platform.get_dev_env_by_name(dev_env_name)
 
     if dev_env_local is None:

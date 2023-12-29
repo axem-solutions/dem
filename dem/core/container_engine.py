@@ -102,23 +102,22 @@ class ContainerEngine(Core):
 
     def remove(self, image: str) -> None:
         """ Remove a tool image.
+
+            If the removal was successful return with True, otherwise return with False.
         
             Args: 
                 image -- the tool image to remove
         """
-        retVal=True        
         try:
              self._docker_client.images.remove(image)
         except docker.errors.ImageNotFound:
-            self.user_output.error("[yellow]" + image + " doesn't exist. Unable to remove it.[/]\n")
-            retVal=False
+            self.user_output.msg(f"[yellow]The {image} doesn't exist. Unable to remove it.[/]\n")
+            raise ContainerEngineError("")
         except docker.errors.APIError:
-            self.user_output.error("[red]Error: " + image + " is used by a container. Unable to remove it.[/]\n")
-            retVal=False
+            self.user_output.error(f"[red]Error: The {image} is used by a container. Unable to remove it.[/]\n")
+            raise ContainerEngineError("")
         else:
-            self.user_output.msg("[green]Successfully removed![/]\n")
-            retVal=True
-        return retVal
+            self.user_output.msg(f"[green]Successfully removed the {image}![/]\n")
 
     def search(self, registry: str) -> list[str]:
         """ Search repository in the axemsolutions registry.

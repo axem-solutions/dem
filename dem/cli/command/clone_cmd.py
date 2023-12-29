@@ -2,11 +2,11 @@
 # dem/cli/command/clone_cmd.py
 
 import typer
-from dem.core.platform import DevEnvLocalSetup
+from dem.core.platform import Platform
 from dem.core.dev_env import DevEnv
 from dem.cli.console import stdout, stderr
 
-def handle_existing_local_dev_env(platform: DevEnvLocalSetup, local_dev_env: DevEnv) -> None:
+def handle_existing_local_dev_env(platform: Platform, local_dev_env: DevEnv) -> None:
     """ Handle the case when the Dev Env already exists locally.
 
         Args:
@@ -19,7 +19,7 @@ def handle_existing_local_dev_env(platform: DevEnvLocalSetup, local_dev_env: Dev
     # TODO: The Dev Env must be uninstalled before the descriptor gets removed.
     platform.local_dev_envs.remove(local_dev_env)
 
-def execute(platform: DevEnvLocalSetup, dev_env_name: str) -> None:
+def execute(platform: Platform, dev_env_name: str) -> None:
     """ Copy the Dev Env's descriptor from the catalog to the local descriptor storage.
 
         If the Dev Env already exists locally, the user will be asked to confirm the overwrite.
@@ -47,6 +47,6 @@ def execute(platform: DevEnvLocalSetup, dev_env_name: str) -> None:
         handle_existing_local_dev_env(platform, local_dev_env)
 
     platform.local_dev_envs.append(catalog_dev_env)
-    platform.flush_to_file()
+    platform.flush_descriptors()
 
     stdout.print("[green]The Dev Env successfully cloned.[/]")

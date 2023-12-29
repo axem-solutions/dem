@@ -7,14 +7,14 @@ from dem.core.exceptions import RegistryError, ContainerEngineError, InternalErr
 import dem.cli.main
 import docker.errors
 from dem.core.core import Core
-from dem.core.platform import DevEnvLocalSetup
+from dem.core.platform import Platform
 from dem.cli.tui.tui_user_output import TUIUserOutput
 
-def main():
+def main() -> None:
     """ Entry point for the CLI application"""
 
     # Create the Development Platform
-    dem.cli.main.platform = DevEnvLocalSetup()
+    dem.cli.main.platform = Platform()
 
     # Connect the UI to the user output interface
     Core.set_user_output(TUIUserOutput())

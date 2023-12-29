@@ -2,12 +2,12 @@
 # dem/cli/command/pull_cmd.py
 
 from dem.core.tool_images import ToolImages
-from dem.core.platform import DevEnvLocalSetup
-from dem.core.dev_env import DevEnv, DevEnv
+from dem.core.platform import Platform
+from dem.core.dev_env import DevEnv
 from dem.cli.console import stdout, stderr
 
-def install_to_dev_env_json(local_dev_env: DevEnv | None, catalog_dev_env: DevEnv, 
-                            platform: DevEnvLocalSetup) -> DevEnv:
+def create_dev_env(local_dev_env: DevEnv | None, catalog_dev_env: DevEnv, 
+                            platform: Platform) -> DevEnv:
     """Install the Dev Env descriptor to the dev_env.json.
     
     If the dev_env_local is None, the Dev Env is not yet installed locally. Install it by appending 
@@ -26,15 +26,15 @@ def install_to_dev_env_json(local_dev_env: DevEnv | None, catalog_dev_env: DevEn
         # If not available, install it.
         local_dev_env = DevEnv(dev_env_to_copy=catalog_dev_env)
         platform.local_dev_envs.append(local_dev_env)
-        platform.flush_to_file()
+        platform.flush_descriptors()
     elif local_dev_env.tools != catalog_dev_env.tools:
         # If already installed, but different, then overwrite it.
         local_dev_env.tools = catalog_dev_env.tools
-        platform.flush_to_file()
+        platform.flush_descriptors()
 
     return local_dev_env
 
-def execute(platform: DevEnvLocalSetup, dev_env_name: str) -> None:
+def execute(platform: Platform, dev_env_name: str) -> None:
     catalog_dev_env: DevEnv | None = None
 
     if not platform.dev_env_catalogs.catalogs:
@@ -49,15 +49,13 @@ def execute(platform: DevEnvLocalSetup, dev_env_name: str) -> None:
         stderr.print("[red]Error: The input Development Environment is not available for the organization.[/]")
         return
 
-    local_dev_env = install_to_dev_env_json(platform.get_local_dev_env(catalog_dev_env), 
+    local_dev_env = create_dev_env(platform.get_dev_env_by_name(catalog_dev_env.name), 
                                             catalog_dev_env, platform)
 
-    # The local Dev Env setup contains the DevEnvOrg to install. Check the images' statuses
-    local_dev_env.check_image_availability(platform.tool_images)
-    platform.pull_images(local_dev_env.tools)
-    # Check image availability again.
-    image_statuses = local_dev_env.check_image_availability(platform.tool_images, 
-                                                            update_tool_images=True)
+    platform.install_dev_env(local_dev_env)
+    # Check image availability.
+    image_statuses: list = local_dev_env.check_image_availability(platform.tool_images, 
+                                                                  update_tool_image_store=True)
 
     if image_statuses.count(ToolImages.LOCAL_AND_REGISTRY) == len(image_statuses):
         stdout.print("The [yellow]" + local_dev_env.name + "[/] Development Environment is ready!")

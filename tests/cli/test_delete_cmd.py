@@ -158,7 +158,7 @@ def test_delete_dev_env_valid_name(mock_remove_unused_tool_images):
     assert 0 == runner_result.exit_code
 
     mock_platform.get_dev_env_by_name.assert_called_once_with(fake_dev_env_to_delete.name)
-    mock_platform.flush_to_file.assert_called_once()
+    mock_platform.flush_descriptors.assert_called_once()
     mock_remove_unused_tool_images.assert_called_once_with(fake_dev_env_to_delete, mock_platform)
 
     assert fake_dev_env1 in mock_platform.local_dev_envs

@@ -2,12 +2,12 @@
 # dem/cli/command/run_cmd.py
 
 from dem.core.dev_env import DevEnv
-from dem.core.platform import DevEnvLocalSetup
+from dem.core.platform import Platform
 from dem.cli.console import stdout, stderr
 import typer
 
 def handle_missing_tool_images(missing_tool_images: set[str], dev_env_local: DevEnv,
-                               platform: DevEnvLocalSetup) -> None:
+                               platform: Platform) -> None:
     """ Report an error to the user that some images are not available. Ask them if the DEM should 
         try to fix the Dev Env: abort if no, pull the missing tool images if yes.
         
@@ -21,12 +21,10 @@ def handle_missing_tool_images(missing_tool_images: set[str], dev_env_local: Dev
         stderr.print("[red]" + missing_tool_image + "[/]")
     typer.confirm("Should DEM try to fix the faulty Development Environment?", abort=True)
 
-    dev_env_local.check_image_availability(platform.tool_images, 
-                                        update_tool_images=True)
-    platform.pull_images(dev_env_local.tools)
+    platform.install_dev_env(dev_env_local)
     stdout.print("[green]DEM fixed the " + dev_env_local.name + "![/]")
 
-def execute(platform: DevEnvLocalSetup, dev_env_name: str, container_arguments: list[str]) -> None:
+def execute(platform: Platform, dev_env_name: str, container_arguments: list[str]) -> None:
     """ Execute the run command in the given Dev Env context. If something is wrong with the Dev 
         Env the DEM can try to fix it.
 
@@ -42,7 +40,7 @@ def execute(platform: DevEnvLocalSetup, dev_env_name: str, container_arguments: 
         raise(typer.Abort)
     else:
         # Update the tool images manually.
-        DevEnvLocalSetup.update_tool_images_on_instantiation = False
+        Platform.update_tool_images_on_instantiation = False
         # Only the local images are needed.
         platform.tool_images.local.update()
 

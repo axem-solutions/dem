@@ -1,11 +1,11 @@
 """CLI command implementation for listing the available Development Environment Catalogs."""
 # dem/cli/command/list_cat_cmd.py
 
-from dem.core.platform import DevEnvLocalSetup
+from dem.core.platform import Platform
 from dem.cli.console import stdout
 from rich.table import Table
 
-def execute(platform: DevEnvLocalSetup) -> None:
+def execute(platform: Platform) -> None:
     """ List available Development Environment Catalogs."""
     catalog_config = None
     table = Table()

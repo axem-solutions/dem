@@ -12,8 +12,6 @@ from unittest.mock import patch, MagicMock, call
 import io
 from rich.console import Console
 from rich.table import Table
-import json
-import tests.fake_data as fake_data
 from dem.core.dev_env import DevEnv, DevEnv
 from dem.core.tool_images import ToolImages
 
@@ -118,6 +116,8 @@ def test_with_empty_catalog():
 def test_with_valid_dev_env_org_json():
     # Test setup
     mock_platform = MagicMock()
+    main.platform = mock_platform
+
     expected_dev_env_list = [
         ["org_only_env", "Ready to be installed."],
         ["demo", "Installed locally."],
@@ -139,8 +139,7 @@ def test_with_valid_dev_env_org_json():
     mock_catalog = MagicMock()
     mock_platform.dev_env_catalogs.catalogs = [mock_catalog]
     mock_catalog.dev_envs = fake_catalog_dev_envs
-    mock_platform.get_local_dev_env.side_effect = [None, MagicMock(), MagicMock()]
-    main.platform = mock_platform
+    mock_platform.get_dev_env_by_name.side_effect = [None, MagicMock(), MagicMock()]
 
     # Run unit under test
     runner_result = runner.invoke(main.typer_cli, ["list", "--all", "--env"])
@@ -149,7 +148,7 @@ def test_with_valid_dev_env_org_json():
     calls = []
     for fake_dev_env in fake_catalog_dev_envs:
         calls.append(call(fake_dev_env))
-    mock_platform.get_local_dev_env.has_calls(calls)
+    mock_platform.get_dev_env_by_name.has_calls(calls)
 
     expected_table = Table()
     expected_table.add_column("Development Environment")

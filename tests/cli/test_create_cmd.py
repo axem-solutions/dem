@@ -8,7 +8,7 @@ import dem.cli.command.create_cmd as create_cmd
 # Test framework
 import pytest
 from typer.testing import CliRunner
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch, MagicMock, call
 
 from dem.core.tool_images import ToolImages
 
@@ -105,7 +105,6 @@ def test_create_dev_env_new(mock_get_tool_image_list, mock_get_dev_env_descripto
     mock_get_dev_env_descriptor_from_user.assert_called_once_with(expected_dev_env_name, mock_tool_images)
     mock_create_new_dev_env.assert_called_once_with(mock_dev_env_local_setup, mock_dev_env_descriptor)
     mock_new_dev_env.check_image_availability.return_value = mock_dev_env_local_setup.tool_images
-    mock_dev_env_local_setup.pull_images.assert_called_once_with(mock_new_dev_env.tools)
 
 @patch("dem.cli.command.create_cmd.overwrite_existing_dev_env")
 @patch("dem.cli.command.create_cmd.get_dev_env_descriptor_from_user")
@@ -143,8 +142,6 @@ def test_create_dev_env_overwrite(mock_confirm, mock_get_tool_image_list,
     mock_get_dev_env_descriptor_from_user.assert_called_once_with(expected_dev_env_name,
                                                                   mock_tool_images)
     mock_overwrite_existing_dev_env.assert_called_once_with(mock_dev_env_original, mock_dev_env_descriptor)
-    mock_dev_env_original.check_image_availability.assert_called_once_with(mock_dev_env_local_setup.tool_images)
-    mock_dev_env_local_setup.pull_images.assert_called_once_with(mock_dev_env_original.tools)
 
 @patch("dem.cli.command.create_cmd.get_dev_env_descriptor_from_user")
 @patch("dem.cli.command.create_cmd.typer.confirm")
@@ -190,10 +187,12 @@ def test_execute(mock_create_dev_env, mock_stdout_print):
 
     mock_create_dev_env.assert_called_once_with(mock_platform, expected_dev_env_name)
     mock_dev_env.check_image_availability.assert_called_once_with(mock_platform.tool_images,
-                                                                  update_tool_images=True)
-
-    mock_stdout_print.assert_called_once_with("The [yellow]" + expected_dev_env_name + "[/] Development Environment is ready!")
-    mock_platform.update_json()
+                                                                  update_tool_image_store=True)
+    mock_platform.flush_descriptors.assert_called_once()
+    mock_stdout_print.assert_has_calls([
+        call(f"The [green]{expected_dev_env_name}[/] Development Environment has been created!"),
+        call("Run [italic]dem install[/] to install it.")
+    ])
 
 @patch("dem.cli.command.create_cmd.stderr.print")
 @patch("dem.cli.command.create_cmd.create_dev_env")
@@ -218,7 +217,7 @@ def test_execute_failure(mock_create_dev_env, mock_stderr_print):
 
     mock_create_dev_env.assert_called_once_with(mock_platform, expected_dev_env_name)
     mock_dev_env.check_image_availability.assert_called_once_with(mock_platform.tool_images,
-                                                                  update_tool_images=True)
+                                                                  update_tool_image_store=True)
     mock_stderr_print.assert_called_once_with("The installation failed.")
 
 @patch("dem.cli.command.create_cmd.stderr.print")

@@ -24,3 +24,11 @@ class ContainerEngineError(Exception):
 class InternalError(Exception):
     """Raised when an object is used incorrectly."""
     pass
+
+class PlatformError(Exception):
+    """Raised when there is a problem with the platform."""
+
+    base_message = "Platform error: "
+
+    def __init__(self, message: str) -> None:
+        super().__init__(self.base_message + message)

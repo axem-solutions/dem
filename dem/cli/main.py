@@ -10,11 +10,11 @@ from dem.cli.command import cp_cmd, info_cmd, list_cmd, pull_cmd, create_cmd, mo
                             list_reg_cmd, del_reg_cmd, add_cat_cmd, list_cat_cmd, del_cat_cmd, \
                             add_host_cmd, uninstall_cmd, list_host_cmd
 from dem.cli.console import stdout
-from dem.core.platform import DevEnvLocalSetup
+from dem.core.platform import Platform
 from dem.core.exceptions import InternalError
 
 typer_cli: typer.Typer = typer.Typer(rich_markup_mode="rich")
-platform: DevEnvLocalSetup | None = None
+platform: Platform | None = None
 
 # Autocomplete functions
 def autocomplete_dev_env_name(incomplete: str) -> Generator:
@@ -320,7 +320,6 @@ def list_host() -> None:
         list_host_cmd.execute(platform)
     else:
         raise InternalError("Error: The platform hasn't been initialized properly!")
-
 
 def _version_callback(value: bool) -> None:
     if value:

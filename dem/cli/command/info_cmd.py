@@ -4,7 +4,7 @@
 from dem.core.tool_images import ToolImages
 from dem.core.dev_env import DevEnv, DevEnv
 from dem.cli.console import stdout, stderr
-from dem.core.platform import DevEnvLocalSetup
+from dem.core.platform import Platform
 from rich.table import Table
 
 image_status_messages = {
@@ -25,7 +25,7 @@ def print_info(dev_env: (DevEnv | DevEnv)) -> None:
                                 image_status_messages[tool["image_status"]])
     stdout.print(tool_info_table)
 
-def execute(platform: DevEnvLocalSetup, arg_dev_env_name: str) -> None:
+def execute(platform: Platform, arg_dev_env_name: str) -> None:
     dev_env = platform.get_dev_env_by_name(arg_dev_env_name)
 
     if dev_env is None:

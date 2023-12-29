@@ -137,6 +137,7 @@ def test_platform_not_initialized():
         main.rename: [test_dev_env_name, test_dev_env_name],
         main.modify: [test_dev_env_name],
         main.delete: [test_dev_env_name],
+        main.uninstall: [test_dev_env_name],
         main.run: [test_dev_env_name, mock_ctx],
         main.add_reg: [test_name, test_url],
         main.list_reg: [],
@@ -144,7 +145,8 @@ def test_platform_not_initialized():
         main.add_cat: [test_name, test_url],
         main.list_cat: [],
         main.del_cat: [test_name],
-        main.add_host: [test_name, test_url]
+        main.add_host: [test_name, test_url],
+        main.list_host: []
     }
 
     for function, parameter in units_to_test.items():
