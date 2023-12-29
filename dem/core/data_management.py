@@ -5,7 +5,7 @@ from dem.core.core import Core
 from dem.core.properties import __config_dir_path__
 from pathlib import PurePath
 import os
-import json, requests
+import json
 
 class BaseJSON(Core):
     """ This class acts as an abstracted buffer over a json file. 
@@ -98,8 +98,10 @@ class ConfigFile(BaseJSON):
             "url": "https://axemsolutions.io/dem/dev_env_org.json"
         }
     ]
+    "hosts": []
 }"""
         super().__init__()
 
-        self.registries: list[dict] = self.deserialized["registries"]
-        self.catalogs: list[dict] = self.deserialized["catalogs"]
+        self.registries: list[dict] = self.deserialized.get("registries", [])
+        self.catalogs: list[dict] = self.deserialized.get("catalogs", [])
+        self.hosts: list[dict] = self.deserialized.get("hosts", [])

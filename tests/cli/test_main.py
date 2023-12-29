@@ -55,6 +55,8 @@ def test_autocomplete_cat_name():
     # Check expectations
     assert expected_completions == actual_completions
 
+    mock_platform.dev_env_catalogs.list_catalog_configs.assert_called_once()
+
 def test_autocomplete_reg_name():
     # Test setup
     mock_platform = MagicMock()
@@ -73,6 +75,29 @@ def test_autocomplete_reg_name():
 
     # Check expectations
     assert expected_completions == actual_completions
+    
+    mock_platform.registries.list_registry_configs.assert_called_once()
+
+def test_autocomplete_host_name():
+    # Test setup
+    mock_platform = MagicMock()
+    fake_host_config = {
+        "name": "test"
+    }
+    mock_platform.hosts.list_configs.return_value = [fake_host_config]
+    main.platform = mock_platform
+
+    expected_completions = [fake_host_config["name"]]
+
+    # Run unit under test
+    actual_completions = []
+    for result in main.autocomplete_host_name("tes"):
+        actual_completions.append(result)
+
+    # Check expectations
+    assert expected_completions == actual_completions
+
+    mock_platform.hosts.list_configs.assert_called_once()
 
 @patch("dem.cli.main.__app_name__", "axem-dem")
 @patch("dem.cli.main.stdout.print")
@@ -146,7 +171,8 @@ def test_platform_not_initialized():
         main.list_cat: [],
         main.del_cat: [test_name],
         main.add_host: [test_name, test_url],
-        main.list_host: []
+        main.list_host: [],
+        main.del_host: [test_name],
     }
 
     for function, parameter in units_to_test.items():
