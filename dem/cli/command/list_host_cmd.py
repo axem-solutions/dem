@@ -5,14 +5,14 @@ from dem.core.platform import Platform
 from dem.cli.console import stdout
 from rich.table import Table
 
-def execute(platform) -> None:
+def execute(platform: Platform) -> None:
     """ List available Hosts.
     
     Usage: dem list-host
     
     """
 
-    hosts = platform.config_file.deserialized.get("hosts", [])
+    hosts: list[dict] = platform.hosts.list_host_configs()
     """
     Ideally, if 'hosts' is populated, it should look something like:
     hosts = [

@@ -9,6 +9,7 @@ from dem.core.container_engine import ContainerEngine
 from dem.core.registry import Registries
 from dem.core.tool_images import ToolImages
 from dem.core.dev_env import DevEnv
+from dem.core.hosts import Hosts
 
 class Platform(Core):
     """ Representation of the Development Platform:
@@ -46,6 +47,7 @@ class Platform(Core):
         self._container_engine = None
         self._registries = None
         self._config_file = None
+        self._hosts = None
 
         self.local_dev_envs: list[DevEnv] = []
         for dev_env_descriptor in self.dev_env_json.deserialized["development_environments"]:
@@ -105,6 +107,17 @@ class Platform(Core):
             self._dev_env_catalogs = DevEnvCatalogs(self.config_file)
 
         return self._dev_env_catalogs
+
+    @property
+    def hosts(self) -> Hosts:
+        """ The hosts.
+        
+            The Hosts() gets instantiated only at the first access.
+        """
+        if self._hosts is None:
+            self._hosts = Hosts(self.config_file)
+
+        return self._hosts
 
     def get_deserialized(self) -> dict:
             """ Create the deserialized json. 

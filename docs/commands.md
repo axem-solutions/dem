@@ -150,6 +150,18 @@ Arguments:
 
 ---
 
+## **`dem uninstall DEV_ENV_NAME`**
+
+Uninstall the selected Development Environment. Set installed flag to False if it was True. Dem checks whether a tool image is
+required or not by any of the remaining installed local Development Environments. In case the tool image is
+not required anymore, the dem delete it. 
+
+Arguments:
+
+`DEV_ENV_NAME` Name of the Development Environment to uninstall. [required]
+
+---
+
 ## **`dem run DEV_ENV_NAME *`**
 
 :warning: Experimental feature!
@@ -286,6 +298,8 @@ Arguments:
 
 `NAME` Name of the registry to delete. [required]
 
+# Host management
+
 ## **`dem add-host NAME ADDRESS`**
 
 Add a new host to the configuration.
@@ -296,19 +310,18 @@ Arguments:
 
 `ADDRESS` IP or hostname of the host. [required]
 
+---
+
 ## **`dem list-host`**
 
 List the available hosts from the config file.
 
 ---
-## **`dem uninstall DEV_ENV_NAME`**
 
-Uninstall the selected Development Environment. Set installed flag to False if it was True. Dem checks whether a tool image is
-required or not by any of the remaining installed local Development Environments. In case the tool image is
-not required anymore, the dem delete it. 
+## **`dem del-host NAME`**
+
+Delete a host from the config file.
 
 Arguments:
 
-`DEV_ENV_NAME` Name of the Development Environment to uninstall. [required]
-
----
+`NAME` Name of the host to delete. [required]

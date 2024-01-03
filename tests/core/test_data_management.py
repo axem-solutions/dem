@@ -156,9 +156,11 @@ def test_ConfigFile(mock_PurePath: MagicMock):
 
     mock_registries = MagicMock()
     mock_catalogs = MagicMock()
+    mock_hosts = MagicMock()
     def stub_update(self):
         self.deserialized["registries"] = mock_registries
         self.deserialized["catalogs"] = mock_catalogs
+        self.deserialized["hosts"] = mock_hosts
     data_management.BaseJSON.update = stub_update
 
     # Run unit under test
@@ -179,8 +181,10 @@ def test_ConfigFile(mock_PurePath: MagicMock):
             "url": "https://axemsolutions.io/dem/dev_env_org.json"
         }
     ]
+    "hosts": []
 }"""
     assert local_dev_env_json.registries is mock_registries
     assert local_dev_env_json.catalogs is mock_catalogs
+    assert local_dev_env_json.hosts is mock_hosts
 
     mock_PurePath.assert_called_once_with(test_path + "/config.json")

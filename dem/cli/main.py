@@ -8,7 +8,7 @@ from dem import __command__, __app_name__
 from dem.cli.command import cp_cmd, info_cmd, list_cmd, pull_cmd, create_cmd, modify_cmd, delete_cmd, \
                             rename_cmd, run_cmd, export_cmd, load_cmd, clone_cmd, add_reg_cmd, \
                             list_reg_cmd, del_reg_cmd, add_cat_cmd, list_cat_cmd, del_cat_cmd, \
-                            add_host_cmd, uninstall_cmd, list_host_cmd
+                            add_host_cmd, uninstall_cmd, list_host_cmd, del_host_cmd
 from dem.cli.console import stdout
 from dem.core.platform import Platform
 from dem.core.exceptions import InternalError
@@ -55,6 +55,19 @@ def autocomplete_reg_name(incomplete: str) -> Generator:
     for registry_config in platform.registries.list_registry_configs():
         if registry_config["name"].startswith(incomplete) or (incomplete == ""):
             yield registry_config["name"]
+
+def autocomplete_host_name(incomplete: str) -> Generator:
+    """ 
+    Autocomplete the input Host name with the available matching Hosts.
+
+    Return with the matching Host name by a Generator.
+    
+    Args:
+        incomplete -- the parameter the user supplied so far when the tab was pressed
+    """
+    for host_config in platform.hosts.list_configs():
+        if host_config["name"].startswith(incomplete) or (incomplete == ""):
+            yield host_config["name"]
 
 # DEM commands
 @typer_cli.command("list") # "list" is a Python keyword
@@ -318,6 +331,17 @@ def list_host() -> None:
     """
     if platform is not None:
         list_host_cmd.execute(platform)
+    else:
+        raise InternalError("Error: The platform hasn't been initialized properly!")
+
+@typer_cli.command()
+def del_host(host_name: Annotated[str, typer.Argument(help="Name of the host to delete.", 
+                                                      autocompletion=autocomplete_host_name)]) -> None:
+    """
+    Delete a host.
+    """
+    if platform:
+        del_host_cmd.execute(platform, host_name)
     else:
         raise InternalError("Error: The platform hasn't been initialized properly!")
 

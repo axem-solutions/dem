@@ -26,7 +26,7 @@ def test_list_host(mock_stdout_print: MagicMock, mock_Table: MagicMock):
             "address": "test_url1"
         }
     ]
-    mock_platform.config_file.deserialized.get.return_value = test_hosts
+    mock_platform.hosts.list_host_configs.return_value = test_hosts
     mock_table = MagicMock()
     mock_Table.return_value = mock_table
 
@@ -36,13 +36,11 @@ def test_list_host(mock_stdout_print: MagicMock, mock_Table: MagicMock):
     # Check expectations
     assert runner_result.exit_code == 0
 
-
-
     mock_Table.assert_called_once()
     calls = [call("name"), call("address")]
     mock_table.add_column.assert_has_calls(calls)
 
-    mock_platform.config_file.deserialized.get.assert_called_once_with("hosts", [])
+    mock_platform.hosts.list_host_configs.assert_called_once()
     
     calls = []
     for host in test_hosts:
@@ -60,22 +58,20 @@ def test_list_host_non_available(mock_stdout_print: MagicMock, mock_Table: Magic
     mock_platform = MagicMock()
     main.platform = mock_platform
 
-    mock_platform.config_file.deserialized.get.return_value = []
+    mock_platform.hosts.list_host_configs.return_value = []
     mock_table = MagicMock()
     mock_Table.return_value = mock_table
 
     # Run unit under test
     runner_result = runner.invoke(main.typer_cli, ["list-host"], color=True)
 
-
     # Check expectations
     assert runner_result.exit_code == 0
-
 
     mock_Table.assert_called_once()
     calls = [call("name"), call("address")]
     mock_table.add_column.assert_has_calls(calls)
 
-    mock_platform.config_file.deserialized.get.assert_called_once_with("hosts", [])
+    mock_platform.hosts.list_host_configs.assert_called_once()
     
     mock_stdout_print.assert_called_once_with("[yellow]No available remote hosts![/]")

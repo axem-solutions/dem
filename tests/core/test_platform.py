@@ -185,6 +185,31 @@ def test_Platform_dev_env_catalogs(mock___init__: MagicMock, mock_DevEnvCatalogs
     mock___init__.assert_called_once()
     mock_DevEnvCatalogs.assert_called_once_with(mock_config_file)
 
+@patch("dem.core.platform.Hosts")
+@patch.object(platform.Platform, "__init__")
+def test_Platform_hosts(mock___init__: MagicMock, mock_Hosts: MagicMock) -> None:
+    # Test setup
+    mock___init__.return_value = None
+
+    test_platform = platform.Platform()
+    test_platform._hosts = None
+
+    mock_config_file = MagicMock()
+    test_platform._config_file = mock_config_file
+
+    mock_hosts = MagicMock()
+    mock_Hosts.return_value = mock_hosts
+
+    # Run unit under test
+    actual_hosts = test_platform.hosts
+
+    # Check expectations
+    assert actual_hosts is mock_hosts
+    assert test_platform._hosts is mock_hosts
+
+    mock___init__.assert_called_once()
+    mock_Hosts.assert_called_once_with(mock_config_file)
+
 @patch.object(platform.Platform, "__init__")
 def test_Platform_get_deserialized(mock___init__: MagicMock) -> None:
     # Test setup
