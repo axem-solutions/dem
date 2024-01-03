@@ -128,9 +128,8 @@ Arguments:
 
 ## **`dem delete DEV_ENV_NAME`**
 
-Delete the selected Development Environment. After the deletion, dem checks whether a tool image is
-required or not by any of the remaining local Development Environments. In case the tool image is
-not required anymore, the dem asks the user if they prefer to delete it or keep it.
+Delete the Dev Env descriptor from the local descriptor storage.
+If the Dev Env is installed, the user will be asked whether they want to uninstall it. 
 
 Arguments:
 

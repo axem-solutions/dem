@@ -198,9 +198,8 @@ def modify(dev_env_name: Annotated[str, typer.Argument(help="Name of the Develop
 def delete(dev_env_name: Annotated[str, typer.Argument(help="Name of the Development Environment to delete.",
                                                        autocompletion=autocomplete_dev_env_name)]) -> None:
     """
-    Delete the Development Environment from the local setup. If a tool image is not required
-    anymore by any of the available local Development Environments, the DEM asks the user whether
-    they want to delete that image or not.
+    Delete the Dev Env descriptor from the local descriptor storage.
+    If the Dev Env is installed, the user will be asked whether they want to uninstall it. 
     """
     if platform:
         delete_cmd.execute(platform, dev_env_name)
