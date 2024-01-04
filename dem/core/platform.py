@@ -156,8 +156,14 @@ class Platform(Core):
                 dev_env_to_install -- the Development Environment to install
         """
         for tool_image in dev_env_to_install.get_registry_only_tool_images(self.tool_images, False):
-            self.user_output.msg(f"\nPulling image {tool_image}", is_title=True)
-            self.container_engine.pull(tool_image)
+            self.user_output.msg(f"\nPulling image {tool_image}", is_title=True)            
+            try:                
+                self.container_engine.pull(tool_image)
+            except ContainerEngineError:
+                raise PlatformError("Dev Env install failed.")
+
+        dev_env_to_install.is_installed = "True"
+        self.flush_descriptors()
 
     def uninstall_dev_env(self, dev_env_to_uninstall: DevEnv) -> None:
         """ Uninstall the Dev Env by removing the images not required anymore.

@@ -335,6 +335,30 @@ List the available hosts from the config file.
 
 ---
 
+## **`dem install DEV_ENV_NAME`**
+
+Install the selected Development Environment. Set installed flag to True. Dem checks which tool image is
+required by the selected local Development Environments and in case the tool image is
+not installed, the dem installs it. 
+
+Arguments:
+
+`DEV_ENV_NAME` Name of the Development Environment to install. [required]
+
+---
+
+## **`dem uninstall DEV_ENV_NAME`**
+
+Uninstall the selected Development Environment. Set installed flag to False if it was True. Dem checks whether a tool image is
+required or not by any of the remaining installed local Development Environments. In case the tool image is
+not required anymore, the dem delete it. 
+
+Arguments:
+
+`DEV_ENV_NAME` Name of the Development Environment to uninstall. [required]
+
+---
+
 ## **`dem del-host NAME`**
 
 Delete a host from the config file.
