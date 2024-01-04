@@ -292,16 +292,19 @@ def test_Platform_get_dev_env_by_name_no_match(mock___init__: MagicMock) -> None
 
     mock___init__.assert_called_once()
 
+@patch.object(platform.Platform, "flush_descriptors")
 @patch.object(platform.Platform, "tool_images")
 @patch.object(platform.Platform, "container_engine")
 @patch.object(platform.Platform, "user_output")
 @patch.object(platform.Platform, "__init__")
-def test_Platform_install_dev_env(mock___init__: MagicMock, mock_user_input: MagicMock, 
-                                  mock_container_engine: MagicMock, mock_tool_images) -> None:
+def test_Platform_install_dev_env_succes(mock___init__: MagicMock, mock_user_input: MagicMock, 
+                                  mock_container_engine: MagicMock, mock_tool_images,
+                                  mock_flush_descriptors: MagicMock) -> None:
     # Test setup
     mock___init__.return_value = None
+   
 
-    test_dev_env = MagicMock()
+    test_dev_env = MagicMock()    
     test_registry_only_tool_images: list[str] = ["test_image_name1:test_image_version1", 
                                                  "test_image_name2:test_image_version2"]
     test_dev_env.get_registry_only_tool_images.return_value = test_registry_only_tool_images
@@ -323,6 +326,36 @@ def test_Platform_install_dev_env(mock___init__: MagicMock, mock_user_input: Mag
         call(test_registry_only_tool_images[0]),
         call(test_registry_only_tool_images[1])
     ])
+    mock_flush_descriptors.assert_called_once()
+
+@patch.object(platform.Platform, "tool_images")
+@patch.object(platform.Platform, "container_engine")
+@patch.object(platform.Platform, "user_output")
+@patch.object(platform.Platform, "__init__")
+def test_Platform_install_dev_env_failure(mock___init__: MagicMock, mock_user_output: MagicMock,
+                                            mock_container_engine: MagicMock,mock_tool_images) -> None:
+    # Test setup
+    mock___init__.return_value = None
+   
+
+    test_dev_env = MagicMock()    
+    test_registry_only_tool_images: list[str] = ["test_image_name1:test_image_version1", 
+                                                 "test_image_name2:test_image_version2"]
+    test_dev_env.get_registry_only_tool_images.return_value = test_registry_only_tool_images
+
+    test_platform = platform.Platform()
+    
+    mock_container_engine.pull.side_effect = platform.ContainerEngineError("")
+
+    # Run unit under test
+    with pytest.raises(platform.PlatformError) as exported_exception_info:
+        test_platform.install_dev_env(test_dev_env)
+
+        # Check expectations
+        mock___init__.assert_called_once()
+
+        assert str(exported_exception_info) == "Platform error: Dev Env install failed."
+        
 
 @patch.object(platform.Platform, "flush_descriptors")
 @patch.object(platform.Platform, "container_engine")
