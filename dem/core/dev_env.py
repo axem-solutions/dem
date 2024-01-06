@@ -3,6 +3,7 @@
 
 from dem.core.core import Core
 from dem.core.tool_images import ToolImages
+import json, os
 
 class DevEnv(Core):
     """ A Development Environment.
@@ -30,9 +31,12 @@ class DevEnv(Core):
                 dev_env_to_copy -- the DevEnv instance to copy
         """
         if descriptor:
-            self.name = descriptor["name"]
-            self.tools = descriptor["tools"]
-            self.is_installed = descriptor["installed"]            
+            self.name: str = descriptor["name"]
+            self.tools: str = descriptor["tools"]
+            if "True" == descriptor["installed"]:
+                self.is_installed = True
+            else:
+                self.is_installed = False
         else:
             self.name = dev_env_to_copy.name
             self.tools = dev_env_to_copy.tools
@@ -91,3 +95,30 @@ class DevEnv(Core):
                 registry_only_tool_images.add(tool["image_name"] + ':' + tool["image_version"])
 
         return registry_only_tool_images
+
+    def get_deserialized(self, omit_is_installed: bool = False) -> dict[str, str]:
+        """ Create the deserialized json. 
+        
+            Return the Dev Env as a dict.
+        """
+        dev_env_json_deserialized: dict = {
+            "name": self.name,
+            "tools": self.tools
+        }
+        
+        if omit_is_installed is False:
+            if self.is_installed:
+                dev_env_json_deserialized["installed"] = "True"
+            else:
+                dev_env_json_deserialized["installed"] = "False"
+
+        return dev_env_json_deserialized
+
+    def export(self, path: str) -> None:
+        """ Export the Dev Env to a file.
+        
+            Args:
+                path -- the path of the file to export the Dev Env to
+        """
+        with open(path, "w") as file:
+            json.dump(self.get_deserialized(True), file, indent=4)

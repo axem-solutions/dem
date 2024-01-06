@@ -34,7 +34,7 @@ def test_uninstall_dev_env_valid_name(mock_stdout_print):
      # Test setup
     fake_dev_env_to_uninstall = MagicMock()
     fake_dev_env_to_uninstall.name = "dev_env"
-    fake_dev_env_to_uninstall.is_installed = "True"    
+    fake_dev_env_to_uninstall.is_installed = True
     mock_platform = MagicMock()
     mock_platform.get_dev_env_by_name.return_value = fake_dev_env_to_uninstall
     main.platform = mock_platform
@@ -54,7 +54,7 @@ def test_uninstall_dev_env_valid_name_not_installed(mock_stderr_print):
      # Test setup
     fake_dev_env_to_uninstall = MagicMock()
     fake_dev_env_to_uninstall.name = "dev_env"
-    fake_dev_env_to_uninstall.is_installed = "False"    
+    fake_dev_env_to_uninstall.is_installed = False
     mock_platform = MagicMock()
     mock_platform.get_dev_env_by_name.return_value = fake_dev_env_to_uninstall
     main.platform = mock_platform    
@@ -73,7 +73,7 @@ def test_uninstall_dev_env_valid_name_failed(mock_stderr_print):
      # Test setup
     fake_dev_env_to_uninstall = MagicMock()
     fake_dev_env_to_uninstall.name = "dev_env"
-    fake_dev_env_to_uninstall.is_installed = "True"    
+    fake_dev_env_to_uninstall.is_installed = True
     mock_platform = MagicMock()
     mock_platform.get_dev_env_by_name.return_value = fake_dev_env_to_uninstall
     test_exception_text = "test_exception_text"

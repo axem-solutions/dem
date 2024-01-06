@@ -161,6 +161,24 @@ Arguments:
 
 ---
 
+## **`dem assign DEV_ENV_NAME, [PROJECT_PATH]`**
+
+Assign a Development Environment to a project.
+
+If the project already has a Development Environment assigned, the user will be asked if they want to
+overwrite it or not.
+
+Projects that have a Development Environment assigned can initialized with the `init` command.
+
+Arguments:
+
+`DEV_ENV_NAME` Name of the Development Environment to assign. [required]
+
+`[PROJECT_PATH]` Path of the project to assign the Development Environment to. If not set, the current
+working directory will be used.
+
+---
+
 ## **`dem run DEV_ENV_NAME *`**
 
 :warning: Experimental feature!

@@ -1,5 +1,8 @@
 """Repesents the Development Platform. The platform resources can be accessed through this interface.  
 """
+
+import os
+from typing import Any
 from dem.core.core import Core
 from dem.core.properties import __supported_dev_env_major_version__
 from dem.core.exceptions import InvalidDevEnvJson, PlatformError, ContainerEngineError
@@ -124,14 +127,10 @@ class Platform(Core):
             
                 Return the dev_env.json as a dict.
             """
-            dev_env_json_deserialized = {
+            dev_env_json_deserialized: dict[str, Any] = {
                 "version": self.version,
                 "development_environments": [
-                    {
-                        "name": dev_env.name,
-                        "installed": dev_env.is_installed,
-                        "tools": dev_env.tools
-                    }
+                    dev_env.get_deserialized()
                     for dev_env in self.local_dev_envs
                 ]
             }
@@ -171,7 +170,7 @@ class Platform(Core):
         """
         all_required_tool_images = set()
         for dev_env in self.local_dev_envs:
-            if (dev_env is not dev_env_to_uninstall) and (dev_env.is_installed == "True"):
+            if (dev_env is not dev_env_to_uninstall) and dev_env.is_installed:
                 for tool in dev_env.tools:
                     all_required_tool_images.add(tool["image_name"] + ":" + tool["image_version"])
 
@@ -185,7 +184,7 @@ class Platform(Core):
                 except ContainerEngineError:
                     raise PlatformError("Dev Env uninstall failed.")
             
-        dev_env_to_uninstall.is_installed = "False"
+        dev_env_to_uninstall.is_installed = False
         self.flush_descriptors()
 
     def flush_descriptors(self) -> None:
@@ -193,3 +192,24 @@ class Platform(Core):
         # Get the up-to-date deserialized data.
         self.dev_env_json.deserialized = self.get_deserialized()
         self.dev_env_json.flush()
+
+    def assign_dev_env(self, dev_env_to_assign: DevEnv, project_path: str) -> None:
+        """ Assign the Development Environment to the project, by exporting the Dev Env's desriptor
+            to the project's .axem directory.
+        
+            Args:
+                dev_env_to_assign -- the Development Environment to assign
+                project_path -- the path of the project
+        """
+        self.user_output.msg(f"\nAssigning the {dev_env_to_assign.name} Development Environment to the project at {project_path}")
+
+        path: str = f"{project_path}/.axem"
+        if not os.path.isdir(path):
+            os.mkdir(path)
+
+        path = f"{path}/dev_env_descriptor.json"
+        if os.path.exists(path):
+            self.user_output.get_confirm("[yellow]A Dev Env is already assigned to the project.[/]", 
+                                         "Overwrite it?")
+
+        dev_env_to_assign.export(path)
