@@ -4,11 +4,12 @@
 import typer, importlib.metadata
 from typing import Generator
 from typing_extensions import Annotated
+import os
 from dem import __command__, __app_name__
 from dem.cli.command import cp_cmd, info_cmd, list_cmd, pull_cmd, create_cmd, modify_cmd, delete_cmd, \
                             rename_cmd, run_cmd, export_cmd, load_cmd, clone_cmd, add_reg_cmd, \
                             list_reg_cmd, del_reg_cmd, add_cat_cmd, list_cat_cmd, del_cat_cmd, \
-                            add_host_cmd, uninstall_cmd, list_host_cmd, del_host_cmd
+                            add_host_cmd, uninstall_cmd, assign_cmd, list_host_cmd, del_host_cmd
 from dem.cli.console import stdout
 from dem.core.platform import Platform
 from dem.core.exceptions import InternalError
@@ -213,10 +214,24 @@ def uninstall(dev_env_name: Annotated[str, typer.Argument(help="Name of the Deve
     Uninstall the Development Environment from the local setup. If a tool image is not required
     anymore by any of the available local Development Environments, the DEM will delete it.
     """
-    if platform is not None:
+    if platform:
         uninstall_cmd.execute(platform, dev_env_name)
     else:
         raise InternalError("Error: The platform hasn't been initialized properly!")  
+
+@typer_cli.command()
+def assign(dev_env_name: Annotated[str, typer.Argument(help="Name of the Dev Env that should be assign to the project.",
+                                                       autocompletion=autocomplete_dev_env_name)],
+           project_path: Annotated[str, typer.Argument(help="Path of the project.")] = os.getcwd()) -> None:
+    """
+    Assign a Development Environment to a project.
+
+    If the project path is not specified, the current working directory will be used.
+    """
+    if platform:
+        assign_cmd.execute(platform, dev_env_name, project_path)
+    else:
+        raise InternalError("Error: The platform hasn't been initialized properly!")
 
 @typer_cli.command(context_settings={"allow_extra_args": True, "ignore_unknown_options": True})
 def run(dev_env_name: Annotated[str, typer.Argument(help="Run the container in this Development Environment context",

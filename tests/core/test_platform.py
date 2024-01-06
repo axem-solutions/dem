@@ -9,6 +9,7 @@ import pytest
 from unittest.mock import patch, MagicMock, call
 
 from dem.core.exceptions import InvalidDevEnvJson
+from typing import Any
 
 @patch("dem.core.platform.DevEnv")
 @patch("dem.core.platform.LocalDevEnvJSON")
@@ -219,13 +220,21 @@ def test_Platform_get_deserialized(mock___init__: MagicMock) -> None:
     test_plaform.version = "0.0"
 
     mock_dev_env1 = MagicMock()
-    mock_dev_env1.name = "test_dev_env_name1"
-    mock_dev_env1.is_installed = "True"
-    mock_dev_env1.tools = []
     mock_dev_env2 = MagicMock()
-    mock_dev_env2.name = "test_dev_env_name2"
-    mock_dev_env2.is_installed = "True"
-    mock_dev_env2.tools = []
+
+    test_deser_dev_env_1: dict[str, Any]= {
+        "name": "test_dev_env_name1",
+        "installed": "True",
+        "tools": []
+    }
+    mock_dev_env1.get_deserialized.return_value = test_deser_dev_env_1
+
+    test_deser_dev_env_2: dict[str, Any]= {
+        "name": "test_dev_env_name2",
+        "installed": "True",
+        "tools": []
+    }
+    mock_dev_env2.get_deserialized.return_value = test_deser_dev_env_2
 
     test_plaform.local_dev_envs = [
         mock_dev_env1, mock_dev_env2
@@ -238,16 +247,7 @@ def test_Platform_get_deserialized(mock___init__: MagicMock) -> None:
     expected_deserialized = {
         "version": test_plaform.version,
         "development_environments": [
-            {
-                "name": mock_dev_env1.name,
-                "installed": mock_dev_env1.is_installed,
-                "tools": mock_dev_env1.tools
-            },
-            {
-                "name": mock_dev_env2.name,
-                "installed": mock_dev_env2.is_installed,
-                "tools": mock_dev_env2.tools
-            }
+            test_deser_dev_env_1, test_deser_dev_env_2
         ]
     }
     assert actual_deserialized == expected_deserialized
@@ -351,14 +351,14 @@ def test_Platform_uninstall_dev_env_success(mock___init__: MagicMock, mock_user_
             "image_version": "test_image_version2"
         }
     ]
-    mock_dev_env1.is_installed = "True"
+    mock_dev_env1.is_installed = True
     mock_dev_env2.tools = [
         {
             "image_name": "test_image_name3",
             "image_version": "test_image_version3"
         }
     ]
-    mock_dev_env2.is_installed = "True"
+    mock_dev_env2.is_installed = True
     mock_dev_env_to_uninstall.tools = [
         {
             "image_name": "test_image_name1",
@@ -373,7 +373,7 @@ def test_Platform_uninstall_dev_env_success(mock___init__: MagicMock, mock_user_
             "image_version": "test_image_version4"
         }
     ]
-    mock_dev_env_to_uninstall.is_installed = "True"
+    mock_dev_env_to_uninstall.is_installed = True
 
     mock_container_engine.remove.return_value = True
 
@@ -383,7 +383,7 @@ def test_Platform_uninstall_dev_env_success(mock___init__: MagicMock, mock_user_
     # Check expectations
     mock___init__.assert_called_once()
 
-    assert mock_dev_env_to_uninstall.is_installed == "False"
+    assert mock_dev_env_to_uninstall.is_installed == False
 
     mock_user_output.msg.assert_has_calls([
         call(f"\nThe tool image [bold]test_image_name1:test_image_version1[/bold] is required by another Development Environment. It won't be deleted."),
@@ -417,14 +417,14 @@ def test_Platform_uninstall_dev_env_failure(mock___init__: MagicMock, mock_user_
             "image_version": "test_image_version2"
         }
     ]
-    mock_dev_env1.is_installed = "True"
+    mock_dev_env1.is_installed = True
     mock_dev_env2.tools = [
         {
             "image_name": "test_image_name3",
             "image_version": "test_image_version3"
         }
     ]
-    mock_dev_env2.is_installed = "True"
+    mock_dev_env2.is_installed = True
     mock_dev_env_to_uninstall.tools = [
         {
             "image_name": "test_image_name1",
@@ -439,7 +439,7 @@ def test_Platform_uninstall_dev_env_failure(mock___init__: MagicMock, mock_user_
             "image_version": "test_image_version4"
         }
     ]
-    mock_dev_env_to_uninstall.is_installed = "True"
+    mock_dev_env_to_uninstall.is_installed = True
 
     mock_container_engine.remove.side_effect = platform.ContainerEngineError("")
 
@@ -451,7 +451,7 @@ def test_Platform_uninstall_dev_env_failure(mock___init__: MagicMock, mock_user_
         mock___init__.assert_called_once()
 
         assert str(exported_exception_info) == "Platform error: Dev Env uninstall failed."
-        assert mock_dev_env_to_uninstall.is_installed == "True"
+        assert mock_dev_env_to_uninstall.is_installed == True
 
         mock_user_output.msg.assert_has_calls([
             call(f"\nThe tool image [bold]test_image_name1:test_image_version1[/bold] is required by another Development Environment. It won't be deleted."),
@@ -482,3 +482,105 @@ def test_Platform_flush_descriptors(mock___init__: MagicMock,
     test_platform.dev_env_json.flush.assert_called_once()
 
     assert test_platform.dev_env_json.deserialized == mock_deserialized
+
+@patch("dem.core.platform.os.path.exists")
+@patch("dem.core.platform.os.path.isdir")
+@patch.object(platform.Core, "user_output")
+@patch.object(platform.Platform, "__init__")
+def test_Platform_assign_dev_env(mock___init__: MagicMock, mock_user_output: MagicMock,
+                                 mock_isdir: MagicMock, mock_exists: MagicMock) -> None:
+    # Test setup
+    mock___init__.return_value = None
+
+    test_platform = platform.Platform()
+
+    test_dev_env_name = "test_dev_env_name"
+    test_project_path = "test_project_path"
+
+    mock_dev_env = MagicMock()
+    mock_dev_env.name = test_dev_env_name
+
+    mock_isdir.return_value = True
+    mock_exists.return_value = False
+
+    # Run unit under test
+    test_platform.assign_dev_env(mock_dev_env, test_project_path)
+
+    # Check expectations
+    mock___init__.assert_called_once()
+
+    mock_user_output.msg.assert_called_once_with(f"\nAssigning the {test_dev_env_name} Development Environment to the project at {test_project_path}")
+    mock_isdir.assert_called_once_with(f"{test_project_path}/.axem")
+    mock_exists.assert_called_once_with(f"{test_project_path}/.axem/dev_env_descriptor.json")
+    mock_dev_env.export.assert_called_once_with(f"{test_project_path}/.axem/dev_env_descriptor.json")
+
+    mock_user_output.get_confirm.assert_not_called()
+
+@patch("dem.core.platform.os.mkdir")
+@patch("dem.core.platform.os.path.exists")
+@patch("dem.core.platform.os.path.isdir")
+@patch.object(platform.Core, "user_output")
+@patch.object(platform.Platform, "__init__")
+def test_Platform_assign_dev_env_missing_axem_dir(mock___init__: MagicMock, 
+                                                  mock_user_output: MagicMock,
+                                                  mock_isdir: MagicMock, mock_exists: MagicMock,
+                                                  mock_mkdir: MagicMock) -> None:
+    # Test setup
+    mock___init__.return_value = None
+
+    test_platform = platform.Platform()
+
+    test_dev_env_name = "test_dev_env_name"
+    test_project_path = "test_project_path"
+
+    mock_dev_env = MagicMock()
+    mock_dev_env.name = test_dev_env_name
+
+    mock_isdir.return_value = False
+    mock_exists.return_value = True
+
+    # Run unit under test
+    test_platform.assign_dev_env(mock_dev_env, test_project_path)
+
+    # Check expectations
+    mock___init__.assert_called_once()
+
+    mock_user_output.msg.assert_called_once_with(f"\nAssigning the {test_dev_env_name} Development Environment to the project at {test_project_path}")
+    mock_isdir.assert_called_once_with(f"{test_project_path}/.axem")
+    mock_mkdir.assert_called_once_with(f"{test_project_path}/.axem")
+    mock_exists.assert_called_once_with(f"{test_project_path}/.axem/dev_env_descriptor.json")
+    mock_dev_env.export.assert_called_once_with(f"{test_project_path}/.axem/dev_env_descriptor.json")
+
+@patch("dem.core.platform.os.path.exists")
+@patch("dem.core.platform.os.path.isdir")
+@patch.object(platform.Core, "user_output")
+@patch.object(platform.Platform, "__init__")
+def test_Platform_assign_dev_env_already_assigned(mock___init__: MagicMock, 
+                                                  mock_user_output: MagicMock,
+                                                  mock_isdir: MagicMock, mock_exists: MagicMock) -> None:
+    # Test setup
+    mock___init__.return_value = None
+
+    test_platform = platform.Platform()
+
+    test_dev_env_name = "test_dev_env_name"
+    test_project_path = "test_project_path"
+
+    mock_dev_env = MagicMock()
+    mock_dev_env.name = test_dev_env_name
+
+    mock_isdir.return_value = True
+    mock_exists.return_value = True
+
+    # Run unit under test
+    test_platform.assign_dev_env(mock_dev_env, test_project_path)
+
+    # Check expectations
+    mock___init__.assert_called_once()
+
+    mock_user_output.msg.assert_called_once_with(f"\nAssigning the {test_dev_env_name} Development Environment to the project at {test_project_path}")
+    mock_isdir.assert_called_once_with(f"{test_project_path}/.axem")
+    mock_exists.assert_called_once_with(f"{test_project_path}/.axem/dev_env_descriptor.json")
+    mock_user_output.get_confirm.assert_called_once_with("[yellow]A Dev Env is already assigned to the project.[/]", 
+                                                         "Overwrite it?")
+    mock_dev_env.export.assert_called_once_with(f"{test_project_path}/.axem/dev_env_descriptor.json")

@@ -12,7 +12,7 @@ def execute(platform: Platform, dev_env_name: str) -> None:
     if dev_env_to_delete is None:
         stderr.print(f"[red]Error: The [bold]{dev_env_name}[/bold] Development Environment doesn't exist.")
     else:
-        if dev_env_to_delete.is_installed == "True":
+        if dev_env_to_delete.is_installed:
             typer.confirm("The Development Environment is installed. Do you want to uninstall it?", 
                           abort=True)
 

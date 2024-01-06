@@ -5,7 +5,9 @@
 import dem.core.dev_env as dev_env
 
 # Test framework
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
+
+from typing import Any
 
 def test_DevEnv():
     # Test setup
@@ -180,3 +182,127 @@ def test_DevEnv_get_registry_only_tool_images() -> None:
         "test_image_name3:test_image_tag3",
     }
     assert expected_registry_only_tool_images == actual_registry_onnly_tool_images
+
+def test_DevEnv_get_deserialized_is_installed_true() -> None:
+    # Test setup
+    test_descriptor: dict[str, Any] = {
+        "name": "test_name",
+        "installed": "True",
+        "tools": [
+            {
+                "image_name": "test_image_name1",
+                "image_version": "test_image_tag1"
+            },
+            {
+                "image_name": "test_image_name2",
+                "image_version": "test_image_tag2"
+            },
+            {
+                "image_name": "test_image_name3",
+                "image_version": "test_image_tag3"
+            },
+            {
+                "image_name": "test_image_name4",
+                "image_version": "test_image_tag4"
+            },
+        ]
+    }
+    test_dev_env = dev_env.DevEnv(test_descriptor)
+
+    # Run unit under test
+    actual_deserialized_dev_env: dict[str, Any] = test_dev_env.get_deserialized()
+
+    # Check expectations
+    assert test_descriptor == actual_deserialized_dev_env
+
+def test_DevEnv_get_deserialized_is_installed_false() -> None:
+    # Test setup
+    test_descriptor: dict[str, Any] = {
+        "name": "test_name",
+        "installed": "False",
+        "tools": [
+            {
+                "image_name": "test_image_name1",
+                "image_version": "test_image_tag1"
+            },
+            {
+                "image_name": "test_image_name2",
+                "image_version": "test_image_tag2"
+            },
+            {
+                "image_name": "test_image_name3",
+                "image_version": "test_image_tag3"
+            },
+            {
+                "image_name": "test_image_name4",
+                "image_version": "test_image_tag4"
+            },
+        ]
+    }
+    test_dev_env = dev_env.DevEnv(test_descriptor)
+
+    # Run unit under test
+    actual_deserialized_dev_env: dict[str, Any] = test_dev_env.get_deserialized()
+
+    # Check expectations
+    assert test_descriptor == actual_deserialized_dev_env
+
+def test_DevEnv_get_deserialized_omit_is_installed() -> None:
+    # Test setup
+    test_descriptor: dict[str, Any] = {
+        "name": "test_name",
+        "installed": "True",
+        "tools": [
+            {
+                "image_name": "test_image_name1",
+                "image_version": "test_image_tag1"
+            },
+            {
+                "image_name": "test_image_name2",
+                "image_version": "test_image_tag2"
+            },
+            {
+                "image_name": "test_image_name3",
+                "image_version": "test_image_tag3"
+            },
+            {
+                "image_name": "test_image_name4",
+                "image_version": "test_image_tag4"
+            },
+        ]
+    }
+    test_dev_env = dev_env.DevEnv(test_descriptor)
+
+    # Run unit under test
+    actual_deserialized_dev_env: dict[str, Any] = test_dev_env.get_deserialized(True)
+
+    # Check expectations
+    del test_descriptor["installed"]
+    assert test_descriptor == actual_deserialized_dev_env
+
+@patch("dem.core.dev_env.open")
+@patch("dem.core.dev_env.json.dump")
+@patch.object(dev_env.DevEnv, "get_deserialized")
+@patch.object(dev_env.DevEnv, "__init__")
+def test_DevEnv_export(mock___init__: MagicMock, mock_get_deserialized: MagicMock, 
+                       mock_json_dump: MagicMock, mock_open: MagicMock) -> None:
+    # Test setup
+    mock___init__.return_value = None
+
+    mock_file = MagicMock()
+    mock_open.return_value.__enter__.return_value = mock_file
+
+    mock_deser = MagicMock()
+    mock_get_deserialized.return_value = mock_deser
+
+    test_path = "/home/test.json"
+
+    test_dev_env = dev_env.DevEnv(MagicMock())
+
+    # Run unit under test
+    test_dev_env.export(test_path)
+
+    # Check expectations
+    mock_open.assert_called_once_with(test_path, "w")
+    mock_get_deserialized.assert_called_once_with(True)
+    mock_json_dump.assert_called_once_with(mock_deser, mock_file, indent=4)

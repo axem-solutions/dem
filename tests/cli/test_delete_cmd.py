@@ -22,7 +22,7 @@ def test_delete(mock_stdout_print: MagicMock, mock_config: MagicMock) -> None:
 
     test_dev_env_name = "test_dev_env_name"
     test_dev_env = MagicMock()
-    test_dev_env.is_installed = "True"
+    test_dev_env.is_installed = True
     mock_platform.get_dev_env_by_name.return_value = test_dev_env
     mock_platform.local_dev_envs = [test_dev_env]
 

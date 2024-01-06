@@ -95,6 +95,8 @@ class TUIUserOutput(UserOutput):
 
     def get_confirm(self, text: str, confirm_text: str) -> None:
         """ Get confirmation from the user.
+
+            In case the user does not confirm the action, the program gets aborted.
         
             Args:
                 text -- message to print (can be empty)

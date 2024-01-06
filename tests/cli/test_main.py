@@ -8,6 +8,7 @@ import dem.cli.main as main
 import pytest
 from typer.testing import CliRunner
 from unittest.mock import patch, MagicMock
+from click.testing import Result
 
 import importlib.metadata, typer
 
@@ -141,7 +142,7 @@ def test_version_exit_raised(mock_importlib_metadata_version):
     with pytest.raises(typer.Exit):
         main._version_callback(True)
 
-def test_platform_not_initialized():
+def test_platform_not_initialized() -> None:
     # Test setup
     test_dev_env_name = "test_dev_env_name"
     test_path = "test_path"
@@ -163,6 +164,7 @@ def test_platform_not_initialized():
         main.modify: [test_dev_env_name],
         main.delete: [test_dev_env_name],
         main.uninstall: [test_dev_env_name],
+        main.assign: [test_dev_env_name, test_path],
         main.run: [test_dev_env_name, mock_ctx],
         main.add_reg: [test_name, test_url],
         main.list_reg: [],
