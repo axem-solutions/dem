@@ -49,7 +49,7 @@ def test_Registry__list_tags(mock_requests_get: MagicMock, mock__get_tag_endpoin
 
     # Check expectations
     mock__get_tag_endpoint_url.assert_called_once_with(test_repo)
-    mock_requests_get.assert_called_once_with(test_tag_endpoint_url, timeout=1)
+    mock_requests_get.assert_called_once_with(test_tag_endpoint_url, timeout=10)
     mock_response.json.assert_called_once()
     mock__append_repo_with_tag.assert_called_once_with(test_endpoint_response, test_repo)
 
@@ -76,7 +76,7 @@ def test_Registry__list_tags_MissingSchema(mock_requests_get: MagicMock,
 
     # Check expectations
     mock__get_tag_endpoint_url.assert_called_once_with(test_repo)
-    mock_requests_get.assert_called_once_with(test_tag_endpoint_url, timeout=1)
+    mock_requests_get.assert_called_once_with(test_tag_endpoint_url, timeout=10)
     mock_user_output.error.assert_called_once_with(test_exception_text)
     mock_user_output.msg.assert_called_once_with("Skipping repository: " + test_repo)
 
@@ -104,7 +104,7 @@ def test_Registry__list_tags_invalid_status(mock_requests_get: MagicMock,
 
     # Check expectations
     mock__get_tag_endpoint_url.assert_called_once_with(test_repo)
-    mock_requests_get.assert_called_once_with(test_tag_endpoint_url, timeout=1)
+    mock_requests_get.assert_called_once_with(test_tag_endpoint_url, timeout=10)
     mock_user_output.error.assert_called_once_with("Error in communication with the registry. Failed to retrieve tags. Response status code: " + str(mock_response.status_code))
     mock_user_output.msg.assert_called_once_with("Skipping repository: " + test_repo)
 
@@ -304,7 +304,7 @@ def test_DockerRegistry__search(mock_requests_get: MagicMock):
     # Check expectations
     assert actual_repo_names is test_response["repositories"]
 
-    mock_requests_get.assert_called_once_with(test_registry_config["url"] + "/v2/_catalog", timeout=1)
+    mock_requests_get.assert_called_once_with(test_registry_config["url"] + "/v2/_catalog", timeout=10)
     mock_response.json.assert_called_once()
 
 @patch.object(registry.DockerRegistry, "user_output")
@@ -327,7 +327,7 @@ def test_DockerRegistry__search_requests_get_exception(mock_requests_get: MagicM
     # Check expectations
     assert actual_repo_names == []
 
-    mock_requests_get.assert_called_once_with(test_registry_config["url"] + "/v2/_catalog", timeout=1)
+    mock_requests_get.assert_called_once_with(test_registry_config["url"] + "/v2/_catalog", timeout=10)
     mock_user_output.error(str(mock_requests_get.side_effect))
     mock_user_output.msg("Skipping registry: " + test_registry_config["name"])
 
@@ -353,7 +353,7 @@ def test_DockerRegistry__search_invalid_status_code(mock_requests_get: MagicMock
     # Check expectations
     assert actual_repo_names == []
 
-    mock_requests_get.assert_called_once_with(test_registry_config["url"] + "/v2/_catalog", timeout=1)
+    mock_requests_get.assert_called_once_with(test_registry_config["url"] + "/v2/_catalog", timeout=10)
     mock_user_output.error("Error in communication with the registry. Failed to retrieve the repositories. Response status code: " + str(mock_response.status_code))
     mock_user_output.msg("Skipping registry: " + test_registry_config["name"])
 
@@ -381,7 +381,7 @@ def test_DockerRegistry__search_json_decode_exception(mock_requests_get: MagicMo
     # Check expectations
     assert actual_repo_names == []
 
-    mock_requests_get.assert_called_once_with(test_registry_config["url"] + "/v2/_catalog", timeout=1)
+    mock_requests_get.assert_called_once_with(test_registry_config["url"] + "/v2/_catalog", timeout=10)
     mock_response.json.assert_called_once()
     mock_user_output.error("Invalid JSON format in response. " + str(mock_response.json.side_effect))
     mock_user_output.msg("Skipping registry: " + test_registry_config["name"])
@@ -410,7 +410,7 @@ def test_DockerRegistry__search_json_generic_exception(mock_requests_get: MagicM
     # Check expectations
     assert actual_repo_names == []
 
-    mock_requests_get.assert_called_once_with(test_registry_config["url"] + "/v2/_catalog", timeout=1)
+    mock_requests_get.assert_called_once_with(test_registry_config["url"] + "/v2/_catalog", timeout=10)
     mock_response.json.assert_called_once()
     mock_user_output.error(str(mock_response.json.side_effect))
     mock_user_output.msg("Skipping registry: " + test_registry_config["name"])

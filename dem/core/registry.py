@@ -43,7 +43,7 @@ class Registry(Core, ABC):
                 repo -- get the tags of this repository
         """
         try:
-            response = requests.get(self._get_tag_endpoint_url(repo), timeout=1)
+            response = requests.get(self._get_tag_endpoint_url(repo), timeout=10)
         except Exception as e:
             self.user_output.error(str(e))
         else:
@@ -135,7 +135,7 @@ class DockerRegistry(Registry):
         repo_endpoint = self._registry_config["url"] + "/v2/_catalog"
 
         try:
-            response = requests.get(repo_endpoint, timeout=1)
+            response = requests.get(repo_endpoint, timeout=10)
         except Exception as e:
             self.user_output.error(str(e))
         else:

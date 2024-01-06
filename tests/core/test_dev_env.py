@@ -6,10 +6,11 @@ import dem.core.dev_env as dev_env
 
 # Test framework
 from unittest.mock import MagicMock, patch
+import pytest
 
 from typing import Any
 
-def test_DevEnv():
+def test_DevEnv() -> None:
     # Test setup
     test_descriptor = {
         "name": "test_name",
@@ -36,6 +37,65 @@ def test_DevEnv():
     assert test_dev_env.name is mock_base_dev_env.name
     assert test_dev_env.tools is mock_base_dev_env.tools
 
+@patch("dem.core.dev_env.json.load")
+@patch("dem.core.dev_env.open")
+@patch("dem.core.dev_env.os.path.exists")
+def test_DevEnv_with_descriptor_path(mock_path_exists: MagicMock, mock_open: MagicMock,
+                                     mock_json_load: MagicMock) -> None:
+    # Test setup
+    test_descriptor_path = "/path/to/descriptor.json"
+    test_descriptor = {
+        "name": "test_name",
+        "installed": "True",
+        "tools": [MagicMock()]
+    }
+    mock_path_exists.return_value = True
+    mock_file = MagicMock()
+    mock_open.return_value.__enter__.return_value = mock_file
+    mock_json_load.return_value = test_descriptor
+    
+    # Run unit under test
+    test_dev_env = dev_env.DevEnv(descriptor_path=test_descriptor_path)
+
+    # Check expectations
+    assert test_dev_env.name is test_descriptor["name"]
+    assert test_dev_env.tools is test_descriptor["tools"]
+    assert test_dev_env.is_installed is True
+
+    mock_path_exists.assert_called_once_with(test_descriptor_path)
+    mock_open.assert_called_once_with(test_descriptor_path, "r")
+    mock_json_load.assert_called_once_with(mock_file)
+
+def test_DevEnv_with_descriptor_path_not_existing() -> None:
+    # Test setup
+    test_descriptor_path = "/path/to/descriptor.json"
+    mock_path_exists = MagicMock()
+    mock_path_exists.return_value = False
+
+    with pytest.raises(FileNotFoundError) as exc_info:
+        # Run unit under test
+        test_dev_env = dev_env.DevEnv(descriptor_path=test_descriptor_path)
+
+        # Check expectations
+        assert str(exc_info.value) == f"dev_env_descriptor.json doesn't exist."
+
+        mock_path_exists.assert_called_once_with(test_descriptor_path)
+
+def test_DevEnv_with_descriptor_and_descriptor_path() -> None:
+    # Test setup
+    test_descriptor = {
+        "name": "test_name",
+        "installed": "True",
+        "tools": [MagicMock()]
+    }
+    test_descriptor_path = "/path/to/descriptor.json"
+
+    with pytest.raises(ValueError) as exc_info:
+        # Run unit under test
+        test_dev_env = dev_env.DevEnv(descriptor=test_descriptor, descriptor_path=test_descriptor_path)
+
+        # Check expectations
+        assert str(exc_info.value) == "Only one of the arguments can be not None."
 
 def test_DevEnv_check_image_availability():
     # Test setup

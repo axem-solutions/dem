@@ -21,19 +21,42 @@ class DevEnv(Core):
     )
 
     def __init__(self, descriptor: dict | None = None, 
-                 dev_env_to_copy: "DevEnv | None" = None) -> None:
-        """ Init the DevEnv class. A new instance can be create from a descriptor or from an already
-            existing DevEnv instance.
+                 dev_env_to_copy: "DevEnv | None" = None, 
+                 descriptor_path: str | None = None) -> None:
+        """ Init the DevEnv class. 
+        
+            A new instance can be created:
+            - from a Dev Env descriptor
+            - based on another Dev Env
+            - from a descriptor avaialable at the given path.
+
+            Only one of the arguments can be used at a time.
         
             Args:
                 descriptor -- the description of the Development Environment from the dev_env.json 
                               file
                 dev_env_to_copy -- the DevEnv instance to copy
+                descriptor_path -- the path of the descriptor file
+
+            Exceptions:
+                ValueError -- if more than one of the arguments is not None
         """
+
+        # Only one of the arguments can be not None
+        if sum(arg is not None for arg in [descriptor, dev_env_to_copy, descriptor_path]) > 1:
+            raise ValueError("Only one of the arguments can be not None.")
+
+        if descriptor_path:
+            if not os.path.exists(descriptor_path):
+                raise FileNotFoundError("dev_env_descriptor.json doesn't exist.")
+            with open(descriptor_path, "r") as file:
+                descriptor = json.load(file)
+
         if descriptor:
             self.name: str = descriptor["name"]
             self.tools: str = descriptor["tools"]
-            if "True" == descriptor["installed"]:
+            descriptor_installed = descriptor.get("installed", "False")
+            if "True" == descriptor_installed:
                 self.is_installed = True
             else:
                 self.is_installed = False
