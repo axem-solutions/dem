@@ -355,13 +355,11 @@ def test_Platform_install_dev_env_failure(mock___init__: MagicMock, mock_user_ou
         mock___init__.assert_called_once()
 
         assert str(exported_exception_info) == "Platform error: Dev Env install failed."
-        
 
 @patch.object(platform.Platform, "flush_descriptors")
 @patch.object(platform.Platform, "container_engine")
-@patch.object(platform.Platform, "user_output")
 @patch.object(platform.Platform, "__init__")
-def test_Platform_uninstall_dev_env_success(mock___init__: MagicMock, mock_user_output: MagicMock,
+def test_Platform_uninstall_dev_env_success(mock___init__: MagicMock,
                                             mock_container_engine: MagicMock, 
                                             mock_flush_descriptors: MagicMock) -> None:
     # Test setup
@@ -418,17 +416,79 @@ def test_Platform_uninstall_dev_env_success(mock___init__: MagicMock, mock_user_
 
     assert mock_dev_env_to_uninstall.is_installed == False
 
-    mock_user_output.msg.assert_has_calls([
-        call(f"\nThe tool image [bold]test_image_name1:test_image_version1[/bold] is required by another Development Environment. It won't be deleted."),
-        call(f"\nThe tool image [bold]test_image_name3:test_image_version3[/bold] is required by another Development Environment. It won't be deleted."),
-    ])
+    mock_container_engine.remove.asssert_called_once_with("test_image_name4:test_image_version4")
+    mock_flush_descriptors.assert_called_once()
+
+@patch.object(platform.Platform, "flush_descriptors")
+@patch.object(platform.Platform, "container_engine")
+@patch.object(platform.Platform, "__init__")
+def test_Platform_uninstall_dev_env_with_duplicate_images(mock___init__: MagicMock,
+                                                          mock_container_engine: MagicMock, 
+                                                          mock_flush_descriptors: MagicMock) -> None:
+    # Test setup
+    mock___init__.return_value = None
+
+    test_platform = platform.Platform()
+    mock_dev_env1 = MagicMock()
+    mock_dev_env2 = MagicMock()
+    mock_dev_env_to_uninstall = MagicMock()
+    test_platform.local_dev_envs = [
+        mock_dev_env1, mock_dev_env2, mock_dev_env_to_uninstall
+    ]
+    mock_dev_env1.tools = [
+        {
+            "image_name": "test_image_name1",
+            "image_version": "test_image_version1"
+        },
+        {
+            "image_name": "test_image_name2",
+            "image_version": "test_image_version2"
+        }
+    ]
+    mock_dev_env1.is_installed = True
+    mock_dev_env2.tools = [
+        {
+            "image_name": "test_image_name3",
+            "image_version": "test_image_version3"
+        }
+    ]
+    mock_dev_env2.is_installed = True
+    mock_dev_env_to_uninstall.tools = [
+        {
+            "image_name": "test_image_name1",
+            "image_version": "test_image_version1"
+        },
+        {
+            "image_name": "test_image_name3",
+            "image_version": "test_image_version3"
+        },
+        {
+            "image_name": "test_image_name4",
+            "image_version": "test_image_version4"
+        },
+        {
+            "image_name": "test_image_name4",
+            "image_version": "test_image_version4"
+        }
+    ]
+    mock_dev_env_to_uninstall.is_installed = True
+
+    mock_container_engine.remove.return_value = True
+
+    # Run unit under test
+    test_platform.uninstall_dev_env(mock_dev_env_to_uninstall)
+
+    # Check expectations
+    mock___init__.assert_called_once()
+
+    assert mock_dev_env_to_uninstall.is_installed == False
+
     mock_container_engine.remove.asssert_called_once_with("test_image_name4:test_image_version4")
     mock_flush_descriptors.assert_called_once()
 
 @patch.object(platform.Platform, "container_engine")
-@patch.object(platform.Platform, "user_output")
 @patch.object(platform.Platform, "__init__")
-def test_Platform_uninstall_dev_env_failure(mock___init__: MagicMock, mock_user_output: MagicMock,
+def test_Platform_uninstall_dev_env_failure(mock___init__: MagicMock,
                                             mock_container_engine: MagicMock) -> None:
     # Test setup
     mock___init__.return_value = None
@@ -486,10 +546,6 @@ def test_Platform_uninstall_dev_env_failure(mock___init__: MagicMock, mock_user_
         assert str(exported_exception_info) == "Platform error: Dev Env uninstall failed."
         assert mock_dev_env_to_uninstall.is_installed == True
 
-        mock_user_output.msg.assert_has_calls([
-            call(f"\nThe tool image [bold]test_image_name1:test_image_version1[/bold] is required by another Development Environment. It won't be deleted."),
-            call(f"\nThe tool image [bold]test_image_name3:test_image_version3[/bold] is required by another Development Environment. It won't be deleted."),
-        ])
         mock_container_engine.remove.asssert_called_once_with("test_image_name4:test_image_version4")
 
 @patch.object(platform.Platform, "get_deserialized")
@@ -617,3 +673,64 @@ def test_Platform_assign_dev_env_already_assigned(mock___init__: MagicMock,
     mock_user_output.get_confirm.assert_called_once_with("[yellow]A Dev Env is already assigned to the project.[/]", 
                                                          "Overwrite it?")
     mock_dev_env.export.assert_called_once_with(f"{test_project_path}/.axem/dev_env_descriptor.json")
+
+@patch("dem.core.platform.DevEnv")
+@patch("dem.core.platform.os.path.exists")
+@patch.object(platform.Core, "user_output")
+@patch.object(platform.Platform, "get_dev_env_by_name")
+@patch.object(platform.Platform, "__init__")
+def test_Platform_init_project(mock___init__: MagicMock, mock_get_dev_env_by_name: MagicMock,
+                               mock_user_output: MagicMock, 
+                               mock_path_exists: MagicMock, mock_DevEnv: MagicMock) -> None:
+    # Test setup
+    mock___init__.return_value = None
+
+    test_platform = platform.Platform()
+
+    test_project_path = "test_project_path"
+    mock_assigned_dev_env = MagicMock()
+    mock_assigned_dev_env.name = "test_assigned_dev_env_name"
+    mock_existing_dev_env = MagicMock()
+
+    mock_path_exists.return_value = True
+    mock_DevEnv.return_value = mock_assigned_dev_env
+    mock_get_dev_env_by_name.return_value = mock_existing_dev_env
+
+    test_platform.local_dev_envs = [mock_existing_dev_env]
+
+    # Run unit under test
+    test_platform.init_project(test_project_path)
+
+    # Check expectations
+    assert mock_existing_dev_env not in test_platform.local_dev_envs
+    assert mock_assigned_dev_env in test_platform.local_dev_envs
+
+    mock_path_exists.assert_called_once_with(f"{test_project_path}/.axem/dev_env_descriptor.json")
+    mock_DevEnv.assert_called_once_with(descriptor_path=f"{test_project_path}/.axem/dev_env_descriptor.json")
+    mock_get_dev_env_by_name.assert_called_once_with(mock_assigned_dev_env.name)
+    mock_user_output.get_confirm.assert_called_once_with("[yellow]This project is already initialized.[/]", 
+                                                         "Overwrite it?")
+
+@patch("dem.core.platform.DevEnv")
+@patch("dem.core.platform.os.path.exists")
+@patch.object(platform.Core, "user_output")
+@patch.object(platform.Platform, "get_dev_env_by_name")
+@patch.object(platform.Platform, "__init__")
+def test_Platform_init_project_file_not_exist(mock___init__: MagicMock, mock_get_dev_env_by_name: MagicMock,
+                               mock_user_output: MagicMock, 
+                               mock_path_exists: MagicMock, mock_DevEnv: MagicMock) -> None:
+    # Test setup
+    mock___init__.return_value = None
+
+    test_platform = platform.Platform()
+
+    test_project_path = "test_project_path"
+    mock_path_exists.return_value = False
+
+    with pytest.raises(FileNotFoundError) as exported_exception_info:
+        # Run unit under test
+        test_platform.init_project(test_project_path)
+
+        # Check expectations
+        mock_path_exists.assert_called_once_with(f"{test_project_path}/.axem/dev_env_descriptor.json")
+        assert str(exported_exception_info.value) == f"The {test_project_path}/.axem/dev_env_descriptor.json file does not exist."

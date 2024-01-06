@@ -3,6 +3,7 @@
 
 from dem.core.platform import Platform
 from dem.core.dev_env import DevEnv
+from dem.core.exceptions import PlatformError
 from dem.cli.console import stderr, stdout
 import typer
 
@@ -16,7 +17,11 @@ def execute(platform: Platform, dev_env_name: str) -> None:
             typer.confirm("The Development Environment is installed. Do you want to uninstall it?", 
                           abort=True)
 
-            platform.uninstall_dev_env(dev_env_to_delete)
+            try:
+                platform.uninstall_dev_env(dev_env_to_delete)
+            except PlatformError as e:
+                stderr.print(f"[red]Error: The deletion failed, because the Dev Env can't be uninstalled. {str(e)}[/]")
+                return
 
         stdout.print("Deleting the Development Environment...")
         platform.local_dev_envs.remove(dev_env_to_delete)

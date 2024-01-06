@@ -162,7 +162,7 @@ class Platform(Core):
             except ContainerEngineError:
                 raise PlatformError("Dev Env install failed.")
 
-        dev_env_to_install.is_installed = "True"
+        dev_env_to_install.is_installed = True
         self.flush_descriptors()
 
     def uninstall_dev_env(self, dev_env_to_uninstall: DevEnv) -> None:
@@ -180,15 +180,17 @@ class Platform(Core):
                 for tool in dev_env.tools:
                     all_required_tool_images.add(tool["image_name"] + ":" + tool["image_version"])
 
+        tool_images_to_remove = set()
         for tool in dev_env_to_uninstall.tools:
             tool_image = tool["image_name"] + ":" + tool["image_version"]
-            if tool_image in all_required_tool_images:
-                self.user_output.msg(f"\nThe tool image [bold]{tool_image}[/bold] is required by another Development Environment. It won't be deleted.")
-            else:
-                try:
-                    self.container_engine.remove(tool_image)
-                except ContainerEngineError:
-                    raise PlatformError("Dev Env uninstall failed.")
+            if tool_image not in all_required_tool_images:
+                tool_images_to_remove.add(tool_image)
+
+        for tool_image in tool_images_to_remove:
+            try:
+                self.container_engine.remove(tool_image)
+            except ContainerEngineError as e:
+                raise PlatformError(f"Dev Env uninstall failed. {str(e)}")
             
         dev_env_to_uninstall.is_installed = False
         self.flush_descriptors()
@@ -219,3 +221,22 @@ class Platform(Core):
                                          "Overwrite it?")
 
         dev_env_to_assign.export(path)
+
+    def init_project(self, project_path: str) -> None:
+        """ Init the project by saving the Dev Env's descriptor to the local Dev Env storage.
+
+            Args:
+                assigned_dev_env -- the Development Environment assigned to the project
+        """
+        descriptor_path = f"{project_path}/.axem/dev_env_descriptor.json"
+        if not os.path.exists(descriptor_path):
+            raise FileNotFoundError(f"The {descriptor_path} file does not exist.")
+
+        assigned_dev_env = DevEnv(descriptor_path=descriptor_path)
+        existing_dev_env = self.get_dev_env_by_name(assigned_dev_env.name)
+        if existing_dev_env is not None:
+            self.user_output.get_confirm("[yellow]This project is already initialized.[/]", 
+                                         "Overwrite it?")
+            self.local_dev_envs.remove(existing_dev_env)
+
+        self.local_dev_envs.append(assigned_dev_env)

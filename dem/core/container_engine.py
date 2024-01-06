@@ -4,6 +4,7 @@
 from dem.core.core import Core
 from dem.core.exceptions import ContainerEngineError
 import docker
+import docker.errors
 
 class ContainerEngine(Core):
     """ Operations on the Docker Container Engine."""
@@ -109,13 +110,11 @@ class ContainerEngine(Core):
                 image -- the tool image to remove
         """
         try:
-             self._docker_client.images.remove(image)
+            self._docker_client.images.remove(image)
         except docker.errors.ImageNotFound:
             self.user_output.msg(f"[yellow]The {image} doesn't exist. Unable to remove it.[/]\n")
-            raise ContainerEngineError("")
         except docker.errors.APIError:
-            self.user_output.error(f"[red]Error: The {image} is used by a container. Unable to remove it.[/]\n")
-            raise ContainerEngineError("")
+            raise ContainerEngineError(f"The {image} is used by a container. Unable to remove it.[/]\n")
         else:
             self.user_output.msg(f"[green]Successfully removed the {image}![/]\n")
 

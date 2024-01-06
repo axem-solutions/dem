@@ -142,6 +142,19 @@ def test_version_exit_raised(mock_importlib_metadata_version):
     with pytest.raises(typer.Exit):
         main._version_callback(True)
 
+@patch("dem.cli.main.init_cmd.execute")
+def test_init_execute(mock_init_execute: MagicMock) -> None:
+    # Test setup
+    test_path = "test_path"
+    mock_platform = MagicMock()
+    main.platform = mock_platform
+
+    # Run unit under test
+    main.init(test_path)
+
+    # Check expectations
+    mock_init_execute.assert_called_once_with(mock_platform, test_path)
+
 def test_platform_not_initialized() -> None:
     # Test setup
     test_dev_env_name = "test_dev_env_name"
@@ -163,8 +176,10 @@ def test_platform_not_initialized() -> None:
         main.rename: [test_dev_env_name, test_dev_env_name],
         main.modify: [test_dev_env_name],
         main.delete: [test_dev_env_name],
+        main.install: [test_dev_env_name],
         main.uninstall: [test_dev_env_name],
         main.assign: [test_dev_env_name, test_path],
+        main.init: [test_path],
         main.run: [test_dev_env_name, mock_ctx],
         main.add_reg: [test_name, test_url],
         main.list_reg: [],

@@ -1,6 +1,6 @@
 !!! warning
 
-    Always put the input text into double quotation marks (""), if it contains whitespaces.
+    Always put the input text into double quotation marks ("") if it contains whitespaces.
 
 ## **`dem list [OPTIONS]`**
 
@@ -149,6 +149,19 @@ Arguments:
 
 ---
 
+## **`dem install DEV_ENV_NAME`**
+
+Install the selected Development Environment. DEM pull all the required containerized tools (which 
+are not yet available on the host PC) from the registry and install the Development Environment 
+locally. If the same Development Environment is already installed, but the installation is not 
+complete, the missing tool images are obtained from the registry.
+
+Arguments:
+
+`DEV_ENV_NAME` Name of the Development Environment to install. [required]
+
+---
+
 ## **`dem uninstall DEV_ENV_NAME`**
 
 Uninstall the selected Development Environment. Set installed flag to False if it was True. Dem checks whether a tool image is
@@ -176,6 +189,17 @@ Arguments:
 
 `[PROJECT_PATH]` Path of the project to assign the Development Environment to. If not set, the current
 working directory will be used.
+
+---
+
+## **`dem init [PROJECT_PATH]`**
+
+Initialize a project with the assigned Development Environment.
+
+Arguments:
+
+`PROJECT_PATH` Path of the project to initialize. If not set, the current working directory will be
+used.
 
 ---
 
