@@ -5,7 +5,7 @@ import copy, typer
 from dem.core.dev_env import DevEnv, DevEnv
 from dem.core.tool_images import ToolImages
 from dem.core.platform import Platform
-from dem.cli.console import stderr
+from dem.cli.console import stderr, stdout
 from dem.cli.tui.renderable.menu import SelectMenu
 from dem.cli.tui.panel.tool_type_selector import ToolTypeSelectorPanel
 from dem.cli.tui.panel.tool_image_selector import ToolImageSelectorPanel
@@ -166,13 +166,50 @@ def handle_user_confirm(confirmation: str, dev_env_local: DevEnv, platform: Plat
 
     platform.flush_descriptors()
 
-def execute(platform: Platform, dev_env_name: str) -> None:
-    dev_env_local = platform.get_dev_env_by_name(dev_env_name)
+def modify_single_tool(platform: Platform, dev_env: DevEnv, tool_type: str, tool_image: str) -> None:
+    if tool_type and tool_image:
+        if tool_image not in platform.tool_images.local.elements:
+            if tool_image in platform.tool_images.registry.elements:
+                platform.container_engine.pull(tool_image)
+            else:
+                stderr.print(f"[red]Error: The {tool_image} is not an available image.[/]")
+                return
 
-    if dev_env_local is None:
-        stderr.print("[red]The Development Environment doesn't exist.")
+        for tool in dev_env.tools:
+            if tool["type"] == tool_type:
+                tool["image_name"] = tool_image.split(":")[0]
+                tool["image_version"] = tool_image.split(":")[1]
+                break
+        else:
+            dev_env.tools.append({
+                "type": tool_type,
+                "image_name": tool_image.split(":")[0],
+                "image_version": tool_image.split(":")[1]
+            })
+
+        platform.flush_descriptors()
     else:
-        tool_image_list = get_tool_image_list(platform.tool_images)
-        get_modifications_from_user(dev_env_local, tool_image_list)
-        confirmation = get_confirm_from_user()
-        handle_user_confirm(confirmation, dev_env_local, platform)
+        stderr.print("[red]Error: The tool type and the tool image must be set together.[/]")
+        return
+
+def open_modify_panel(platform: Platform, dev_env: DevEnv) -> None:
+    tool_image_list: list[list[str]] = get_tool_image_list(platform.tool_images)
+    get_modifications_from_user(dev_env, tool_image_list)
+    confirmation = get_confirm_from_user()
+    handle_user_confirm(confirmation, dev_env, platform)
+
+def execute(platform: Platform, dev_env_name: str, tool_type: str, tool_image: str) -> None:
+    dev_env = platform.get_dev_env_by_name(dev_env_name)
+
+    if dev_env is None:
+        stderr.print("[red]The Development Environment doesn't exist.")
+        return
+    elif dev_env.is_installed is True:
+        stdout.print("[yellow]The Development Environment is installed. It can't be modified.[/]")
+        typer.confirm("Do you want to uninstall it?", abort=True)
+        platform.uninstall_dev_env(dev_env)
+
+    if (tool_type or tool_image):
+        modify_single_tool(platform, dev_env, tool_type, tool_image)
+    else:
+        open_modify_panel(platform, dev_env)
