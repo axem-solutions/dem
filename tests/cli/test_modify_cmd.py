@@ -140,31 +140,183 @@ def test_execute_invalid_name():
 @patch("dem.cli.command.modify_cmd.get_confirm_from_user")
 @patch("dem.cli.command.modify_cmd.get_modifications_from_user")
 @patch("dem.cli.command.modify_cmd.get_tool_image_list")
-def test_execute_valid_name(mock_get_tool_image_list, mock_get_modifications_from_user, 
+def test_open_modify_panel(mock_get_tool_image_list, mock_get_modifications_from_user, 
                             mock_get_confirm_from_user, mock_handle_user_confirm):
     # Test setup
     mock_platform = MagicMock()
-    main.platform = mock_platform
-    mock_dev_env_local = MagicMock()
-    mock_platform.get_dev_env_by_name.return_value = mock_dev_env_local
+    mock_dev_env = MagicMock()
+
+    mock_tool_images = MagicMock()
+    mock_platform.tool_images = mock_tool_images
 
     mock_tool_image_list = MagicMock()
     mock_get_tool_image_list.return_value = mock_tool_image_list
 
     mock_confirmation = MagicMock()
     mock_get_confirm_from_user.return_value = mock_confirmation
-    test_dev_env_name =  "test"
 
     # Run unit under test
-    runner_result = runner.invoke(main.typer_cli, ["modify", test_dev_env_name], color=True)
+    modify_cmd.open_modify_panel(mock_platform, mock_dev_env)
 
     # Check expectations
-    assert 0 == runner_result.exit_code
-
-    mock_platform.get_dev_env_by_name.assert_called_once_with(test_dev_env_name)
-    mock_get_tool_image_list.assert_called_once_with(mock_platform.tool_images)
-    mock_get_modifications_from_user.assert_called_once_with(mock_dev_env_local, 
+    mock_get_tool_image_list.assert_called_once_with(mock_tool_images)
+    mock_get_modifications_from_user.assert_called_once_with(mock_dev_env, 
                                                              mock_tool_image_list)
     mock_get_confirm_from_user.assert_called_once()
-    mock_handle_user_confirm.assert_called_once_with(mock_confirmation, mock_dev_env_local, 
-                                                     mock_platform)
+    mock_handle_user_confirm.assert_called_once_with(mock_confirmation, mock_dev_env, mock_platform)
+
+def test_modify_single_tool_new_item() -> None:
+    # Test setup
+    mock_dev_env = MagicMock()
+    mock_dev_env.tools = []
+    mock_platform = MagicMock()
+    test_tool_type = "test_tool_type"
+    test_tool_image_name = "test_tool_image_name"
+    test_tool_image_version = "test_tool_image_version"
+    test_tool_image = test_tool_image_name + ":" + test_tool_image_version
+
+    mock_platform.tool_images.registry.elements = [test_tool_image]
+
+    # Run unit under test
+    modify_cmd.modify_single_tool(mock_platform, mock_dev_env, test_tool_type,
+                                  test_tool_image)
+
+    # Check expectations
+    assert mock_dev_env.tools[0]["type"] == test_tool_type
+    assert mock_dev_env.tools[0]["image_name"] == test_tool_image_name
+    assert mock_dev_env.tools[0]["image_version"] == test_tool_image_version
+
+    mock_platform.container_engine.pull.assert_called_once_with(test_tool_image)
+    mock_platform.flush_descriptors.assert_called_once()
+
+def test_modify_single_tool_overwrite_item() -> None:
+    # Test setup
+    mock_dev_env = MagicMock()
+    mock_dev_env.tools = [
+        {
+            "type": "test_tool_type",
+            "image_name": "old_test_tool_image_name",
+            "image_version": "old_test_tool_image_version"
+        }
+    ]
+    mock_platform = MagicMock()
+    test_tool_type = "test_tool_type"
+    test_tool_image_name = "test_tool_image_name"
+    test_tool_image_version = "test_tool_image_version"
+    test_tool_image = test_tool_image_name + ":" + test_tool_image_version
+
+    mock_platform.tool_images.registry.elements = [test_tool_image]
+
+    # Run unit under test
+    modify_cmd.modify_single_tool(mock_platform, mock_dev_env, test_tool_type,
+                                  test_tool_image)
+
+    # Check expectations
+    assert mock_dev_env.tools[0]["type"] == test_tool_type
+    assert mock_dev_env.tools[0]["image_name"] == test_tool_image_name
+    assert mock_dev_env.tools[0]["image_version"] == test_tool_image_version
+
+    mock_platform.container_engine.pull.assert_called_once_with(test_tool_image)
+    mock_platform.flush_descriptors.assert_called_once()
+
+@patch("dem.cli.command.modify_cmd.stderr.print")
+def test_modify_single_tool_invalid_image(mock_stderr_print: MagicMock) -> None:
+    # Test setup
+    mock_dev_env = MagicMock()
+    mock_platform = MagicMock()
+    test_tool_type = "test_tool_type"
+    test_tool_image = "test_tool_image"
+
+    mock_platform.tool_images.local.elements = []
+    mock_platform.tool_images.registry.elements = []
+
+    # Run unit under test
+    modify_cmd.modify_single_tool(mock_platform, mock_dev_env, test_tool_type,
+                                  test_tool_image)
+
+    # Check expectations
+    mock_platform.container_engine.pull.assert_not_called()
+    mock_platform.flush_descriptors.assert_not_called()
+
+    mock_stderr_print.assert_called_once_with(f"[red]Error: The {test_tool_image} is not an available image.[/]")
+
+@patch("dem.cli.command.modify_cmd.stderr.print")
+def test_modify_single_tool_no_image(mock_stderr_print: MagicMock) -> None:
+    # Test setup
+    mock_dev_env = MagicMock()
+    mock_platform = MagicMock()
+    test_tool_type = "test_tool_type"
+    test_tool_image = ""
+
+    # Run unit under test
+    modify_cmd.modify_single_tool(mock_platform, mock_dev_env, test_tool_type,
+                                  test_tool_image)
+
+    # Check expectations
+    mock_platform.container_engine.pull.assert_not_called()
+    mock_platform.flush_descriptors.assert_not_called()
+
+    mock_stderr_print.assert_called_once_with("[red]Error: The tool type and the tool image must be set together.[/]")
+
+@patch("dem.cli.command.modify_cmd.stderr.print")
+def test_modify_single_tool_no_type(mock_stderr_print: MagicMock) -> None:
+    # Test setup
+    mock_dev_env = MagicMock()
+    mock_platform = MagicMock()
+    test_tool_type = ""
+    test_tool_image = "test_tool_image"
+
+    # Run unit under test
+    modify_cmd.modify_single_tool(mock_platform, mock_dev_env, test_tool_type,
+                                  test_tool_image)
+
+    # Check expectations
+    mock_platform.container_engine.pull.assert_not_called()
+    mock_platform.flush_descriptors.assert_not_called()
+
+    mock_stderr_print.assert_called_once_with("[red]Error: The tool type and the tool image must be set together.[/]")
+
+@patch("dem.cli.command.modify_cmd.modify_single_tool")
+@patch("dem.cli.command.modify_cmd.typer.confirm")
+@patch("dem.cli.command.modify_cmd.stdout.print")
+def test_execute_single_tool_dev_env_installed(mock_stdout_print: MagicMock, mock_confirm: MagicMock,
+                                               mock_modify_single_tool: MagicMock) -> None:
+    # Test setup
+    mock_platform = MagicMock()
+    test_dev_env_name = "test_dev_env_name"
+    test_tool_type = "test_tool_type"
+    test_tool_image = "test_tool_image"
+    mock_dev_env = MagicMock()
+    mock_dev_env.is_installed = True
+
+    mock_platform.get_dev_env_by_name.return_value = mock_dev_env
+
+    # Run unit under test
+    modify_cmd.execute(mock_platform, test_dev_env_name, test_tool_type, test_tool_image)
+
+    # Check expectations
+    mock_platform.get_dev_env_by_name.assert_called_once_with(test_dev_env_name)
+    mock_stdout_print.assert_called_once_with("[yellow]The Development Environment is installed. It can't be modified.[/]")
+    mock_confirm.assert_called_once_with("Do you want to uninstall it?", abort=True)
+    mock_platform.uninstall_dev_env.assert_called_once_with(mock_dev_env)
+    mock_modify_single_tool.assert_called_once_with(mock_platform, mock_dev_env, test_tool_type, 
+                                                    test_tool_image)
+
+@patch("dem.cli.command.modify_cmd.open_modify_panel")
+def test_execute_open_modify_panel(mock_open_modify_panel: MagicMock) -> None:
+    # Test setup
+    mock_platform = MagicMock()
+    test_dev_env_name = "test_dev_env_name"
+    test_tool_type = ""
+    test_tool_image = ""
+
+    mock_dev_env = MagicMock()
+    mock_dev_env.is_installed = False
+    mock_platform.get_dev_env_by_name.return_value = mock_dev_env
+
+    # Run unit under test
+    modify_cmd.execute(mock_platform, test_dev_env_name, test_tool_type, test_tool_image)
+
+    # Check expectations
+    mock_platform.get_dev_env_by_name.assert_called_once_with(test_dev_env_name)
+    mock_open_modify_panel.assert_called_once_with(mock_platform, mock_dev_env)

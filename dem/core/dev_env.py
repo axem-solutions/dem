@@ -54,7 +54,7 @@ class DevEnv(Core):
 
         if descriptor:
             self.name: str = descriptor["name"]
-            self.tools: str = descriptor["tools"]
+            self.tools: list[dict[str, str]] = descriptor["tools"]
             descriptor_installed = descriptor.get("installed", "False")
             if "True" == descriptor_installed:
                 self.is_installed = True

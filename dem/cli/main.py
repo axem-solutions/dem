@@ -164,7 +164,7 @@ def load(path_to_dev_env: Annotated[str, typer.Argument(help="Path to the Dev En
         raise InternalError("Error: The platform hasn't been initialized properly!")
 
 @typer_cli.command()
-def clone(dev_env_name: Annotated[str, typer.Argument(help="Name of the Dev Env to clone.")]) -> None:
+def clone(dev_env_name: Annotated[str, typer.Argument(help="Name of the Dev Env descriptor to clone.")]) -> None:
     """
     Copy the Dev Env's descriptor from the catalog to the local descriptor storage.
     """
@@ -187,12 +187,15 @@ def rename(dev_env_name: Annotated[str, typer.Argument(help="Name of the Develop
 
 @typer_cli.command()
 def modify(dev_env_name: Annotated[str, typer.Argument(help="Name of the Development Environment to modify.",
-                                                       autocompletion=autocomplete_dev_env_name)]) -> None:
+                                                       autocompletion=autocomplete_dev_env_name)],
+           tool_type: Annotated[str, typer.Argument(help="The tool type to modify.")] = "",
+           tool_image: Annotated[str, typer.Argument(help="The tool image to set for the tool type.")] = "") -> None:
     """
-    Modify the tool types and required tool images for an existing Development Environment.
+    Modify a tool in a Development Environment.
+    If the tool type is not specified, the Dev Env settings panel will be opened.
     """
     if platform:
-        modify_cmd.execute(platform, dev_env_name)
+        modify_cmd.execute(platform, dev_env_name, tool_type, tool_image)
     else:
         raise InternalError("Error: The platform hasn't been initialized properly!")
 
