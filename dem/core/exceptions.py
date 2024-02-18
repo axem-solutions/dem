@@ -1,12 +1,12 @@
 """Collection of dem specific exceptions."""
 # dem/core/exceptions.py
 
-class InvalidDevEnvJson(Exception):
-    """Raised when the dev_env.json file is invalid."""
+class DataStorageError(Exception):
+    """Raised when valid data can't be loaded from file."""
 
-    base_message = "Error in dev_env.json: "
+    base_message = "Invalid file: "
 
-    def __init__(self, message: str) -> None:
+    def __init__(self, message: str = "") -> None:
         super().__init__(self.base_message + message)
 
 class RegistryError(Exception):

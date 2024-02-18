@@ -43,7 +43,8 @@ class Registry(Core, ABC):
                 repo -- get the tags of this repository
         """
         try:
-            response = requests.get(self._get_tag_endpoint_url(repo), timeout=10)
+            response = requests.get(self._get_tag_endpoint_url(repo), 
+                                              timeout=self.config_file.http_request_timeout_s)
         except Exception as e:
             self.user_output.error(str(e))
         else:
@@ -135,7 +136,7 @@ class DockerRegistry(Registry):
         repo_endpoint = self._registry_config["url"] + "/v2/_catalog"
 
         try:
-            response = requests.get(repo_endpoint, timeout=10)
+            response = requests.get(repo_endpoint, timeout=self.config_file.http_request_timeout_s)
         except Exception as e:
             self.user_output.error(str(e))
         else:
@@ -161,17 +162,16 @@ class DockerRegistry(Registry):
 
 class Registries(Core):
     """ Contains all configured registiries."""
-    def __init__(self, container_engine: ContainerEngine, config_file: ConfigFile) -> None:
+    def __init__(self, container_engine: ContainerEngine) -> None:
         """ Init the class by creating the registry instances.
             
             Args:
                 container_engine -- the container engine
                 config_file -- config file that contains the registry parameters
         """
-        self._config_file = config_file
         self._container_engine = container_engine
         self.registries: list[Registry] = []
-        for registry_config in config_file.registries:
+        for registry_config in self.config_file.registries:
             self._add_registry_instance(registry_config)
     
     def _add_registry_instance(self, registry_config: dict) -> None:
@@ -210,15 +210,15 @@ class Registries(Core):
         """
         self._add_registry_instance(registry_config)
 
-        self._config_file.registries.append(registry_config)
-        self._config_file.flush()
+        self.config_file.registries.append(registry_config)
+        self.config_file.flush()
 
     def list_registry_configs(self) -> list[dict]:
         """ List the registry configs. (As stored in the config file.)
         
             Returns with the list of the available registry configurations.
         """
-        return self._config_file.registries
+        return self.config_file.registries
 
     def delete_registry(self, registry_config: dict) -> None:
         """ Delete the registry.
@@ -230,5 +230,5 @@ class Registries(Core):
             if registry._registry_config == registry_config:
                 self.registries.remove(registry)
 
-        self._config_file.registries.remove(registry_config)
-        self._config_file.flush()
+        self.config_file.registries.remove(registry_config)
+        self.config_file.flush()

@@ -7,9 +7,11 @@ import dem.core.dev_env_catalog as dev_env_catalog
 # Test framework
 from unittest.mock import patch, MagicMock, call
 
+@patch.object(dev_env_catalog.Core, "config_file")
 @patch("dem.core.dev_env_catalog.DevEnv")
 @patch("dem.core.dev_env_catalog.requests")
-def test_DevEnvCatalog(mock_requests: MagicMock, mock_DevEnv: MagicMock):
+def test_DevEnvCatalog(mock_requests: MagicMock, mock_DevEnv: MagicMock, 
+                       mock_config_file: MagicMock) -> None:
     # Test setup
     mock_response = MagicMock()
     mock_requests.get.return_value = mock_response
@@ -27,13 +29,16 @@ def test_DevEnvCatalog(mock_requests: MagicMock, mock_DevEnv: MagicMock):
         "url": test_url
     }
 
+    test_http_request_timeout_s = 1
+    mock_config_file.http_request_timeout_s = test_http_request_timeout_s
+
     # Run unit under test
     test_dev_env_catalog = dev_env_catalog.DevEnvCatalog(test_catalog_config)
 
     # Check expectations
     assert test_dev_env_catalog.dev_envs == test_dev_envs
 
-    mock_requests.get.assert_called_once_with(test_url, timeout=1)
+    mock_requests.get.assert_called_once_with(test_url, timeout=test_http_request_timeout_s)
     mock_response.json.assert_called_once()
 
     calls = [call(descriptor=test_dev_env_descriptor) for test_dev_env_descriptor in test_dev_env_descriptors]
@@ -59,10 +64,10 @@ def test_DevEnvCatalog_get_dev_env_by_name(mock___init__: MagicMock):
     assert actual_dev_env is test_dev_envs[expected_dev_env_index]
     mock___init__.assert_called_once()
 
+@patch.object(dev_env_catalog.Core, "config_file")
 @patch("dem.core.dev_env_catalog.DevEnvCatalog")
-def test_DevEnvCatalogs(mock_DevEnvCatalog: MagicMock):
+def test_DevEnvCatalogs(mock_DevEnvCatalog: MagicMock, mock_config_file: MagicMock) -> None:
     # Test setup
-    mock_config_file = MagicMock()
     mock_config_file.catalogs = [
         {
             "url": "test_url_1"
@@ -75,7 +80,7 @@ def test_DevEnvCatalogs(mock_DevEnvCatalog: MagicMock):
     mock_DevEnvCatalog.side_effect = mock_dev_env_catalogs
 
     # Run unit under test
-    test_dev_env_catalogs = dev_env_catalog.DevEnvCatalogs(mock_config_file)
+    test_dev_env_catalogs = dev_env_catalog.DevEnvCatalogs()
 
     # Check expectations
     assert test_dev_env_catalogs.catalogs == mock_dev_env_catalogs
@@ -85,10 +90,10 @@ def test_DevEnvCatalogs(mock_DevEnvCatalog: MagicMock):
         calls.append(call(test_catalog))
     mock_DevEnvCatalog.assert_has_calls(calls)
 
+@patch.object(dev_env_catalog.Core, "config_file")
 @patch("dem.core.dev_env_catalog.DevEnvCatalog")
-def test_DevEnvCatalogs_add_catalog(mock_DevEnvCatalog: MagicMock):
+def test_DevEnvCatalogs_add_catalog(mock_DevEnvCatalog: MagicMock, mock_config_file: MagicMock) -> None:
     # Test setup
-    mock_config_file = MagicMock()
     test_default_catalogs = [
         {
             "url": "test_url_1"
@@ -109,7 +114,7 @@ def test_DevEnvCatalogs_add_catalog(mock_DevEnvCatalog: MagicMock):
     mock_dev_env_catalogs.append(expected_catalog_to_be_added)
     mock_DevEnvCatalog.side_effect = mock_dev_env_catalogs
 
-    test_dev_env_catalogs = dev_env_catalog.DevEnvCatalogs(mock_config_file)
+    test_dev_env_catalogs = dev_env_catalog.DevEnvCatalogs()
 
     # Run unit under test
     test_dev_env_catalogs.add_catalog(expected_catalog_config_to_be_added)
@@ -126,12 +131,13 @@ def test_DevEnvCatalogs_add_catalog(mock_DevEnvCatalog: MagicMock):
     mock_DevEnvCatalog.assert_has_calls(calls)
     mock_config_file.flush.assert_called_once()
 
+@patch.object(dev_env_catalog.Core, "config_file")
 @patch.object(dev_env_catalog.Core, "user_output")
 @patch("dem.core.dev_env_catalog.DevEnvCatalog")
 def test_DevEnvCatalogs_add_catalog_exception(mock_DevEnvCatalog: MagicMock, 
-                                              mock_user_output: MagicMock):
+                                              mock_user_output: MagicMock,
+                                              mock_config_file: MagicMock) -> None:
     # Test setup
-    mock_config_file = MagicMock()
     mock_config_file.catalogs = []
     expected_catalog_config_to_be_added = {
         "url": "test_url"
@@ -140,7 +146,7 @@ def test_DevEnvCatalogs_add_catalog_exception(mock_DevEnvCatalog: MagicMock,
     test_exception_text = "test_exception_text"
     mock_DevEnvCatalog.side_effect = Exception(test_exception_text)
 
-    test_dev_env_catalogs = dev_env_catalog.DevEnvCatalogs(mock_config_file)
+    test_dev_env_catalogs = dev_env_catalog.DevEnvCatalogs()
 
     # Run unit under test
     test_dev_env_catalogs.add_catalog(expected_catalog_config_to_be_added)
@@ -153,10 +159,11 @@ def test_DevEnvCatalogs_add_catalog_exception(mock_DevEnvCatalog: MagicMock,
     ]
     mock_user_output.error.assert_has_calls(calls)
 
+@patch.object(dev_env_catalog.Core, "config_file")
 @patch("dem.core.dev_env_catalog.DevEnvCatalog")
-def test_DevEnvCatalogs_list_catalog_configs(mock_DevEnvCatalog: MagicMock):
+def test_DevEnvCatalogs_list_catalog_configs(mock_DevEnvCatalog: MagicMock, 
+                                             mock_config_file: MagicMock) -> None:
     # Test setup
-    mock_config_file = MagicMock()
     mock_config_file.catalogs = [
         {
             "url": "test_url_1"
@@ -168,7 +175,7 @@ def test_DevEnvCatalogs_list_catalog_configs(mock_DevEnvCatalog: MagicMock):
     mock_dev_env_catalogs = [MagicMock()] * len(mock_config_file.catalogs)
     mock_DevEnvCatalog.side_effect = mock_dev_env_catalogs
 
-    test_dev_env_catalogs = dev_env_catalog.DevEnvCatalogs(mock_config_file)
+    test_dev_env_catalogs = dev_env_catalog.DevEnvCatalogs()
 
     # Run unit under test
     actual_catalog_configs = test_dev_env_catalogs.list_catalog_configs()
@@ -181,10 +188,11 @@ def test_DevEnvCatalogs_list_catalog_configs(mock_DevEnvCatalog: MagicMock):
         calls.append(call(test_catalog))
     mock_DevEnvCatalog.assert_has_calls(calls)
 
+@patch.object(dev_env_catalog.Core, "config_file")
 @patch("dem.core.dev_env_catalog.DevEnvCatalog")
-def test_DevEnvCatalogs_delete_catalog(mock_DevEnvCatalog: MagicMock):
+def test_DevEnvCatalogs_delete_catalog(mock_DevEnvCatalog: MagicMock, 
+                                       mock_config_file: MagicMock) -> None:
     # Test setup
-    mock_config_file = MagicMock()
     catalog_config_to_delete = {
         "url": "test_url_1"
     }
@@ -199,7 +207,7 @@ def test_DevEnvCatalogs_delete_catalog(mock_DevEnvCatalog: MagicMock):
     mock_dev_env_catalogs[1].config = mock_config_file.catalogs[1]
     mock_DevEnvCatalog.side_effect = mock_dev_env_catalogs
 
-    test_dev_env_catalogs = dev_env_catalog.DevEnvCatalogs(mock_config_file)
+    test_dev_env_catalogs = dev_env_catalog.DevEnvCatalogs()
 
     # Run unit under test
     test_dev_env_catalogs.delete_catalog(mock_config_file.catalogs[0])

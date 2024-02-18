@@ -5,9 +5,9 @@ import os
 from typing import Any
 from dem.core.core import Core
 from dem.core.properties import __supported_dev_env_major_version__
-from dem.core.exceptions import InvalidDevEnvJson, PlatformError, ContainerEngineError
+from dem.core.exceptions import DataStorageError, PlatformError, ContainerEngineError
 from dem.core.dev_env_catalog import DevEnvCatalogs
-from dem.core.data_management import LocalDevEnvJSON, ConfigFile
+from dem.core.data_management import LocalDevEnvJSON
 from dem.core.container_engine import ContainerEngine
 from dem.core.registry import Registries
 from dem.core.tool_images import ToolImages
@@ -24,34 +24,34 @@ class Platform(Core):
             _tool_images -- the available tool images
             _container_engine -- the container engine
             _regisitries -- managing the registries
-            _config_file -- contains the DEM configuration
             update_tool_images_on_instantiation -- can be used to disable tool update if not needed
     """
     update_tool_images_on_instantiation = True
 
-    def _dev_env_json_version_check(self) -> None:
+    def _dev_env_json_version_check(self, dev_env_json_major_version: int) -> None:
         """ Check that the json file is supported.
 
-            The version is stored as string in the X.Y format.
-            Raises an InvalidDevEnvJson exception, if the version is not supported.
+            The version is stored as a string in the X.Y format.
+            Raises an DataStorageError exception, if the version is not supported.
         """
-        dev_env_json_major_version = int(self.version.split('.', 1)[0])
+        
         if dev_env_json_major_version != __supported_dev_env_major_version__:
-            raise InvalidDevEnvJson("The dev_env.json version v1.0 is not supported.")
+            raise DataStorageError("The dev_env.json version v1.0 is not supported.")
 
     def __init__(self) -> None:
-        """ Init the class, by creating a list of the Development Environments."""
-
-        self.dev_env_json = LocalDevEnvJSON()
-        self.version: str = self.dev_env_json.deserialized["version"]
-        self._dev_env_json_version_check()
+        """ Init the class."""
         self._dev_env_catalogs = None
         self._tool_images = None
         self._container_engine = None
         self._registries = None
-        self._config_file = None
         self._hosts = None
 
+    def load_dev_envs(self) -> None:
+        """ Load the Development Environments from the dev_env.json file."""
+        self.dev_env_json = LocalDevEnvJSON()
+        self.dev_env_json.update()
+        self.version = self.dev_env_json.deserialized["version"]
+        self._dev_env_json_version_check(int(self.version.split('.', 1)[0]))
         self.local_dev_envs: list[DevEnv] = []
         for dev_env_descriptor in self.dev_env_json.deserialized["development_environments"]:
             self.local_dev_envs.append(DevEnv(descriptor=dev_env_descriptor))
@@ -85,20 +85,9 @@ class Platform(Core):
             The Registries() gets instantiated only at the first access.
         """
         if self._registries is None:
-            self._registries = Registries(self.container_engine, self.config_file)
+            self._registries = Registries(self.container_engine)
 
         return self._registries
-
-    @property
-    def config_file(self) -> ConfigFile:
-        """ The config file.
-
-            The ConfigFile() gets instantiated only at the first access.
-        """
-        if self._config_file is None:
-            self._config_file = ConfigFile()
-
-        return self._config_file
 
     @property
     def dev_env_catalogs(self) -> DevEnvCatalogs:
@@ -107,7 +96,7 @@ class Platform(Core):
             The DevEnvCatalogs() gets instantiated only at the first access.
         """
         if self._dev_env_catalogs is None:
-            self._dev_env_catalogs = DevEnvCatalogs(self.config_file)
+            self._dev_env_catalogs = DevEnvCatalogs()
 
         return self._dev_env_catalogs
 
@@ -118,7 +107,7 @@ class Platform(Core):
             The Hosts() gets instantiated only at the first access.
         """
         if self._hosts is None:
-            self._hosts = Hosts(self.config_file)
+            self._hosts = Hosts()
 
         return self._hosts
 

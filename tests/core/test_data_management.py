@@ -6,6 +6,7 @@ import dem.core.data_management as data_management
 
 # Test framework
 from unittest.mock import patch, MagicMock, call
+import pytest
 
 import json.decoder
 
@@ -13,7 +14,7 @@ import json.decoder
 
 @patch("dem.core.data_management.open")
 @patch("dem.core.data_management.json.load")
-def test_BaseJSON_existing_json(mock_json_load: MagicMock, mock_open: MagicMock):
+def test_BaseJSON_update(mock_json_load: MagicMock, mock_open: MagicMock) -> None:
     # Test setup
     fake_opened_file = MagicMock()
     mock_open.return_value = fake_opened_file
@@ -22,9 +23,10 @@ def test_BaseJSON_existing_json(mock_json_load: MagicMock, mock_open: MagicMock)
 
     test_path = "test_path"
     data_management.BaseJSON._path = test_path
+    base_json = data_management.BaseJSON()
 
     # Run unit under test
-    base_json = data_management.BaseJSON()
+    base_json.update()
 
     # Check expectations
     mock_open.assert_called_once_with(test_path, "r")
@@ -37,10 +39,10 @@ def test_BaseJSON_existing_json(mock_json_load: MagicMock, mock_open: MagicMock)
 @patch("dem.core.data_management.json.loads")
 @patch("dem.core.data_management.os.path.exists")
 @patch("dem.core.data_management.os.makedirs")
-def test_dev_env_json_read_FileNotFounderror(mock_os_makedirs: MagicMock, 
-                                             mock_os_path_exists: MagicMock, 
-                                             mock_json_loads: MagicMock, 
-                                             mock_open: MagicMock):
+def test_BaseJSON_update_FileNotFoundError(mock_os_makedirs: MagicMock, 
+                                           mock_os_path_exists: MagicMock, 
+                                           mock_json_loads: MagicMock, 
+                                           mock_open: MagicMock):
     # Test setup
     fake_opened_file = MagicMock()
     mock_open.side_effect = [FileNotFoundError, fake_opened_file]
@@ -50,9 +52,10 @@ def test_dev_env_json_read_FileNotFounderror(mock_os_makedirs: MagicMock,
 
     test_default_json = "test_empty_json"
     data_management.BaseJSON._default_json = test_default_json
+    base_json = data_management.BaseJSON()
 
     # Run unit under test
-    base_json = data_management.BaseJSON()
+    base_json.update()
    
     # Check expectations
     calls = [
@@ -71,38 +74,9 @@ def test_dev_env_json_read_FileNotFounderror(mock_os_makedirs: MagicMock,
 
     assert base_json.deserialized is expected_deserialized_json
 
-@patch.object(data_management.BaseJSON, "_create_default_json")
-@patch("dem.core.data_management.open")
-@patch("dem.core.data_management.json.load")
-def test_dev_env_json_read_JSONDecodeError(mock_json_load: MagicMock, mock_open: MagicMock, 
-                                           mock_create_default_json: MagicMock):
-    # Test setup
-    fake_opened_file = MagicMock()
-    mock_open.return_value = fake_opened_file
-    mock_json_load.side_effect = json.decoder.JSONDecodeError("dummy_msg", "dummy_doc", 0)
-
-    mock_deserialized = MagicMock()
-    mock_create_default_json.return_value = mock_deserialized
-
-    data_management.BaseJSON.user_output = MagicMock()
-
-    # Run unit under test
-    base_json =  data_management.BaseJSON()
-
-    # Check expectations
-    mock_open.assert_called_once_with(base_json._path, "r")
-    mock_json_load.assert_called_once_with(fake_opened_file)
-
-    base_json.user_output.get_confirm.assert_called_once_with("[red]Error: invalid json format.[/]", 
-                                                              "Restore the original json file?")
-    mock_create_default_json.assert_called_once()
-
-    assert base_json.deserialized is mock_deserialized
-
-@patch.object(data_management.BaseJSON, "update", MagicMock())
 @patch("dem.core.data_management.open")
 @patch("dem.core.data_management.json.dump")
-def test_dev_env_json_write(mock_json_dump: MagicMock, mock_open: MagicMock):
+def test_BaseJSON_flush(mock_json_dump: MagicMock, mock_open: MagicMock) -> None:
     # Test setup
     mock_opened_file = MagicMock()
     mock_open.return_value = mock_opened_file
@@ -118,6 +92,22 @@ def test_dev_env_json_write(mock_json_dump: MagicMock, mock_open: MagicMock):
     mock_open.assert_called_once_with(base_json._path, "w")
     mock_json_dump.assert_called_once_with(fake_json_deserialized, mock_opened_file, indent=4)
     mock_opened_file.close.assert_called_once()
+
+@patch.object(data_management.BaseJSON, "_create_default_json")
+def test_BaseJSON_restore(mock_create_default_json: MagicMock) -> None:
+    # Test setup
+    mock_json_deserialized = MagicMock()
+    mock_create_default_json.return_value = mock_json_deserialized
+
+    test_base_json = data_management.BaseJSON()
+
+    # Run unit under test
+    test_base_json.restore()
+
+    # Check expectations
+    assert test_base_json.deserialized is mock_json_deserialized
+
+    mock_create_default_json.assert_called_once()
 
 @patch("dem.core.data_management.PurePath")
 @patch.object(data_management.BaseJSON, "__init__")
@@ -145,6 +135,32 @@ def test_LocalDevEnvJSON(mock___init__: MagicMock, mock_PurePath: MagicMock):
     mock_PurePath.assert_called_once_with(test_path + "/dev_env.json")
     mock___init__.assert_called_once()
 
+@patch.object(data_management.BaseJSON, "update")
+def test_LocalDevEnvJSON_update(mock_update: MagicMock) -> None:
+    # Test setup
+    test_local_dev_env_json = data_management.LocalDevEnvJSON()
+
+    # Run unit under test
+    test_local_dev_env_json.update()
+
+    # Check expectations
+    mock_update.assert_called_once()
+
+@patch.object(data_management.BaseJSON, "update")
+def test_LocalDevEnvJSON_update_JSONDecodeError(mock_update: MagicMock) -> None:
+    # Test setup
+    test_local_dev_env_json = data_management.LocalDevEnvJSON()
+    mock_update.side_effect = json.decoder.JSONDecodeError("test_msg", "test_doc", 0)
+
+    with pytest.raises(data_management.DataStorageError) as e:
+        # Run unit under test
+        test_local_dev_env_json.update()
+
+    # Check expectations
+    assert "Invalid file: The dev_env.json file is corrupted.\ntest_msg: line 1 column 1 (char 0)" == str(e.value)
+
+    mock_update.assert_called_once()
+
 @patch("dem.core.data_management.PurePath")
 def test_ConfigFile(mock_PurePath: MagicMock):
     # Test setup
@@ -157,11 +173,6 @@ def test_ConfigFile(mock_PurePath: MagicMock):
     mock_registries = MagicMock()
     mock_catalogs = MagicMock()
     mock_hosts = MagicMock()
-    def stub_update(self):
-        self.deserialized["registries"] = mock_registries
-        self.deserialized["catalogs"] = mock_catalogs
-        self.deserialized["hosts"] = mock_hosts
-    data_management.BaseJSON.update = stub_update
 
     # Run unit under test
     local_dev_env_json = data_management.ConfigFile()
@@ -180,11 +191,72 @@ def test_ConfigFile(mock_PurePath: MagicMock):
             "name": "axem",
             "url": "https://axemsolutions.io/dem/dev_env_org.json"
         }
-    ]
-    "hosts": []
+    ],
+    "hosts": [],
+    "http_request_timeout_s": 2
 }"""
-    assert local_dev_env_json.registries is mock_registries
-    assert local_dev_env_json.catalogs is mock_catalogs
-    assert local_dev_env_json.hosts is mock_hosts
 
     mock_PurePath.assert_called_once_with(test_path + "/config.json")
+
+@patch.object(data_management.BaseJSON, "update")
+def test_ConfigFile_update(mock_update: MagicMock) -> None:
+    # Test setup
+    test_config_file = data_management.ConfigFile()
+    test_registry = MagicMock()
+    test_catalog = MagicMock()
+    test_host = MagicMock()
+    test_http_request_timeout_s = 2
+    test_config_file.deserialized = {
+        "registries": [test_registry],
+        "catalogs": [test_catalog],
+        "hosts": [test_host],
+        "http_request_timeout_s": test_http_request_timeout_s
+    }
+
+    # Run unit under test
+    test_config_file.update()
+
+    # Check expectations
+    assert test_registry in test_config_file.registries
+    assert test_catalog in test_config_file.catalogs
+    assert test_host in test_config_file.hosts
+    assert test_config_file.http_request_timeout_s == test_http_request_timeout_s
+
+    mock_update.assert_called_once()
+
+@patch.object(data_management.BaseJSON, "update")
+def test_ConfigFile_update_missing_http_request_timeout_s(mock_update: MagicMock) -> None:
+    # Test setup
+    test_config_file = data_management.ConfigFile()
+    test_registry = MagicMock()
+    test_catalog = MagicMock()
+    test_host = MagicMock()
+    test_config_file.deserialized = {
+        "registries": [test_registry],
+        "catalogs": [test_catalog],
+        "hosts": [test_host],
+    }
+
+    with pytest.raises(data_management.DataStorageError) as e:
+        # Run unit under test
+        test_config_file.update()
+
+    # Check expectations
+    assert "Invalid file: The http_request_timeout_s is not set in the config.json file." == str(e.value)
+
+    mock_update.assert_called_once()
+
+@patch.object(data_management.BaseJSON, "update")
+def test_ConfigFile_update_JSONDecodeError(mock_update: MagicMock) -> None:
+    # Test setup
+    test_config_file = data_management.ConfigFile()
+    mock_update.side_effect = json.decoder.JSONDecodeError("test_msg", "test_doc", 0)
+
+    with pytest.raises(data_management.DataStorageError) as e:
+        # Run unit under test
+        test_config_file.update()
+
+    # Check expectations
+    assert "Invalid file: The config.json file is corrupted.\ntest_msg: line 1 column 1 (char 0)" == str(e.value)
+
+    mock_update.assert_called_once()

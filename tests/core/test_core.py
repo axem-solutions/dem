@@ -5,7 +5,7 @@
 import dem.core.core as core
 
 # Test framework
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 import pytest
 
 @pytest.fixture
@@ -13,7 +13,7 @@ def tear_down_test():
     yield
     core.Core.set_user_output(core.NoUserOutput())
 
-def test_Core(tear_down_test):
+def test_Core(tear_down_test) -> None:
     # Test setup
     mock_user_output = MagicMock()
     
@@ -22,6 +22,7 @@ def test_Core(tear_down_test):
 
     # Check expectations
     assert isinstance(test_core.user_output, core.NoUserOutput)
+    assert isinstance(test_core.config_file, core.ConfigFile)
 
     # Run unit under test
     core.Core.set_user_output(mock_user_output)

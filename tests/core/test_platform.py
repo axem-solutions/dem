@@ -8,12 +8,12 @@ import dem.core.platform as platform
 import pytest
 from unittest.mock import patch, MagicMock, call
 
-from dem.core.exceptions import InvalidDevEnvJson
+from dem.core.exceptions import DataStorageError
 from typing import Any
 
 @patch("dem.core.platform.DevEnv")
 @patch("dem.core.platform.LocalDevEnvJSON")
-def test_Platform_creation(mock_LocalDevEnvJSON: MagicMock, mock_DevEnv: MagicMock) -> None:
+def test_Platform_load_dev_envs(mock_LocalDevEnvJSON: MagicMock, mock_DevEnv: MagicMock) -> None:
     # Test setup
     mock_local_dev_env_json = MagicMock()
     mock_LocalDevEnvJSON.return_value = mock_local_dev_env_json
@@ -30,19 +30,21 @@ def test_Platform_creation(mock_LocalDevEnvJSON: MagicMock, mock_DevEnv: MagicMo
             test_dev_env_descriptor
         ]
     }
+    test_platform = platform.Platform()
 
     # Run unit under test
-    test_platform = platform.Platform()
+    test_platform.load_dev_envs()
 
     # Check expectations
     mock_LocalDevEnvJSON.assert_called_once()
+    mock_local_dev_env_json.update.assert_called_once()
     mock_DevEnv.assert_called_once_with(descriptor=test_dev_env_descriptor)
 
     assert test_platform.local_dev_envs[0] is mock_dev_env
     assert test_platform.version == mock_local_dev_env_json.deserialized["version"]
 
 @patch("dem.core.platform.LocalDevEnvJSON")
-def test_Platfrom_invalid_version_expect_error(mock_LocalDevEnvJSON: MagicMock) -> None:
+def test_Platfrom_load_dev_envs_invalid_version_expect_error(mock_LocalDevEnvJSON: MagicMock) -> None:
     # Test setup
     mock_local_dev_env_json = MagicMock()
     mock_LocalDevEnvJSON.return_value = mock_local_dev_env_json
@@ -52,12 +54,14 @@ def test_Platfrom_invalid_version_expect_error(mock_LocalDevEnvJSON: MagicMock) 
         "version": "0.0"
     }
 
+    test_platform = platform.Platform()
+
     # Run unit under test
-    with pytest.raises(InvalidDevEnvJson) as exported_exception_info:
-        platform.Platform()
+    with pytest.raises(DataStorageError) as exported_exception_info:
+        test_platform.load_dev_envs()
 
     # Check expectations
-    excepted_error_message = "Error in dev_env.json: The dev_env.json version v1.0 is not supported."
+    excepted_error_message = "Invalid file: The dev_env.json version v1.0 is not supported."
     assert str(exported_exception_info.value) == excepted_error_message
 
 @patch("dem.core.platform.ToolImages")
@@ -122,9 +126,7 @@ def test_Platform_registries(mock___init__: MagicMock, mock_Registries: MagicMoc
     test_platform._registries = None
 
     mock_container_engine = MagicMock()
-    mock_config_file = MagicMock()
     test_platform._container_engine = mock_container_engine
-    test_platform._config_file = mock_config_file
 
     mock_registries = MagicMock()
     mock_Registries.return_value = mock_registries
@@ -137,29 +139,7 @@ def test_Platform_registries(mock___init__: MagicMock, mock_Registries: MagicMoc
     assert test_platform._registries is mock_registries
 
     mock___init__.assert_called_once()
-    mock_Registries.assert_called_once_with(mock_container_engine, mock_config_file)
-
-@patch("dem.core.platform.ConfigFile")
-@patch.object(platform.Platform, "__init__")
-def test_Platform_config_file(mock___init__: MagicMock, mock_ConfigFile: MagicMock) -> None:
-    # Test setup
-    mock___init__.return_value = None
-
-    test_platform = platform.Platform()
-    test_platform._config_file = None
-
-    mock_config_file = MagicMock()
-    mock_ConfigFile.return_value = mock_config_file
-
-    # Run unit under test
-    actual_config_file = test_platform.config_file
-
-    # Check expectations
-    assert actual_config_file is mock_config_file
-    assert test_platform._config_file is mock_config_file
-
-    mock___init__.assert_called_once()
-    mock_ConfigFile.assert_called_once()
+    mock_Registries.assert_called_once_with(mock_container_engine)
 
 @patch("dem.core.platform.DevEnvCatalogs")
 @patch.object(platform.Platform, "__init__")
@@ -169,9 +149,6 @@ def test_Platform_dev_env_catalogs(mock___init__: MagicMock, mock_DevEnvCatalogs
 
     test_platform = platform.Platform()
     test_platform._dev_env_catalogs = None
-
-    mock_config_file = MagicMock()
-    test_platform._config_file = mock_config_file
 
     mock_dev_env_catalogs = MagicMock()
     mock_DevEnvCatalogs.return_value = mock_dev_env_catalogs
@@ -184,7 +161,7 @@ def test_Platform_dev_env_catalogs(mock___init__: MagicMock, mock_DevEnvCatalogs
     assert test_platform._dev_env_catalogs is mock_dev_env_catalogs
 
     mock___init__.assert_called_once()
-    mock_DevEnvCatalogs.assert_called_once_with(mock_config_file)
+    mock_DevEnvCatalogs.assert_called_once_with()
 
 @patch("dem.core.platform.Hosts")
 @patch.object(platform.Platform, "__init__")
@@ -194,9 +171,6 @@ def test_Platform_hosts(mock___init__: MagicMock, mock_Hosts: MagicMock) -> None
 
     test_platform = platform.Platform()
     test_platform._hosts = None
-
-    mock_config_file = MagicMock()
-    test_platform._config_file = mock_config_file
 
     mock_hosts = MagicMock()
     mock_Hosts.return_value = mock_hosts
@@ -209,7 +183,7 @@ def test_Platform_hosts(mock___init__: MagicMock, mock_Hosts: MagicMock) -> None
     assert test_platform._hosts is mock_hosts
 
     mock___init__.assert_called_once()
-    mock_Hosts.assert_called_once_with(mock_config_file)
+    mock_Hosts.assert_called_once_with()
 
 @patch.object(platform.Platform, "__init__")
 def test_Platform_get_deserialized(mock___init__: MagicMock) -> None:

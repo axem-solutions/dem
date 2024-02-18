@@ -2,6 +2,7 @@
 # dem/core/core.py
 
 from dem.core.user_output import UserOutput, NoUserOutput
+from dem.core.data_management import ConfigFile
 
 class Core():
     """ Base class for all core classes.
@@ -10,6 +11,7 @@ class Core():
             user_output -- interface to the UI (must be a descendant of the UserOutput class)
     """
     user_output: UserOutput = NoUserOutput()
+    config_file: ConfigFile = ConfigFile()
 
     """ Set the user output class for all core descendant core classes.
     

@@ -1,11 +1,10 @@
 """This module represents a Development Environment."""
 # dem/core/dev_env.py
 
-from dem.core.core import Core
 from dem.core.tool_images import ToolImages
 import json, os
 
-class DevEnv(Core):
+class DevEnv():
     """ A Development Environment.
         
         Class variables:
