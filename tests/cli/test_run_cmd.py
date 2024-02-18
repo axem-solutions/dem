@@ -30,10 +30,10 @@ def test_handle_invalid_dev_env(mock_stderr_print: MagicMock):
         # execute() gets tested directly to see if the exception is raised
         run_cmd.execute(mock_platform, test_dev_env_name, [])
 
-        # Check expectations
-        mock_stderr_print.assert_called_once_with("[red]Error: Unknown Development Environment: " + test_dev_env_name + "[/]")
+    # Check expectations
+    mock_stderr_print.assert_called_once_with("[red]Error: Unknown Development Environment: " + test_dev_env_name + "[/]")
 
-        mock_platform.get_dev_env_by_name.assert_called_once_with(test_dev_env_name)
+    mock_platform.get_dev_env_by_name.assert_called_once_with(test_dev_env_name)
 
 
 @patch("dem.cli.command.run_cmd.typer.confirm")

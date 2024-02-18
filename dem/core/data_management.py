@@ -1,13 +1,14 @@
 """json file handling."""
 # dem/core/data_management.py
 
-from dem.core.core import Core
+from typing import Any
 from dem.core.properties import __config_dir_path__
+from dem.core.exceptions import DataStorageError
 from pathlib import PurePath
 import os
 import json
 
-class BaseJSON(Core):
+class BaseJSON():
     """ This class acts as an abstracted buffer over a json file. 
     
         If the buffer is not up-to-date it can be updated with update() which is a read from the 
@@ -41,8 +42,7 @@ class BaseJSON(Core):
         """ Init the class with an empty dict for the deserialized dev_env.json file. 
             Later this variable can be used to access the deserialized data. 
         """
-        self.deserialized = {}
-        self.update()
+        self.deserialized: dict[str, Any] = {}
 
     def update(self) -> None:
         """ Update the buffer with the content from the json file."""
@@ -51,20 +51,18 @@ class BaseJSON(Core):
         except FileNotFoundError:
             self.deserialized = self._create_default_json()
         else:
-            try:
-                self.deserialized = json.load(json_file)
-            except json.decoder.JSONDecodeError:
-                self.user_output.get_confirm("[red]Error: invalid json format.[/]", 
-                                             "Restore the original json file?")
-                self.deserialized = self._create_default_json()
-            else:
-                json_file.close()
+            self.deserialized = json.load(json_file)
+            json_file.close()
 
     def flush(self) -> None:
         """ Write the buffer content to the json file."""
         json_file = open(self._path, "w")
         json.dump(self.deserialized, json_file, indent=4)
         json_file.close()
+
+    def restore(self) -> None:
+        """ Restore the json file to its default content."""
+        self.deserialized = self._create_default_json()
 
 class LocalDevEnvJSON(BaseJSON):
     """ Serialize and deserialize the dev_env.json file."""
@@ -79,6 +77,12 @@ class LocalDevEnvJSON(BaseJSON):
 }
 """
         super().__init__()
+
+    def update(self) -> None:
+        try:
+            super().update()
+        except json.decoder.JSONDecodeError as e:
+            raise DataStorageError(f"The dev_env.json file is corrupted.\n{str(e)}") from e
 
 class ConfigFile(BaseJSON):
     """ Serialize and deserialize the config.json file."""
@@ -97,11 +101,22 @@ class ConfigFile(BaseJSON):
             "name": "axem",
             "url": "https://axemsolutions.io/dem/dev_env_org.json"
         }
-    ]
-    "hosts": []
+    ],
+    "hosts": [],
+    "http_request_timeout_s": 2
 }"""
         super().__init__()
+
+    def update(self) -> None:
+        try:
+            super().update()
+        except json.decoder.JSONDecodeError as e:
+            raise DataStorageError(f"The config.json file is corrupted.\n{str(e)}") from e
 
         self.registries: list[dict] = self.deserialized.get("registries", [])
         self.catalogs: list[dict] = self.deserialized.get("catalogs", [])
         self.hosts: list[dict] = self.deserialized.get("hosts", [])
+        self.http_request_timeout_s: float = self.deserialized.get("http_request_timeout_s", None)
+        
+        if self.http_request_timeout_s is None:
+            raise DataStorageError("The http_request_timeout_s is not set in the config.json file.")

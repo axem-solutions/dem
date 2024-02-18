@@ -18,15 +18,14 @@ class Host():
 
 class Hosts(Core):
     """ List of the available Hosts. """
-    def __init__(self, config_file: ConfigFile) -> None:
+    def __init__(self) -> None:
         """ Init the class with the host configurations.
 
             Args:
                 config_file -- contains the host configurations
             """
-        self._config_file: ConfigFile = config_file
         self.hosts: list[Host] = []
-        for host_config in config_file.hosts:
+        for host_config in self.config_file.hosts:
             self._try_to_add_host(host_config)
 
     def _try_to_add_host(self, host_config: dict) -> bool:
@@ -46,15 +45,15 @@ class Hosts(Core):
                 catalog_config -- the new catalog to add
         """
         if self._try_to_add_host(host_config):
-            self._config_file.hosts.append(host_config)
-            self._config_file.flush()
+            self.config_file.hosts.append(host_config)
+            self.config_file.flush()
 
     def list_host_configs(self) -> list[dict]:
         """ List the host configs. (As stored in the config file.)
         
             Return with the list of the available host configurations.
         """
-        return self._config_file.hosts
+        return self.config_file.hosts
 
     def delete_host(self, host_config: dict) -> None:
         """ Delete the host.
@@ -66,5 +65,5 @@ class Hosts(Core):
             if host.config == host_config:
                 self.hosts.remove(host)
 
-        self._config_file.hosts.remove(host_config)
-        self._config_file.flush()
+        self.config_file.hosts.remove(host_config)
+        self.config_file.flush()

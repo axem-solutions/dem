@@ -24,11 +24,12 @@ class HelperRegistry(registry.Registry):
     def _list_repos_in_registry(self) -> Generator:
         return super()._list_repos_in_registry()
 
+@patch.object(registry.Core, "config_file")
 @patch.object(registry.Registry, "_append_repo_with_tag")
 @patch.object(registry.Registry, "_get_tag_endpoint_url")
 @patch("dem.core.registry.requests.get")
 def test_Registry__list_tags(mock_requests_get: MagicMock, mock__get_tag_endpoint_url: MagicMock,
-                             mock__append_repo_with_tag: MagicMock):
+                             mock__append_repo_with_tag: MagicMock, mock_config_file: MagicMock) -> None:
     # Test setup
     mock_container_engine = MagicMock()
     test_registry_config = {}
@@ -42,6 +43,9 @@ def test_Registry__list_tags(mock_requests_get: MagicMock, mock__get_tag_endpoin
     test_tag_endpoint_url = "test_tag_endpoint_url"
     mock__get_tag_endpoint_url.return_value = test_tag_endpoint_url
 
+    test_http_request_timeout_s = 10
+    mock_config_file.http_request_timeout_s = test_http_request_timeout_s
+
     test_registry = HelperRegistry(mock_container_engine, test_registry_config)
 
     # Run unit under test
@@ -49,16 +53,17 @@ def test_Registry__list_tags(mock_requests_get: MagicMock, mock__get_tag_endpoin
 
     # Check expectations
     mock__get_tag_endpoint_url.assert_called_once_with(test_repo)
-    mock_requests_get.assert_called_once_with(test_tag_endpoint_url, timeout=10)
+    mock_requests_get.assert_called_once_with(test_tag_endpoint_url, timeout=test_http_request_timeout_s)
     mock_response.json.assert_called_once()
     mock__append_repo_with_tag.assert_called_once_with(test_endpoint_response, test_repo)
 
+@patch.object(registry.Core, "config_file")
 @patch.object(registry.Core, "user_output")
 @patch.object(registry.Registry, "_get_tag_endpoint_url")
 @patch("dem.core.registry.requests.get")
 def test_Registry__list_tags_MissingSchema(mock_requests_get: MagicMock, 
                                            mock__get_tag_endpoint_url: MagicMock,
-                                           mock_user_output: MagicMock):
+                                           mock_user_output: MagicMock, mock_config_file: MagicMock) -> None:
     # Test setup
     mock_container_engine = MagicMock()
     test_registry_config = {}
@@ -69,6 +74,9 @@ def test_Registry__list_tags_MissingSchema(mock_requests_get: MagicMock,
     test_tag_endpoint_url = "test_tag_endpoint_url"
     mock__get_tag_endpoint_url.return_value = test_tag_endpoint_url
 
+    test_http_request_timeout_s = 10
+    mock_config_file.http_request_timeout_s = test_http_request_timeout_s
+
     test_registry = HelperRegistry(mock_container_engine, test_registry_config)
 
     # Run unit under test
@@ -76,16 +84,18 @@ def test_Registry__list_tags_MissingSchema(mock_requests_get: MagicMock,
 
     # Check expectations
     mock__get_tag_endpoint_url.assert_called_once_with(test_repo)
-    mock_requests_get.assert_called_once_with(test_tag_endpoint_url, timeout=10)
+    mock_requests_get.assert_called_once_with(test_tag_endpoint_url, timeout=test_http_request_timeout_s)
     mock_user_output.error.assert_called_once_with(test_exception_text)
     mock_user_output.msg.assert_called_once_with("Skipping repository: " + test_repo)
 
+@patch.object(registry.Core, "config_file")
 @patch.object(registry.Core, "user_output")
 @patch.object(registry.Registry, "_get_tag_endpoint_url")
 @patch("dem.core.registry.requests.get")
 def test_Registry__list_tags_invalid_status(mock_requests_get: MagicMock, 
                                             mock__get_tag_endpoint_url: MagicMock,
-                                            mock_user_output: MagicMock):
+                                            mock_user_output: MagicMock, 
+                                            mock_config_file: MagicMock) -> None:
     # Test setup
     mock_container_engine = MagicMock()
     test_registry_config = {}
@@ -97,6 +107,9 @@ def test_Registry__list_tags_invalid_status(mock_requests_get: MagicMock,
     test_tag_endpoint_url = "test_tag_endpoint_url"
     mock__get_tag_endpoint_url.return_value = test_tag_endpoint_url
 
+    test_http_request_timeout_s = 10
+    mock_config_file.http_request_timeout_s = test_http_request_timeout_s
+
     test_registry = HelperRegistry(mock_container_engine, test_registry_config)
 
     # Run unit under test
@@ -104,7 +117,7 @@ def test_Registry__list_tags_invalid_status(mock_requests_get: MagicMock,
 
     # Check expectations
     mock__get_tag_endpoint_url.assert_called_once_with(test_repo)
-    mock_requests_get.assert_called_once_with(test_tag_endpoint_url, timeout=10)
+    mock_requests_get.assert_called_once_with(test_tag_endpoint_url, timeout=test_http_request_timeout_s)
     mock_user_output.error.assert_called_once_with("Error in communication with the registry. Failed to retrieve tags. Response status code: " + str(mock_response.status_code))
     mock_user_output.msg.assert_called_once_with("Skipping repository: " + test_repo)
 
@@ -277,8 +290,9 @@ def test_DockerRegistry__list_repos_in_registry(mock__search: MagicMock, mock__l
     mock__search.assert_called_once()
     mock__list_tags.assert_has_calls(calls)
 
+@patch.object(registry.Core, "config_file")
 @patch("dem.core.registry.requests.get")
-def test_DockerRegistry__search(mock_requests_get: MagicMock):
+def test_DockerRegistry__search(mock_requests_get: MagicMock, mock_config_file) -> None:
     # Test setup
     mock_container_engine = MagicMock()
     test_registry_config = {
@@ -296,6 +310,9 @@ def test_DockerRegistry__search(mock_requests_get: MagicMock):
     mock_response.json.return_value = test_response
     mock_requests_get.return_value = mock_response
 
+    test_http_request_timeout_s = 10
+    mock_config_file.http_request_timeout_s = test_http_request_timeout_s
+
     test_docker_registry = registry.DockerRegistry(mock_container_engine, test_registry_config)
 
     # Run unit under test
@@ -304,12 +321,16 @@ def test_DockerRegistry__search(mock_requests_get: MagicMock):
     # Check expectations
     assert actual_repo_names is test_response["repositories"]
 
-    mock_requests_get.assert_called_once_with(test_registry_config["url"] + "/v2/_catalog", timeout=10)
+    mock_requests_get.assert_called_once_with(test_registry_config["url"] + "/v2/_catalog", 
+                                              timeout=test_http_request_timeout_s)
     mock_response.json.assert_called_once()
 
+@patch.object(registry.Core, "config_file")
 @patch.object(registry.DockerRegistry, "user_output")
 @patch("dem.core.registry.requests.get")
-def test_DockerRegistry__search_requests_get_exception(mock_requests_get: MagicMock, mock_user_output: MagicMock):
+def test_DockerRegistry__search_requests_get_exception(mock_requests_get: MagicMock, 
+                                                       mock_user_output: MagicMock,
+                                                       mock_config_file: MagicMock) -> None:
     # Test setup
     mock_container_engine = MagicMock()
     test_registry_config = {
@@ -319,6 +340,9 @@ def test_DockerRegistry__search_requests_get_exception(mock_requests_get: MagicM
 
     mock_requests_get.side_effect = Exception("test")
 
+    test_http_request_timeout_s = 10
+    mock_config_file.http_request_timeout_s = test_http_request_timeout_s
+
     test_docker_registry = registry.DockerRegistry(mock_container_engine, test_registry_config)
 
     # Run unit under test
@@ -327,13 +351,17 @@ def test_DockerRegistry__search_requests_get_exception(mock_requests_get: MagicM
     # Check expectations
     assert actual_repo_names == []
 
-    mock_requests_get.assert_called_once_with(test_registry_config["url"] + "/v2/_catalog", timeout=10)
+    mock_requests_get.assert_called_once_with(test_registry_config["url"] + "/v2/_catalog", 
+                                              timeout=test_http_request_timeout_s)
     mock_user_output.error(str(mock_requests_get.side_effect))
     mock_user_output.msg("Skipping registry: " + test_registry_config["name"])
 
+@patch.object(registry.Core, "config_file")
 @patch.object(registry.DockerRegistry, "user_output")
 @patch("dem.core.registry.requests.get")
-def test_DockerRegistry__search_invalid_status_code(mock_requests_get: MagicMock, mock_user_output: MagicMock):
+def test_DockerRegistry__search_invalid_status_code(mock_requests_get: MagicMock, 
+                                                    mock_user_output: MagicMock,
+                                                    mock_config_file: MagicMock) -> None:
     # Test setup
     mock_container_engine = MagicMock()
     test_registry_config = {
@@ -345,6 +373,9 @@ def test_DockerRegistry__search_invalid_status_code(mock_requests_get: MagicMock
     mock_response.status_code = 0
     mock_requests_get.return_value = mock_response
 
+    test_http_request_timeout_s = 10
+    mock_config_file.http_request_timeout_s = test_http_request_timeout_s
+
     test_docker_registry = registry.DockerRegistry(mock_container_engine, test_registry_config)
 
     # Run unit under test
@@ -353,14 +384,17 @@ def test_DockerRegistry__search_invalid_status_code(mock_requests_get: MagicMock
     # Check expectations
     assert actual_repo_names == []
 
-    mock_requests_get.assert_called_once_with(test_registry_config["url"] + "/v2/_catalog", timeout=10)
+    mock_requests_get.assert_called_once_with(test_registry_config["url"] + "/v2/_catalog", 
+                                              timeout=test_http_request_timeout_s)
     mock_user_output.error("Error in communication with the registry. Failed to retrieve the repositories. Response status code: " + str(mock_response.status_code))
     mock_user_output.msg("Skipping registry: " + test_registry_config["name"])
 
+@patch.object(registry.Core, "config_file")
 @patch.object(registry.DockerRegistry, "user_output")
 @patch("dem.core.registry.requests.get")
 def test_DockerRegistry__search_json_decode_exception(mock_requests_get: MagicMock, 
-                                                      mock_user_output: MagicMock):
+                                                      mock_user_output: MagicMock,
+                                                      mock_config_file: MagicMock) -> None:
     # Test setup
     mock_container_engine = MagicMock()
     test_registry_config = {
@@ -373,6 +407,9 @@ def test_DockerRegistry__search_json_decode_exception(mock_requests_get: MagicMo
     mock_response.json.side_effect = requests.exceptions.JSONDecodeError("dummy_msg", "dummy_doc", 0)
     mock_requests_get.return_value = mock_response
 
+    test_http_request_timeout_s = 10
+    mock_config_file.http_request_timeout_s = test_http_request_timeout_s
+
     test_docker_registry = registry.DockerRegistry(mock_container_engine, test_registry_config)
 
     # Run unit under test
@@ -381,15 +418,18 @@ def test_DockerRegistry__search_json_decode_exception(mock_requests_get: MagicMo
     # Check expectations
     assert actual_repo_names == []
 
-    mock_requests_get.assert_called_once_with(test_registry_config["url"] + "/v2/_catalog", timeout=10)
+    mock_requests_get.assert_called_once_with(test_registry_config["url"] + "/v2/_catalog", 
+                                              timeout=test_http_request_timeout_s)
     mock_response.json.assert_called_once()
     mock_user_output.error("Invalid JSON format in response. " + str(mock_response.json.side_effect))
     mock_user_output.msg("Skipping registry: " + test_registry_config["name"])
 
+@patch.object(registry.Core, "config_file")
 @patch.object(registry.DockerRegistry, "user_output")
 @patch("dem.core.registry.requests.get")
 def test_DockerRegistry__search_json_generic_exception(mock_requests_get: MagicMock, 
-                                                       mock_user_output: MagicMock):
+                                                       mock_user_output: MagicMock,
+                                                       mock_config_file: MagicMock) -> None:
     # Test setup
     mock_container_engine = MagicMock()
     test_registry_config = {
@@ -402,6 +442,9 @@ def test_DockerRegistry__search_json_generic_exception(mock_requests_get: MagicM
     mock_response.json.side_effect = Exception("test")
     mock_requests_get.return_value = mock_response
 
+    test_http_request_timeout_s = 10
+    mock_config_file.http_request_timeout_s = test_http_request_timeout_s
+
     test_docker_registry = registry.DockerRegistry(mock_container_engine, test_registry_config)
     
     # Run unit under test
@@ -410,17 +453,19 @@ def test_DockerRegistry__search_json_generic_exception(mock_requests_get: MagicM
     # Check expectations
     assert actual_repo_names == []
 
-    mock_requests_get.assert_called_once_with(test_registry_config["url"] + "/v2/_catalog", timeout=10)
+    mock_requests_get.assert_called_once_with(test_registry_config["url"] + "/v2/_catalog", 
+                                              timeout=test_http_request_timeout_s)
     mock_response.json.assert_called_once()
     mock_user_output.error(str(mock_response.json.side_effect))
     mock_user_output.msg("Skipping registry: " + test_registry_config["name"])
 
+@patch.object(registry.Core, "config_file")
 @patch("dem.core.registry.DockerRegistry")
 @patch("dem.core.registry.DockerHub")
-def test_Registries(mock_DockerHub: MagicMock, mock_DockerRegistry: MagicMock):
+def test_Registries(mock_DockerHub: MagicMock, mock_DockerRegistry: MagicMock, 
+                    mock_config_file: MagicMock) -> None:
     # Test setup
     mock_container_engine = MagicMock()
-    mock_config_file = MagicMock()
     mock_config_file.registries = [
         {
             "name": "registry_config1",
@@ -439,10 +484,9 @@ def test_Registries(mock_DockerHub: MagicMock, mock_DockerRegistry: MagicMock):
     mock_DockerRegistry.return_value = mock_docker_registry
 
     # Run unit under test
-    test_registries = registry.Registries(mock_container_engine, mock_config_file)
+    test_registries = registry.Registries(mock_container_engine)
 
     # Check expectations
-    assert test_registries._config_file is mock_config_file
     assert test_registries._container_engine is mock_container_engine
     assert mock_docker_hub in test_registries.registries
     assert mock_docker_registry in test_registries.registries
@@ -450,12 +494,13 @@ def test_Registries(mock_DockerHub: MagicMock, mock_DockerRegistry: MagicMock):
     mock_DockerHub.assert_called_once_with(mock_container_engine, mock_config_file.registries[0])
     mock_DockerRegistry.assert_called_once_with(mock_container_engine, mock_config_file.registries[1])
 
+@patch.object(registry.Core, "config_file")
 @patch("dem.core.registry.DockerRegistry")
 @patch("dem.core.registry.DockerHub")
-def test_Registries_list_repos(mock_DockerHub: MagicMock, mock_DockerRegistry: MagicMock):
+def test_Registries_list_repos(mock_DockerHub: MagicMock, mock_DockerRegistry: MagicMock,
+                               mock_config_file: MagicMock) -> None:
     # Test setup
     mock_container_engine = MagicMock()
-    mock_config_file = MagicMock()
     mock_config_file.registries = [
         {
             "name": "registry_config1",
@@ -480,7 +525,7 @@ def test_Registries_list_repos(mock_DockerHub: MagicMock, mock_DockerRegistry: M
     mock_DockerHub._docker_hub_domain = "registry.hub.docker.com"
     mock_DockerRegistry.return_value = mock_docker_registry
 
-    test_registries = registry.Registries(mock_container_engine, mock_config_file)
+    test_registries = registry.Registries(mock_container_engine)
 
     # Run unit under test
     actual_repos = test_registries.list_repos()
@@ -498,17 +543,26 @@ def test_Registries_list_repos_handle_exception(mock___init__: MagicMock,
 
     test_exception_text = "test_exception_test"
     test_registry_name = "test_registry_name"
-    class StubRegistry():
+    class StubRegistry(registry.Registry):
         def __init__(self) -> None:
             self._registry_config = {
                 "name": test_registry_name
             }
 
+        def _append_repo_with_tag(self, endpoint_response: dict, repo: str) -> None:
+            pass
+
+        def _get_tag_endpoint_url(self, repo_name: str) -> str:
+            return "test"
+
+        def _list_repos_in_registry(self) -> Generator:
+            yield "test"
+
         @property
         def repos(self) -> list[str]:
             raise(Exception(test_exception_text))
 
-    test_registries = registry.Registries(MagicMock(), MagicMock())
+    test_registries = registry.Registries(MagicMock())
     test_registries.registries = [StubRegistry()]
 
     # Run unit under test
@@ -523,11 +577,12 @@ def test_Registries_list_repos_handle_exception(mock___init__: MagicMock,
     ]
     mock_user_output.error.assert_has_calls(calls)
 
+@patch.object(registry.Core, "config_file")
 @patch.object(registry.Registries, "_add_registry_instance")
-def test_Registries_add_registry(mock__add_registry_instance: MagicMock):
+def test_Registries_add_registry(mock__add_registry_instance: MagicMock, 
+                                 mock_config_file: MagicMock) -> None:
     # Test setup
     mock_container_engine = MagicMock()
-    mock_config_file = MagicMock()
     mock_config_file.registries = []
 
     registry_to_add = {
@@ -535,7 +590,7 @@ def test_Registries_add_registry(mock__add_registry_instance: MagicMock):
         "url": "https://registry.hub.docker.com/v2/"
     }
 
-    test_registries = registry.Registries(mock_container_engine, mock_config_file)
+    test_registries = registry.Registries(mock_container_engine)
 
     # Run unit under test
     test_registries.add_registry(registry_to_add)
@@ -546,16 +601,16 @@ def test_Registries_add_registry(mock__add_registry_instance: MagicMock):
     mock__add_registry_instance.assert_called_once_with(registry_to_add)
     mock_config_file.flush.assert_called_once()
 
-def test_list_registries():
+@patch.object(registry.Core, "config_file")
+def test_list_registries(mock_config_file: MagicMock) -> None:
     # Test setup
     mock_container_engine = MagicMock()
-    mock_config_file = MagicMock()
     mock_config_file.registries = [{
         "name": "test_registry_name",
         "url": "https://registry.hub.docker.com/v2/"
     }]
 
-    test_registries = registry.Registries(mock_container_engine, mock_config_file)
+    test_registries = registry.Registries(mock_container_engine)
 
     # Run unit under test
     actual_registry_list = test_registries.list_registry_configs()
@@ -563,16 +618,16 @@ def test_list_registries():
     # Check expectations
     assert actual_registry_list is mock_config_file.registries
 
-def test_delete_registry():
+@patch.object(registry.Core, "config_file")
+def test_delete_registry(mock_config_file: MagicMock) -> None:
     # Test setup
     mock_container_engine = MagicMock()
-    mock_config_file = MagicMock()
     mock_config_file.registries = [{
         "name": "test_registry_name",
         "url": "https://registry.hub.docker.com/v2/"
     }]
 
-    test_registries = registry.Registries(mock_container_engine, mock_config_file)
+    test_registries = registry.Registries(mock_container_engine)
 
     # Run unit under test
     test_registries.delete_registry(mock_config_file.registries[0])
