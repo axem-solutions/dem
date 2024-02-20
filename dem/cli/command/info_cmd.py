@@ -30,6 +30,7 @@ def execute(platform: Platform, arg_dev_env_name: str) -> None:
 
     if dev_env is None:
         for catalog in platform.dev_env_catalogs.catalogs:
+            catalog.request_dev_envs()
             dev_env = catalog.get_dev_env_by_name(arg_dev_env_name)
             if dev_env is not None:
                 dev_env.check_image_availability(platform.tool_images)

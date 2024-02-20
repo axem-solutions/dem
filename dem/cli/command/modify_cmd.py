@@ -205,8 +205,8 @@ def execute(platform: Platform, dev_env_name: str, tool_type: str, tool_image: s
         stderr.print("[red]The Development Environment doesn't exist.")
         return
     elif dev_env.is_installed is True:
-        stdout.print("[yellow]The Development Environment is installed. It can't be modified.[/]")
-        typer.confirm("Do you want to uninstall it?", abort=True)
+        stdout.print("[yellow]The Development Environment is installed, so it can't be modified.[/]")
+        typer.confirm("Do you want to uninstall it first?", abort=True)
         platform.uninstall_dev_env(dev_env)
 
     if (tool_type or tool_image):

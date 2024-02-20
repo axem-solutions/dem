@@ -35,6 +35,7 @@ def execute(platform: Platform, dev_env_name: str) -> None:
         return
 
     for catalog in platform.dev_env_catalogs.catalogs:
+        catalog.request_dev_envs()
         catalog_dev_env = catalog.get_dev_env_by_name(dev_env_name)
         if catalog_dev_env:
             break

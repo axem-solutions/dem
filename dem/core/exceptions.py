@@ -32,3 +32,11 @@ class PlatformError(Exception):
 
     def __init__(self, message: str) -> None:
         super().__init__(self.base_message + message)
+
+class CatalogError(Exception):
+    """Raised when there is a problem with the catalog."""
+
+    base_message = "Catalog error: "
+
+    def __init__(self, message: str) -> None:
+        super().__init__(self.base_message + message)
