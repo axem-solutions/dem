@@ -40,13 +40,13 @@ def test_autocomplete_dev_env_name():
 def test_autocomplete_cat_name():
     # Test setup
     mock_platform = MagicMock()
-    fake_catalog_config = {
-        "name": "test"
-    }
-    mock_platform.dev_env_catalogs.list_catalog_configs.return_value = [fake_catalog_config]
+    mock_catalog = MagicMock()
+    mock_catalog.name = "test"
+    mock_platform.dev_env_catalogs.catalogs = [mock_catalog]
+
     main.platform = mock_platform
 
-    expected_completions = [fake_catalog_config["name"]]
+    expected_completions: list[str] = [mock_catalog.name]
 
     # Run unit under test
     actual_completions = []
@@ -55,8 +55,6 @@ def test_autocomplete_cat_name():
 
     # Check expectations
     assert expected_completions == actual_completions
-
-    mock_platform.dev_env_catalogs.list_catalog_configs.assert_called_once()
 
 def test_autocomplete_reg_name():
     # Test setup
@@ -79,13 +77,13 @@ def test_autocomplete_reg_name():
     
     mock_platform.registries.list_registry_configs.assert_called_once()
 
-def test_autocomplete_host_name():
+def test_autocomplete_host_name() -> None:
     # Test setup
     mock_platform = MagicMock()
     fake_host_config = {
         "name": "test"
     }
-    mock_platform.hosts.list_configs.return_value = [fake_host_config]
+    mock_platform.hosts.list_host_configs.return_value = [fake_host_config]
     main.platform = mock_platform
 
     expected_completions = [fake_host_config["name"]]
@@ -98,7 +96,7 @@ def test_autocomplete_host_name():
     # Check expectations
     assert expected_completions == actual_completions
 
-    mock_platform.hosts.list_configs.assert_called_once()
+    mock_platform.hosts.list_host_configs.assert_called_once()
 
 @patch("dem.cli.main.__app_name__", "axem-dem")
 @patch("dem.cli.main.stdout.print")

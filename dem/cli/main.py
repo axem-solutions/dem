@@ -28,9 +28,10 @@ def autocomplete_dev_env_name(incomplete: str) -> Generator:
     Args:
         incomplete -- the parameter the user supplied so far when the tab was pressed
     """
-    for dev_env in platform.local_dev_envs:
-        if dev_env.name.startswith(incomplete) or (incomplete == ""):
-            yield dev_env.name
+    if platform is not None:
+        for dev_env in platform.local_dev_envs:
+            if dev_env.name.startswith(incomplete) or (incomplete == ""):
+                yield dev_env.name
 
 def autocomplete_cat_name(incomplete: str) -> Generator:
     """ 
@@ -41,9 +42,10 @@ def autocomplete_cat_name(incomplete: str) -> Generator:
     Args:
         incomplete -- the parameter the user supplied so far when the tab was pressed
     """
-    for catalog_config in platform.dev_env_catalogs.list_catalog_configs():
-        if catalog_config["name"].startswith(incomplete) or (incomplete == ""):
-            yield catalog_config["name"]
+    if platform is not None:
+        for catalog in platform.dev_env_catalogs.catalogs:
+            if catalog.name.startswith(incomplete) or (incomplete == ""):
+                yield catalog.name
 
 def autocomplete_reg_name(incomplete: str) -> Generator:
     """ 
@@ -54,9 +56,10 @@ def autocomplete_reg_name(incomplete: str) -> Generator:
     Args:
         incomplete -- the parameter the user supplied so far when the tab was pressed
     """
-    for registry_config in platform.registries.list_registry_configs():
-        if registry_config["name"].startswith(incomplete) or (incomplete == ""):
-            yield registry_config["name"]
+    if platform is not None:
+        for registry_config in platform.registries.list_registry_configs():
+            if registry_config["name"].startswith(incomplete) or (incomplete == ""):
+                yield registry_config["name"]
 
 def autocomplete_host_name(incomplete: str) -> Generator:
     """ 
@@ -67,9 +70,10 @@ def autocomplete_host_name(incomplete: str) -> Generator:
     Args:
         incomplete -- the parameter the user supplied so far when the tab was pressed
     """
-    for host_config in platform.hosts.list_configs():
-        if host_config["name"].startswith(incomplete) or (incomplete == ""):
-            yield host_config["name"]
+    if platform is not None:
+        for host_config in platform.hosts.list_host_configs():
+            if host_config["name"].startswith(incomplete) or (incomplete == ""):
+                yield host_config["name"]
 
 # DEM commands
 @typer_cli.command("list") # "list" is a Python keyword

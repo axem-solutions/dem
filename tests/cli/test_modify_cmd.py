@@ -296,8 +296,8 @@ def test_execute_single_tool_dev_env_installed(mock_stdout_print: MagicMock, moc
 
     # Check expectations
     mock_platform.get_dev_env_by_name.assert_called_once_with(test_dev_env_name)
-    mock_stdout_print.assert_called_once_with("[yellow]The Development Environment is installed. It can't be modified.[/]")
-    mock_confirm.assert_called_once_with("Do you want to uninstall it?", abort=True)
+    mock_stdout_print.assert_called_once_with("[yellow]The Development Environment is installed, so it can't be modified.[/]")
+    mock_confirm.assert_called_once_with("Do you want to uninstall it first?", abort=True)
     mock_platform.uninstall_dev_env.assert_called_once_with(mock_dev_env)
     mock_modify_single_tool.assert_called_once_with(mock_platform, mock_dev_env, test_tool_type, 
                                                     test_tool_image)

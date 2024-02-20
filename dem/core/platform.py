@@ -40,7 +40,7 @@ class Platform(Core):
 
     def __init__(self) -> None:
         """ Init the class."""
-        self._dev_env_catalogs = None
+        self._dev_env_catalogs: DevEnvCatalogs | None = None
         self._tool_images = None
         self._container_engine = None
         self._registries = None

@@ -74,6 +74,7 @@ def list_dev_envs(platform: Platform, local: bool, org: bool)-> None:
             stdout.print("[yellow]No Development Environment Catalogs are available!")
             return
         for catalog in platform.dev_env_catalogs.catalogs:
+            catalog.request_dev_envs()
             if not catalog.dev_envs:
                 stdout.print("[yellow]No Development Environments are available in the catalogs.[/]")
                 return
