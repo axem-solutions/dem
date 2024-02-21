@@ -1,5 +1,5 @@
 """Tests for the clone CLI command."""
-# tests/cli/test_pull_cmd.py
+# tests/cli/test_clone_cmd.py
 
 # Unit under test:
 import dem.cli.main as main

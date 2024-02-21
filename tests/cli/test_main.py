@@ -165,7 +165,6 @@ def test_platform_not_initialized() -> None:
     units_to_test = {
         main.list_: [],
         main.info: [test_dev_env_name],
-        main.pull: [test_dev_env_name],
         main.cp: [test_dev_env_name, test_dev_env_name],
         main.create: [test_dev_env_name],
         main.export: [test_dev_env_name],
