@@ -6,7 +6,7 @@ from typing import Generator
 from typing_extensions import Annotated
 import os
 from dem import __command__, __app_name__
-from dem.cli.command import cp_cmd, info_cmd, list_cmd, pull_cmd, create_cmd, modify_cmd, delete_cmd, \
+from dem.cli.command import cp_cmd, info_cmd, list_cmd, create_cmd, modify_cmd, delete_cmd, \
                             rename_cmd, run_cmd, export_cmd, load_cmd, clone_cmd, add_reg_cmd, \
                             list_reg_cmd, del_reg_cmd, add_cat_cmd, list_cat_cmd, del_cat_cmd, \
                             add_host_cmd, uninstall_cmd, install_cmd, assign_cmd, init_cmd, \
@@ -109,17 +109,6 @@ def info(dev_env_name: Annotated[str, typer.Argument(help="Name of the Developme
     """
     if platform:
         info_cmd.execute(platform, dev_env_name)
-    else:
-        raise InternalError("Error: The platform hasn't been initialized properly!")
-
-@typer_cli.command()
-def pull(dev_env_name: Annotated[str, typer.Argument(help="Name of the Development Environment to install.")]) -> None:
-    """
-    Pull all the required tool images from the registry and install the Development Environment
-    locally.
-    """
-    if platform:
-        pull_cmd.execute(platform, dev_env_name)
     else:
         raise InternalError("Error: The platform hasn't been initialized properly!")
 

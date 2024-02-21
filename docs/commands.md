@@ -36,22 +36,6 @@ Arguments:
 
 ---
 
-## **`dem pull DEV_ENV_NAME`**
-
-Pull all the required containerized tools (which are not yet available on the host PC) from the
-registry and install the Development Environment locally.
-
-    If a Development Environment with the same name, but a different description has been already
-    available on the host PC, it gets overwritten with the new one.
-    If the same Development Environment is already installed, but the installation is not complete,
-    the missing tool images are obtained from the registry.
-
-Arguments:
-
-`DEV_ENV_NAME` Name of the Development Environment to install. [required]
-
----
-
 ## **`dem create DEV_ENV_NAME`**
 
 Create a new Development Environment.
@@ -77,7 +61,7 @@ Arguments:
 
 ---
 
-## **`dem clone DEV_ENV_NAME`
+## **`dem clone DEV_ENV_NAME`**
 
 Clone a Development Environment descriptor from the catalogs. 
 
