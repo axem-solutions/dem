@@ -1,10 +1,10 @@
 ---
-title: Design
+title: Design (for DEM developers)
 ---
 
 ## Architectural Overview
 
-This chapter contains the technical documentation for the design.
+This chapter contains the technical documentation of the design.
 
 The Development Environment Manager (DEM) provides an abstraction layer for the Development 
 Platform, which encompasses a collection of available resources, such as registries, catalogs, 

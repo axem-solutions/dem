@@ -38,7 +38,7 @@ Arguments:
 
 ## **`dem create DEV_ENV_NAME`**
 
-Create a new Development Environment.
+Create a new Development Environment descriptor and save it to the local descriptor storage (catalog).
 
 Running this command will open up an interactive UI on the command line. Follow the steps below to
 configure the new Environment.
@@ -55,6 +55,8 @@ Select the required tool image and press :material-keyboard-return:.
 
     ![image select](wp-content/image_select.png)
 
+:info: After creation, the Development Environment can be installed with the `install` command.
+
 Arguments:
 
 `DEV_ENV_NAME` Name of the Development Environment to create. [required]
@@ -65,10 +67,11 @@ Arguments:
 
 Clone a Development Environment descriptor from the catalogs. 
 
-Only the Development Environment descriptor gets cloned, the required tool images are not pulled. To
-pull the required tool images, use the `install` command.  
+Only the Development Environment descriptor will be cloned, the required tool images won't be pulled.
 If a Development Environment with the same name has been already available on the host PC, the user
 will be asked if they want to overwrite it or not.
+
+:info: After cloning, the Development Environment can be installed with the `install` command.
 
 Arguments:
 
@@ -139,10 +142,10 @@ Arguments:
 
 ## **`dem install DEV_ENV_NAME`**
 
-Install the selected Development Environment. DEM pull all the required containerized tools (which 
+Install the selected Development Environment. DEM pulls all the required containerized tools (which 
 are not yet available on the host PC) from the registry and install the Development Environment 
 locally. If the same Development Environment is already installed, but the installation is not 
-complete, the missing tool images are obtained from the registry.
+complete, the missing tool images get obtained from the registry.
 
 Arguments:
 
@@ -152,9 +155,9 @@ Arguments:
 
 ## **`dem uninstall DEV_ENV_NAME`**
 
-Uninstall the selected Development Environment. Set installed flag to False if it was True. Dem checks whether a tool image is
-required or not by any of the remaining installed local Development Environments. In case the tool image is
-not required anymore, the dem delete it. 
+Uninstall the selected Development Environment. Sets the installed flag to False. DEM checks whether 
+a tool image is required or not by any of the remaining installed local Development Environments. In 
+case the tool image is not required anymore, the DEM tries to delete it. 
 
 Arguments:
 
@@ -169,7 +172,7 @@ Assign a Development Environment to a project.
 If the project already has a Development Environment assigned, the user will be asked if they want to
 overwrite it or not.
 
-Projects that have a Development Environment assigned can initialized with the `init` command.
+Projects that have a Development Environment assigned, can be initialized with the `init` command.
 
 Arguments:
 
@@ -183,6 +186,9 @@ working directory will be used.
 ## **`dem init [PROJECT_PATH]`**
 
 Initialize a project with the assigned Development Environment.
+
+:info: After the initialization, the Development Environment can be installed with the `install` 
+command.
 
 Arguments:
 
@@ -251,6 +257,8 @@ Imports a Development Environment.
 
     The file to import only contains the Development Environment descriptor. For a successful import
     the DEM needs access to all the registries where the required images are stored.
+
+:info: After the import, the Development Environment can be installed with the `install` command.
 
 Arguments:
 
@@ -344,30 +352,6 @@ Arguments:
 ## **`dem list-host`**
 
 List the available hosts from the config file.
-
----
-
-## **`dem install DEV_ENV_NAME`**
-
-Install the selected Development Environment. Set installed flag to True. Dem checks which tool image is
-required by the selected local Development Environments and in case the tool image is
-not installed, the dem installs it. 
-
-Arguments:
-
-`DEV_ENV_NAME` Name of the Development Environment to install. [required]
-
----
-
-## **`dem uninstall DEV_ENV_NAME`**
-
-Uninstall the selected Development Environment. Set installed flag to False if it was True. Dem checks whether a tool image is
-required or not by any of the remaining installed local Development Environments. In case the tool image is
-not required anymore, the dem delete it. 
-
-Arguments:
-
-`DEV_ENV_NAME` Name of the Development Environment to uninstall. [required]
 
 ---
 

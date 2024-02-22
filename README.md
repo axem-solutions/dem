@@ -46,25 +46,27 @@ Development Environments for embedded software development.
 Contributors and early adopters are welcome!
 </p>
 
-## Concept
-A Development Environment is a set of tools used for a development project (e.g. build system, 
-debugger, toolchain, etc.).  The tools are separately packed into container images, which are stored 
-in registries.
+## The Concept in a Nutshell
+A set of software tools used for a specific development project is called a Development Environment.
+These tools for example can be the build system, debugger, test framework, etc...  
 
-Each Development Environment has a descriptor. A descriptor indicates which tools are 
-required in the project and the place their container images are stored. All descriptors are stored 
-in the Development Environment Catalogs. The users can browse these catalogs, and list the available 
-environments and their statuses.  
-A Development Environment can be installed from its catalog by a simple dem command, which means 
-that the required tool images get downloaded from the registries.
+The idea is to pack the tools separately into container images, which are then can be stored in 
+registries.
 
-The registries, the catalogs, and the development infrastructure form a Development Platform.
+Each Development Environment has a descriptor. A descriptor, like a blueprint, indicates which tools 
+are required in the project, and the place their container images are stored.
 
-The purpose of DEM is the easy management of this platform. The users can install available 
-Development Environments or freely create their own from the tool images available in the registries 
-or locally.
+![Dev Env descriptor](/docs/wp-content/dev_env_descriptor.png)
 
-![platform](docs/wp-content/platform.png)
+The descriptors can be stored in the Development Environment Catalogs. The users can browse these 
+catalogs, and download a copy of the Development Environment descriptor to their local catalog.
+
+![Catalogs](/docs/wp-content/dem_catalogs.png)
+
+The users can install a Development Environments from their local catalog or freely create their own 
+based on the tools available in the registries or on their local system.
+
+![Dev Env installation](/docs/wp-content/dev_env_installation.png)
 
 ## Key features
 
@@ -145,10 +147,9 @@ Now you have the Dev Env descriptor in your local catalog, but you might want to
 - Change the tool image for a given tool.
 - Set the host where the image should be placed.
 
-You can edit it the Dev Env with:
+You can edit it with:
 
     dem modify DEV_ENV_NAME
-
 
 Finally, if you are ready to use it, you can initialize it with:
 

@@ -11,8 +11,9 @@ To use the DEM on your PC, you need to have the following tools installed:
 
 ## Installation
 
-Use the following install script to get the latest version of DEM:
-    curl -fsSL 'https://raw.githubusercontent.com/axem-solutions/dem/main/install-dem.sh' | bash
+Use the following install script to get the latest version of DEM:  
+
+    `curl -fsSL 'https://raw.githubusercontent.com/axem-solutions/dem/main/install-dem.sh' | bash`
 
 ### Alternative installation
 
@@ -29,12 +30,12 @@ After installation, you can enable the autocompletion for bash and zsh shells
 
     dem --install-completion
 
+> If the command didn't work, supply your shell type as input parameter (bash or zsh)  
 > Note for zsh users: `compinit` must be called from your .zshrc.
 
-## Optional: Use the source code
+## Optional: Use the source code (for DEM developers)
 
-The dem is [open source](https://github.com/axem-solutions/dem), so you can use it as a python 
-module. To do this, you need to add the `-m` flag to your command.
+The DEM can be run as a Python module. To do this, you need to add the `-m` flag to your command.
 
 For example:
 
@@ -50,3 +51,7 @@ First install the environment with required dependencies:
 Enter the virtual environment:
 
     poetry shell
+
+Inside the virtual environment, you can run the DEM the same way as it was an installed package:
+
+    dem list --local --env
