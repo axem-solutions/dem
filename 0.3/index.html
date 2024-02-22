@@ -290,13 +290,6 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#developing-embedded-software" class="md-nav__link">
-    Developing Embedded Software
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#concept" class="md-nav__link">
     Concept
   </a>
@@ -375,8 +368,23 @@
   
   
     <li class="md-nav__item">
-      <a href="development_environments/" class="md-nav__link">
-        Development Environments
+      <a href="basics/" class="md-nav__link">
+        The Basics
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="quickstart/" class="md-nav__link">
+        Quickstart
       </a>
     </li>
   
@@ -406,7 +414,7 @@
   
     <li class="md-nav__item">
       <a href="design/" class="md-nav__link">
-        Design
+        Design (for DEM developers)
       </a>
     </li>
   
@@ -437,13 +445,6 @@
       Table of contents
     </label>
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#developing-embedded-software" class="md-nav__link">
-    Developing Embedded Software
-  </a>
-  
-</li>
       
         <li class="md-nav__item">
   <a href="#concept" class="md-nav__link">
@@ -525,15 +526,11 @@ containerized Development Environments.</strong></p>
 <p>Learn by doing! Try our <a href="https://www.axemsolutions.io/tutorial/index.html">tutorial</a> 
 with a simple embedded project!</p>
 </div>
-<h2 id="developing-embedded-software">Developing Embedded Software</h2>
-<p>Writing software for other architectures than our host usually requires a lot of different tools.
-The software tools used for a specific project can be grouped and they form a 
-<strong>Development Environment</strong>. To make it simpler to work with these tools, they are typically bundled 
-together into an IDE (Integrated Development Environment).</p>
 <h2 id="concept">Concept</h2>
 <h3 id="loose-coupling-between-tools"><img alt="🔓" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@14.1.2/assets/svg/1f513.svg" title=":unlock:" /> Loose coupling between tools</h3>
-<p>One of the biggest disadvantages of IDEs is that sometimes it is hard to use the underlying 
-integrated tools separately. They might depend on the IDE itself or each other, so standalone usage can be difficult and the whole IDE installation is required.</p>
+<p>One of the biggest disadvantage of traditional IDEs is that sometimes it is hard to use the 
+underlying integrated tools separately. They might depend on the IDE itself or each other, so 
+standalone usage can be difficult and the whole IDE installation might be required.</p>
 <p>DEM's goal is to <strong>reduce these dependencies</strong> and provide the possibility of standalone usage.</p>
 <h3 id="separated-environments-for-the-tools"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13.152.682a2.251 2.251 0 0 1 2.269 0l.007.004 6.957 4.276a2.277 2.277 0 0 1 1.126 1.964v7.516c0 .81-.432 1.56-1.133 1.968l-.002.001-11.964 7.037-.004.003c-.706.41-1.578.41-2.284 0l-.026-.015-6.503-4.502a2.268 2.268 0 0 1-1.096-1.943V9.438c0-.392.1-.77.284-1.1l.003-.006.014-.026c.197-.342.48-.627.82-.827h.002L13.152.681Zm.757 1.295h-.001L2.648 8.616l6.248 4.247a.775.775 0 0 0 .758-.01h.001l11.633-6.804-6.629-4.074a.75.75 0 0 0-.75.003ZM8.517 14.33a2.286 2.286 0 0 1-.393-.18l-.023-.014-6.102-4.147v7.003c0 .275.145.528.379.664l.025.014 6.114 4.232V14.33ZM18 9.709l-3.25 1.9v7.548L18 17.245Zm-7.59 4.438-.002.002a2.296 2.296 0 0 1-.391.18v7.612l3.233-1.902v-7.552Zm9.09-5.316v7.532l2.124-1.25a.776.776 0 0 0 .387-.671V7.363Z"/></svg></span> Separated environments for the tools</h3>
 <p>In a generic setup, the used tools can interfere with each other or the underlying host system,
@@ -550,19 +547,19 @@ lifecycle. DEM makes the change easy by providing a way to <strong>quickly swap 
 <li>to use a different version of the same tool </li>
 <li>to use a completely different tool</li>
 </ul>
-<p>Containerization ensures the <strong>safe coexistence</strong> of the same tools with different version numbers.<br />
-Adding a new tool is as simple as to change one, making the Development Environment very 
-<strong>scalable</strong>.</p>
+<p>Containerization ensures the <strong>safe coexistence</strong> of the different versions of the same tools.<br />
+Adding a new tool is as simple as changing one, making the Development Environment <strong>scalable</strong>.</p>
 <h3 id="reliable-development-environment-sharing"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m21 12-7-7v4C7 10 4 15 3 20c2.5-3.5 6-5.1 11-5.1V19l7-7Z"/></svg></span> Reliable Development Environment sharing</h3>
 <p>To <strong>create software predictively and effectively</strong>, it is crucial to have a <strong>consistent</strong>
 Development Environment <strong>for every developer</strong> in the organization.<br />
 With DEM, you can <strong>easily share</strong> the same environment with every coworker.</p>
 <h3 id="quick-and-reproducible-setup"><img alt="🚀" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@14.1.2/assets/svg/1f680.svg" title=":rocket:" /> Quick and reproducible setup</h3>
 <p>Before starting to work on a project, setting up the required tools can be a time-consuming task. 
-Using DEM to <strong>install a new Development Environment</strong> is a <strong>single command</strong>.</p>
+By using DEM, the <strong>installation of a new Development Environment</strong> becomes very <strong>quick</strong> and
+<strong>simple</strong>.</p>
 <p>If some modifications must be added to an old project no one worked on for a while, installing the 
-required toolset can be an exhausting task. With DEM the Development Environments can be stored in a
-Catalog and can be reinstalled whenever needed.</p>
+required toolset can be an exhausting task. With DEM the Development Environment can be assigned to
+a project, so it can be <strong>reinstalled whenever needed</strong>.</p>
 
 
   
@@ -736,7 +733,7 @@ Catalog and can be reinstalled whenever needed.</p>
       </div>
       <script>var consent=__md_get("__consent");if(consent)for(var input of document.forms.consent.elements)input.name&&(input.checked=consent[input.name]||!1);else"file:"!==location.protocol&&setTimeout(function(){document.querySelector("[data-md-component=consent]").hidden=!1},250);var action,form=document.forms.consent;for(action of["submit","reset"])form.addEventListener(action,function(e){if(e.preventDefault(),"reset"===e.type)for(var n of document.forms.consent.elements)n.name&&(n.checked=!1);__md_set("__consent",Object.fromEntries(Array.from(new FormData(form).keys()).map(function(e){return[e,!0]}))),location.hash="",location.reload()})</script>
     
-    <script id="__config" type="application/json">{"base": ".", "features": ["navigation.instant", "navigation.tracking", "navigation.footer"], "search": "assets/javascripts/workers/search.208ed371.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+    <script id="__config" type="application/json">{"base": ".", "features": ["navigation.instant", "navigation.tracking", "navigation.footer", "content.code.copy"], "search": "assets/javascripts/workers/search.208ed371.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
     
     
       <script src="assets/javascripts/bundle.51198bba.min.js"></script>
