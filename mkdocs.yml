@@ -19,6 +19,7 @@ theme:
     - navigation.instant
     - navigation.tracking
     - navigation.footer
+    - content.code.copy
   icon:
     repo: fontawesome/brands/github
   logo: wp-content/uploads/2023/03/x_w.png
@@ -54,6 +55,8 @@ extra:
   analytics:
     provider: google
     property: G-MCWQMMXY3W
+  version:
+    provider: mike
 
 copyright: >
   Copyright 2023 - axem solutions - All rights reserved |
@@ -78,6 +81,7 @@ markdown_extensions:
 nav:
   - 'index.md'
   - 'installation.md'
-  - 'development_environments.md'
+  - 'basics.md'
+  - 'quickstart.md'
   - 'commands.md'
   - 'design.md'
