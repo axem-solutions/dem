@@ -305,36 +305,36 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#unlock-loose-coupling-between-tools" class="md-nav__link">
-    :unlock: Loose coupling between tools
+  <a href="#loose-coupling-between-tools" class="md-nav__link">
+    Loose coupling between tools
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#octicons-container-24-separated-environments-for-the-tools" class="md-nav__link">
-    :octicons-container-24: Separated environments for the tools
+  <a href="#separated-environments-for-the-tools" class="md-nav__link">
+     Separated environments for the tools
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#arrows_counterclockwise-scaleable-tool-management" class="md-nav__link">
-    :arrows_counterclockwise: Scaleable tool management
+  <a href="#scaleable-tool-management" class="md-nav__link">
+    Scaleable tool management
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#material-share-reliable-development-environment-sharing" class="md-nav__link">
-    :material-share: Reliable Development Environment sharing
+  <a href="#reliable-development-environment-sharing" class="md-nav__link">
+     Reliable Development Environment sharing
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#rocket-quick-and-reproducible-setup" class="md-nav__link">
-    :rocket: Quick and reproducible setup
+  <a href="#quick-and-reproducible-setup" class="md-nav__link">
+    Quick and reproducible setup
   </a>
   
 </li>
@@ -454,36 +454,36 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#unlock-loose-coupling-between-tools" class="md-nav__link">
-    :unlock: Loose coupling between tools
+  <a href="#loose-coupling-between-tools" class="md-nav__link">
+    Loose coupling between tools
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#octicons-container-24-separated-environments-for-the-tools" class="md-nav__link">
-    :octicons-container-24: Separated environments for the tools
+  <a href="#separated-environments-for-the-tools" class="md-nav__link">
+     Separated environments for the tools
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#arrows_counterclockwise-scaleable-tool-management" class="md-nav__link">
-    :arrows_counterclockwise: Scaleable tool management
+  <a href="#scaleable-tool-management" class="md-nav__link">
+    Scaleable tool management
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#material-share-reliable-development-environment-sharing" class="md-nav__link">
-    :material-share: Reliable Development Environment sharing
+  <a href="#reliable-development-environment-sharing" class="md-nav__link">
+     Reliable Development Environment sharing
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#rocket-quick-and-reproducible-setup" class="md-nav__link">
-    :rocket: Quick and reproducible setup
+  <a href="#quick-and-reproducible-setup" class="md-nav__link">
+    Quick and reproducible setup
   </a>
   
 </li>
@@ -531,11 +531,11 @@ The software tools used for a specific project can be grouped and they form a
 <strong>Development Environment</strong>. To make it simpler to work with these tools, they are typically bundled 
 together into an IDE (Integrated Development Environment).</p>
 <h2 id="concept">Concept</h2>
-<h3 id="unlock-loose-coupling-between-tools">:unlock: Loose coupling between tools</h3>
+<h3 id="loose-coupling-between-tools"><img alt="🔓" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@14.1.2/assets/svg/1f513.svg" title=":unlock:" /> Loose coupling between tools</h3>
 <p>One of the biggest disadvantages of IDEs is that sometimes it is hard to use the underlying 
 integrated tools separately. They might depend on the IDE itself or each other, so standalone usage can be difficult and the whole IDE installation is required.</p>
 <p>DEM's goal is to <strong>reduce these dependencies</strong> and provide the possibility of standalone usage.</p>
-<h3 id="octicons-container-24-separated-environments-for-the-tools">:octicons-container-24: Separated environments for the tools</h3>
+<h3 id="separated-environments-for-the-tools"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13.152.682a2.251 2.251 0 0 1 2.269 0l.007.004 6.957 4.276a2.277 2.277 0 0 1 1.126 1.964v7.516c0 .81-.432 1.56-1.133 1.968l-.002.001-11.964 7.037-.004.003c-.706.41-1.578.41-2.284 0l-.026-.015-6.503-4.502a2.268 2.268 0 0 1-1.096-1.943V9.438c0-.392.1-.77.284-1.1l.003-.006.014-.026c.197-.342.48-.627.82-.827h.002L13.152.681Zm.757 1.295h-.001L2.648 8.616l6.248 4.247a.775.775 0 0 0 .758-.01h.001l11.633-6.804-6.629-4.074a.75.75 0 0 0-.75.003ZM8.517 14.33a2.286 2.286 0 0 1-.393-.18l-.023-.014-6.102-4.147v7.003c0 .275.145.528.379.664l.025.014 6.114 4.232V14.33ZM18 9.709l-3.25 1.9v7.548L18 17.245Zm-7.59 4.438-.002.002a2.296 2.296 0 0 1-.391.18v7.612l3.233-1.902v-7.552Zm9.09-5.316v7.532l2.124-1.25a.776.776 0 0 0 .387-.671V7.363Z"/></svg></span> Separated environments for the tools</h3>
 <p>In a generic setup, the used tools can interfere with each other or the underlying host system,
 causing hardly detectable and fixable issues throughout the development process. It can be really 
 devastating to see two PCs generating different binaries from the same source, and after days of 
@@ -543,7 +543,7 @@ debugging to find out that an environment variable had a different value for som
 <p>To eliminate this problem, the tools need to operate in their <strong>own isolated environments</strong>. A 
 lightweight and fast solution for isolation is <strong>containerization</strong>. The tools get built into their 
 respective <strong>container images</strong>, and the way they communicate with the host system can be controlled.</p>
-<h3 id="arrows_counterclockwise-scaleable-tool-management">:arrows_counterclockwise: Scaleable tool management</h3>
+<h3 id="scaleable-tool-management"><img alt="🔄" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@14.1.2/assets/svg/1f504.svg" title=":arrows_counterclockwise:" /> Scaleable tool management</h3>
 <p>Changes in the tools used for development may be necessary several times during the development 
 lifecycle. DEM makes the change easy by providing a way to <strong>quickly swap tool images</strong>:</p>
 <ul>
@@ -553,11 +553,11 @@ lifecycle. DEM makes the change easy by providing a way to <strong>quickly swap 
 <p>Containerization ensures the <strong>safe coexistence</strong> of the same tools with different version numbers.<br />
 Adding a new tool is as simple as to change one, making the Development Environment very 
 <strong>scalable</strong>.</p>
-<h3 id="material-share-reliable-development-environment-sharing">:material-share: Reliable Development Environment sharing</h3>
+<h3 id="reliable-development-environment-sharing"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m21 12-7-7v4C7 10 4 15 3 20c2.5-3.5 6-5.1 11-5.1V19l7-7Z"/></svg></span> Reliable Development Environment sharing</h3>
 <p>To <strong>create software predictively and effectively</strong>, it is crucial to have a <strong>consistent</strong>
 Development Environment <strong>for every developer</strong> in the organization.<br />
 With DEM, you can <strong>easily share</strong> the same environment with every coworker.</p>
-<h3 id="rocket-quick-and-reproducible-setup">:rocket: Quick and reproducible setup</h3>
+<h3 id="quick-and-reproducible-setup"><img alt="🚀" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@14.1.2/assets/svg/1f680.svg" title=":rocket:" /> Quick and reproducible setup</h3>
 <p>Before starting to work on a project, setting up the required tools can be a time-consuming task. 
 Using DEM to <strong>install a new Development Environment</strong> is a <strong>single command</strong>.</p>
 <p>If some modifications must be added to an old project no one worked on for a while, installing the 
