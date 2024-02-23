@@ -339,6 +339,20 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#development-environment-descriptor" class="md-nav__link">
+    Development Environment Descriptor
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#container-engine" class="md-nav__link">
+    Container Engine
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#registry-and-repository" class="md-nav__link">
     Registry and Repository
   </a>
@@ -458,6 +472,20 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#development-environment-descriptor" class="md-nav__link">
+    Development Environment Descriptor
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#container-engine" class="md-nav__link">
+    Container Engine
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#registry-and-repository" class="md-nav__link">
     Registry and Repository
   </a>
@@ -508,6 +536,13 @@ which can be run in a container.</p>
 <h2 id="a-tool-container-image">A Tool Container Image</h2>
 <p>The idea is to build the tools from a Development Environment into their own respective images, so 
 they can run isolatedly.</p>
+<h2 id="development-environment-descriptor">Development Environment Descriptor</h2>
+<p>Each Development Environment has a descriptor. A descriptor, like a blueprint, indicates which tools
+are required in the project, and the place their container images are stored.</p>
+<p><img alt="Dev Env descriptor" src="../wp-content/dev_env_descriptor.png" /></p>
+<h2 id="container-engine">Container Engine</h2>
+<p>The container engine is responsible for running the container images. The DEM uses the Docker
+Container Engine to run the tool images.</p>
 <h2 id="registry-and-repository">Registry and Repository</h2>
 <p>A registry serves as a storage for the tool images, where they can be kept without occupying space on 
 the developer's computer. This storage enables convenient sharing of images with others, ensuring 
@@ -530,16 +565,16 @@ can be used to add or delete registries.</p>
 <a href="https://github.com/axem-solutions/dem/discussions/categories/regsitry">new descussion</a>.</p>
 </div>
 <h2 id="development-environment-catalogs">Development Environment Catalogs</h2>
-<p>A catalog is a collection of Development Environment descriptors. A descriptor is like a blueprint 
-for a Development Environment, it defines the required tools and the location of their associated 
-container images.<br />
+<p>A catalog is a collection of Development Environment descriptors.<br />
 The DEM can handle multiple catalogs. To list the currently available ones use the <code>dem list-cat</code> 
 command.  The <code>dem add-cat</code> and <code>dem del-cat</code> commands can be used to add or delete catalogs.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>axem has its own catalog, which is available by default.</p>
 </div>
-<p>The users can install new Development Environments from the catalogs in a self-service manner.</p>
+<p>The users can browse these catalogs, and download a copy of the Development Environment descriptor 
+to their local catalog.</p>
+<p><img alt="Catalogs" src="../wp-content/dem_catalogs.png" /></p>
 <h2 id="development-platform">Development Platform</h2>
 <p>The registries, the catalogs, and the whole development infrastructure are part of the Development 
 Platform. </p>
