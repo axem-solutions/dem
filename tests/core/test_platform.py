@@ -272,33 +272,54 @@ def test_Platform_get_dev_env_by_name_no_match(mock___init__: MagicMock) -> None
 @patch.object(platform.Platform, "user_output")
 @patch.object(platform.Platform, "__init__")
 def test_Platform_install_dev_env_succes(mock___init__: MagicMock, mock_user_input: MagicMock, 
-                                  mock_container_engine: MagicMock, mock_tool_images,
-                                  mock_flush_descriptors: MagicMock) -> None:
+                                         mock_container_engine: MagicMock, mock_tool_images,
+                                         mock_flush_descriptors: MagicMock) -> None:
     # Test setup
     mock___init__.return_value = None
    
 
-    test_dev_env = MagicMock()    
-    test_registry_only_tool_images: list[str] = ["test_image_name1:test_image_version1", 
-                                                 "test_image_name2:test_image_version2"]
-    test_dev_env.get_registry_only_tool_images.return_value = test_registry_only_tool_images
+    mock_dev_env = MagicMock()    
+    mock_dev_env.tools = [
+        {
+            "image_name": "test_image_name0",
+            "image_version": "test_image_version0",
+            "image_status": platform.ToolImages.LOCAL_AND_REGISTRY
+        },
+        {
+            "image_name": "test_image_name1",
+            "image_version": "test_image_version1",
+            "image_status": platform.ToolImages.REGISTRY_ONLY
+        },
+        {
+            "image_name": "test_image_name2",
+            "image_version": "test_image_version2",
+            "image_status": platform.ToolImages.REGISTRY_ONLY
+        },
+        {
+            "image_name": "test_image_name3",
+            "image_version": "test_image_version3",
+            "image_status": platform.ToolImages.LOCAL_ONLY
+        }
+    ]
 
     test_platform = platform.Platform()
 
     # Run unit under test
-    test_platform.install_dev_env(test_dev_env)
+    test_platform.install_dev_env(mock_dev_env)
 
     # Check expectations
     mock___init__.assert_called_once()
 
-    test_dev_env.get_registry_only_tool_images.assert_called_once_with(mock_tool_images, False)
+    mock_dev_env.check_image_availability.assert_called_once_with(mock_tool_images, False)
+    expected_registry_only_tool_images: list[str] = ["test_image_name1:test_image_version1", 
+                                                 "test_image_name2:test_image_version2"]
     mock_user_input.msg.assert_has_calls([
-        call(f"\nPulling image {test_registry_only_tool_images[0]}", is_title=True),
-        call(f"\nPulling image {test_registry_only_tool_images[1]}", is_title=True)
+        call(f"\nPulling image {expected_registry_only_tool_images[0]}", is_title=True),
+        call(f"\nPulling image {expected_registry_only_tool_images[1]}", is_title=True)
     ])
     mock_container_engine.pull.assert_has_calls([
-        call(test_registry_only_tool_images[0]),
-        call(test_registry_only_tool_images[1])
+        call(expected_registry_only_tool_images[0]),
+        call(expected_registry_only_tool_images[1])
     ])
     mock_flush_descriptors.assert_called_once()
 
@@ -306,29 +327,71 @@ def test_Platform_install_dev_env_succes(mock___init__: MagicMock, mock_user_inp
 @patch.object(platform.Platform, "container_engine")
 @patch.object(platform.Platform, "user_output")
 @patch.object(platform.Platform, "__init__")
-def test_Platform_install_dev_env_failure(mock___init__: MagicMock, mock_user_output: MagicMock,
-                                            mock_container_engine: MagicMock,mock_tool_images) -> None:
+def test_Platform_install_dev_env_pull_failure(mock___init__: MagicMock, mock_user_output: MagicMock,
+                                               mock_container_engine: MagicMock,mock_tool_images) -> None:
     # Test setup
     mock___init__.return_value = None
-   
 
-    test_dev_env = MagicMock()    
-    test_registry_only_tool_images: list[str] = ["test_image_name1:test_image_version1", 
-                                                 "test_image_name2:test_image_version2"]
-    test_dev_env.get_registry_only_tool_images.return_value = test_registry_only_tool_images
+    mock_dev_env = MagicMock()    
+    mock_dev_env.tools = [
+        {
+            "image_name": "test_image_name1",
+            "image_version": "test_image_version1",
+            "image_status": platform.ToolImages.REGISTRY_ONLY
+        }
+    ]
+
+    test_exception_text = "test_exception_text"
+    mock_container_engine.pull.side_effect = platform.ContainerEngineError(test_exception_text)
 
     test_platform = platform.Platform()
-    
-    mock_container_engine.pull.side_effect = platform.ContainerEngineError("")
 
     # Run unit under test
     with pytest.raises(platform.PlatformError) as exported_exception_info:
-        test_platform.install_dev_env(test_dev_env)
+        test_platform.install_dev_env(mock_dev_env)
 
-        # Check expectations
-        mock___init__.assert_called_once()
+    # Check expectations
+    assert str(exported_exception_info.value) == f"Platform error: Dev Env install failed. Reason:" + \
+                                                 f" Container engine error: {test_exception_text}"
 
-        assert str(exported_exception_info) == "Platform error: Dev Env install failed."
+    mock___init__.assert_called_once()
+
+    mock_dev_env.check_image_availability.assert_called_once_with(mock_tool_images, False)
+    expected_registry_only_tool_image = "test_image_name1:test_image_version1"
+    mock_user_output.msg.assert_called_once_with(f"\nPulling image {expected_registry_only_tool_image}", 
+                                                 is_title=True)
+    mock_container_engine.pull.assert_called_once_with(expected_registry_only_tool_image)
+
+@patch.object(platform.Platform, "tool_images")
+@patch.object(platform.Platform, "container_engine")
+@patch.object(platform.Platform, "user_output")
+@patch.object(platform.Platform, "__init__")
+def test_Platform_install_dev_env_not_avilable(mock___init__: MagicMock, mock_user_output: MagicMock,
+                                               mock_container_engine: MagicMock,mock_tool_images) -> None:
+    # Test setup
+    mock___init__.return_value = None
+
+    mock_dev_env = MagicMock()    
+    mock_dev_env.tools = [
+        {
+            "image_name": "test_image_name1",
+            "image_version": "test_image_version1",
+            "image_status": platform.ToolImages.NOT_AVAILABLE
+        }
+    ]
+
+    test_platform = platform.Platform()
+
+    # Run unit under test
+    with pytest.raises(platform.PlatformError) as exported_exception_info:
+        test_platform.install_dev_env(mock_dev_env)
+
+    # Check expectations
+    assert str(exported_exception_info.value) == f"Platform error: The test_image_name1:test_image_version1 image is not available."
+
+    mock___init__.assert_called_once()
+
+    mock_dev_env.check_image_availability.assert_called_once_with(mock_tool_images, False)
 
 @patch.object(platform.Platform, "flush_descriptors")
 @patch.object(platform.Platform, "container_engine")

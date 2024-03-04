@@ -104,20 +104,6 @@ class DevEnv():
 
         return image_statuses
 
-    def get_registry_only_tool_images(self, all_tool_images: ToolImages, 
-                                      update_tool_image_store: bool) -> set:
-        """ Get the list of registry only tool images.
-        
-            Returns with the list of registry only tool images.
-        """
-        registry_only_tool_images: set = set()
-        self.check_image_availability(all_tool_images, update_tool_image_store)
-        for tool in self.tools:
-            if tool["image_status"] == ToolImages.REGISTRY_ONLY:
-                registry_only_tool_images.add(tool["image_name"] + ':' + tool["image_version"])
-
-        return registry_only_tool_images
-
     def get_deserialized(self, omit_is_installed: bool = False) -> dict[str, str]:
         """ Create the deserialized json. 
         
