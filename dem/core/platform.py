@@ -144,12 +144,21 @@ class Platform(Core):
             Args:
                 dev_env_to_install -- the Development Environment to install
         """
-        for tool_image in dev_env_to_install.get_registry_only_tool_images(self.tool_images, False):
-            self.user_output.msg(f"\nPulling image {tool_image}", is_title=True)            
-            try:                
-                self.container_engine.pull(tool_image)
-            except ContainerEngineError:
-                raise PlatformError("Dev Env install failed.")
+        dev_env_to_install.check_image_availability(self.tool_images, False)
+
+        # First check if the missing images are available in the registries.
+        for tool in dev_env_to_install.tools:
+            if tool["image_status"] == ToolImages.NOT_AVAILABLE:
+                raise PlatformError(f"The {tool['image_name']}:{tool['image_version']} image is not available.")
+
+        for tool in dev_env_to_install.tools:
+            if tool["image_status"] == ToolImages.REGISTRY_ONLY:
+                self.user_output.msg(f"\nPulling image {tool['image_name']}:{tool['image_version']}", 
+                                     is_title=True)
+                try:                
+                    self.container_engine.pull(f"{tool['image_name']}:{tool['image_version']}")
+                except ContainerEngineError as e:
+                    raise PlatformError(f"Dev Env install failed. Reason: {str(e)}")
 
         dev_env_to_install.is_installed = True
         self.flush_descriptors()

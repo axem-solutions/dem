@@ -23,6 +23,6 @@ def execute(platform: Platform, dev_env_name: str) -> None:
         try:
             platform.install_dev_env(dev_env_to_install)            
         except PlatformError as e:
-            stderr.print(f"[red]Error: {e}[/]")
+            stderr.print(f"[red]{e}[/]")
         else:
             stdout.print(f"[green]Successfully installed the {dev_env_name}![/]")
