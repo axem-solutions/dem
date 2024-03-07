@@ -17,160 +17,112 @@ from rich.console import Console
 # the stdout.
 runner = CliRunner(mix_stderr=False)
 
-@patch("dem.cli.command.export_cmd.open")
 @patch("dem.cli.command.export_cmd.os.path.isdir")
-def test_create_exported_dev_env_json(mock_os_path_isdir,mock_open):
+def test_export_path_is_dir(mock_isdir: MagicMock):
     # Test setup
-    dev_env_name = "dev_env_name"
-    dev_env_json = {
-                    "name": "Cica",
-                    "installed": "True",
-                    "tools": [
-                        {
-                            "type": "build system",
-                            "image_name": "axemsolutions/make_gnu_arm",
-                            "image_version": "latest"
-                        }]
-                   }
-    given_path = "home"    
-    mock_os_path_isdir.return_value = False    
-    fake_opened_file = MagicMock()
-    mock_open.return_value = fake_opened_file
+    test_export_path = "fake_export_path"
+    mock_isdir.return_value = True
+
+    mock_dev_env = MagicMock()
+    mock_dev_env.name = "fake_dev_env"
 
     # Run unit under test
-    export_cmd.create_exported_dev_env_json(dev_env_name,dev_env_json,given_path)
-    fake_opened_file.write.assert_called()
-    fake_opened_file.close.assert_called()            
-    mock_open.assert_called_with(given_path , "w")
-    mock_os_path_isdir.assert_called()
+    export_cmd.export(mock_dev_env, test_export_path)
 
+    # Check expectations
+    mock_isdir.assert_called_once_with(test_export_path)
+    mock_dev_env.export.assert_called_once_with(f"{test_export_path}/{mock_dev_env.name}.json")
 
-    mock_os_path_isdir.return_value = True
-    export_cmd.create_exported_dev_env_json(dev_env_name,dev_env_json,given_path)
-    fake_opened_file.write.assert_called()
-    fake_opened_file.close.assert_called()            
-    mock_open.assert_called_with( given_path+"/"+dev_env_name , "w")
-    mock_os_path_isdir.assert_called()
-
-    mock_os_path_isdir.return_value = False
-    given_path = "/home/axem" 
-    export_cmd.create_exported_dev_env_json(dev_env_name,dev_env_json,given_path)
-    fake_opened_file.write.assert_called()
-    fake_opened_file.close.assert_called()            
-    mock_open.assert_called_with( given_path , "w")
-    mock_os_path_isdir.assert_called()
-
-    mock_os_path_isdir.return_value = False
-    given_path = "" 
-    export_cmd.create_exported_dev_env_json(dev_env_name,dev_env_json,given_path)
-    fake_opened_file.write.assert_called()
-    fake_opened_file.close.assert_called()            
-    mock_open.assert_called_with( dev_env_name , "w")
-    mock_os_path_isdir.assert_called()
-
-@patch("dem.cli.command.export_cmd.json.dump")
-@patch("dem.cli.command.export_cmd.open")
-@patch("dem.cli.command.export_cmd.check_is_path_contains_spec_char")
-@patch("dem.cli.command.export_cmd.check_is_directory")
-def test_wo_path(mock_check_is_directory: MagicMock,
-                 mock_check_is_path_contains_spec_char: MagicMock, mock_open: MagicMock,
-                 mock_json_dump: MagicMock):
+@patch("dem.cli.command.export_cmd.os.path.isdir")
+def test_export_path_is_file(mock_isdir: MagicMock):
     # Test setup
+    test_export_path = "fake_export_path.json"
+    mock_isdir.return_value = False
+
+    mock_dev_env = MagicMock()
+    mock_dev_env.name = "fake_dev_env"
+
+    # Run unit under test
+    export_cmd.export(mock_dev_env, test_export_path)
+
+    # Check expectations
+    mock_isdir.assert_called_once_with(test_export_path)
+    mock_dev_env.export.assert_called_once_with(test_export_path)
+
+@patch("dem.cli.command.export_cmd.os.path.isdir")
+def test_export_path_is_empty(mock_isdir: MagicMock):
+    # Test setup
+    test_export_path = ""
+    mock_dev_env = MagicMock()
+    mock_dev_env.name = "fake_dev_env"
+
+    mock_isdir.return_value = False
+
+    # Run unit under test
+    export_cmd.export(mock_dev_env, test_export_path)
+
+    # Check expectations
+    mock_dev_env.export.assert_called_once_with(f"{mock_dev_env.name}.json")
+
+@patch("dem.cli.command.export_cmd.export")
+def test_execute(mock_export: MagicMock):
+    # Test setup
+    test_dev_env_name = "fake_dev_env_name"
+    test_export_path = "fake_export_path"
+
     mock_platform = MagicMock()
+    mock_dev_env = MagicMock()
+    mock_platform.get_dev_env_by_name.return_value = mock_dev_env
     main.platform = mock_platform
 
-    mock_dev_env_to_export = MagicMock()
-    mock_platform.get_dev_env_by_name.return_value = mock_dev_env_to_export
-
-    mock_check_is_directory.return_value = False
-    mock_check_is_path_contains_spec_char.return_value = False
-
-    mock_exported_file = MagicMock()
-    mock_open.return_value = mock_exported_file
-
-    test_dev_env_name = "test_dev_env_name"
-
     # Run unit under test
-    runner_result = runner.invoke(main.typer_cli, ["export", test_dev_env_name])
+    runner_result = runner.invoke(main.typer_cli, ["export", test_dev_env_name, test_export_path], color=True)
 
-    # # Check expectations
+    # Check expectations
     assert 0 == runner_result.exit_code
 
     mock_platform.get_dev_env_by_name.assert_called_once_with(test_dev_env_name)
-    mock_check_is_directory.assert_called_once_with("")
-    mock_check_is_path_contains_spec_char.assert_called_once_with("")
-    mock_open.assert_called_once_with(test_dev_env_name, "w")
-    mock_json_dump.assert_called_once_with(mock_dev_env_to_export.__dict__, mock_exported_file, 
-                                           indent=4)
-    mock_exported_file.close.assert_called_once()
+    mock_export.assert_called_once_with(mock_dev_env, test_export_path)
 
-def test_with_invalid_devenv():
+@patch("dem.cli.command.export_cmd.stderr.print")
+def test_execute_dev_env_not_found(mock_stderr_print: MagicMock):
     # Test setup
-    mock_platform = MagicMock()
-    main.platform = mock_platform
+    test_dev_env_name = "fake_dev_env_name"
+    test_export_path = "fake_export_path"
 
+    mock_platform = MagicMock()
     mock_platform.get_dev_env_by_name.return_value = None
-
-    test_invalid_dev_env_name = ""
-
-    # Run unit under test
-    runner_result = runner.invoke(main.typer_cli, ["export", test_invalid_dev_env_name])
-
-    # Check expectations
-    assert 0 == runner_result.exit_code
-
-    mock_platform.get_dev_env_by_name.assert_called_once_with(test_invalid_dev_env_name)
-
-    console = Console(file=io.StringIO())
-    console.print("[red]Error: The input Development Environment does not exist.[/]")
-    assert console.file.getvalue() == runner_result.stderr
-    
-@patch("dem.cli.command.export_cmd.create_exported_dev_env_json")
-def test_execute_valid_parameters(mock_create_exported_dev_env_json: MagicMock):
-    # Test setup
-    test_dev_env_name = "test_dev_env_name"
-    test_path_to_export = "test_path_to_export"
-
-    mock_platform = MagicMock()
     main.platform = mock_platform
 
-    mock_dev_env_to_export = MagicMock()
-    mock_platform.get_dev_env_by_name.return_value = mock_dev_env_to_export
-
     # Run unit under test
-    runner_result = runner.invoke(main.typer_cli, ["export", test_dev_env_name, 
-                                                   test_path_to_export])
+    runner_result = runner.invoke(main.typer_cli, ["export", test_dev_env_name, test_export_path], color=True)
 
     # Check expectations
     assert 0 == runner_result.exit_code
 
     mock_platform.get_dev_env_by_name.assert_called_once_with(test_dev_env_name)
-    mock_create_exported_dev_env_json.assert_called_once_with(test_dev_env_name, 
-                                                              mock_dev_env_to_export.__dict__,
-                                                              test_path_to_export)
-    
-@patch("dem.cli.command.export_cmd.create_exported_dev_env_json", side_effect=FileNotFoundError("FileNotFoundError"))
-def test_execute_FileNotFoundError(mock_create_exported_dev_env_json: MagicMock):
+    mock_stderr_print.assert_called_once_with("[red]Error: The input Development Environment does not exist.[/]")
+
+@patch("dem.cli.command.export_cmd.stderr.print")
+@patch("dem.cli.command.export_cmd.export")
+def test_execute_invalid_path(mock_export: MagicMock, mock_stderr_print: MagicMock):
     # Test setup
-    test_dev_env_name = "test_dev_env_name"
-    test_path_to_export = ""
+    test_dev_env_name = "fake_dev_env_name"
+    test_export_path = "fake_export_path"
 
     mock_platform = MagicMock()
+    mock_dev_env = MagicMock()
+    mock_platform.get_dev_env_by_name.return_value = mock_dev_env
     main.platform = mock_platform
 
-    mock_dev_env_to_export = MagicMock()
-    mock_platform.get_dev_env_by_name.return_value = mock_dev_env_to_export
+    mock_export.side_effect = FileNotFoundError
 
-    #Run unit under test
-    runner_result = runner.invoke(main.typer_cli, ["export", test_dev_env_name, 
-                                                   test_path_to_export])
-    assert runner_result.exit_code == 0
+    # Run unit under test
+    runner_result = runner.invoke(main.typer_cli, ["export", test_dev_env_name, test_export_path], color=True)
 
-    console = Console(file=io.StringIO())
-    console.print("[red]Error: Invalid input path.[/]")
-    assert console.file.getvalue() == runner_result.stderr
+    # Check expectations
+    assert 0 == runner_result.exit_code
 
     mock_platform.get_dev_env_by_name.assert_called_once_with(test_dev_env_name)
-    mock_create_exported_dev_env_json.assert_called_once_with(test_dev_env_name, 
-                                                              mock_dev_env_to_export.__dict__,
-                                                              test_path_to_export)
+    mock_export.assert_called_once_with(mock_dev_env, test_export_path)
+    mock_stderr_print.assert_called_once_with("[red]Error: Invalid input path.[/]")
