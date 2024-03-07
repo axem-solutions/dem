@@ -1,7 +1,3 @@
-!!! warning
-
-    Always put the input text into double quotation marks ("") if it contains whitespaces.
-
 ## **`dem list [OPTIONS]`**
 
 List the Development Environments installed locally or available in the catalog.
