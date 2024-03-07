@@ -1,9 +1,18 @@
+<div align="center">
+    <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="docs/wp-content/dem_logo_dark.png">
+        <img alt="DEM logo" src="docs/wp-content/dem_logo_light.png" width="150">
+    </picture>
+</div>
+
+<br>
+
 <h1 align="center">
-    Containerized Development Environment Manager <br /> for <br /> Embedded Development
+    Development Environment Manager <br /> for <br /> Embedded Development
 </h1>
 
 <h3 align="center">
-Manage your containerized Development Environments with ease
+Manage your isolated Development Environments with ease
 </h3>
 <br />
 
@@ -13,7 +22,6 @@ Manage your containerized Development Environments with ease
     <a href="https://discord.com/invite/Nv6hSzXruK" target="_blank"><img src="https://img.shields.io/discord/1156270239860920431?logo=discord&color=2C2F33&link=https%3A%2F%2Fdiscord.com%2Finvite%Nv6hSzXruK" alt="Discord"/></a>
 </p>
 
-<br />
 <br />
 
 <h3 align="center">
@@ -25,8 +33,6 @@ Get answers to your challenges, and learn more about DEM, embedded development t
 </h4>
 
 <br />
-<br />
-
 
 ## Overview
 
@@ -133,7 +139,9 @@ In this case you only need to initialize the Dev Env with:
 
 You can import a Dev Env descriptor JSON with: 
 
-    dem load DEV_ENV_NAME
+    dem load PATH_TO_DEV_ENV
+
+where PATH_TO_DEV_ENV is the path to the JSON file.
 
 ### I'd like to create my own Dev Env from scratch...
 
@@ -151,7 +159,7 @@ You can edit it with:
 
     dem modify DEV_ENV_NAME
 
-Finally, if you are ready to use it, you can initialize it with:
+Finally, if you are ready to use the Development Environment, you can install it with:
 
     dem install DEV_ENV_NAME
 
