@@ -78,21 +78,21 @@ def autocomplete_host_name(incomplete: str) -> Generator:
 # DEM commands
 @typer_cli.command("list") # "list" is a Python keyword
 def list_(local: Annotated[bool, typer.Option(help="Scope is the local host.")] = False,
-          all: Annotated[bool, typer.Option(help="Scope is the organization.")] = False,
+          all: Annotated[bool, typer.Option(help="Scope is the catalogs.")] = False,
           env: Annotated[bool, typer.Option(help="List the environments.")] = False,
           tool: Annotated[bool, typer.Option(help="List the tool images.")] = False) -> None:
     """
-    List the Development Environments available locally or for the organization.
+    List the Development Environments available locally or from the catalogs.
     
     The following option combinations are suppported:
 
         --local --env -> List the local Development Environments.
 
-        --all --env -> List the organization's Development Environments.
+        --all --env -> List the Development Environments available from the catalogs.
 
         --local --tool -> List the local tool images.
 
-        --all --tool -> List the tool images available in the axemsolutions registry.
+        --all --tool -> List the tool images available from the registries.
     """
     if platform:
         list_cmd.execute(platform, local, all, env, tool)
