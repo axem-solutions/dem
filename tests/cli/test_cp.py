@@ -80,17 +80,20 @@ def test_check_new_dev_env_name_taken(mock_stderr_print):
 def test_cp_given_dev_env():
     # Test setup
     mock_platform = MagicMock()
-    fake_dev_env_to_cp = MagicMock()
+    mock_dev_env_to_cp = MagicMock()
+    mock_dev_env_to_cp.name = "test_dev_env"
+    mock_dev_env_to_cp.is_installed = True
 
     test_new_name = "test_cpd"
 
     mock_platform.local_dev_envs = []
 
     # Run unit under test
-    cp_cmd.cp_given_dev_env(mock_platform, fake_dev_env_to_cp, test_new_name)
+    cp_cmd.cp_given_dev_env(mock_platform, mock_dev_env_to_cp, test_new_name)
 
     # Check expectations
     assert mock_platform.local_dev_envs[0].name is test_new_name
+    assert mock_platform.local_dev_envs[0].is_installed is False
 
     mock_platform.flush_descriptors.assert_called_once()
 

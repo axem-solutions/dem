@@ -26,6 +26,7 @@ def cp_given_dev_env(platform: Platform, dev_env_to_cp: DevEnv,
                         new_dev_env_name: str):
     new_dev_env = copy.deepcopy(dev_env_to_cp)
     new_dev_env.name = new_dev_env_name
+    new_dev_env.is_installed = False
     platform.local_dev_envs.append(new_dev_env)
     platform.flush_descriptors()
 
