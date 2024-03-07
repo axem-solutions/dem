@@ -25,18 +25,6 @@ def test_DevEnv() -> None:
     assert test_dev_env.name is test_descriptor["name"]
     assert test_dev_env.tools is test_descriptor["tools"]
 
-    # Test setup
-    mock_base_dev_env = MagicMock()
-    mock_base_dev_env.name = "test_name"
-    mock_base_dev_env.tools = [MagicMock()]
-
-    # Run unit under test
-    test_dev_env = dev_env.DevEnv(dev_env_to_copy=mock_base_dev_env)
-
-    # Check expectations
-    assert test_dev_env.name is mock_base_dev_env.name
-    assert test_dev_env.tools is mock_base_dev_env.tools
-
 @patch("dem.core.dev_env.json.load")
 @patch("dem.core.dev_env.open")
 @patch("dem.core.dev_env.os.path.exists")

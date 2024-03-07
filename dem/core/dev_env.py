@@ -19,14 +19,11 @@ class DevEnv():
         "CI/CD server",
     )
 
-    def __init__(self, descriptor: dict | None = None, 
-                 dev_env_to_copy: "DevEnv | None" = None, 
-                 descriptor_path: str | None = None) -> None:
+    def __init__(self, descriptor: dict | None = None, descriptor_path: str | None = None) -> None:
         """ Init the DevEnv class. 
         
             A new instance can be created:
             - from a Dev Env descriptor
-            - based on another Dev Env
             - from a descriptor avaialable at the given path.
 
             Only one of the arguments can be used at a time.
@@ -34,7 +31,6 @@ class DevEnv():
             Args:
                 descriptor -- the description of the Development Environment from the dev_env.json 
                               file
-                dev_env_to_copy -- the DevEnv instance to copy
                 descriptor_path -- the path of the descriptor file
 
             Exceptions:
@@ -42,7 +38,7 @@ class DevEnv():
         """
 
         # Only one of the arguments can be not None
-        if sum(arg is not None for arg in [descriptor, dev_env_to_copy, descriptor_path]) > 1:
+        if sum(arg is not None for arg in [descriptor, descriptor_path]) > 1:
             raise ValueError("Only one of the arguments can be not None.")
 
         if descriptor_path:
@@ -51,17 +47,13 @@ class DevEnv():
             with open(descriptor_path, "r") as file:
                 descriptor = json.load(file)
 
-        if descriptor:
-            self.name: str = descriptor["name"]
-            self.tools: list[dict[str, str]] = descriptor["tools"]
-            descriptor_installed = descriptor.get("installed", "False")
-            if "True" == descriptor_installed:
-                self.is_installed = True
-            else:
-                self.is_installed = False
+        self.name: str = descriptor["name"]
+        self.tools: list[dict[str, str]] = descriptor["tools"]
+        descriptor_installed = descriptor.get("installed", "False")
+        if "True" == descriptor_installed:
+            self.is_installed = True
         else:
-            self.name = dev_env_to_copy.name
-            self.tools = dev_env_to_copy.tools
+            self.is_installed = False
 
     def check_image_availability(self, all_tool_images: ToolImages, 
                                  update_tool_image_store: bool = False,
