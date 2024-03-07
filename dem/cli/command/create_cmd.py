@@ -146,8 +146,6 @@ def create_new_dev_env(platform: Platform, new_dev_env_descriptor: dict) -> DevE
     new_dev_env = DevEnv(new_dev_env_descriptor)
     platform.local_dev_envs.append(new_dev_env)
 
-    return new_dev_env
-
 def create_dev_env(platform: Platform, dev_env_name: str) -> DevEnv:
     if ' ' in dev_env_name:
         stderr.print("The name of the Development Environment cannot contain whitespace characters!")
@@ -163,22 +161,11 @@ def create_dev_env(platform: Platform, dev_env_name: str) -> DevEnv:
     
     if dev_env_original is not None:
         overwrite_existing_dev_env(dev_env_original, new_dev_env_descriptor)
-        new_dev_env = dev_env_original
     else:
-        new_dev_env = create_new_dev_env(platform, new_dev_env_descriptor)
-
-    return new_dev_env
+        create_new_dev_env(platform, new_dev_env_descriptor)
 
 def execute(platform: Platform, dev_env_name: str) -> None:
-    dev_env = create_dev_env(platform, dev_env_name)
-
-    # Validate the Dev Env creation
-    image_statuses = dev_env.check_image_availability(platform.tool_images, 
-                                                      update_tool_image_store=True)
-
-    if (ToolImages.NOT_AVAILABLE in image_statuses) or (ToolImages.REGISTRY_ONLY in image_statuses):
-        stderr.print("The installation failed.")
-    else:
-        platform.flush_descriptors()
-        stdout.print(f"The [green]{dev_env_name}[/] Development Environment has been created!")
-        stdout.print("Run [italic]dem install[/] to install it.")
+    create_dev_env(platform, dev_env_name)
+    platform.flush_descriptors()
+    stdout.print(f"The [green]{dev_env_name}[/] Development Environment has been created!")
+    stdout.print("Run [italic]dem install[/] to install it.")

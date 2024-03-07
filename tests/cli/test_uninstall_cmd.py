@@ -47,7 +47,7 @@ def test_uninstall_dev_env_valid_name(mock_stdout_print):
     
     mock_platform.get_dev_env_by_name.assert_called_once_with(fake_dev_env_to_uninstall.name )
     mock_platform.uninstall_dev_env.assert_called_once_with(fake_dev_env_to_uninstall)
-    mock_stdout_print.assert_called_once_with(f"[green]Successfully deleted the {fake_dev_env_to_uninstall.name}![/]")
+    mock_stdout_print.assert_called_once_with(f"[green]Successfully uninstalled the {fake_dev_env_to_uninstall.name}![/]")
 
 @patch("dem.cli.command.uninstall_cmd.stderr.print")
 def test_uninstall_dev_env_valid_name_not_installed(mock_stderr_print):

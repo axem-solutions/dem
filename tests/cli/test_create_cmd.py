@@ -66,11 +66,9 @@ def test_create_new_dev_env(mock_DevEnvLocal):
     mock_new_dev_env_descriptor = MagicMock()
 
     # Run unit under test
-    actual_new_dev_env = create_cmd.create_new_dev_env(mock_platform, 
-                                                       mock_new_dev_env_descriptor)
+    create_cmd.create_new_dev_env(mock_platform, mock_new_dev_env_descriptor)
 
     # Check expectations
-    assert actual_new_dev_env == mock_new_dev_env
     mock_DevEnvLocal.assert_called_once_with(mock_new_dev_env_descriptor)
     mock_platform.local_dev_envs.append.assert_called_once_with(mock_new_dev_env)
 
@@ -95,11 +93,9 @@ def test_create_dev_env_new(mock_get_tool_image_list, mock_get_dev_env_descripto
     expected_dev_env_name = "test_dev_env"
 
     # Run unit under test
-    actual_dev_env = create_cmd.create_dev_env(mock_dev_env_local_setup, expected_dev_env_name)
+    create_cmd.create_dev_env(mock_dev_env_local_setup, expected_dev_env_name)
 
     # Check expectations
-    assert actual_dev_env == mock_new_dev_env
-
     mock_dev_env_local_setup.get_dev_env_by_name.assert_called_once_with(expected_dev_env_name)
     mock_get_tool_image_list.assert_called_once_with(mock_dev_env_local_setup.tool_images)
     mock_get_dev_env_descriptor_from_user.assert_called_once_with(expected_dev_env_name, mock_tool_images)
@@ -130,11 +126,9 @@ def test_create_dev_env_overwrite(mock_confirm, mock_get_tool_image_list,
     expected_dev_env_name = "test_dev_env"
 
     # Run unit under test
-    actual_dev_env = create_cmd.create_dev_env(mock_dev_env_local_setup, expected_dev_env_name)
+    create_cmd.create_dev_env(mock_dev_env_local_setup, expected_dev_env_name)
 
     # Check expectations
-    assert actual_dev_env == mock_dev_env_original
-
     mock_dev_env_local_setup.get_dev_env_by_name.assert_called_once_with(expected_dev_env_name)
     mock_confirm.assert_called_once_with("The input name is already used by a Development Environment. Overwrite it?",
                                          abort=True)
@@ -173,11 +167,6 @@ def test_execute(mock_create_dev_env, mock_stdout_print):
 
     mock_dev_env = MagicMock()
     expected_dev_env_name = "test_dev_env"
-    mock_dev_env.name = expected_dev_env_name
-    mock_create_dev_env.return_value = mock_dev_env
-
-    image_statuses = [ToolImages.LOCAL_AND_REGISTRY, ToolImages.LOCAL_ONLY] * 2
-    mock_dev_env.check_image_availability.return_value = image_statuses
 
     # Run unit under test
     runner_result = runner.invoke(main.typer_cli, ["create", expected_dev_env_name], color=True)
@@ -186,8 +175,6 @@ def test_execute(mock_create_dev_env, mock_stdout_print):
     assert 0 == runner_result.exit_code
 
     mock_create_dev_env.assert_called_once_with(mock_platform, expected_dev_env_name)
-    mock_dev_env.check_image_availability.assert_called_once_with(mock_platform.tool_images,
-                                                                  update_tool_image_store=True)
     mock_platform.flush_descriptors.assert_called_once()
     mock_stdout_print.assert_has_calls([
         call(f"The [green]{expected_dev_env_name}[/] Development Environment has been created!"),
@@ -201,12 +188,6 @@ def test_execute_failure(mock_create_dev_env, mock_stderr_print):
     mock_platform = MagicMock()
     main.platform = mock_platform
 
-    mock_dev_env = MagicMock()
-    mock_create_dev_env.return_value = mock_dev_env
-
-    image_statuses = [ToolImages.NOT_AVAILABLE] * 5
-    mock_dev_env.check_image_availability.return_value = image_statuses
-
     expected_dev_env_name = "test_dev_env"
 
     # Run unit under test
@@ -216,9 +197,6 @@ def test_execute_failure(mock_create_dev_env, mock_stderr_print):
     assert 0 == runner_result.exit_code
 
     mock_create_dev_env.assert_called_once_with(mock_platform, expected_dev_env_name)
-    mock_dev_env.check_image_availability.assert_called_once_with(mock_platform.tool_images,
-                                                                  update_tool_image_store=True)
-    mock_stderr_print.assert_called_once_with("The installation failed.")
 
 @patch("dem.cli.command.create_cmd.stderr.print")
 def test_create_dev_env_with_whitespace(mock_stderr_print):

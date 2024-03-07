@@ -25,4 +25,4 @@ def execute(platform: Platform, dev_env_name: str) -> None:
         except PlatformError as e:
             stderr.print(f"[red]Error: {str(e)}[/]")
         else:
-            stdout.print(f"[green]Successfully deleted the {dev_env_name}![/]")
+            stdout.print(f"[green]Successfully uninstalled the {dev_env_name}![/]")
