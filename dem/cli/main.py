@@ -181,10 +181,11 @@ def rename(dev_env_name: Annotated[str, typer.Argument(help="Name of the Develop
 @typer_cli.command()
 def modify(dev_env_name: Annotated[str, typer.Argument(help="Name of the Development Environment to modify.",
                                                        autocompletion=autocomplete_dev_env_name)],
-           tool_type: Annotated[str, typer.Argument(help="The tool type to modify.")] = "",
+           tool_type: Annotated[str, typer.Argument(help="The tool type to change.")] = "",
            tool_image: Annotated[str, typer.Argument(help="The tool image to set for the tool type.")] = "") -> None:
     """
-    Modify a tool in a Development Environment.
+    Change a tool in a Development Environment.
+
     If the tool type is not specified, the Dev Env settings panel will be opened.
     """
     if platform:

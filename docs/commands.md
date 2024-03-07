@@ -88,7 +88,7 @@ Arguments:
 
 ## **`dem modify DEV_ENV_NAME`**
 
-Modify a tool in a Development Environment.
+Change a tool in a Development Environment.
 
 If the tool type is not specified, the Dev Env settings panel will be opened:
 
@@ -108,7 +108,7 @@ Select the required tool image and press :material-keyboard-return:.
 Arguments:
 
 `DEV_ENV_NAME` Name of the Development Environment to modify. [required]  
-`[TOOL_TYPE]` The type of the tool to modify. [optional]  
+`[TOOL_TYPE]` The tool type to change. [optional]  
 `[TOOL_IMAGE]` The tool image to set for the tool type. [optional]
 
 ---
