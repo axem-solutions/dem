@@ -114,8 +114,10 @@ def test_create_dev_env_overwrite(mock_confirm, mock_get_tool_image_list,
 
     mock_platform.get_dev_env_by_name.assert_called_once_with(expected_dev_env_name)
     mock_confirm.assert_has_calls([
-        call("The input name is already used by a Development Environment. Overwrite it?", abort=True),
-        call("The Development Environment to overwrite is installed. Uninstall it?", abort=True)
+        call("The input name is already used by a Development Environment. Overwrite it?", 
+             abort=True),
+        call("The Development Environment is installed, so it can't be overwritten. " + \
+             "Uninstall it first?", abort=True)
     ])
     mock_platform.uninstall_dev_env.assert_called_once_with(mock_dev_env_original)
     mock_get_tool_image_list(mock_platform.tool_images)

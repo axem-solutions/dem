@@ -169,8 +169,8 @@ def create_dev_env(platform: Platform, dev_env_name: str) -> None:
                       abort=True)
 
         if dev_env_original.is_installed:
-            typer.confirm("The Development Environment to overwrite is installed. Uninstall it?", 
-                          abort=True)
+            typer.confirm("The Development Environment is installed, so it can't be overwritten. " + \
+                          "Uninstall it first?", abort=True)
             platform.uninstall_dev_env(dev_env_original)
 
     tool_image_list = get_tool_image_list(platform.tool_images)
