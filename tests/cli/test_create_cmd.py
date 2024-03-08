@@ -10,8 +10,6 @@ import pytest
 from typer.testing import CliRunner
 from unittest.mock import patch, MagicMock, call
 
-from dem.core.tool_images import ToolImages
-
 ## Global test variables
 
 # In order to test stdout and stderr separately, the stderr can't be mixed into the stdout.
@@ -39,22 +37,6 @@ def test_get_tool_image_list():
         ["local_image", "local"],
     ]
     assert actual_tool_images == expected_tool_iamges
-
-def test_overwrite_existing_dev_env():
-    # Test setup
-    mock_original_dev_env = MagicMock()
-    mock_original_dev_env.tools = MagicMock()
-
-    mock_tools = MagicMock()
-    mock_new_dev_env_descriptor = {
-        "tools": mock_tools
-    }
-
-    # Run unit under test
-    create_cmd.overwrite_existing_dev_env(mock_original_dev_env, mock_new_dev_env_descriptor)
-
-    # Check expectations
-    assert mock_original_dev_env.tools == mock_tools
 
 @patch("dem.cli.command.create_cmd.DevEnv")
 def test_create_new_dev_env(mock_DevEnvLocal):
@@ -102,17 +84,16 @@ def test_create_dev_env_new(mock_get_tool_image_list, mock_get_dev_env_descripto
     mock_create_new_dev_env.assert_called_once_with(mock_dev_env_local_setup, mock_dev_env_descriptor)
     mock_new_dev_env.check_image_availability.return_value = mock_dev_env_local_setup.tool_images
 
-@patch("dem.cli.command.create_cmd.overwrite_existing_dev_env")
 @patch("dem.cli.command.create_cmd.get_dev_env_descriptor_from_user")
 @patch("dem.cli.command.create_cmd.get_tool_image_list")
 @patch("dem.cli.command.create_cmd.typer.confirm")
 def test_create_dev_env_overwrite(mock_confirm, mock_get_tool_image_list, 
-                                  mock_get_dev_env_descriptor_from_user,
-                                  mock_overwrite_existing_dev_env):
+                                  mock_get_dev_env_descriptor_from_user) -> None:
     # Test setup
-    mock_dev_env_local_setup = MagicMock()
+    mock_platform = MagicMock()
     mock_dev_env_original = MagicMock()
-    mock_dev_env_local_setup.get_dev_env_by_name.return_value = mock_dev_env_original
+    mock_dev_env_original.is_installed = True
+    mock_platform.get_dev_env_by_name.return_value = mock_dev_env_original
     mock_tools = MagicMock()
     mock_dev_env_descriptor = {
         "tools": mock_tools
@@ -126,20 +107,24 @@ def test_create_dev_env_overwrite(mock_confirm, mock_get_tool_image_list,
     expected_dev_env_name = "test_dev_env"
 
     # Run unit under test
-    create_cmd.create_dev_env(mock_dev_env_local_setup, expected_dev_env_name)
+    create_cmd.create_dev_env(mock_platform, expected_dev_env_name)
 
     # Check expectations
-    mock_dev_env_local_setup.get_dev_env_by_name.assert_called_once_with(expected_dev_env_name)
-    mock_confirm.assert_called_once_with("The input name is already used by a Development Environment. Overwrite it?",
-                                         abort=True)
-    mock_get_tool_image_list(mock_dev_env_local_setup.tool_images)
+    assert mock_dev_env_original.tools is mock_tools
+
+    mock_platform.get_dev_env_by_name.assert_called_once_with(expected_dev_env_name)
+    mock_confirm.assert_has_calls([
+        call("The input name is already used by a Development Environment. Overwrite it?", abort=True),
+        call("The Development Environment to overwrite is installed. Uninstall it?", abort=True)
+    ])
+    mock_platform.uninstall_dev_env.assert_called_once_with(mock_dev_env_original)
+    mock_get_tool_image_list(mock_platform.tool_images)
     mock_get_dev_env_descriptor_from_user.assert_called_once_with(expected_dev_env_name,
                                                                   mock_tool_images)
-    mock_overwrite_existing_dev_env.assert_called_once_with(mock_dev_env_original, mock_dev_env_descriptor)
 
 @patch("dem.cli.command.create_cmd.get_dev_env_descriptor_from_user")
 @patch("dem.cli.command.create_cmd.typer.confirm")
-def test_execute_abort(mock_confirm, mock_get_dev_env_descriptor_from_user):
+def test_create_dev_env_abort(mock_confirm, mock_get_dev_env_descriptor_from_user):
     # Test setup
     mock_dev_env_local_setup = MagicMock()
     mock_dev_env_original = MagicMock()
@@ -152,11 +137,11 @@ def test_execute_abort(mock_confirm, mock_get_dev_env_descriptor_from_user):
     with pytest.raises(Exception):
         create_cmd.create_dev_env(mock_dev_env_local_setup, expected_dev_env_name)
 
-        # Check expectations
-        mock_dev_env_local_setup.get_dev_env_by_name.assert_called_once_with(expected_dev_env_name)
-        mock_confirm.assert_called_once_with("The input name is already used by a Development Environment. Overwrite it?",
-                                            abort=True)
-        mock_get_dev_env_descriptor_from_user.assert_not_called()
+    # Check expectations
+    mock_dev_env_local_setup.get_dev_env_by_name.assert_called_once_with(expected_dev_env_name)
+    mock_confirm.assert_called_once_with("The input name is already used by a Development Environment. Overwrite it?",
+                                        abort=True)
+    mock_get_dev_env_descriptor_from_user.assert_not_called()
 
 @patch("dem.cli.command.create_cmd.stdout.print")
 @patch("dem.cli.command.create_cmd.create_dev_env")
@@ -181,9 +166,8 @@ def test_execute(mock_create_dev_env, mock_stdout_print):
         call("Run [italic]dem install[/] to install it.")
     ])
 
-@patch("dem.cli.command.create_cmd.stderr.print")
 @patch("dem.cli.command.create_cmd.create_dev_env")
-def test_execute_failure(mock_create_dev_env, mock_stderr_print):
+def test_execute_failure(mock_create_dev_env):
     # Test setup
     mock_platform = MagicMock()
     main.platform = mock_platform

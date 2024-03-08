@@ -139,14 +139,26 @@ def get_dev_env_descriptor_from_user(dev_env_name: str, tool_image_list: list[li
 
     return dev_env_descriptor
 
-def overwrite_existing_dev_env(original_dev_env: DevEnv, new_dev_env_descriptor: dict) -> None:
-    original_dev_env.tools = new_dev_env_descriptor["tools"]
-
-def create_new_dev_env(platform: Platform, new_dev_env_descriptor: dict) -> DevEnv:
+def create_new_dev_env(platform: Platform, new_dev_env_descriptor: dict) -> None:
+    """ Create a new Development Environment.
+        
+        Args:
+            platform -- the platform
+            new_dev_env_descriptor -- the descriptor of the new Development Environment
+    """
     new_dev_env = DevEnv(new_dev_env_descriptor)
     platform.local_dev_envs.append(new_dev_env)
 
-def create_dev_env(platform: Platform, dev_env_name: str) -> DevEnv:
+def create_dev_env(platform: Platform, dev_env_name: str) -> None:
+    """ Create a new Development Environment or overwrite an existing one.
+        
+        Args:
+            platform -- the platform
+            dev_env_name -- the name of the Development Environment
+
+        Exceptions:
+            Abort -- if the name of the Development Environment contains whitespace characters
+    """
     if ' ' in dev_env_name:
         stderr.print("The name of the Development Environment cannot contain whitespace characters!")
         raise typer.Abort()
@@ -156,15 +168,29 @@ def create_dev_env(platform: Platform, dev_env_name: str) -> DevEnv:
         typer.confirm("The input name is already used by a Development Environment. Overwrite it?", 
                       abort=True)
 
+        if dev_env_original.is_installed:
+            typer.confirm("The Development Environment to overwrite is installed. Uninstall it?", 
+                          abort=True)
+            platform.uninstall_dev_env(dev_env_original)
+
     tool_image_list = get_tool_image_list(platform.tool_images)
     new_dev_env_descriptor = get_dev_env_descriptor_from_user(dev_env_name, tool_image_list)
     
     if dev_env_original is not None:
-        overwrite_existing_dev_env(dev_env_original, new_dev_env_descriptor)
+        dev_env_original.tools = new_dev_env_descriptor["tools"]
     else:
         create_new_dev_env(platform, new_dev_env_descriptor)
 
 def execute(platform: Platform, dev_env_name: str) -> None:
+    """ Create a new Development Environment.
+        
+        Args:
+            platform -- the platform
+            dev_env_name -- the name of the Development Environment
+
+        Exceptions:
+            Abort -- if the name of the Development Environment contains whitespace characters
+    """
     create_dev_env(platform, dev_env_name)
     platform.flush_descriptors()
     stdout.print(f"The [green]{dev_env_name}[/] Development Environment has been created!")
