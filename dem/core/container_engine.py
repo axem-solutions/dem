@@ -114,7 +114,7 @@ class ContainerEngine(Core):
         except docker.errors.ImageNotFound:
             self.user_output.msg(f"[yellow]The {image} doesn't exist. Unable to remove it.[/]\n")
         except docker.errors.APIError:
-            raise ContainerEngineError(f"The {image} is used by a container. Unable to remove it.[/]\n")
+            raise ContainerEngineError(f"The {image} is used by a container. Unable to remove it.\n")
         else:
             self.user_output.msg(f"[green]Successfully removed the {image}![/]\n")
 

@@ -117,25 +117,6 @@ def test_handle_user_confirm_cancel():
     with pytest.raises(typer.Abort):
         modify_cmd.handle_user_confirm("cancel", MagicMock(), MagicMock())
 
-def test_execute_invalid_name():
-    # Test setup
-    mock_platform = MagicMock()
-    main.platform = mock_platform
-    mock_platform.get_dev_env_by_name.return_value = None
-    test_dev_env_name =  "not existing env"
-
-    # Run unit under test
-    runner_result = runner.invoke(main.typer_cli, ["modify", test_dev_env_name], color=True)
-
-    # Check expectations
-    assert 0 == runner_result.exit_code
-
-    mock_platform.get_dev_env_by_name.assert_called_once_with(test_dev_env_name)
-
-    console = Console(file=io.StringIO())
-    console.print("[red]The Development Environment doesn't exist.")
-    assert console.file.getvalue() == runner_result.stderr
-
 @patch("dem.cli.command.modify_cmd.handle_user_confirm")
 @patch("dem.cli.command.modify_cmd.get_confirm_from_user")
 @patch("dem.cli.command.modify_cmd.get_modifications_from_user")
@@ -276,6 +257,25 @@ def test_modify_single_tool_no_type(mock_stderr_print: MagicMock) -> None:
 
     mock_stderr_print.assert_called_once_with("[red]Error: The tool type and the tool image must be set together.[/]")
 
+def test_execute_invalid_name():
+    # Test setup
+    mock_platform = MagicMock()
+    main.platform = mock_platform
+    mock_platform.get_dev_env_by_name.return_value = None
+    test_dev_env_name =  "not existing env"
+
+    # Run unit under test
+    runner_result = runner.invoke(main.typer_cli, ["modify", test_dev_env_name], color=True)
+
+    # Check expectations
+    assert 0 == runner_result.exit_code
+
+    mock_platform.get_dev_env_by_name.assert_called_once_with(test_dev_env_name)
+
+    console = Console(file=io.StringIO())
+    console.print("[red]The Development Environment doesn't exist.")
+    assert console.file.getvalue() == runner_result.stderr
+
 @patch("dem.cli.command.modify_cmd.modify_single_tool")
 @patch("dem.cli.command.modify_cmd.typer.confirm")
 @patch("dem.cli.command.modify_cmd.stdout.print")
@@ -320,3 +320,30 @@ def test_execute_open_modify_panel(mock_open_modify_panel: MagicMock) -> None:
     # Check expectations
     mock_platform.get_dev_env_by_name.assert_called_once_with(test_dev_env_name)
     mock_open_modify_panel.assert_called_once_with(mock_platform, mock_dev_env)
+
+@patch("dem.cli.command.modify_cmd.stderr.print")
+@patch("dem.cli.command.modify_cmd.typer.confirm")
+@patch("dem.cli.command.modify_cmd.stdout.print")
+def test_execute_PlatformError(mock_stdout_print: MagicMock, mock_confirm: MagicMock,
+                               mock_stderr_print: MagicMock) -> None:
+    # Test setup
+    mock_platform = MagicMock()
+    test_dev_env_name = "test_dev_env_name"
+    test_tool_type = "test_tool_type"
+    test_tool_image = "test_tool_image"
+    mock_dev_env = MagicMock()
+    mock_dev_env.is_installed = True
+
+    mock_platform.get_dev_env_by_name.return_value = mock_dev_env
+    test_exception_text = "test_exception_text"
+    mock_platform.uninstall_dev_env.side_effect = modify_cmd.PlatformError(test_exception_text)
+
+    # Run unit under test
+    modify_cmd.execute(mock_platform, test_dev_env_name, test_tool_type, test_tool_image)
+
+    # Check expectations
+    mock_platform.get_dev_env_by_name.assert_called_once_with(test_dev_env_name)
+    mock_stdout_print.assert_called_once_with("[yellow]The Development Environment is installed, so it can't be modified.[/]")
+    mock_confirm.assert_called_once_with("Do you want to uninstall it first?", abort=True)
+    mock_platform.uninstall_dev_env.assert_called_once_with(mock_dev_env)
+    mock_stderr_print.assert_called_once_with(f"[red]Platform error: {test_exception_text}[/]")

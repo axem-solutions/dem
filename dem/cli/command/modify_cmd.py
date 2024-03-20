@@ -5,6 +5,7 @@ import copy, typer
 from dem.core.dev_env import DevEnv, DevEnv
 from dem.core.tool_images import ToolImages
 from dem.core.platform import Platform
+from dem.core.exceptions import PlatformError
 from dem.cli.console import stderr, stdout
 from dem.cli.tui.renderable.menu import SelectMenu
 from dem.cli.tui.panel.tool_type_selector import ToolTypeSelectorPanel
@@ -207,7 +208,11 @@ def execute(platform: Platform, dev_env_name: str, tool_type: str, tool_image: s
     elif dev_env.is_installed is True:
         stdout.print("[yellow]The Development Environment is installed, so it can't be modified.[/]")
         typer.confirm("Do you want to uninstall it first?", abort=True)
-        platform.uninstall_dev_env(dev_env)
+        try:
+            platform.uninstall_dev_env(dev_env)
+        except PlatformError as e:
+            stderr.print(f"[red]{str(e)}[/]")
+            return
 
     if (tool_type or tool_image):
         modify_single_tool(platform, dev_env, tool_type, tool_image)

@@ -124,6 +124,38 @@ def test_create_dev_env_overwrite(mock_confirm, mock_get_tool_image_list,
     mock_get_dev_env_descriptor_from_user.assert_called_once_with(expected_dev_env_name,
                                                                   mock_tool_images)
 
+@patch("dem.cli.command.create_cmd.typer.Abort")
+@patch("dem.cli.command.create_cmd.stderr.print")
+@patch("dem.cli.command.create_cmd.typer.confirm")
+def test_create_dev_env_overwrite_PlatformError(mock_confirm: MagicMock, mock_stderr_print: MagicMock, 
+                                                mock_Abort: MagicMock) -> None:
+    # Test setup
+    mock_platform = MagicMock()
+    mock_dev_env_original = MagicMock()
+    mock_dev_env_original.is_installed = True
+    mock_platform.get_dev_env_by_name.return_value = mock_dev_env_original
+    test_exception_text = "test_exception_text"
+    mock_platform.uninstall_dev_env.side_effect = create_cmd.PlatformError(test_exception_text)
+    mock_Abort.side_effect = Exception("")
+
+    test_dev_env_name = "test_dev_env"
+
+    # Run unit under test
+    with pytest.raises(Exception):
+        create_cmd.create_dev_env(mock_platform, test_dev_env_name)
+
+    # Check expectations
+    mock_platform.get_dev_env_by_name.assert_called_once_with(test_dev_env_name)
+    mock_confirm.assert_has_calls([
+        call("The input name is already used by a Development Environment. Overwrite it?", 
+             abort=True),
+        call("The Development Environment is installed, so it can't be overwritten. " + \
+             "Uninstall it first?", abort=True)
+    ])
+    mock_platform.uninstall_dev_env.assert_called_once_with(mock_dev_env_original)
+    mock_stderr_print.assert_called_once_with(f"[red]Platform error: {test_exception_text}[/]")
+    mock_Abort.assert_called_once()
+
 @patch("dem.cli.command.create_cmd.get_dev_env_descriptor_from_user")
 @patch("dem.cli.command.create_cmd.typer.confirm")
 def test_create_dev_env_abort(mock_confirm, mock_get_dev_env_descriptor_from_user):

@@ -133,4 +133,4 @@ def test_execute_reinit_installed_uninstall_fails(mock_DevEnv, mock_confirm, moc
     mock_confirm.assert_has_calls([call("Would you like to re-init the Dev Env? All local changes will be lost!", abort=True),
                                    call("The Development Environment is installed, so it can't be deleted. Do you want to uninstall it first?", abort=True)])
     mock_platform.uninstall_dev_env.assert_called_once_with(mock_local_dev_env)
-    mock_stderr_print.assert_called_once_with(f"[red]Error: The Dev Env can't be uninstalled. Platform error: {test_exception_text}")
+    mock_stderr_print.assert_called_once_with(f"[red]Platform error: {test_exception_text}[/]")

@@ -20,7 +20,7 @@ def execute(platform: Platform, dev_env_name: str) -> None:
             try:
                 platform.uninstall_dev_env(dev_env_to_delete)
             except PlatformError as e:
-                stderr.print(f"[red]Error: The deletion failed, because the Dev Env can't be uninstalled. {str(e)}[/]")
+                stderr.print(f"[red]{str(e)}[/]")
                 return
 
         stdout.print("Deleting the Development Environment...")

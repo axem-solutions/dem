@@ -166,11 +166,11 @@ class Platform(Core):
     def uninstall_dev_env(self, dev_env_to_uninstall: DevEnv) -> None:
         """ Uninstall the Dev Env by removing the images not required anymore.
 
-            Exceptions:
-                PlatformError -- if the uninstall fails
-        
             Args:
                 dev_env_to_uninstall -- the Development Environment to uninstall
+
+            Exceptions:
+                PlatformError -- if the uninstall fails
         """
         all_required_tool_images = set()
         for dev_env in self.local_dev_envs:
@@ -188,7 +188,7 @@ class Platform(Core):
             try:
                 self.container_engine.remove(tool_image)
             except ContainerEngineError as e:
-                raise PlatformError(f"Dev Env uninstall failed. {str(e)}")
+                raise PlatformError(f"Dev Env uninstall failed. <-caused by- {str(e)}")
             
         dev_env_to_uninstall.is_installed = False
         self.flush_descriptors()
