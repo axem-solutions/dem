@@ -560,7 +560,7 @@ def test_Registries_list_repos_handle_exception(mock___init__: MagicMock,
 
         @property
         def repos(self) -> list[str]:
-            raise(Exception(test_exception_text))
+            raise Exception(test_exception_text)
 
     test_registries = registry.Registries(MagicMock())
     test_registries.registries = [StubRegistry()]

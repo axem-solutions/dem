@@ -4,6 +4,7 @@
 import typer
 from dem.core.platform import Platform
 from dem.core.dev_env import DevEnv
+from dem.core.exceptions import PlatformError
 from dem.cli.console import stdout, stderr
 
 def handle_existing_local_dev_env(platform: Platform, local_dev_env: DevEnv) -> None:
@@ -13,10 +14,18 @@ def handle_existing_local_dev_env(platform: Platform, local_dev_env: DevEnv) -> 
             platform -- the platform
             local_dev_env -- the existing Dev Env
     """
-    stdout.print("[yellow]The Dev Env already exists. By continuing the local Dev Env will be uninstalled.[/]")
+    stdout.print("[yellow]The Dev Env already exists.[/]")
     typer.confirm("Continue with overwrite?", abort=True)
     
-    # TODO: The Dev Env must be uninstalled before the descriptor gets removed.
+    if local_dev_env.is_installed:
+        typer.confirm("The Dev Env to overwrite is installed. Do you want to uninstall it?", 
+                      abort=True)
+        try:
+            platform.uninstall_dev_env(local_dev_env)
+        except PlatformError as e:
+            stderr.print(f"[red]{str(e)}[/]")
+            raise typer.Abort()
+
     platform.local_dev_envs.remove(local_dev_env)
 
 def execute(platform: Platform, dev_env_name: str) -> None:

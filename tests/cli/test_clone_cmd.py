@@ -7,7 +7,8 @@ import dem.cli.command.clone_cmd as clone_cmd
 
 # Test framework
 from typer.testing import CliRunner
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch, MagicMock, call
+import pytest
 
 # In order to test stdout and stderr separately, the stderr can't be mixed into the stdout.
 runner = CliRunner(mix_stderr=False)
@@ -23,9 +24,38 @@ def test_handle_existing_local_dev_env(mock_stdout_print: MagicMock, mock_typer_
     clone_cmd.handle_existing_local_dev_env(mock_platform, mock_local_dev_env)
 
     # Check expectations
-    mock_stdout_print.assert_called_once_with("[yellow]The Dev Env already exists. By continuing the local Dev Env will be uninstalled.[/]")
-    mock_typer_confirm.assert_called_once_with("Continue with overwrite?", abort=True)
+    mock_stdout_print.assert_called_once_with("[yellow]The Dev Env already exists.[/]")
+    mock_typer_confirm.assert_has_calls([call("Continue with overwrite?", abort=True),
+                                         call("The Dev Env to overwrite is installed. Do you want to uninstall it?", 
+                                              abort=True)])
+    mock_platform.uninstall_dev_env.assert_called_once_with(mock_local_dev_env)
     mock_platform.local_dev_envs.remove.assert_called_once_with(mock_local_dev_env)
+
+@patch("dem.cli.command.clone_cmd.stderr.print")
+@patch("dem.cli.command.clone_cmd.typer.confirm")
+@patch("dem.cli.command.clone_cmd.stdout.print")
+def test_handle_existing_local_dev_env_PlatformError(mock_stdout_print: MagicMock, 
+                                                     mock_typer_confirm: MagicMock,
+                                                     mock_stderr_print: MagicMock):
+    # Test setup
+    mock_platform = MagicMock()
+    mock_local_dev_env = MagicMock()
+
+    test_exception_message = "test_exception_message"
+    mock_platform.uninstall_dev_env.side_effect = clone_cmd.PlatformError(test_exception_message)
+
+    # Run unit under test
+    with pytest.raises(clone_cmd.typer.Abort):
+        clone_cmd.handle_existing_local_dev_env(mock_platform, mock_local_dev_env)
+
+    # Check expectations
+    mock_stdout_print.assert_called_once_with("[yellow]The Dev Env already exists.[/]")
+    mock_typer_confirm.assert_has_calls([call("Continue with overwrite?", abort=True),
+                                         call("The Dev Env to overwrite is installed. Do you want to uninstall it?", 
+                                              abort=True)])
+    mock_platform.uninstall_dev_env.assert_called_once_with(mock_local_dev_env)
+    mock_stderr_print.assert_called_once_with(f"[red]Platform error: {test_exception_message}[/]")
+    mock_platform.local_dev_envs.remove.assert_not_called()
 
 def test_execute_no_catalogs() -> None:
     # Test setup

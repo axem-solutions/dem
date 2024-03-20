@@ -45,7 +45,7 @@ def handle_tool_type_selector_panel(tool_type_selector_panel: ToolTypeSelectorPa
     tool_type_selector_panel.wait_for_user()
 
     if "cancel" in tool_type_selector_panel.cancel_next_menu.get_selection():
-        raise(typer.Abort())
+        raise typer.Abort()
 
     tool_type_selector_panel.cancel_next_menu.is_selected = False
 
@@ -151,7 +151,7 @@ def get_confirm_from_user() -> str:
 
 def handle_user_confirm(confirmation: str, dev_env_local: DevEnv, platform: Platform) -> None:
     if confirmation == "cancel":
-        raise(typer.Abort())
+        raise typer.Abort()
 
     if confirmation == "save as":
         new_dev_env = copy.deepcopy(dev_env_local)
@@ -163,7 +163,7 @@ def handle_user_confirm(confirmation: str, dev_env_local: DevEnv, platform: Plat
             platform.local_dev_envs.append(new_dev_env)
         else:
             stderr.print("[red]The Development Environment already exist.")
-            raise(typer.Abort())
+            raise typer.Abort()
 
     platform.flush_descriptors()
 
