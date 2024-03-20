@@ -351,8 +351,8 @@ def test_Platform_install_dev_env_pull_failure(mock___init__: MagicMock, mock_us
         test_platform.install_dev_env(mock_dev_env)
 
     # Check expectations
-    assert str(exported_exception_info.value) == f"Platform error: Dev Env install failed. Reason:" + \
-                                                 f" Container engine error: {test_exception_text}"
+    assert str(exported_exception_info.value) == "Platform error: Dev Env install failed. --> " + \
+                                                 f"Container engine error: {test_exception_text}"
 
     mock___init__.assert_called_once()
 
@@ -580,7 +580,7 @@ def test_Platform_uninstall_dev_env_failure(mock___init__: MagicMock,
         # Check expectations
         mock___init__.assert_called_once()
 
-        assert str(exported_exception_info) == "Platform error: Dev Env uninstall failed. <-caused by-"
+        assert str(exported_exception_info) == "Platform error: Dev Env uninstall failed. --> "
         assert mock_dev_env_to_uninstall.is_installed == True
 
         mock_container_engine.remove.asssert_called_once_with("test_image_name4:test_image_version4")

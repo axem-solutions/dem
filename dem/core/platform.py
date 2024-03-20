@@ -158,7 +158,7 @@ class Platform(Core):
                 try:                
                     self.container_engine.pull(f"{tool['image_name']}:{tool['image_version']}")
                 except ContainerEngineError as e:
-                    raise PlatformError(f"Dev Env install failed. Reason: {str(e)}")
+                    raise PlatformError(f"Dev Env install failed. --> {str(e)}")
 
         dev_env_to_install.is_installed = True
         self.flush_descriptors()
@@ -188,7 +188,7 @@ class Platform(Core):
             try:
                 self.container_engine.remove(tool_image)
             except ContainerEngineError as e:
-                raise PlatformError(f"Dev Env uninstall failed. <-caused by- {str(e)}")
+                raise PlatformError(f"Dev Env uninstall failed. --> {str(e)}")
             
         dev_env_to_uninstall.is_installed = False
         self.flush_descriptors()

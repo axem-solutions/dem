@@ -37,7 +37,7 @@ def execute(platform: Platform, dev_env_name: str, container_arguments: list[str
 
     if dev_env_local is None:
         stderr.print("[red]Error: Unknown Development Environment: " + dev_env_name + "[/]")
-        raise(typer.Abort)
+        raise typer.Abort()
     else:
         # Update the tool images manually.
         Platform.update_tool_images_on_instantiation = False

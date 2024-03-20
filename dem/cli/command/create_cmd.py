@@ -44,7 +44,7 @@ def handle_tool_type_selector_panel(tool_type_selector_panel: ToolTypeSelectorPa
     tool_type_selector_panel.wait_for_user()
 
     if "cancel" in tool_type_selector_panel.cancel_next_menu.get_selection():
-        raise(typer.Abort())
+        raise typer.Abort()
 
     tool_type_selector_panel.cancel_next_menu.is_selected = False
 
@@ -176,7 +176,7 @@ def create_dev_env(platform: Platform, dev_env_name: str) -> None:
                 platform.uninstall_dev_env(dev_env_original)
             except PlatformError as e:
                 stderr.print(f"[red]{str(e)}[/]")
-                typer.Abort()
+                raise typer.Abort()
 
     tool_image_list = get_tool_image_list(platform.tool_images)
     new_dev_env_descriptor = get_dev_env_descriptor_from_user(dev_env_name, tool_image_list)
