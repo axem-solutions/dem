@@ -23,6 +23,6 @@ def execute(platform: Platform, dev_env_name: str) -> None:
         try:
             platform.uninstall_dev_env(dev_env_to_uninstall)
         except PlatformError as e:
-            stderr.print(f"[red]Error: {str(e)}[/]")
+            stderr.print(f"[red]{str(e)}[/]")
         else:
             stdout.print(f"[green]Successfully uninstalled the {dev_env_name}![/]")

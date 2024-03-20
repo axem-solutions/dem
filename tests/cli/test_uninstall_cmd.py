@@ -87,4 +87,4 @@ def test_uninstall_dev_env_valid_name_failed(mock_stderr_print):
     assert 0 == runner_result.exit_code
     
     mock_platform.get_dev_env_by_name.assert_called_once_with(fake_dev_env_to_uninstall.name )
-    mock_stderr_print.assert_called_once_with(f"[red]Error: Platform error: {test_exception_text}[/]")
+    mock_stderr_print.assert_called_once_with(f"[red]Platform error: {test_exception_text}[/]")

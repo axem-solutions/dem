@@ -580,7 +580,7 @@ def test_Platform_uninstall_dev_env_failure(mock___init__: MagicMock,
         # Check expectations
         mock___init__.assert_called_once()
 
-        assert str(exported_exception_info) == "Platform error: Dev Env uninstall failed."
+        assert str(exported_exception_info) == "Platform error: Dev Env uninstall failed. <-caused by-"
         assert mock_dev_env_to_uninstall.is_installed == True
 
         mock_container_engine.remove.asssert_called_once_with("test_image_name4:test_image_version4")

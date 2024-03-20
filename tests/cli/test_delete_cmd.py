@@ -66,7 +66,7 @@ def test_delete_uninstall_failed(mock_stderr_print: MagicMock, mock_confirm: Mag
     mock_confirm.assert_called_once_with("The Development Environment is installed. Do you want to uninstall it?", 
                                         abort=True)
     mock_platform.uninstall_dev_env.assert_called_once_with(test_dev_env)
-    mock_stderr_print.assert_called_once_with(f"[red]Error: The deletion failed, because the Dev Env can't be uninstalled. Platform error: {test_exception_text}[/]")
+    mock_stderr_print.assert_called_once_with(f"[red]Platform error: {test_exception_text}[/]")
 
 @patch("dem.cli.command.delete_cmd.stderr.print")
 def test_delete_not_existing(mock_stderr_print: MagicMock) -> None:

@@ -36,7 +36,7 @@ def execute(platform: Platform, project_path: str) -> None:
                 try:
                     platform.uninstall_dev_env(local_dev_env)
                 except PlatformError as e:
-                    stderr.print(f"[red]Error: The Dev Env can't be uninstalled. {str(e)}")
+                    stderr.print(f"[red]{str(e)}[/]")
                     return
             
             platform.local_dev_envs.remove(local_dev_env)

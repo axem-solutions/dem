@@ -5,6 +5,7 @@ import typer
 from dem.core.dev_env import DevEnv, DevEnv
 from dem.core.tool_images import ToolImages
 from dem.core.platform import Platform
+from dem.core.exceptions import PlatformError
 from dem.cli.console import stdout, stderr
 from dem.cli.tui.panel.tool_type_selector import ToolTypeSelectorPanel
 from dem.cli.tui.panel.tool_image_selector import ToolImageSelectorPanel
@@ -171,7 +172,11 @@ def create_dev_env(platform: Platform, dev_env_name: str) -> None:
         if dev_env_original.is_installed:
             typer.confirm("The Development Environment is installed, so it can't be overwritten. " + \
                           "Uninstall it first?", abort=True)
-            platform.uninstall_dev_env(dev_env_original)
+            try:
+                platform.uninstall_dev_env(dev_env_original)
+            except PlatformError as e:
+                stderr.print(f"[red]{str(e)}[/]")
+                typer.Abort()
 
     tool_image_list = get_tool_image_list(platform.tool_images)
     new_dev_env_descriptor = get_dev_env_descriptor_from_user(dev_env_name, tool_image_list)
