@@ -1,23 +1,11 @@
 """This module represents a Development Environment."""
 # dem/core/dev_env.py
 
-from dem.core.tool_images import ToolImages
+from dem.core.tool_images import ToolImage, ToolImages
 import json, os
 
 class DevEnv():
-    """ A Development Environment.
-        
-        Class variables:
-            supported_tool_types -- supported tool types
-    """ 
-    supported_tool_types = ( 
-        "build system",
-        "toolchain",
-        "debugger",
-        "deployer",
-        "test framework",
-        "CI/CD server",
-    )
+    """ A Development Environment. """
 
     def __init__(self, descriptor: dict | None = None, descriptor_path: str | None = None) -> None:
         """ Init the DevEnv class. 
@@ -48,53 +36,19 @@ class DevEnv():
                 descriptor = json.load(file)
 
         self.name: str = descriptor["name"]
-        self.tools: list[dict[str, str]] = descriptor["tools"]
+        self.tool_image_descriptors: list[dict[str, str]] = descriptor["tools"]
+        self.tool_images: list[ToolImage] = []
         descriptor_installed = descriptor.get("installed", "False")
         if "True" == descriptor_installed:
             self.is_installed = True
         else:
             self.is_installed = False
 
-    def check_image_availability(self, all_tool_images: ToolImages, 
-                                 update_tool_image_store: bool = False,
-                                 local_only: bool = False) -> list:
-        """ Checks the tool image's availability.
-        
-            Updates the "image_status" key for the tool dictionary.
-            Returns with the statuses of the Dev Env tool images.
-
-            Args:
-                all_tool_images -- the images the Dev Envs can access
-                update_tool_images -- update the list of available tool images
-                local_only -- only local images are used
-        """
-        if update_tool_image_store == True:
-            all_tool_images.local.update()
-            if local_only is False:
-                all_tool_images.registry.update()
-
-        local_tool_images = all_tool_images.local.elements
-
-        if local_only is True:
-            registry_tool_images = []
-        else:
-            registry_tool_images = all_tool_images.registry.elements
-
-        image_statuses = []
-        for tool in self.tools:
-            tool_image_name = tool["image_name"] + ':' + tool["image_version"]
-            if (tool_image_name in local_tool_images) and (tool_image_name in registry_tool_images):
-                image_status = ToolImages.LOCAL_AND_REGISTRY
-            elif (tool_image_name in local_tool_images):
-                image_status = ToolImages.LOCAL_ONLY
-            elif (tool_image_name in registry_tool_images):
-                image_status = ToolImages.REGISTRY_ONLY
-            else:
-                image_status = ToolImages.NOT_AVAILABLE
-            image_statuses.append(image_status)
-            tool["image_status"] = image_status
-
-        return image_statuses
+    def assign_tool_image_instances(self, tool_images: ToolImages) -> None:
+        for tool_descriptor in self.tool_image_descriptors:
+            tool_image_name = tool_descriptor["image_name"] + ':' + tool_descriptor["image_version"]
+            tool_image = tool_images.all_tool_images.get(tool_image_name, ToolImage(tool_image_name))
+            self.tool_images.append(tool_image)
 
     def get_deserialized(self, omit_is_installed: bool = False) -> dict[str, str]:
         """ Create the deserialized json. 
@@ -103,7 +57,7 @@ class DevEnv():
         """
         dev_env_json_deserialized: dict = {
             "name": self.name,
-            "tools": self.tools
+            "tools": self.tool_image_descriptors
         }
         
         if omit_is_installed is False:

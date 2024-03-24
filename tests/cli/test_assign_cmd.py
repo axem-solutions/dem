@@ -38,7 +38,7 @@ def test_assign(mock_stdout_print: MagicMock, mock_isdir: MagicMock) -> None:
     mock_isdir.assert_called_once_with(test_project_path)
     mock_platform.get_dev_env_by_name.assert_called_once_with(test_dev_env_name)
     mock_platform.assign_dev_env.assert_called_once_with(mock_dev_env, test_project_path)
-    mock_stdout_print.assert_called_once_with(f"\n[green]Successfully assigned the {test_dev_env_name} Dev Env to the project at{test_project_path}![/]")
+    mock_stdout_print.assert_called_once_with(f"\n[green]Successfully assigned the {test_dev_env_name} Dev Env to the project at {test_project_path}![/]")
 
 @patch("dem.cli.command.assign_cmd.stderr.print")
 @patch("dem.cli.command.assign_cmd.os.path.isdir")

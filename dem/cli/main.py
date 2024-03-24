@@ -180,16 +180,14 @@ def rename(dev_env_name: Annotated[str, typer.Argument(help="Name of the Develop
 
 @typer_cli.command()
 def modify(dev_env_name: Annotated[str, typer.Argument(help="Name of the Development Environment to modify.",
-                                                       autocompletion=autocomplete_dev_env_name)],
-           tool_type: Annotated[str, typer.Argument(help="The tool type to change.")] = "",
-           tool_image: Annotated[str, typer.Argument(help="The tool image to set for the tool type.")] = "") -> None:
+                                                       autocompletion=autocomplete_dev_env_name)]) -> None:
     """
     Change a tool in a Development Environment.
 
     If the tool type is not specified, the Dev Env settings panel will be opened.
     """
     if platform:
-        modify_cmd.execute(platform, dev_env_name, tool_type, tool_image)
+        modify_cmd.execute(platform, dev_env_name)
     else:
         raise InternalError("Error: The platform hasn't been initialized properly!")
 

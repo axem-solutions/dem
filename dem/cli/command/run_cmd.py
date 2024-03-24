@@ -32,23 +32,23 @@ def execute(platform: Platform, dev_env_name: str, container_arguments: list[str
             dev_env_name -- name of the Development Environment
             container_arguments -- arguments passed to the container
     """
-    
+    # Load the Dev Envs
+    platform.load_dev_envs()
+
     dev_env_local = platform.get_dev_env_by_name(dev_env_name)
 
     if dev_env_local is None:
         stderr.print("[red]Error: Unknown Development Environment: " + dev_env_name + "[/]")
         raise typer.Abort()
     else:
-        # Update the tool images manually.
-        Platform.update_tool_images_on_instantiation = False
         # Only the local images are needed.
-        platform.tool_images.local.update()
+        Platform.local_only = True
 
         missing_tool_images = set()
-        for tool in dev_env_local.tools:
+        for tool in dev_env_local.tool_image_descriptors:
             tool_image = tool["image_name"] + ":" + tool["image_version"]
             # Check if the required tool image exists locally.
-            if tool_image not in platform.tool_images.local.elements:
+            if tool_image not in platform.tool_images.get_local_ones().keys():
                 missing_tool_images.add(tool_image)
 
         if missing_tool_images:

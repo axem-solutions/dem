@@ -14,6 +14,9 @@ def execute(platform: Platform, dev_env_name: str, project_path: str) -> None:
             dev_env_name -- the name of the Development Environment to assign
             project_path -- the path to the project to assign the Development Environment to
     """
+    # Load the Dev Envs
+    platform.load_dev_envs()
+
     if not os.path.isdir(project_path):
         stderr.print(f"[red]Error: The {project_path} path does not exist.[/]")
         return
@@ -24,4 +27,4 @@ def execute(platform: Platform, dev_env_name: str, project_path: str) -> None:
         stderr.print(f"[red]Error: The {dev_env_name} Development Environment does not exist.[/]")
     else:
         platform.assign_dev_env(dev_env_to_assign, project_path)
-        stdout.print(f"\n[green]Successfully assigned the {dev_env_name} Dev Env to the project at{project_path}![/]")
+        stdout.print(f"\n[green]Successfully assigned the {dev_env_name} Dev Env to the project at {project_path}![/]")

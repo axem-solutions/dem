@@ -3,7 +3,6 @@
 
 from dem.core.core import Core
 from dem.core.container_engine import ContainerEngine
-from dem.core.data_management import ConfigFile
 import requests
 from typing import Generator
 from abc import ABC, abstractmethod

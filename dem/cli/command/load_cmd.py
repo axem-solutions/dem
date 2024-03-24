@@ -12,18 +12,18 @@ def check_is_file_exist(param: str | None) -> bool:
     else:
         return False
 
-def load_dev_env_to_dev_env_json(dev_env_local_setup: Platform,path_to_dev_env: str) -> bool:
+def load_dev_env_to_dev_env_json(platform: Platform,path_to_dev_env: str) -> bool:
     raw_file = open(path_to_dev_env, "r")   
             
     try:
         dev_env = json.load(raw_file)
         
-        if dev_env_local_setup.get_dev_env_by_name(dev_env["name"]) is not None:
+        if platform.get_dev_env_by_name(dev_env["name"]) is not None:
             stderr.print("[red]Error: The Development Environment exist.[/]")
             return False                       
         else:        
-            new_dev_env = DevEnv(dev_env)
-            dev_env_local_setup.local_dev_envs.append(new_dev_env)
+            new_dev_env: DevEnv = DevEnv(dev_env)
+            platform.local_dev_envs.append(new_dev_env)
     except json.decoder.JSONDecodeError:
        stderr.print("[red]Error: invalid json format.[/]")
        return False                       
@@ -32,6 +32,9 @@ def load_dev_env_to_dev_env_json(dev_env_local_setup: Platform,path_to_dev_env: 
         return True
 
 def execute(platform: Platform, path_to_dev_env: str) -> None:
+    # Load the Dev Envs
+    platform.load_dev_envs()
+
     if check_is_file_exist(path_to_dev_env) is True:                
         retval = load_dev_env_to_dev_env_json(platform,path_to_dev_env)        
         if retval == True:

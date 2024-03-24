@@ -5,73 +5,114 @@
 import dem.core.tool_images as tool_images
 
 # Test framework
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock
 import pytest
 
-from dem.core.exceptions import RegistryError
-
-def test_LocalToolImages():
-    # Test setup
-    test_container_engine = MagicMock()
-    mock_elements = MagicMock()
-    test_container_engine.get_local_tool_images.return_value = mock_elements
-
+def test_ToolImage() -> None:
     # Run unit under test
-    local_tool_images = tool_images.LocalToolImages(test_container_engine)
-    local_tool_images.update()
+    tool_image = tool_images.ToolImage("test_repo:test_tag")
 
     # Check expectations
-    test_container_engine.get_local_tool_images.assert_called_once()
-    assert local_tool_images.elements is mock_elements
+    assert tool_image.name == "test_repo:test_tag"
+    assert tool_image.repository == "test_repo"
+    assert tool_image.tag == "test_tag"
+    assert tool_image.availability == tool_images.ToolImage.NOT_AVAILABLE
 
-def test_RegistryToolImages():
-    # Test setup
-    test_registries = MagicMock()
-    mock_elements = MagicMock()
-    test_registries.list_repos.return_value = mock_elements
+def test_ToolImage_InvalidName() -> None:
+    # Test setup 
+    test_name = "test_repo"
 
     # Run unit under test
-    registry_tool_images = tool_images.RegistryToolImages(test_registries)
-    registry_tool_images.update()
+    with pytest.raises(tool_images.ToolImageError) as e:
+        tool_images.ToolImage(test_name)
 
     # Check expectations
-    test_registries.list_repos.assert_called_once()
-    assert registry_tool_images.elements is mock_elements
+    assert str(e.value) == f"Invalid tool image name: {test_name}"
 
-def test_RegistryToolImages_RegistryError():
-    # Test setup
-    test_registries = MagicMock()
-    test_registries.list_repos.side_effect = RegistryError()
-
-    # Run unit under test
-    with pytest.raises(Exception):
-        registry_tool_images = tool_images.RegistryToolImages(test_registries)
-        registry_tool_images.update()
-
-        # Check expectations
-        test_registries.list_repos.assert_called_once()
-        assert not registry_tool_images.elements
-
-@patch("dem.core.tool_images.RegistryToolImages")
-@patch("dem.core.tool_images.LocalToolImages")
-def test_ToolImages(mock_LocalToolImages: MagicMock, mock_RegistryToolImages: MagicMock):
+def test_ToolImages_update() -> None:
     # Test setup
     mock_container_engine = MagicMock()
     mock_registries = MagicMock()
-    mock_local_tool_images = MagicMock()
-    mock_LocalToolImages.return_value = mock_local_tool_images
-    mock_registry_tool_images = MagicMock()
-    mock_RegistryToolImages.return_value = mock_registry_tool_images
+    test_local_tool_images = ["local_tool_image_1:tag", 
+                              "local_tool_image_2:tag", 
+                              "local_and_registry_tool_image:tag"]
+    test_registry_tool_images = ["registry_tool_image_1:tag", 
+                                 "registry_tool_image_2:tag", 
+                                 "local_and_registry_tool_image:tag"]
+
+    mock_container_engine.get_local_tool_images.return_value = test_local_tool_images
+    mock_registries.list_repos.return_value = test_registry_tool_images
+
+    tool_images_instance = tool_images.ToolImages(mock_container_engine, mock_registries)
 
     # Run unit under test
-    tool_images_obj = tool_images.ToolImages(mock_container_engine, mock_registries)
+    tool_images_instance.update()
 
     # Check expectations
-    mock_LocalToolImages.assert_called_once_with(mock_container_engine)
-    mock_RegistryToolImages.assert_called_once_with(mock_registries)
+    assert len(tool_images_instance.all_tool_images) == 5
+    assert tool_images_instance.all_tool_images["local_tool_image_1:tag"].availability == tool_images.ToolImage.LOCAL_ONLY
+    assert tool_images_instance.all_tool_images["local_tool_image_2:tag"].availability == tool_images.ToolImage.LOCAL_ONLY
+    assert tool_images_instance.all_tool_images["registry_tool_image_1:tag"].availability == tool_images.ToolImage.REGISTRY_ONLY
+    assert tool_images_instance.all_tool_images["registry_tool_image_2:tag"].availability == tool_images.ToolImage.REGISTRY_ONLY
+    assert tool_images_instance.all_tool_images["local_and_registry_tool_image:tag"].availability == tool_images.ToolImage.LOCAL_AND_REGISTRY
 
-    mock_local_tool_images.update.assert_called_once()
-    mock_registry_tool_images.update.assert_called_once()
+    mock_container_engine.get_local_tool_images.assert_called_once()
+    mock_registries.list_repos.assert_called_once()
 
-    assert tool_images_obj.local is mock_local_tool_images
-    assert tool_images_obj.registry is mock_registry_tool_images
+def test_ToolImages_get_local_ones() -> None:
+    # Test setup
+    mock_container_engine = MagicMock()
+    mock_registries = MagicMock()
+    test_local_tool_images = ["local_tool_image_1:tag", 
+                              "local_tool_image_2:tag", 
+                              "local_and_registry_tool_image:tag"]
+    test_registry_tool_images = ["registry_tool_image_1:tag", 
+                                 "registry_tool_image_2:tag", 
+                                 "local_and_registry_tool_image:tag"]
+
+    mock_container_engine.get_local_tool_images.return_value = test_local_tool_images
+    mock_registries.list_repos.return_value = test_registry_tool_images
+
+    tool_images_instance = tool_images.ToolImages(mock_container_engine, mock_registries)
+    tool_images_instance.update()
+
+    # Run unit under test
+    local_tool_images = tool_images_instance.get_local_ones()
+
+    # Check expectations
+    assert len(local_tool_images) == 3
+    assert "local_tool_image_1:tag" in local_tool_images
+    assert "local_tool_image_2:tag" in local_tool_images
+    assert "local_and_registry_tool_image:tag" in local_tool_images
+
+    mock_container_engine.get_local_tool_images.assert_called_once()
+    mock_registries.list_repos.assert_called_once()
+
+def test_ToolImages_get_registry_ones() -> None:
+    # Test setup
+    mock_container_engine = MagicMock()
+    mock_registries = MagicMock()
+    test_local_tool_images = ["local_tool_image_1:tag", 
+                              "local_tool_image_2:tag", 
+                              "local_and_registry_tool_image:tag"]
+    test_registry_tool_images = ["registry_tool_image_1:tag", 
+                                 "registry_tool_image_2:tag", 
+                                 "local_and_registry_tool_image:tag"]
+
+    mock_container_engine.get_local_tool_images.return_value = test_local_tool_images
+    mock_registries.list_repos.return_value = test_registry_tool_images
+
+    tool_images_instance = tool_images.ToolImages(mock_container_engine, mock_registries)
+    tool_images_instance.update()
+
+    # Run unit under test
+    registry_tool_images = tool_images_instance.get_registry_ones()
+
+    # Check expectations
+    assert len(registry_tool_images) == 3
+    assert "registry_tool_image_1:tag" in registry_tool_images
+    assert "registry_tool_image_2:tag" in registry_tool_images
+    assert "local_and_registry_tool_image:tag" in registry_tool_images
+
+    mock_container_engine.get_local_tool_images.assert_called_once()
+    mock_registries.list_repos.assert_called_once()

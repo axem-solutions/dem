@@ -1,56 +1,11 @@
 """Local and registry tool images."""
 # dem/core/tool_images.py
 
-from dem.core.exceptions import RegistryError
 from dem.core.container_engine import ContainerEngine
 from dem.core.registry import Registries
+from dem.core.exceptions import ToolImageError
 
-class BaseToolImages():
-    """ Base class for the tool images. 
-    
-        Do not instantiate it directly!
-    """
-    def __init__(self) -> None:
-        """ Init the class. """
-        self.elements = []
-
-class LocalToolImages(BaseToolImages):
-    """ Local tool images."""
-    def __init__(self, container_engine: ContainerEngine) -> None:
-        """ Init the class.
-        
-            Args: 
-                container_engine -- container engine
-        """
-        super().__init__()
-        self.container_egine = container_engine
-
-    def update(self) -> None:
-        """ Update the local tool image list using the container engine."""
-        self.elements = self.container_egine.get_local_tool_images()
-
-class RegistryToolImages(BaseToolImages):
-    """ Registry tool images. """
-
-    def __init__(self, registries: Registries) -> None:
-        """ Init the class.
-        
-            Args: 
-                registries -- registries
-        """
-        super().__init__()
-        self._registries = registries
-
-    def update(self) -> None:
-        """ Update the list of available tools in the registry using the registry interface."""
-        try:
-            self.elements = self._registries.list_repos()
-        except RegistryError as e:
-            self.elements = []
-            raise
-
-class ToolImages():
-    """ Available tool images."""
+class ToolImage():
     (
         LOCAL_ONLY,
         REGISTRY_ONLY,
@@ -58,18 +13,83 @@ class ToolImages():
         NOT_AVAILABLE,
     ) = range(4)
 
-    def __init__(self, container_engine: ContainerEngine, registries: Registries, 
-                 update_on_instantiation: bool = True) -> None:
+    def __init__(self, name: str) -> None:
+        self.name = name
+        try:
+            self.repository = self.name.split(":")[0]
+            self.tag = self.name.split(":")[1]
+        except IndexError:
+            raise ToolImageError(f"Invalid tool image name: {name}")
+        self.availability = self.NOT_AVAILABLE
+
+class ToolImages():
+    """ Available tool images."""
+    def __init__(self, container_engine: ContainerEngine, registries: Registries) -> None:
         """ Init the class.
+
+            The tool images will be obtained by running the update method.
         
             Args: 
                 container_engine -- container engine
                 registries -- registries
                 update_on_instantiation -- set to false for manual update
         """
-        self.local = LocalToolImages(container_engine)
-        self.registry = RegistryToolImages(registries)
+        self.container_engine = container_engine
+        self.registries = registries
+        self.all_tool_images = {}
 
-        if update_on_instantiation is True:
-            self.local.update()
-            self.registry.update()
+    def update(self, local_only = False, registry_only = False) -> None:
+        """ Update the list of available tools.
+        
+            Args:
+                local_only -- update the local tools only
+                registry_only -- update the registry tools only
+        """
+        registry_tool_image_names = []
+        local_tool_image_names = []
+
+        if not registry_only:
+            local_tool_image_names = self.container_engine.get_local_tool_images()
+
+        if not local_only:
+            registry_tool_image_names = self.registries.list_repos()
+
+        for tool_image_name in local_tool_image_names:
+            tool_image = ToolImage(tool_image_name)
+            if tool_image_name in registry_tool_image_names:
+                tool_image.availability = ToolImage.LOCAL_AND_REGISTRY
+            else:
+                tool_image.availability = ToolImage.LOCAL_ONLY
+            self.all_tool_images[tool_image_name] = tool_image
+
+        for tool_image_name in registry_tool_image_names:
+            if tool_image_name not in local_tool_image_names:
+                tool_image = ToolImage(tool_image_name)
+                tool_image.availability = ToolImage.REGISTRY_ONLY
+                self.all_tool_images[tool_image_name] = tool_image
+
+    def get_local_ones(self) -> dict[str, ToolImage]:
+        """ Get the local tool images.
+        
+            Return with the local tool images.
+        """
+        local_tool_images = {}
+        for key, tool_image in self.all_tool_images.items():
+            if ((tool_image.availability == ToolImage.LOCAL_ONLY) or 
+                (tool_image.availability == ToolImage.LOCAL_AND_REGISTRY)):
+                local_tool_images[key] = tool_image
+
+        return local_tool_images
+    
+    def get_registry_ones(self) -> dict[str, ToolImage]:
+        """ Get the registry tool images.
+        
+            Return with the registry tool images.
+        """
+        registry_tool_images = {}
+        for key, tool_image in self.all_tool_images.items():
+            if ((tool_image.availability == ToolImage.REGISTRY_ONLY) or 
+                (tool_image.availability == ToolImage.LOCAL_AND_REGISTRY)):
+                registry_tool_images[key] = tool_image
+
+        return registry_tool_images

@@ -3,7 +3,8 @@
 
 from dem import __command__
 from dem.cli.console import stderr, stdout
-from dem.core.exceptions import RegistryError, ContainerEngineError, InternalError, DataStorageError
+from dem.core.exceptions import RegistryError, ContainerEngineError, InternalError, DataStorageError, \
+                                CatalogError, ToolImageError
 import dem.cli.main
 from dem.core.core import Core
 from dem.core.platform import Platform
@@ -24,9 +25,6 @@ def main() -> None:
         # Load the configuration file
         dem.cli.main.platform.config_file.update()
 
-        # Load the Dev Envs
-        dem.cli.main.platform.load_dev_envs()
-
         # Run the CLI application
         dem.cli.main.typer_cli(prog_name=__command__)
     except LookupError as e:
@@ -42,7 +40,7 @@ def main() -> None:
             stdout.print("\nHint: The input repository might not exist in the registry.")
         elif "400" in str(e):
             stdout.print("\nHint: The input parameters might not be valid.")
-    except (ContainerEngineError, InternalError) as e:
+    except (ContainerEngineError, InternalError, ToolImageError) as e:
         stderr.print("[red]" + str(e) + "[/]")
     except DataStorageError as e:
         stderr.print("[red]" + str(e) + "[/]")
@@ -53,6 +51,8 @@ def main() -> None:
             elif "dev_env.json" in str(e):
                 stdout.print("Restoring the original Dev Env descriptor file...")
                 dem.cli.main.platform.dev_env_json.restore()
+    except CatalogError as e:
+        stderr.print(f"[red]{str(e)}[/]")
 
 # Call the main() when run as `python -m`
 if __name__ == "__main__":

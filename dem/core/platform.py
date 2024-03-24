@@ -10,7 +10,7 @@ from dem.core.dev_env_catalog import DevEnvCatalogs
 from dem.core.data_management import LocalDevEnvJSON
 from dem.core.container_engine import ContainerEngine
 from dem.core.registry import Registries
-from dem.core.tool_images import ToolImages
+from dem.core.tool_images import ToolImages, ToolImage
 from dem.core.dev_env import DevEnv
 from dem.core.hosts import Hosts
 
@@ -21,12 +21,9 @@ class Platform(Core):
         - External resources.
 
         Class variables:
-            _tool_images -- the available tool images
-            _container_engine -- the container engine
-            _regisitries -- managing the registries
-            update_tool_images_on_instantiation -- can be used to disable tool update if not needed
+            local_only -- work with the local tool images only
     """
-    update_tool_images_on_instantiation = True
+    local_only = False
 
     def _dev_env_json_version_check(self, dev_env_json_major_version: int) -> None:
         """ Check that the json file is supported.
@@ -47,7 +44,10 @@ class Platform(Core):
         self._hosts = None
 
     def load_dev_envs(self) -> None:
-        """ Load the Development Environments from the dev_env.json file."""
+        """ Load the Development Environments from the dev_env.json file.
+        
+            The Dev Envs will only contain the descriptors and not the ToolImage instances.
+        """
         self.dev_env_json = LocalDevEnvJSON()
         self.dev_env_json.update()
         self.version = self.dev_env_json.deserialized["version"]
@@ -56,6 +56,11 @@ class Platform(Core):
         for dev_env_descriptor in self.dev_env_json.deserialized["development_environments"]:
             self.local_dev_envs.append(DevEnv(descriptor=dev_env_descriptor))
 
+    def assign_tool_image_instances_to_all_dev_envs(self) -> None:
+        """ Assign the ToolImage instances to all Development Environments."""
+        for dev_env in self.local_dev_envs:
+            dev_env.assign_tool_image_instances(self.tool_images)
+
     @property
     def tool_images(self) -> ToolImages:
         """ The tool images.
@@ -63,8 +68,8 @@ class Platform(Core):
             The ToolImages() gets instantiated only at the first access.
         """
         if self._tool_images is None:
-            self._tool_images = ToolImages(self.container_engine, self.registries,
-                                          self.update_tool_images_on_instantiation)
+            self._tool_images = ToolImages(self.container_engine, self.registries)
+            self._tool_images.update(local_only=self.local_only)
         return self._tool_images
     
     @property
@@ -144,19 +149,17 @@ class Platform(Core):
             Args:
                 dev_env_to_install -- the Development Environment to install
         """
-        dev_env_to_install.check_image_availability(self.tool_images, False)
+        # First check if the missing images are available in the registries, so DEM won't start to 
+        # pull the images and then fail.
+        for tool_image in dev_env_to_install.tool_images:
+            if tool_image.availability == ToolImage.NOT_AVAILABLE:
+                raise PlatformError(f"The {tool_image.name} image is not available.")
 
-        # First check if the missing images are available in the registries.
-        for tool in dev_env_to_install.tools:
-            if tool["image_status"] == ToolImages.NOT_AVAILABLE:
-                raise PlatformError(f"The {tool['image_name']}:{tool['image_version']} image is not available.")
-
-        for tool in dev_env_to_install.tools:
-            if tool["image_status"] == ToolImages.REGISTRY_ONLY:
-                self.user_output.msg(f"\nPulling image {tool['image_name']}:{tool['image_version']}", 
-                                     is_title=True)
+        for tool_image in dev_env_to_install.tool_images:
+            if tool_image.availability == ToolImage.REGISTRY_ONLY:
+                self.user_output.msg(f"\nPulling image {tool_image.name}", is_title=True)
                 try:                
-                    self.container_engine.pull(f"{tool['image_name']}:{tool['image_version']}")
+                    self.container_engine.pull(tool_image.name)
                 except ContainerEngineError as e:
                     raise PlatformError(f"Dev Env install failed. --> {str(e)}")
 
@@ -175,18 +178,18 @@ class Platform(Core):
         all_required_tool_images = set()
         for dev_env in self.local_dev_envs:
             if (dev_env is not dev_env_to_uninstall) and dev_env.is_installed:
-                for tool in dev_env.tools:
-                    all_required_tool_images.add(tool["image_name"] + ":" + tool["image_version"])
+                for tool_image_descriptor in dev_env.tool_image_descriptors:
+                    all_required_tool_images.add(tool_image_descriptor["image_name"] + ":" + tool_image_descriptor["image_version"])
 
         tool_images_to_remove = set()
-        for tool in dev_env_to_uninstall.tools:
-            tool_image = tool["image_name"] + ":" + tool["image_version"]
-            if tool_image not in all_required_tool_images:
-                tool_images_to_remove.add(tool_image)
+        for tool_image_descriptor in dev_env_to_uninstall.tool_image_descriptors:
+            tool_image_name = tool_image_descriptor["image_name"] + ":" + tool_image_descriptor["image_version"]
+            if tool_image_name not in all_required_tool_images:
+                tool_images_to_remove.add(tool_image_name)
 
-        for tool_image in tool_images_to_remove:
+        for tool_image_name in tool_images_to_remove:
             try:
-                self.container_engine.remove(tool_image)
+                self.container_engine.remove(tool_image_name)
             except ContainerEngineError as e:
                 raise PlatformError(f"Dev Env uninstall failed. --> {str(e)}")
             
@@ -231,6 +234,7 @@ class Platform(Core):
             raise FileNotFoundError(f"The {descriptor_path} file does not exist.")
 
         assigned_dev_env = DevEnv(descriptor_path=descriptor_path)
+        assigned_dev_env.assign_tool_image_instances(self.tool_images)
         existing_dev_env = self.get_dev_env_by_name(assigned_dev_env.name)
         if existing_dev_env is not None:
             self.user_output.get_confirm("[yellow]This project is already initialized.[/]", 
