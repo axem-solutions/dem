@@ -8,6 +8,9 @@ from dem.cli.console import stderr, stdout
 import typer
 
 def execute(platform: Platform, dev_env_name: str) -> None:
+    # Load the Dev Envs
+    platform.load_dev_envs()
+
     dev_env_to_delete: DevEnv | None = platform.get_dev_env_by_name(dev_env_name)
 
     if dev_env_to_delete is None:

@@ -102,14 +102,14 @@ def test_execute(mock_handle_missing_tool_images):
     test_args = ["run", test_dev_env_name, test_tool_type, test_workspace_path, test_command]
     
     mock_platform = MagicMock()
-    mock_platform.tool_images.local.elements = ["test_image_name:test_image_version"]
+    mock_platform.tool_images.get_local_ones.return_value = {
+        "test_image_name:test_image_version": MagicMock()
+    }
     main.platform = mock_platform
     mock_dev_env_local = MagicMock()
     mock_platform.get_dev_env_by_name.return_value = mock_dev_env_local
 
-    main.Platform.update_tool_images_on_instantiation = True
-
-    mock_dev_env_local.tools = [
+    mock_dev_env_local.tool_image_descriptors = [
         {
             "image_name": "test_image_name",
             "image_version": "test_image_version",
@@ -127,10 +127,8 @@ def test_execute(mock_handle_missing_tool_images):
 
     # Check expectations
     assert 0 == runner_result.exit_code
-    assert main.Platform.update_tool_images_on_instantiation is False
 
     mock_platform.get_dev_env_by_name.assert_called_once_with(test_dev_env_name)
-    mock_platform.tool_images.local.update.assert_called_once()
 
     expected_missing_tool_image = {"missing_image_name:missing_image_version"}
     mock_handle_missing_tool_images.assert_called_once_with(expected_missing_tool_image, 

@@ -12,8 +12,6 @@ from unittest.mock import patch, MagicMock, call
 import io
 from rich.console import Console
 from rich.table import Table
-from dem.core.dev_env import DevEnv, DevEnv
-from dem.core.tool_images import ToolImages
 
 ## Global test variables
 
@@ -25,25 +23,32 @@ runner = CliRunner(mix_stderr=False)
 
 ## Test listing the local dev envs.
 
-def test_with_valid_dev_env_json():
+@patch("dem.cli.command.list_cmd.stdout.print")
+@patch("dem.cli.command.list_cmd.get_local_dev_env_status")
+@patch("dem.cli.command.list_cmd.Table")
+def test_with_valid_dev_env_json(mock_Table: MagicMock, mock_get_local_dev_env_status: MagicMock,
+                                 mock_stdout_print: MagicMock) -> None:
     # Test setup
     mock_platform = MagicMock()
     expected_dev_env_list = [
         ["demo", "Installed."],
         ["nagy_cica_project", "[red]Error: Required image is not available![/]"]
     ]
-    fake_image_statuses = [
-        [ToolImages.LOCAL_AND_REGISTRY] * 5,
-        [ToolImages.NOT_AVAILABLE] * 5
-    ]
     fake_dev_envs = []
-    for idx, expected_dev_env in enumerate(expected_dev_env_list):
-        fake_dev_env = MagicMock(spec=DevEnv)
+    for expected_dev_env in expected_dev_env_list:
+        fake_dev_env = MagicMock()
         fake_dev_env.name = expected_dev_env[0]
-        fake_dev_env.check_image_availability.return_value = fake_image_statuses[idx]
         fake_dev_envs.append(fake_dev_env)
     mock_platform.local_dev_envs = fake_dev_envs
     main.platform = mock_platform
+
+    mock_table = MagicMock()
+    mock_Table.return_value = mock_table
+
+    mock_get_local_dev_env_status.side_effect = [
+        expected_dev_env_list[0][1],
+        expected_dev_env_list[1][1]
+    ]
 
     # Run unit under test
     runner_result = runner.invoke(main.typer_cli, ["list", "--local", "--env"])
@@ -51,15 +56,11 @@ def test_with_valid_dev_env_json():
     # Check expectations
     assert 0 == runner_result.exit_code
 
-    expected_table = Table()
-    expected_table.add_column("Development Environment")
-    expected_table.add_column("Status")
-    expected_table.add_row(*expected_dev_env_list[0])
-    expected_table.add_row(*expected_dev_env_list[1])
-    console = Console(file=io.StringIO())
-    console.print(expected_table)
-    expected_output = console.file.getvalue()
-    assert expected_output == runner_result.stdout
+    mock_Table.assert_called_once()
+    mock_table.add_column.assert_has_calls([call("Development Environment"), call("Status")])
+    mock_table.add_row.assert_has_calls([call(*(expected_dev_env_list[0])), 
+                                         call(*(expected_dev_env_list[1]))])
+    mock_stdout_print.assert_called_once_with(mock_table)
 
 def test_with_empty_dev_env_json():
     # Test setup
@@ -113,7 +114,8 @@ def test_with_empty_catalog():
     console.print("[yellow]No Development Environments are available in the catalogs.[/]")
     assert console.file.getvalue() == runner_result.stdout
 
-def test_with_valid_dev_env_org_json():
+@patch("dem.cli.command.list_cmd.get_catalog_dev_env_status")
+def test_with_valid_dev_env_org_json(mock_get_catalog_dev_env_status: MagicMock) -> None:
     # Test setup
     mock_platform = MagicMock()
     main.platform = mock_platform
@@ -124,22 +126,22 @@ def test_with_valid_dev_env_org_json():
         ["nagy_cica_project", "Incomplete local install. The missing images are available in the registry. Use `dem pull` to reinstall."],
         ["unavailable_image_env", "[red]Error: Required image is not available in the registry![/]"]
     ]
-    fake_image_statuses = [
-        [ToolImages.REGISTRY_ONLY] * 5,
-        [ToolImages.LOCAL_AND_REGISTRY] * 6,
-        [ToolImages.LOCAL_AND_REGISTRY, ToolImages.REGISTRY_ONLY],
-        [ToolImages.NOT_AVAILABLE] * 4
-    ]
     fake_catalog_dev_envs = []
-    for idx, expected_dev_env in enumerate(expected_dev_env_list):
-        fake_dev_env = MagicMock(spec=DevEnv)
+    for expected_dev_env in expected_dev_env_list:
+        fake_dev_env = MagicMock()
         fake_dev_env.name = expected_dev_env[0]
-        fake_dev_env.check_image_availability.return_value = fake_image_statuses[idx]
         fake_catalog_dev_envs.append(fake_dev_env)
     mock_catalog = MagicMock()
     mock_platform.dev_env_catalogs.catalogs = [mock_catalog]
     mock_catalog.dev_envs = fake_catalog_dev_envs
     mock_platform.get_dev_env_by_name.side_effect = [None, MagicMock(), MagicMock()]
+
+    mock_get_catalog_dev_env_status.side_effect = [
+        expected_dev_env_list[0][1],
+        expected_dev_env_list[1][1],
+        expected_dev_env_list[2][1],
+        expected_dev_env_list[3][1]
+    ]
 
     # Run unit under test
     runner_result = runner.invoke(main.typer_cli, ["list", "--all", "--env"])
@@ -298,16 +300,3 @@ def test_no_registries_available(mock_stdout_print: MagicMock):
     assert 0 == runner_result.exit_code
 
     mock_stdout_print.assert_called_once_with("[yellow]No registries are available!")
-
-def test_get_local_dev_env_status_reinstall():
-    # Test setup
-    mock_dev_env = MagicMock()
-    mock_tool_images = MagicMock()
-
-    mock_dev_env.check_image_availability.return_value = [list_cmd.ToolImages.REGISTRY_ONLY]
-
-    # Run unit under test
-    actual_dev_env_status = list_cmd.get_local_dev_env_status(mock_dev_env, mock_tool_images)
-
-    # Check expectations
-    assert actual_dev_env_status is list_cmd.dev_env_local_status_messages[list_cmd.DEV_ENV_LOCAL_REINSTALL]

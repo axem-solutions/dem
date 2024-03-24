@@ -37,6 +37,9 @@ def execute(platform: Platform, dev_env_name: str) -> None:
             platform -- the platform
             dev_env_name -- name of the Dev Env to clone
     """
+    # Load the Dev Envs
+    platform.load_dev_envs()
+
     catalog_dev_env: DevEnv | None = None
 
     if not platform.dev_env_catalogs.catalogs:

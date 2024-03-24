@@ -31,6 +31,9 @@ def cp_given_dev_env(platform: Platform, dev_env_to_cp: DevEnv,
     platform.flush_descriptors()
 
 def execute(platform: Platform, dev_env_to_cp_name: str, new_dev_env_name: str) -> None:
+    # Load the Dev Envs
+    platform.load_dev_envs()
+
     dev_env_to_cp = get_dev_env_to_cp(platform, dev_env_to_cp_name)
 
     if (dev_env_to_cp is not None and

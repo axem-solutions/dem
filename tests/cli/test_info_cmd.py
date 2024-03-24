@@ -3,10 +3,11 @@
 
 # Unit under test:
 import dem.cli.main as main
+import dem.cli.command.info_cmd as info_cmd
 
 # Test framework
 from typer.testing import CliRunner
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, call, patch
 
 import io
 from rich.console import Console
@@ -33,207 +34,89 @@ def get_expected_table(expected_tools: list[list[str]]) ->str:
 
 ## Test cases
 
-def test_info_local_dev_env_demo():
+@patch("dem.cli.command.info_cmd.stdout.print")
+@patch("dem.cli.command.info_cmd.Table")
+def test_print_info(mock_Table: MagicMock, mock_stdout_print: MagicMock) -> None:
     # Test setup
-    mock_platform = MagicMock()
-    main.platform = mock_platform
+    mock_table = MagicMock()
+    mock_Table.return_value = mock_table
+
+    mock_tool_image1 = MagicMock()
+    mock_tool_image1.name = "axemsolutions/make_gnu_arm:latest"
+    mock_tool_image1.availability = info_cmd.ToolImage.LOCAL_AND_REGISTRY
+
+    mock_tool_image2 = MagicMock()
+    mock_tool_image2.name = "axemsolutions/stlink_org:latest"
+    mock_tool_image2.availability = info_cmd.ToolImage.LOCAL_ONLY
+
+    mock_tool_image3 = MagicMock()
+    mock_tool_image3.name = "axemsolutions/cpputest:latest"
+    mock_tool_image3.availability = info_cmd.ToolImage.REGISTRY_ONLY
 
     mock_dev_env = MagicMock()
-    mock_dev_env.tools = [
-        {
-            "type": "build system",
-            "image_name": "axemsolutions/make_gnu_arm",
-            "image_version": "latest", 
-        },
-        {
-            "type": "toolchain",
-            "image_name": "axemsolutions/make_gnu_arm",
-            "image_version": "latest", 
-        },
-        {
-            "type": "debugger",
-            "image_name": "axemsolutions/stlink_org",
-            "image_version": "latest", 
-        },
-        {
-            "type": "deployer",
-            "image_name": "axemsolutions/stlink_org",
-            "image_version": "latest", 
-        },
-        {
-            "type": "test framework",
-            "image_name": "axemsolutions/cpputest",
-            "image_version": "latest" 
-        },
-    ]
-    mock_platform.get_dev_env_by_name.return_value = mock_dev_env
-    def stub_check_image_availability(*args, **kwargs):
-        for tool in mock_dev_env.tools:
-            tool["image_status"] = ToolImages.LOCAL_AND_REGISTRY
-    mock_dev_env.check_image_availability.side_effect = stub_check_image_availability
-
+    mock_dev_env.tool_images = [ mock_tool_image1, mock_tool_image2, mock_tool_image3]
+    
     # Run unit under test
-    test_dev_env_name = "demo"
-    runner_result = runner.invoke(main.typer_cli, ["info", test_dev_env_name], color=True)
+    info_cmd.print_info(mock_dev_env)
 
     # Check expectations
-    assert runner_result.exit_code == 0
+    mock_table.add_column.assert_has_calls([
+        call("Image"),
+        call("Status")
+    ])
+    mock_table.add_row.assert_has_calls([
+        call("axemsolutions/make_gnu_arm:latest", "Image is available locally and in the registry."),
+        call("axemsolutions/stlink_org:latest", "Image is available locally."),
+        call("axemsolutions/cpputest:latest", "Image is available in the registry."),
+    ])
+    mock_stdout_print.assert_called_once_with(mock_table)
 
-    mock_platform.get_dev_env_by_name.assert_called_once_with(test_dev_env_name)
-    mock_dev_env.check_image_availability.assert_called_once_with(mock_platform.tool_images)
-
-    expected_tools = [
-        ["build system", "axemsolutions/make_gnu_arm:latest", "Image is available locally and in the registry."],
-        ["toolchain", "axemsolutions/make_gnu_arm:latest", "Image is available locally and in the registry."],
-        ["debugger", "axemsolutions/stlink_org:latest", "Image is available locally and in the registry."],
-        ["deployer", "axemsolutions/stlink_org:latest", "Image is available locally and in the registry."],
-        ["test framework", "axemsolutions/cpputest:latest", "Image is available locally and in the registry."],
-    ]
-    assert get_expected_table(expected_tools)  == runner_result.stdout
-
-def test_info_local_dev_env_nagy_cica_project():
+@patch("dem.cli.command.info_cmd.stderr.print")
+def test_execute_dev_env_not_found(mock_stderr_print: MagicMock) -> None:
     # Test setup
     mock_platform = MagicMock()
     main.platform = mock_platform
-
-    fake_dev_env = MagicMock()
-    fake_dev_env.tools = [
-        {
-            "type": "build system",
-            "image_name": "axemsolutions/bazel",
-            "image_version": "latest", 
-        },
-        {
-            "type": "toolchain",
-            "image_name": "axemsolutions/gnu_arm",
-            "image_version": "latest", 
-        },
-        {
-            "type": "debugger",
-            "image_name": "axemsolutions/jlink",
-            "image_version": "latest", 
-        },
-        {
-            "type": "deployer",
-            "image_name": "axemsolutions/jlink",
-            "image_version": "latest", 
-        },
-        {
-            "type": "test framework",
-            "image_name": "axemsolutions/cpputest",
-            "image_version": "latest" 
-        },
-    ]
-    mock_platform.get_dev_env_by_name.return_value = fake_dev_env
-    def stub_check_image_availability(*args, **kwargs):
-        fake_dev_env.tools[0]["image_status"] = ToolImages.NOT_AVAILABLE
-        fake_dev_env.tools[1]["image_status"] = ToolImages.NOT_AVAILABLE
-        fake_dev_env.tools[2]["image_status"] = ToolImages.LOCAL_ONLY
-        fake_dev_env.tools[3]["image_status"] = ToolImages.LOCAL_ONLY
-        fake_dev_env.tools[4]["image_status"] = ToolImages.LOCAL_AND_REGISTRY
-    fake_dev_env.check_image_availability.side_effect = stub_check_image_availability
-
-    # Run unit under test
-    test_dev_env_name = "nagy_cica_project"
-    runner_result = runner.invoke(main.typer_cli, ["info", test_dev_env_name], color=True)
-
-    # Check expectations
-    assert runner_result.exit_code == 0
-
-    mock_platform.get_dev_env_by_name.assert_called_once_with(test_dev_env_name)
-    fake_dev_env.check_image_availability.assert_called_once_with(mock_platform.tool_images)
-
-    expected_tools = [
-        ["build system", "axemsolutions/bazel:latest", "[red]Error: Required image is not available![/]"],
-        ["toolchain", "axemsolutions/gnu_arm:latest", "[red]Error: Required image is not available![/]"],
-        ["debugger", "axemsolutions/jlink:latest", "Image is available locally."],
-        ["deployer", "axemsolutions/jlink:latest", "Image is available locally."],
-        ["test framework", "axemsolutions/cpputest:latest", "Image is available locally and in the registry."],
-    ]
-    assert get_expected_table(expected_tools) == runner_result.stdout
-
-def test_info_dev_env_invalid():
-    # Test setup
-    mock_platform = MagicMock()
-    main.platform = mock_platform
-
-    mock_platform.get_dev_env_by_name.return_value = None
     mock_platform.dev_env_catalogs.catalogs = []
 
+    test_dev_env_name = "test_dev_env_name"
+    mock_platform.get_dev_env_by_name.return_value = None
+
     # Run unit under test
-    test_dev_env_name = "not_existing_environment"
     runner_result = runner.invoke(main.typer_cli, ["info", test_dev_env_name], color=True)
 
     # Check expectations
     assert runner_result.exit_code == 0
-
+    
+    mock_platform.load_dev_envs.assert_called_once()
+    mock_platform.assign_tool_image_instances_to_all_dev_envs.assert_called_once()
     mock_platform.get_dev_env_by_name.assert_called_once_with(test_dev_env_name)
+    mock_stderr_print.assert_called_once_with(f"[red]Error: Unknown Development Environment: {test_dev_env_name}[/]\n")
 
-    console = Console(file=io.StringIO())
-    console.print("[red]Error: Unknown Development Environment: not_existing_environment[/]")
-    expected_output = console.file.getvalue()
-    assert expected_output == runner_result.stderr
-
-def test_info_org_dev_env():
+@patch("dem.cli.command.info_cmd.print_info")
+def test_execute(mock_print_info: MagicMock) -> None:
     # Test setup
     mock_platform = MagicMock()
     main.platform = mock_platform
 
+    test_dev_env_name = "test_dev_env_name"
     mock_platform.get_dev_env_by_name.return_value = None
 
+    mock_dev_env = MagicMock()
+
     mock_catalog = MagicMock()
+    mock_catalog.get_dev_env_by_name.return_value = mock_dev_env
     mock_platform.dev_env_catalogs.catalogs = [mock_catalog]
-    fake_dev_env = MagicMock()
-    fake_dev_env.tools = [
-        {
-            "type": "build system",
-            "image_name": "axemsolutions/cmake",
-            "image_version": "latest", 
-        },
-        {
-            "type": "toolchain",
-            "image_name": "axemsolutions/llvm",
-            "image_version": "latest", 
-        },
-        {
-            "type": "debugger",
-            "image_name": "axemsolutions/pemicro",
-            "image_version": "latest", 
-        },
-        {
-            "type": "deployer",
-            "image_name": "axemsolutions/pemicro",
-            "image_version": "latest", 
-        },
-        {
-            "type": "test framework",
-            "image_name": "axemsolutions/unity",
-            "image_version": "latest" 
-        },
-    ]
-    mock_catalog.get_dev_env_by_name.return_value = fake_dev_env
-    def stub_check_image_availability(*args, **kwargs):
-        for tool in fake_dev_env.tools:
-            tool["image_status"] = ToolImages.REGISTRY_ONLY
-    fake_dev_env.check_image_availability.side_effect = stub_check_image_availability
 
     # Run unit under test
-    test_dev_env_name = "org_only_env"
     runner_result = runner.invoke(main.typer_cli, ["info", test_dev_env_name], color=True)
 
     # Check expectations
     assert runner_result.exit_code == 0
 
+    mock_platform.load_dev_envs.assert_called_once()
+    mock_platform.assign_tool_image_instances_to_all_dev_envs.assert_called_once()
     mock_platform.get_dev_env_by_name.assert_called_once_with(test_dev_env_name)
-
+    mock_catalog.request_dev_envs.assert_called_once()
     mock_catalog.get_dev_env_by_name.assert_called_once_with(test_dev_env_name)
-    fake_dev_env.check_image_availability.assert_called_once_with(mock_platform.tool_images)
-
-    expected_tools = [
-        ["build system", "axemsolutions/cmake:latest", "Image is available in the registry."],
-        ["toolchain", "axemsolutions/llvm:latest", "Image is available in the registry."],
-        ["debugger", "axemsolutions/pemicro:latest", "Image is available in the registry."],
-        ["deployer", "axemsolutions/pemicro:latest", "Image is available in the registry."],
-        ["test framework", "axemsolutions/unity:latest", "Image is available in the registry."],
-    ]
-    assert get_expected_table(expected_tools) == runner_result.stdout
+    mock_dev_env.assign_tool_image_instances.assert_called_once_with(mock_platform.tool_images)
+    mock_print_info.assert_called_once_with(mock_dev_env)

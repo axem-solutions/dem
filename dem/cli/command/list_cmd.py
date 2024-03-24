@@ -3,7 +3,7 @@
 
 from dem.core.platform import Platform
 from dem.core.dev_env import DevEnv
-from dem.core.tool_images import ToolImages
+from dem.core.tool_images import ToolImage
 from dem.cli.console import stdout, stderr
 from rich.table import Table
 
@@ -34,10 +34,13 @@ dev_env_local_status_messages = {
 }
 
 def get_catalog_dev_env_status(platform: Platform, dev_env: DevEnv) -> str:
-    image_statuses = dev_env.check_image_availability(platform.tool_images)
-    if (ToolImages.NOT_AVAILABLE in image_statuses) or (ToolImages.LOCAL_ONLY in image_statuses):
+    image_statuses = []
+    for tool_image in dev_env.tool_images:
+        image_statuses.append(tool_image.availability)
+
+    if (ToolImage.NOT_AVAILABLE in image_statuses) or (ToolImage.LOCAL_ONLY in image_statuses):
         dev_env_status = dev_env_org_status_messages[DEV_ENV_ORG_NOT_IN_REGISTRY]
-    elif (image_statuses.count(ToolImages.LOCAL_AND_REGISTRY) == len(image_statuses)) and \
+    elif (image_statuses.count(ToolImage.LOCAL_AND_REGISTRY) == len(image_statuses)) and \
             platform.get_dev_env_by_name(dev_env.name):
         dev_env_status = dev_env_org_status_messages[DEV_ENV_ORG_INSTALLED_LOCALLY]
     else:
@@ -47,17 +50,23 @@ def get_catalog_dev_env_status(platform: Platform, dev_env: DevEnv) -> str:
             dev_env_status = dev_env_org_status_messages[DEV_ENV_ORG_READY]
     return dev_env_status
 
-def get_local_dev_env_status(dev_env: DevEnv, tool_images: ToolImages) -> str:
-    image_statuses = dev_env.check_image_availability(tool_images)
-    if (ToolImages.NOT_AVAILABLE in image_statuses):
+def get_local_dev_env_status(dev_env: DevEnv, tool_images: ToolImage) -> str:
+    image_statuses = []
+    for tool_image in dev_env.tool_images:
+        image_statuses.append(tool_image.availability)
+
+    if (ToolImage.NOT_AVAILABLE in image_statuses):
         dev_env_status = dev_env_local_status_messages[DEV_ENV_LOCAL_NOT_AVAILABLE]
-    elif (ToolImages.REGISTRY_ONLY in image_statuses):
+    elif (ToolImage.REGISTRY_ONLY in image_statuses):
         dev_env_status = dev_env_local_status_messages[DEV_ENV_LOCAL_REINSTALL]
     else:
         dev_env_status = dev_env_local_status_messages[DEV_ENV_LOCAL_INSTALLED]
     return dev_env_status
 
 def list_dev_envs(platform: Platform, local: bool, org: bool)-> None:
+    # Load the Dev Envs
+    platform.load_dev_envs()
+
     table = Table()
     table.add_column("Development Environment")
     table.add_column("Status")

@@ -34,7 +34,6 @@ def test_cli_success(mock_Platform: MagicMock, mock_cli_main: MagicMock, mock_Co
     mock_TUIUserOutput.assert_called_once()
     mock_Core.set_user_output.assert_called_once_with(mock_tui_user_output)
     mock_platform.config_file.update.assert_called_once()
-    mock_platform.load_dev_envs.assert_called_once()
     mock_cli_main.typer_cli.assert_called_once_with(prog_name=__command__)
 
 @patch("dem.__main__.stderr.print")
@@ -63,7 +62,6 @@ def test_cli_LookupError(mock_Platform: MagicMock, mock_cli_main: MagicMock, moc
     mock_TUIUserOutput.assert_called_once()
     mock_Core.set_user_output.assert_called_once_with(mock_tui_user_output)
     mock_platform.config_file.update.assert_called_once()
-    mock_platform.load_dev_envs.assert_called_once()
     mock_cli_main.typer_cli.assert_called_once_with(prog_name=__command__)
     mock_stderr_print.assert_called_once_with("[red]" + test_exception_text + "[/]")
 
@@ -93,7 +91,6 @@ def test_cli_RegistryError(mock_Platform: MagicMock, mock_cli_main: MagicMock, m
     mock_TUIUserOutput.assert_called_once()
     mock_Core.set_user_output.assert_called_once_with(mock_tui_user_output)
     mock_platform.config_file.update.assert_called_once()
-    mock_platform.load_dev_envs.assert_called_once()
     mock_cli_main.typer_cli.assert_called_once_with(prog_name=__command__)
     mock_stderr_print.assert_called_once_with("[red]" + test_exception_text + "\nUsing local tool images only![/]")
 
@@ -126,7 +123,6 @@ def test_cli_DockerException_permission_denied(mock_Platform: MagicMock, mock_cl
     mock_TUIUserOutput.assert_called_once()
     mock_Core.set_user_output.assert_called_once_with(mock_tui_user_output)
     mock_platform.config_file.update.assert_called_once()
-    mock_platform.load_dev_envs.assert_called_once()
     mock_cli_main.typer_cli.assert_called_once_with(prog_name=__command__)
     mock_stderr_print.assert_called_once_with("[red]" + test_exception_text + "[/]")
     mock_stdout_print.assert_called_once_with("\nHint: Is your user part of the docker group?")
@@ -161,7 +157,6 @@ def test_cli_DockerException_invalid_reference_format(mock_Platform: MagicMock,
     mock_TUIUserOutput.assert_called_once()
     mock_Core.set_user_output.assert_called_once_with(mock_tui_user_output)
     mock_platform.config_file.update.assert_called_once()
-    mock_platform.load_dev_envs.assert_called_once()
     mock_cli_main.typer_cli.assert_called_once_with(prog_name=__command__)
     mock_stderr_print.assert_called_once_with("[red]" + test_exception_text + "[/]")
     mock_stdout_print.assert_called_once_with("\nHint: The input repository might not exist in the registry.")
@@ -194,7 +189,6 @@ def test_cli_DockerException_400(mock_Platform: MagicMock, mock_cli_main: MagicM
     mock_TUIUserOutput.assert_called_once()
     mock_Core.set_user_output.assert_called_once_with(mock_tui_user_output)
     mock_platform.config_file.update.assert_called_once()
-    mock_platform.load_dev_envs.assert_called_once()
     mock_cli_main.typer_cli.assert_called_once_with(prog_name=__command__)
     mock_stderr_print.assert_called_once_with("[red]" + test_exception_text + "[/]")
     mock_stdout_print.assert_called_once_with("\nHint: The input parameters might not be valid.")
@@ -226,7 +220,6 @@ def test_cli_DockerException_unknown(mock_Platform: MagicMock, mock_cli_main: Ma
     mock_TUIUserOutput.assert_called_once()
     mock_Core.set_user_output.assert_called_once_with(mock_tui_user_output)
     mock_platform.config_file.update.assert_called_once()
-    mock_platform.load_dev_envs.assert_called_once()
     mock_cli_main.typer_cli.assert_called_once_with(prog_name=__command__)
     mock_stderr_print.assert_called_once_with("[red]" + test_exception_text + "[/]")
 
@@ -257,7 +250,6 @@ def test_cli_ContainerEngineError(mock_Platform: MagicMock, mock_cli_main: Magic
     mock_TUIUserOutput.assert_called_once()
     mock_Core.set_user_output.assert_called_once_with(mock_tui_user_output)
     mock_platform.config_file.update.assert_called_once()
-    mock_platform.load_dev_envs.assert_called_once()
     mock_cli_main.typer_cli.assert_called_once_with(prog_name=__command__)
     mock_stderr_print.assert_called_once_with("[red]Container engine error: " + test_exception_text + "[/]")
 

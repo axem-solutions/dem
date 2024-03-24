@@ -13,6 +13,10 @@ class RegistryError(Exception):
     """Raised when the communication with registry fails."""
     pass
 
+class ToolImageError(Exception):
+    """Raised when there is a problem with the tool image."""
+    pass
+
 class ContainerEngineError(Exception):
     """Raised when there is a problem with the container engine."""
 

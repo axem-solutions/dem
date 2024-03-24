@@ -207,11 +207,11 @@ def test_HorizontalMenu_handle_user_input(mock_move_cursor, mock_key):
     ]
     mock_move_cursor.assert_has_calls(calls)
 
-@patch.object(menu.CancelNextMenu, "add_row")
+@patch.object(menu.CancelSaveMenu, "add_row")
 @patch.object(menu.HorizontalMenu, "__init__")
-def test_CancelNextMenu(mock_super___init__, mock_add_row):
+def test_CancelSaveMenu(mock_super___init__, mock_add_row):
     # Run unit under test
-    test_cancel_next_menu = menu.CancelNextMenu()
+    test_cancel_next_menu = menu.CancelSaveMenu()
 
     # Check expectations
     mock_super___init__.assert_called_once()
@@ -219,11 +219,11 @@ def test_CancelNextMenu(mock_super___init__, mock_add_row):
                                          test_cancel_next_menu.cursor_off + test_cancel_next_menu.menu_items[1])
 
 @patch.object(menu.HorizontalMenu, "__init__", MagicMock())
-@patch.object(menu.CancelNextMenu, "add_row", MagicMock())
+@patch.object(menu.CancelSaveMenu, "add_row", MagicMock())
 @patch("dem.cli.tui.renderable.menu.key")
-def test_CancelNextMenu_handle_user_input_enter(mock_key):
+def test_CancelSaveMenu_handle_user_input_enter(mock_key):
     # Test setup
-    test_cancel_next_menu = menu.CancelNextMenu()
+    test_cancel_next_menu = menu.CancelSaveMenu()
 
     # Run unit under test
     test_cancel_next_menu.handle_user_input(mock_key.ENTER)
@@ -232,12 +232,12 @@ def test_CancelNextMenu_handle_user_input_enter(mock_key):
     assert test_cancel_next_menu.is_selected is True
 
 @patch.object(menu.HorizontalMenu, "__init__", MagicMock())
-@patch.object(menu.CancelNextMenu, "add_row", MagicMock())
+@patch.object(menu.CancelSaveMenu, "add_row", MagicMock())
 @patch("dem.cli.tui.renderable.menu.key", MagicMock())
 @patch.object(menu.HorizontalMenu, "handle_user_input")
-def test_CancelNextMenu_handle_user_input_else(mock_super_handle_user_input):
+def test_CancelSaveMenu_handle_user_input_else(mock_super_handle_user_input):
     # Test setup
-    test_cancel_next_menu = menu.CancelNextMenu()
+    test_cancel_next_menu = menu.CancelSaveMenu()
     fake_input = MagicMock()
 
     # Run unit under test
@@ -246,166 +246,252 @@ def test_CancelNextMenu_handle_user_input_else(mock_super_handle_user_input):
     # Check expectations
     mock_super_handle_user_input.assert_called_once_with(fake_input)
 
-@patch.object(menu.BackMenu, "add_row")
-@patch.object(menu.HorizontalMenu, "__init__")
-def test_BackMenu(mock_super___init__, mock_add_row):
-    # Run unit under test
-    test_back_next_menu = menu.BackMenu()
-
-    # Check expectations
-    mock_super___init__.assert_called_once()
-    mock_add_row.assert_called_once_with(test_back_next_menu.cursor_off + test_back_next_menu.menu_item)
-
-@patch.object(menu.HorizontalMenu, "__init__", MagicMock())
-@patch.object(menu.BackMenu, "add_row", MagicMock())
-@patch("dem.cli.tui.renderable.menu.key")
-def test_BackMenu_handle_user_input_enter(mock_key):
-    # Test setup
-    test_back_next_menu = menu.BackMenu()
-
-    # Run unit under test
-    test_back_next_menu.handle_user_input(mock_key.ENTER)
-
-    # Check expectations
-    assert test_back_next_menu.is_selected is True
-
-@patch.object(menu.VerticalMenu, "add_row")
-@patch.object(menu.ToolTypeMenu, "add_column")
+@patch.object(menu.table.Table, "add_column")
+@patch.object(menu.table.Table, "add_row")
 @patch.object(menu.VerticalMenu, "__init__")
-def test_ToolTypeMenu(mock_super___init__, mock_add_column, mock_add_row):
+def test_ToolImageMenu(mock___init__: MagicMock, mock_add_row: MagicMock, 
+                       mock_add_column: MagicMock) -> None:
     # Test setup
-    test_supported_tool_types = [
-        "test1",
-        "test2",
-        "test3",
-        "test4",
-        "test5",
+    mock___init__.return_value = None
+
+    mock_printable_tool_image1 = MagicMock()
+    mock_printable_tool_image1.name = "test_image1"
+    mock_printable_tool_image1.status = "test_available1"
+    mock_printable_tool_image2 = MagicMock()
+    mock_printable_tool_image2.name = "test_image2"
+    mock_printable_tool_image2.status = "test_available2"
+    test_printable_tool_images = [mock_printable_tool_image1, mock_printable_tool_image2]
+
+    test_already_selected_tool_images = [
+        mock_printable_tool_image1.name,
+        mock_printable_tool_image2.name
     ]
 
     # Run unit under test
-    test_tool_type_menu = menu.ToolTypeMenu(test_supported_tool_types)
+    menu.ToolImageMenu(test_printable_tool_images, test_already_selected_tool_images)
 
     # Check expectations
-    mock_super___init__.assert_called_once()
-    
-    calls = [
-        call("Tool types"),
-        call("Selected"),
-    ]
-    mock_add_column.assert_has_calls(calls)
+    mock___init__.assert_called_once()
+    mock_add_column.has_calls([
+        call("Tool Image", no_wrap=True),
+        call("Available", no_wrap=True)
+    ])
+    mock_add_row.has_calls([
+        call(f"* [green]{mock_printable_tool_image1.name}[/]", mock_printable_tool_image1.status),
+        call(f"  [green]{mock_printable_tool_image2.name}[/]", mock_printable_tool_image2.status)
+    ])
 
-    calls = []
-    for index, test_tool_type in enumerate(test_supported_tool_types):
-        if (index == 0):
-            calls.append(call(test_tool_type_menu.cursor_on + test_tool_type, 
-                              test_tool_type_menu.not_selected))
-        else:
-            calls.append(call(test_tool_type_menu.cursor_off + test_tool_type, 
-                              test_tool_type_menu.not_selected))
-    mock_add_row.assert_has_calls(calls)
-
-def test_ToolTypeMenu_preset_selection():
+@patch.object(menu.ToolImageMenu, "__init__")
+def test_handle_user_input_when_select(mock___init__: MagicMock) -> None:
     # Test setup
-    test_supported_tool_types = [
-        "test1",
-        "test2",
-        "test3",
-        "test4",
-        "test5",
-    ]
-    test_already_selected_tool_types = [
-        "test1",
-        "test3",
-        "test5",
-    ]
+    mock___init__.return_value = None
 
-    test_tool_type_menu = menu.ToolTypeMenu(test_supported_tool_types)
+    test_input = menu.key.ENTER
+    test_tool_image_menu = menu.ToolImageMenu([], [])
+    test_tool_image_menu.cursor_pos = 0
+    mock_columns = [MagicMock()]
+    test_tool_image_menu.columns = mock_columns
+    test_tool_image_menu.columns[0]._cells = []
+    test_tool_image_menu.columns[0]._cells.append("* test_image")
 
     # Run unit under test
-    test_tool_type_menu.preset_selection(test_already_selected_tool_types)
+    test_tool_image_menu.handle_user_input(test_input)
 
     # Check expectations
-    expected_selection = [
-        test_tool_type_menu.selected,
-        test_tool_type_menu.not_selected,
-        test_tool_type_menu.selected,
-        test_tool_type_menu.not_selected,
-        test_tool_type_menu.selected,
-    ]
-    for row_idx, cell in enumerate(test_tool_type_menu.columns[1]._cells):
-        assert cell == expected_selection[row_idx]
+    assert "* [green]test_image[/]" == test_tool_image_menu.columns[0]._cells[test_tool_image_menu.cursor_pos]
 
-def test_ToolTypeMenu_toggle_select():
+    mock___init__.assert_called_once()
+
+@patch.object(menu.ToolImageMenu, "__init__")
+def test_handle_user_input_when_deselect(mock___init__: MagicMock) -> None:
     # Test setup
-    test_supported_tool_types = [
-        "test1",
-    ]
+    mock___init__.return_value = None
 
-    test_tool_type_menu = menu.ToolTypeMenu(test_supported_tool_types)
-
-    # Run unit under test - not selected -> selected
-    test_tool_type_menu.toggle_select()
-
-    # Check expectations
-    assert test_tool_type_menu.columns[1]._cells[test_tool_type_menu.cursor_pos] is test_tool_type_menu.selected
-
-    # Run unit under test - selected -> not selected
-    test_tool_type_menu.toggle_select()
-
-    # Check expectations
-    assert test_tool_type_menu.columns[1]._cells[test_tool_type_menu.cursor_pos] is test_tool_type_menu.not_selected
-
-@patch.object(menu.VerticalMenu, "__init__", MagicMock())
-@patch.object(menu.ToolTypeMenu, "add_column", MagicMock())
-@patch.object(menu.ToolTypeMenu, "toggle_select")
-@patch("dem.cli.tui.renderable.menu.key")
-def test_ToolTypeMenu_handle_user_input_enter(mock_key, mock_toggle_select):
-    # Test setup
-    test_tool_type_menu = menu.ToolTypeMenu([])
+    test_input = menu.key.ENTER
+    test_tool_image_menu = menu.ToolImageMenu([], [])
+    test_tool_image_menu.cursor_pos = 0
+    mock_columns = [MagicMock()]
+    test_tool_image_menu.columns = mock_columns
+    test_tool_image_menu.columns[0]._cells = []
+    test_tool_image_menu.columns[0]._cells.append("* [green]test_image[/]")
 
     # Run unit under test
-    test_tool_type_menu.handle_user_input(mock_key.ENTER)
+    test_tool_image_menu.handle_user_input(test_input)
 
     # Check expectations
-    mock_toggle_select.assert_called_once()
+    assert "* test_image" in test_tool_image_menu.columns[0]._cells[test_tool_image_menu.cursor_pos]
 
-@patch.object(menu.VerticalMenu, "__init__", MagicMock())
-@patch.object(menu.ToolTypeMenu, "add_column", MagicMock())
-@patch("dem.cli.tui.renderable.menu.key", MagicMock())
+    mock___init__.assert_called_once()
+
 @patch.object(menu.VerticalMenu, "handle_user_input")
-def test_ToolTypeMenu_handle_user_input_else(mock_super_handle_user_input):
+@patch.object(menu.ToolImageMenu, "__init__")
+def test_handle_user_input_when_other(mock___init__: MagicMock, mock_handle_user_input: MagicMock) -> None:
     # Test setup
-    test_tool_type_menu = menu.ToolTypeMenu([])
-    fake_input = MagicMock()
+    mock___init__.return_value = None
+
+    test_input = "test_input"
+    test_tool_image_menu = menu.ToolImageMenu([], [])
 
     # Run unit under test
-    test_tool_type_menu.handle_user_input(fake_input)
-
-    # # Check expectations
-    mock_super_handle_user_input.assert_called_once_with(fake_input)
-
-def test_ToolTypeMenu_get_selected_tool_types():
-    # Test setup
-    test_supported_tool_types = [
-        "test1",
-        "test2",
-        "test3",
-        "test4",
-        "test5",
-    ]
-
-    test_tool_type_menu = menu.ToolTypeMenu(test_supported_tool_types)
-    test_tool_type_menu.columns[1]._cells[0] = test_tool_type_menu.selected
-    test_tool_type_menu.columns[1]._cells[2] = test_tool_type_menu.selected
-    test_tool_type_menu.columns[1]._cells[4] = test_tool_type_menu.selected
-
-    # Run unit under test
-    actual_selected_tool_types = test_tool_type_menu.get_selected_tool_types()
+    test_tool_image_menu.handle_user_input(test_input)
 
     # Check expectations
-    expected_selected_tool_types = [
-        "test1",
-        "test3",
-        "test5",
+    mock___init__.assert_called_once()
+    mock_handle_user_input.assert_called_once_with(test_input)
+
+@patch.object(menu.ToolImageMenu, "__init__")
+def test_get_selected_tool_images(mock___init__: MagicMock) -> None:
+    # Test setup
+    mock___init__.return_value = None
+
+    test_tool_image_menu = menu.ToolImageMenu([], [])
+    mock_columns = [MagicMock()]
+    test_tool_image_menu.columns = mock_columns
+    test_tool_image_menu.columns[0]._cells = []
+    test_tool_image_menu.columns[0]._cells.append("* [green]test_image1[/]")
+    test_tool_image_menu.columns[0]._cells.append("  test_image2")
+    test_tool_image_menu.columns[0]._cells.append("  [green]test_image3[/]")
+
+    # Run unit under test
+    actual_selected_tool_images = test_tool_image_menu.get_selected_tool_images()
+
+    # Check expectations
+    mock___init__.assert_called_once()
+
+    assert ["test_image1", "test_image3"] == actual_selected_tool_images
+
+@patch("dem.cli.tui.renderable.menu.align.Align")
+@patch.object(menu.VerticalMenu, "add_row")
+@patch.object(menu.VerticalMenu, "__init__")
+def test_SelectMenu(mock___init__: MagicMock, mock_add_row: MagicMock, mock_Align: MagicMock) -> None:
+    # Test setup
+    mock___init__.return_value = None
+
+    mock_alignment = MagicMock()
+    mock_Align.return_value = mock_alignment
+
+    test_selection = ["test1", "test2"]
+
+    # Run unit under test
+    actual_select_menu = menu.SelectMenu(test_selection)
+
+    # Check expectations
+    assert actual_select_menu.show_edge is False
+    assert actual_select_menu.show_lines is False
+
+    mock___init__.assert_called_once()
+    mock_add_row.assert_has_calls([
+        call("* test1"),
+        call("  test2")
+
+    ])
+    mock_Align.assert_called_once_with(actual_select_menu, align="center", vertical="middle")
+
+@patch.object(menu.SelectMenu, "move_cursor")
+@patch("dem.cli.tui.renderable.menu.readkey")
+@patch("dem.cli.tui.renderable.menu.live.Live")
+@patch.object(menu.SelectMenu, "__init__")
+def test_SelectMenu_wait_for_user(mock___init__: MagicMock, mock_Live: MagicMock, 
+                                  mock_readkey: MagicMock, mock_move_cursor: MagicMock) -> None:
+    # Test setup
+    mock___init__.return_value = None
+
+    mock_readkey.side_effect = [menu.key.UP, menu.key.DOWN, menu.key.ENTER]
+    mock_alignment = MagicMock()
+
+    test_select_menu = menu.SelectMenu([])
+    test_select_menu.alignment = mock_alignment
+
+    # Run unit under test
+    test_select_menu.wait_for_user()
+
+    # Check expectations
+    mock_Live.assert_called_once_with(mock_alignment, refresh_per_second=8, screen=True)
+    mock_move_cursor.assert_has_calls([
+        call(test_select_menu.CURSOR_UP),
+        call(test_select_menu.CURSOR_DOWN)
+    ])
+
+def test_get_selected() -> None:
+    # Test setup
+    test_select_menu = menu.SelectMenu([])
+    test_select_menu.cursor_pos = 1
+    test_select_menu.columns = [MagicMock()]
+    test_select_menu.columns[0]._cells = ["* test1", "  test2"]
+
+    # Run unit under test
+    actual_selected = test_select_menu.get_selected()
+
+    # Check expectations
+    assert "test2" == actual_selected
+
+@patch.object(menu.VerticalMenu, "set_title")
+def test_set_title(mock_set_title: MagicMock) -> None:
+    # Test setup
+    test_select_menu = menu.SelectMenu([])
+    test_select_menu.width = 0
+    test_title = "test_title"
+
+    # Run unit under test
+    test_select_menu.set_title(test_title)
+
+    # Check expectations
+    assert test_select_menu.width == len(test_title)
+
+    mock_set_title.assert_called_once_with(test_title)
+    
+@patch("dem.cli.tui.renderable.menu.align.Align")
+@patch("dem.cli.tui.renderable.menu.table.Table")
+@patch.object(menu.panel.Panel, "__init__")
+def test_DevEnvStatusPanel(mock___init__: MagicMock, mock_Table: MagicMock, mock_Align: MagicMock) -> None:
+    # Test setup
+    mock___init__.return_value = None
+
+    mock_outer_table = MagicMock()
+    mock_Table.return_value = mock_outer_table
+
+    mock_aligned_renderable = MagicMock()
+    mock_Align.return_value = mock_aligned_renderable
+
+    test_already_selected_tool_images = ["test1", "test2"]
+
+    # Run unit under test
+    test_dev_env_status_panel = menu.DevEnvStatusPanel(test_already_selected_tool_images)
+
+    # Check expectations
+    mock___init__.assert_called_once()
+    mock_Table.assert_called_once_with(box=None)
+    mock___init__.assert_called_once_with(mock_outer_table, title="Development Environment", 
+                                          expand=True)
+    mock_Align.assert_called_once_with(test_dev_env_status_panel, vertical="middle")
+    mock_outer_table.add_row.assert_has_calls = [
+        call(test_already_selected_tool_images[0]),
+        call(test_already_selected_tool_images[1])
     ]
-    assert actual_selected_tool_types == expected_selected_tool_types
+
+@patch("dem.cli.tui.renderable.menu.table.Table")
+@patch.object(menu.DevEnvStatusPanel, "__init__")
+def test_DevEnvStatusPanel_update_table(mock___init__: MagicMock, mock_Table: MagicMock) -> None:
+    # Test setup
+    mock___init__.return_value = None
+
+    test_dev_env_status_panel = menu.DevEnvStatusPanel([])
+    mock_outer_table = MagicMock()
+    mock_Table.return_value = mock_outer_table
+
+    test_dev_env_status_panel.renderable = None
+
+    test_selected_tool_images = ["test1", "test2"]
+
+    # Run unit under test
+    test_dev_env_status_panel.update_table(test_selected_tool_images)
+
+    # Check expectations
+    assert test_dev_env_status_panel.renderable is mock_outer_table
+
+    mock___init__.assert_called_once()
+    mock_Table.assert_called_once_with(box=None)
+    mock_outer_table.add_row.assert_has_calls = [
+        call(test_selected_tool_images[0]),
+        call(test_selected_tool_images[1])
+    ]

@@ -23,7 +23,7 @@ def test_DevEnv() -> None:
 
     # Check expectations
     assert test_dev_env.name is test_descriptor["name"]
-    assert test_dev_env.tools is test_descriptor["tools"]
+    assert test_dev_env.tool_image_descriptors is test_descriptor["tools"]
 
 @patch("dem.core.dev_env.json.load")
 @patch("dem.core.dev_env.open")
@@ -47,7 +47,7 @@ def test_DevEnv_with_descriptor_path(mock_path_exists: MagicMock, mock_open: Mag
 
     # Check expectations
     assert test_dev_env.name is test_descriptor["name"]
-    assert test_dev_env.tools is test_descriptor["tools"]
+    assert test_dev_env.tool_image_descriptors is test_descriptor["tools"]
     assert test_dev_env.is_installed is True
 
     mock_path_exists.assert_called_once_with(test_descriptor_path)
@@ -85,7 +85,7 @@ def test_DevEnv_with_descriptor_and_descriptor_path() -> None:
         # Check expectations
         assert str(exc_info.value) == "Only one of the arguments can be not None."
 
-def test_DevEnv_check_image_availability():
+def test_DevEnv_assign_tool_image_instances() -> None:
     # Test setup
     test_descriptor = {
         "name": "test_name",
@@ -102,89 +102,34 @@ def test_DevEnv_check_image_availability():
             {
                 "image_name": "test_image_name3",
                 "image_version": "test_image_tag3"
-            },
-            {
-                "image_name": "test_image_name4",
-                "image_version": "test_image_tag4"
-            },
+            }
         ]
     }
-    mock_tool_images = MagicMock()
-    mock_tool_images.local.elements = [
-        "test_image_name1:test_image_tag1",
-        "test_image_name2:test_image_tag2"
-    ]
-    mock_tool_images.registry.elements = [
-        "test_image_name1:test_image_tag1",
-        "test_image_name3:test_image_tag3"
-    ]
     test_dev_env = dev_env.DevEnv(test_descriptor)
 
-    # Run unit under test
-    actual_image_statuses = test_dev_env.check_image_availability(mock_tool_images, True)
-
-    # Check expectations
-    expected_statuses = [
-        dev_env.ToolImages.LOCAL_AND_REGISTRY,
-        dev_env.ToolImages.LOCAL_ONLY,
-        dev_env.ToolImages.REGISTRY_ONLY,
-        dev_env.ToolImages.NOT_AVAILABLE
-    ]
-    assert expected_statuses == actual_image_statuses
-    for idx, tool in enumerate(test_dev_env.tools):
-        assert expected_statuses[idx] == tool["image_status"]
-
-    
-    mock_tool_images.local.update.assert_called_once()
-    mock_tool_images.registry.update.assert_called_once()
-
-
-def test_DevEnv_check_image_availability_local_only():
-    # Test setup
-    test_descriptor = {
-        "name": "test_name",
-        "installed": "True",
-        "tools": [
-            {
-                "image_name": "test_image_name1",
-                "image_version": "test_image_tag1"
-            },
-            {
-                "image_name": "test_image_name2",
-                "image_version": "test_image_tag2"
-            },
-            {
-                "image_name": "test_image_name3",
-                "image_version": "test_image_tag3"
-            },
-            {
-                "image_name": "test_image_name4",
-                "image_version": "test_image_tag4"
-            },
-        ]
+    mock_tool_images = MagicMock()
+    mock_tool_image1 = MagicMock()
+    mock_tool_image1.name = "test_image_name1:test_image_tag1"
+    mock_tool_image2 = MagicMock()
+    mock_tool_image2.name = "test_image_name2:test_image_tag2"
+    mock_tool_image3 = MagicMock()
+    mock_tool_image3.name = "test_image_name3:test_image_tag3"
+    mock_tool_image4 = MagicMock()
+    mock_tool_image4.name = "test_image_name4:test_image_tag4"
+    mock_tool_images.all_tool_images = {
+        "test_image_name1:test_image_tag1": mock_tool_image1,
+        "test_image_name2:test_image_tag2": mock_tool_image2,
+        "test_image_name3:test_image_tag3": mock_tool_image3,
+        "test_image_name4:test_image_tag4": mock_tool_image4
     }
-    mock_tool_images = MagicMock()
-    mock_tool_images.local.elements = [
-        "test_image_name1:test_image_tag1",
-        "test_image_name2:test_image_tag2"
-    ]
-    test_dev_env = dev_env.DevEnv(test_descriptor)
 
     # Run unit under test
-    actual_image_statuses = test_dev_env.check_image_availability(mock_tool_images, True, True)
+    test_dev_env.assign_tool_image_instances(mock_tool_images)
 
     # Check expectations
-    expected_statuses = [
-        dev_env.ToolImages.LOCAL_ONLY,
-        dev_env.ToolImages.LOCAL_ONLY,
-        dev_env.ToolImages.NOT_AVAILABLE,
-        dev_env.ToolImages.NOT_AVAILABLE
-    ]
-    assert expected_statuses == actual_image_statuses
-    for idx, tool in enumerate(test_dev_env.tools):
-        assert expected_statuses[idx] == tool["image_status"]
-
-    mock_tool_images.local.update.assert_called_once()
+    assert len(test_dev_env.tool_images) == 3
+    for tool_image in test_dev_env.tool_images:
+        assert tool_image is mock_tool_images.all_tool_images[tool_image.name]
 
 def test_DevEnv_get_deserialized_is_installed_true() -> None:
     # Test setup
