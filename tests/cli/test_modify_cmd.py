@@ -136,7 +136,7 @@ def test_open_dev_env_settings_panel(mock_DevEnvSettingsWindow: MagicMock) -> No
     mock_dev_env_settings_panel = MagicMock()
     mock_DevEnvSettingsWindow.return_value = mock_dev_env_settings_panel
     expected_selected_tool_images = ["test1:1.0", "test2:2.0"]
-    mock_dev_env_settings_panel.selected_tool_images = expected_selected_tool_images
+    mock_dev_env_settings_panel.tool_image_menu.get_selected_tool_images.return_value = expected_selected_tool_images
     mock_dev_env_settings_panel.cancel_save_menu.get_selection.return_value = "save"
 
     mock_printable_tool_images = MagicMock()
@@ -146,11 +146,11 @@ def test_open_dev_env_settings_panel(mock_DevEnvSettingsWindow: MagicMock) -> No
                                                                          mock_printable_tool_images)
 
     # Check expectations
+    assert actual_selected_tool_images == expected_selected_tool_images
+
     mock_DevEnvSettingsWindow.assert_called_once_with(mock_printable_tool_images, 
                                                      ["test1:1.0", "test2:2.0"])
     mock_dev_env_settings_panel.wait_for_user.assert_called_once()
-
-    assert actual_selected_tool_images == expected_selected_tool_images
 
 @patch("dem.cli.command.modify_cmd.DevEnvSettingsWindow")
 def test_open_dev_env_settings_panel_cancel(mock_DevEnvSettingsWindow: MagicMock) -> None:

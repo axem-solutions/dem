@@ -25,7 +25,7 @@ def open_dev_env_settings_panel(all_tool_images: dict[str, ToolImage]) -> list[s
     if "cancel" in dev_env_settings_panel.cancel_save_menu.get_selection():
         raise typer.Abort()
 
-    return dev_env_settings_panel.selected_tool_images
+    return dev_env_settings_panel.tool_image_menu.get_selected_tool_images()
 
 def create_new_dev_env_descriptor(dev_env_name: str, selected_tool_images: list[str]) -> dict:
     """ Create a new Development Environment descriptor.
