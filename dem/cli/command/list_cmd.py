@@ -64,8 +64,7 @@ def get_local_dev_env_status(dev_env: DevEnv, tool_images: ToolImage) -> str:
     return dev_env_status
 
 def list_dev_envs(platform: Platform, local: bool, org: bool)-> None:
-    # Load the Dev Envs
-    platform.load_dev_envs()
+
 
     table = Table()
     table.add_column("Development Environment")

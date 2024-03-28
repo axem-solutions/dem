@@ -19,8 +19,7 @@ def export(dev_env: DevEnv, export_path: str):
     dev_env.export(export_path)
 
 def execute(platform: Platform, dev_env_name: str, export_path: str) -> None:
-    # Load the Dev Envs
-    platform.load_dev_envs()
+
 
     dev_env = platform.get_dev_env_by_name(dev_env_name)
     if dev_env:

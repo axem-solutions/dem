@@ -32,8 +32,7 @@ def load_dev_env_to_dev_env_json(platform: Platform,path_to_dev_env: str) -> boo
         return True
 
 def execute(platform: Platform, path_to_dev_env: str) -> None:
-    # Load the Dev Envs
-    platform.load_dev_envs()
+
 
     if check_is_file_exist(path_to_dev_env) is True:                
         retval = load_dev_env_to_dev_env_json(platform,path_to_dev_env)        

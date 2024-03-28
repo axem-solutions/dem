@@ -13,8 +13,7 @@ def execute(platform: Platform, dev_env_name: str) -> None:
             platform -- the platform
             dev_env_name -- the name of the Development Environment to install
     """
-    # Load the Dev Envs
-    platform.load_dev_envs()
+
     platform.assign_tool_image_instances_to_all_dev_envs()
 
     dev_env_to_install: DevEnv | None = platform.get_dev_env_by_name(dev_env_name)

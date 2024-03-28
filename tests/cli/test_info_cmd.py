@@ -87,7 +87,6 @@ def test_execute_dev_env_not_found(mock_stderr_print: MagicMock) -> None:
     # Check expectations
     assert runner_result.exit_code == 0
     
-    mock_platform.load_dev_envs.assert_called_once()
     mock_platform.assign_tool_image_instances_to_all_dev_envs.assert_called_once()
     mock_platform.get_dev_env_by_name.assert_called_once_with(test_dev_env_name)
     mock_stderr_print.assert_called_once_with(f"[red]Error: Unknown Development Environment: {test_dev_env_name}[/]\n")
@@ -113,7 +112,6 @@ def test_execute(mock_print_info: MagicMock) -> None:
     # Check expectations
     assert runner_result.exit_code == 0
 
-    mock_platform.load_dev_envs.assert_called_once()
     mock_platform.assign_tool_image_instances_to_all_dev_envs.assert_called_once()
     mock_platform.get_dev_env_by_name.assert_called_once_with(test_dev_env_name)
     mock_catalog.request_dev_envs.assert_called_once()

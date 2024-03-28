@@ -14,8 +14,7 @@ def execute(platform: Platform, dev_env_name: str, project_path: str) -> None:
             dev_env_name -- the name of the Development Environment to assign
             project_path -- the path to the project to assign the Development Environment to
     """
-    # Load the Dev Envs
-    platform.load_dev_envs()
+
 
     if not os.path.isdir(project_path):
         stderr.print(f"[red]Error: The {project_path} path does not exist.[/]")
