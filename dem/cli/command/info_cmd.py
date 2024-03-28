@@ -15,6 +15,11 @@ image_status_messages = {
 }
 
 def print_info(dev_env: DevEnv) -> None:
+    """ Print information about the given Development Environment.
+    
+        Args:
+            dev_env -- the Development Environment to print information about
+    """
     tool_info_table = Table()
     tool_info_table.add_column("Image")
     tool_info_table.add_column("Status")
@@ -25,8 +30,12 @@ def print_info(dev_env: DevEnv) -> None:
     stdout.print(tool_info_table)
 
 def execute(platform: Platform, arg_dev_env_name: str) -> None:
-    # Load the Dev Envs
-    platform.load_dev_envs()
+    """ Print information about the given Development Environment.
+    
+        Args:
+            platform -- the platform
+            arg_dev_env_name -- the name of the Development Environment to print information about
+    """
     platform.assign_tool_image_instances_to_all_dev_envs()
 
     dev_env = platform.get_dev_env_by_name(arg_dev_env_name)

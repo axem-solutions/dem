@@ -115,8 +115,6 @@ def execute(platform: Platform, dev_env_name: str) -> None:
         Exceptions:
             Abort -- if the name of the Development Environment contains whitespace characters
     """
-    # Load the Dev Envs
-    platform.load_dev_envs()
     platform.assign_tool_image_instances_to_all_dev_envs()
 
     create_dev_env(platform, dev_env_name)

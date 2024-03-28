@@ -165,8 +165,7 @@ def execute(platform: Platform, dev_env_name: str) -> None:
         Exceptions:
             typer.Abort -- if the user cancels the operation
     """
-    # Load the Dev Envs
-    platform.load_dev_envs()
+
     platform.assign_tool_image_instances_to_all_dev_envs()
 
     dev_env = platform.get_dev_env_by_name(dev_env_name)

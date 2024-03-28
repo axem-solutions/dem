@@ -5,8 +5,7 @@ from dem.core.platform import Platform
 from dem.cli.console import stderr
 
 def execute(platform: Platform, dev_env_name_to_rename: str, new_dev_env_name: str) -> None:
-    # Load the Dev Envs
-    platform.load_dev_envs()
+
 
     dev_env_to_rename = platform.get_dev_env_by_name(dev_env_name_to_rename)
 

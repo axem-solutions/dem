@@ -25,6 +25,9 @@ def main() -> None:
         # Load the configuration file
         dem.cli.main.platform.config_file.update()
 
+        # Load the Dev Env descriptors
+        dem.cli.main.platform.load_dev_envs()
+
         # Run the CLI application
         dem.cli.main.typer_cli(prog_name=__command__)
     except LookupError as e:
@@ -40,8 +43,8 @@ def main() -> None:
             stdout.print("\nHint: The input repository might not exist in the registry.")
         elif "400" in str(e):
             stdout.print("\nHint: The input parameters might not be valid.")
-    except (ContainerEngineError, InternalError, ToolImageError) as e:
-        stderr.print("[red]" + str(e) + "[/]")
+    except (ContainerEngineError, InternalError, ToolImageError, CatalogError) as e:
+        stderr.print(f"[red]{str(e)}[/]")
     except DataStorageError as e:
         stderr.print("[red]" + str(e) + "[/]")
         if typer.confirm("Do you want to reset the file?"):
@@ -51,8 +54,6 @@ def main() -> None:
             elif "dev_env.json" in str(e):
                 stdout.print("Restoring the original Dev Env descriptor file...")
                 dem.cli.main.platform.dev_env_json.restore()
-    except CatalogError as e:
-        stderr.print(f"[red]{str(e)}[/]")
 
 # Call the main() when run as `python -m`
 if __name__ == "__main__":

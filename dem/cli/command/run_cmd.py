@@ -32,8 +32,7 @@ def execute(platform: Platform, dev_env_name: str, container_arguments: list[str
             dev_env_name -- name of the Development Environment
             container_arguments -- arguments passed to the container
     """
-    # Load the Dev Envs
-    platform.load_dev_envs()
+
 
     dev_env_local = platform.get_dev_env_by_name(dev_env_name)
 
