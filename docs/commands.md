@@ -36,20 +36,13 @@ Arguments:
 
 Create a new Development Environment descriptor and save it to the local descriptor storage (catalog).
 
-Running this command will open up an interactive UI on the command line. Follow the steps below to
-configure the new Environment.
-
-1. First you need to select the tool types. You can navigate with the :material-arrow-up: and
-:material-arrow-down: or :material-alpha-k: and :material-alpha-j: keys. Select the required
-tool types with :material-keyboard-space:. Select next if you finished the selection.
+Running this command will open up the Dev Env settings window:
 
     ![tool select](wp-content/tool_select.png)
 
 2. Assign the required tool images for the selected types. You can navigate with the
 :material-arrow-up: and :material-arrow-down: or :material-alpha-k: and :material-alpha-j: keys.
 Select the required tool image and press :material-keyboard-return:.
-
-    ![image select](wp-content/image_select.png)
 
 :info: After creation, the Development Environment can be installed with the `install` command.
 
@@ -71,7 +64,7 @@ will be asked if they want to overwrite it or not.
 
 Arguments:
 
-`DEV_ENV_NAME` Name of the Development Environment, whose descriptor to clone. [required]
+`DEV_ENV_NAME` Clone the descriptor of the Dev Env. [required]
 
 ---
 
@@ -88,28 +81,16 @@ Arguments:
 
 ## **`dem modify DEV_ENV_NAME`**
 
-Change a tool in a Development Environment.
-
-If the tool type is not specified, the Dev Env settings panel will be opened:
-
-1. The dem shows a list of the already selected tools. You can modify the selection. You can
-navigate with the :material-arrow-up: and :material-arrow-down: or :material-alpha-k: and
-:material-alpha-j: keys. Modify the required tool types with :material-keyboard-space:. Select next
-when you're done with the selection.
-
-    ![tool select](wp-content/tool_select.png)
+Open the Development Environment settings window to modify the Development Environment descriptor.
 
 2. Assign the required tool images for the selected types. You can navigate with the
 :material-arrow-up: and :material-arrow-down: or :material-alpha-k: and :material-alpha-j: keys.
 Select the required tool image and press :material-keyboard-return:.
 
-    ![image select](wp-content/image_select.png)
 
 Arguments:
 
 `DEV_ENV_NAME` Name of the Development Environment to modify. [required]  
-`[TOOL_TYPE]` The tool type to change. [optional]  
-`[TOOL_IMAGE]` The tool image to set for the tool type. [optional]
 
 ---
 
