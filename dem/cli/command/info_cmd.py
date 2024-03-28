@@ -44,7 +44,8 @@ def execute(platform: Platform, arg_dev_env_name: str) -> None:
         for catalog in platform.dev_env_catalogs.catalogs:
             catalog.request_dev_envs()
             dev_env = catalog.get_dev_env_by_name(arg_dev_env_name)
-            dev_env.assign_tool_image_instances(platform.tool_images)
+            if dev_env:
+                dev_env.assign_tool_image_instances(platform.tool_images)
             break
 
     if dev_env is None:
