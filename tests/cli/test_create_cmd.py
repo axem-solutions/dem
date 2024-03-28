@@ -27,7 +27,7 @@ def test_open_dev_env_settings_panel(mock_convert_to_printable_tool_images : Mag
 
     mock_dev_env_settings_panel = MagicMock()
     mock_selected_tool_images = MagicMock()
-    mock_dev_env_settings_panel.selected_tool_images = mock_selected_tool_images
+    mock_dev_env_settings_panel.tool_image_menu.get_selected_tool_images.return_value = mock_selected_tool_images
     mock_DevEnvSettingsWindow.return_value = mock_dev_env_settings_panel
 
     mock_dev_env_settings_panel.cancel_save_menu.get_selection.return_value = "save"
@@ -42,6 +42,7 @@ def test_open_dev_env_settings_panel(mock_convert_to_printable_tool_images : Mag
     mock_DevEnvSettingsWindow.assert_called_once_with(mock_printable_tool_images)
     mock_dev_env_settings_panel.wait_for_user.assert_called_once()
     mock_dev_env_settings_panel.cancel_save_menu.get_selection.assert_called_once()
+    mock_dev_env_settings_panel.tool_image_menu.get_selected_tool_images.assert_called_once()
 
 @patch("dem.cli.command.create_cmd.DevEnvSettingsWindow")
 @patch("dem.cli.command.create_cmd.convert_to_printable_tool_images")

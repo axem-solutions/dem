@@ -18,43 +18,58 @@ class NavigationHint(Panel):
 """
     def __init__(self) -> None:
         super().__init__(self.hint_text, title="Navigation", expand=False)
-        self.aligned_renderable = Align(self, align="center")
 
 class DevEnvSettingsWindow():
     def __init__(self, printable_tool_images: list[PrintableToolImage], 
                  already_selected_tool_images: list[str] = []) -> None:
         # Panel content
-        self.tool_image_menu = ToolImageMenu(printable_tool_images, already_selected_tool_images)
-        self.dev_env_status = DevEnvStatusPanel(already_selected_tool_images)
-        self.cancel_save_menu = CancelSaveMenu()
-        self.navigation_hint = NavigationHint()
+        self.dev_env_status_height = len(printable_tool_images)
+        self.dev_env_status_width = 0
+        for printable_tool_image in printable_tool_images:
+            if len(printable_tool_image.name) > self.dev_env_status_width:
+                self.dev_env_status_width = len(printable_tool_image.name)
 
-        self.menus = Align(Group(
-            Align(self.tool_image_menu, align="center", vertical="middle"),
-            Align(self.cancel_save_menu, align="center", vertical="middle"),
-        ), align="center", vertical="middle")
+        self.tool_image_menu = ToolImageMenu(printable_tool_images, already_selected_tool_images)
+        self.dev_env_status_panel = DevEnvStatusPanel(already_selected_tool_images, 
+                                                      self.dev_env_status_height, 
+                                                      self.dev_env_status_width)
+        self.cancel_save_menu = CancelSaveMenu()
+        self.navigation_hint_panel = NavigationHint()
+
+        self.build_layout()
+        self.cancel_save_menu.remove_cursor()
+        self.active_menu = self.tool_image_menu
+
+    def build_layout(self) -> None:
+        # Set the alignments
+        aligned_tool_image_menu = Align(self.tool_image_menu, vertical="bottom", align="right")
+        aligned_dev_env_status_panel = Align(self.dev_env_status_panel, vertical="bottom", align="left")
+        aligned_cancel_save_menu = Align(self.cancel_save_menu, vertical="middle", align="center")
+        aligned_navigation_hint_panel = Align(self.navigation_hint_panel, vertical="top", align="center")
 
         self.layout = Layout(name="root")
 
         self.layout.split_column(
-            Layout(name="main"),
-            Layout(name="navigation_hint", size=7),
+            Layout(name="dev_env_settings"),
+            Layout(name="navigation"),
         )
-        self.layout["main"].split_row(
-            Layout(name="menus"),
-            Layout(name="dev_env_status", size=30)
+        self.layout["dev_env_settings"].split_row(
+            Layout(name="available"),
+            Layout(name="selected")
         )
 
-        self.layout["menus"].update(self.menus)
-        self.layout["dev_env_status"].update(self.dev_env_status.aligned_renderable)
-        self.layout["navigation_hint"].update(self.navigation_hint.aligned_renderable)
+        self.layout["navigation"].split_column(
+            Layout(name="cancel_save", ratio=2),
+            Layout(name="navigation_hint", ratio=7)
+        )
 
-        self.cancel_save_menu.remove_cursor()
-        self.active_menu = self.tool_image_menu
+        self.layout["available"].update(aligned_tool_image_menu)
+        self.layout["selected"].update(aligned_dev_env_status_panel)
+        self.layout["cancel_save"].update(aligned_cancel_save_menu)
+        self.layout["navigation_hint"].update(aligned_navigation_hint_panel)
 
     def wait_for_user(self) -> None:
-        self.selected_tool_images = []
-        with Live(self.layout, refresh_per_second=8, screen=True):
+        with Live(self.layout, refresh_per_second=8, screen=True) as live:
             while self.cancel_save_menu.is_selected is False:
                 input = readkey()
                 if input is key.TAB:
@@ -70,5 +85,8 @@ class DevEnvSettingsWindow():
                     self.active_menu.handle_user_input(input)
 
                     if (self.active_menu is self.tool_image_menu) and (input in [key.ENTER, key.SPACE]):
-                        self.selected_tool_images = self.tool_image_menu.get_selected_tool_images()
-                        self.dev_env_status.update_table(self.selected_tool_images)
+                        self.dev_env_status_panel = DevEnvStatusPanel(self.tool_image_menu.get_selected_tool_images(),
+                                                                      self.dev_env_status_height,
+                                                                      self.dev_env_status_width)
+                        self.build_layout()
+                        live.update(self.layout)

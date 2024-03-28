@@ -112,7 +112,7 @@ def open_dev_env_settings_panel(already_selected_tool_images: list[str],
     if "cancel" in dev_env_settings_panel.cancel_save_menu.get_selection():
         raise typer.Abort()
 
-    return dev_env_settings_panel.selected_tool_images
+    return dev_env_settings_panel.tool_image_menu.get_selected_tool_images()
 
 def update_dev_env(dev_env: DevEnv, selected_tool_images: list[str]) -> None:
     """ Update the Development Environment.

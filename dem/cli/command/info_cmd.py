@@ -46,7 +46,7 @@ def execute(platform: Platform, arg_dev_env_name: str) -> None:
             dev_env = catalog.get_dev_env_by_name(arg_dev_env_name)
             if dev_env:
                 dev_env.assign_tool_image_instances(platform.tool_images)
-            break
+                break
 
     if dev_env is None:
         stderr.print(f"[red]Error: Unknown Development Environment: {arg_dev_env_name}[/]\n")

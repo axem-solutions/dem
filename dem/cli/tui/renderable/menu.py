@@ -3,6 +3,8 @@
 
 from dem.cli.tui.printable_tool_image import PrintableToolImage
 from rich import live, table, align, panel, box
+from rich.console import RenderableType
+
 from readchar import readkey, key
 
 class BaseMenu(table.Table):
@@ -207,8 +209,10 @@ class ToolImageMenu(VerticalMenu):
     def __init__(self, printable_tool_images: list[PrintableToolImage],
                  already_selected_tool_images: list[str]) -> None:
         super().__init__()
+        self.title = "Select the tool images for the Development Environment:"
         self.add_column("Tool images", no_wrap=True)
         self.add_column("Availability", no_wrap=True)
+        self.tool_image_selection = []
 
         for index, tool_image in enumerate(printable_tool_images):
             row_content = []
@@ -219,9 +223,13 @@ class ToolImageMenu(VerticalMenu):
                 row_content = "  " + tool_image.name, tool_image.status
 
             if tool_image.name in already_selected_tool_images:
+                self.tool_image_selection.append(tool_image.name)
                 row_content = f"{row_content[0][:2]}[green]{row_content[0][2:]}[/]", str(row_content[1])
             
             self.add_row(*row_content)
+    
+    def get_table_width(self) -> int:
+        return sum(self._measure_column)
 
     def handle_user_input(self, input: str) -> None:
         if input == key.ENTER or input == key.SPACE:
@@ -238,12 +246,14 @@ class ToolImageMenu(VerticalMenu):
             super().handle_user_input(input)
 
     def get_selected_tool_images(self) -> list[str]:
-        selected_tool_images = []
         for cell in self.columns[0]._cells:
-            if "[green]" in cell:
-                selected_tool_images.append(cell[2:].replace("[/]", "").replace("[green]", ""))
+            tool_image_name = cell[2:].replace("[/]", "").replace("[green]", "")
+            if ("[green]" in cell) and (tool_image_name not in self.tool_image_selection):
+                self.tool_image_selection.append(tool_image_name)
+            elif ("[green]" not in cell) and (tool_image_name in self.tool_image_selection):
+                self.tool_image_selection.remove(tool_image_name)
         
-        return selected_tool_images
+        return self.tool_image_selection
 
 class SelectMenu(VerticalMenu):
     def __init__(self, selection: list[str]) -> None:
@@ -278,19 +288,17 @@ class SelectMenu(VerticalMenu):
         self.width = len(title)
         super().set_title(title)
 
-class DevEnvStatusPanel(panel.Panel):
-    def __init__(self, already_selected_tool_images: list[str]) -> None:
-        self.outer_table = table.Table(box=None)
-        super().__init__(self.outer_table, title="Development Environment", expand=True)
-        self.aligned_renderable = align.Align(self, vertical="middle")
+class DevEnvStatusPanel(table.Table):
+    def __init__(self, selected_tool_images: list[str], height: int, width: int) -> None:
+        super().__init__(title="Dev Env Settings")
+        self.add_column("Selected Tool Images", no_wrap=True)
 
-        for tool_image in already_selected_tool_images:
-            self.outer_table.add_row(tool_image)
-
-    def update_table(self, selected_tool_images: list[str]) -> None:
-        self.outer_table = table.Table(box=None)
+        if height > 10:
+            height = 10
 
         for tool_image in selected_tool_images:
-            self.outer_table.add_row(tool_image)
+            self.add_row(tool_image)
 
-        self.renderable = self.outer_table
+        if len(selected_tool_images) < height:
+            for _ in range(height - len(selected_tool_images)):
+                self.add_row(" " * width)

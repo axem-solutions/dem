@@ -345,6 +345,7 @@ def test_get_selected_tool_images(mock___init__: MagicMock) -> None:
     mock___init__.return_value = None
 
     test_tool_image_menu = menu.ToolImageMenu([], [])
+    test_tool_image_menu.tool_image_selection = []
     mock_columns = [MagicMock()]
     test_tool_image_menu.columns = mock_columns
     test_tool_image_menu.columns[0]._cells = []
@@ -440,58 +441,25 @@ def test_set_title(mock_set_title: MagicMock) -> None:
 
     mock_set_title.assert_called_once_with(test_title)
     
-@patch("dem.cli.tui.renderable.menu.align.Align")
-@patch("dem.cli.tui.renderable.menu.table.Table")
-@patch.object(menu.panel.Panel, "__init__")
-def test_DevEnvStatusPanel(mock___init__: MagicMock, mock_Table: MagicMock, mock_Align: MagicMock) -> None:
+@patch.object(menu.table.Table, "add_row")
+@patch.object(menu.table.Table, "add_column")
+@patch.object(menu.table.Table, "__init__")
+def test_DevEnvStatusPanel(mock___init__: MagicMock, mock_add_column: MagicMock, 
+                           mock_add_row: MagicMock) -> None:
     # Test setup
     mock___init__.return_value = None
-
-    mock_outer_table = MagicMock()
-    mock_Table.return_value = mock_outer_table
-
-    mock_aligned_renderable = MagicMock()
-    mock_Align.return_value = mock_aligned_renderable
-
-    test_already_selected_tool_images = ["test1", "test2"]
-
-    # Run unit under test
-    test_dev_env_status_panel = menu.DevEnvStatusPanel(test_already_selected_tool_images)
-
-    # Check expectations
-    mock___init__.assert_called_once()
-    mock_Table.assert_called_once_with(box=None)
-    mock___init__.assert_called_once_with(mock_outer_table, title="Development Environment", 
-                                          expand=True)
-    mock_Align.assert_called_once_with(test_dev_env_status_panel, vertical="middle")
-    mock_outer_table.add_row.assert_has_calls = [
-        call(test_already_selected_tool_images[0]),
-        call(test_already_selected_tool_images[1])
-    ]
-
-@patch("dem.cli.tui.renderable.menu.table.Table")
-@patch.object(menu.DevEnvStatusPanel, "__init__")
-def test_DevEnvStatusPanel_update_table(mock___init__: MagicMock, mock_Table: MagicMock) -> None:
-    # Test setup
-    mock___init__.return_value = None
-
-    test_dev_env_status_panel = menu.DevEnvStatusPanel([])
-    mock_outer_table = MagicMock()
-    mock_Table.return_value = mock_outer_table
-
-    test_dev_env_status_panel.renderable = None
 
     test_selected_tool_images = ["test1", "test2"]
+    test_height = 12
+    test_width = max(len(test_selected_tool_images[0]), len(test_selected_tool_images[1]))
 
     # Run unit under test
-    test_dev_env_status_panel.update_table(test_selected_tool_images)
+    menu.DevEnvStatusPanel(test_selected_tool_images, test_height, test_width)
 
     # Check expectations
-    assert test_dev_env_status_panel.renderable is mock_outer_table
-
-    mock___init__.assert_called_once()
-    mock_Table.assert_called_once_with(box=None)
-    mock_outer_table.add_row.assert_has_calls = [
-        call(test_selected_tool_images[0]),
-        call(test_selected_tool_images[1])
-    ]
+    mock___init__.assert_called_once_with(title="Dev Env Settings")
+    mock_add_column.assert_called_once_with("Selected Tool Images", no_wrap=True)
+    mock_add_row.assert_has_calls([
+        call("test1"),
+        call("test2"),
+    ] + [call(" " * test_width) for _ in range(8)])
