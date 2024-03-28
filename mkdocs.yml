@@ -59,7 +59,7 @@ extra:
     provider: mike
 
 copyright: >
-  Copyright 2023 - axem solutions - All rights reserved |
+  Copyright 2024 - axem solutions - All rights reserved |
   <a href="#__consent">Change cookie settings</a> |
   Made with <a href="https://squidfunk.github.io/mkdocs-material/">Material for MkDocs</a>
 
@@ -75,8 +75,9 @@ markdown_extensions:
   - pymdownx.details
   - pymdownx.superfences
   - pymdownx.emoji:
-      emoji_index: !!python/name:materialx.emoji.twemoji
-      emoji_generator: !!python/name:materialx.emoji.to_svg
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+
 
 nav:
   - 'index.md'

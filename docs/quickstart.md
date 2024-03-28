@@ -46,7 +46,7 @@ catalog, which you can modify to your needs. You might want to:
 - Add/remove tools.
 - Change the tool image for a given tool.
 
-You can edit it with the Development Environment settings view:
+You can edit it with the Development Environment settings window:
 
     dem modify DEV_ENV_NAME
 
