@@ -36,15 +36,21 @@ Arguments:
 
 Create a new Development Environment descriptor and save it to the local descriptor storage (catalog).
 
-Running this command will open up the Dev Env settings window:
+Running this command will open up the Dev Env Settings Window:
 
-    ![tool select](wp-content/tool_select.png)
+![Dev Env Settings Window](wp-content/dev_env_settings_window.png)
 
-2. Assign the required tool images for the selected types. You can navigate with the
-:material-arrow-up: and :material-arrow-down: or :material-alpha-k: and :material-alpha-j: keys.
-Select the required tool image and press :material-keyboard-return:.
+The table on the left shows the available tool types. Select the ones you want to use in the 
+Development Environment. You can navigate with the :material-arrow-up: and :material-arrow-down: or 
+:material-alpha-k: and :material-alpha-j: keys. Move the cursor to the tool image you would like to 
+select or deselect  and press the :material-keyboard-return:. 
+On the right side, you can see the tool images that are selected.
 
-:info: After creation, the Development Environment can be installed with the `install` command.
+When the Dev Env is ready, press :material-keyboard-return: on the `save` button.
+
+!!! info 
+
+    After creation, the Development Environment can be installed with the `install` command.
 
 Arguments:
 
@@ -81,12 +87,23 @@ Arguments:
 
 ## **`dem modify DEV_ENV_NAME`**
 
-Open the Development Environment settings window to modify the Development Environment descriptor.
+Modify a Development Environment descriptor available from the local descriptor storage (catalog).
 
-2. Assign the required tool images for the selected types. You can navigate with the
-:material-arrow-up: and :material-arrow-down: or :material-alpha-k: and :material-alpha-j: keys.
-Select the required tool image and press :material-keyboard-return:.
+Running this command will open up the Dev Env Settings Window, prefilled with the current selection:
 
+![Dev Env Settings Window](wp-content/dev_env_settings_window.png)
+
+The table on the left shows the available tool types. Select the ones you want to use in the 
+Development Environment. You can navigate with the :material-arrow-up: and :material-arrow-down: or 
+:material-alpha-k: and :material-alpha-j: keys. Move the cursor to the tool image you would like to 
+select or deselect  and press the :material-keyboard-return:. 
+On the right side, you can see the tool images that are selected.
+
+When the Dev Env is ready, press :material-keyboard-return: on the `save` button.
+
+!!! info 
+
+    After the modification, the Development Environment can be installed with the `install` command.
 
 Arguments:
 

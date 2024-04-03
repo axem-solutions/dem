@@ -15,6 +15,16 @@ containerized Development Environments.**
     Learn by doing! Try our [tutorial](https://www.axemsolutions.io/tutorial/index.html) 
     with a simple embedded project!
 
+## Pain points DEM solves
+- Slow and error-prone setup of Development Environments -> **Quick and reproducible installation** 
+with a single command
+- "It works on my machine" -> **Consistent Development Environments** for every developer
+- Modifying the toolset is hard and time-consuming -> **Easy and scalable Dev Env management** where 
+the tools are like building blocks
+- Devs get out of flow and waste time and motivation configuring the tools -> Devs can **focus on 
+their actual work**
+- Vendor specific interfaces -> **Standardized Development Environments**
+
 ## Concept
 
 ### :unlock: Loose coupling between tools
