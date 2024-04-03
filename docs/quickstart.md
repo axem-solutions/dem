@@ -15,7 +15,6 @@ You can clone the selected template with:
 
     dem clone DEV_ENV_NAME
 
-
 ## I'd like to work on a project already configured with DEM...
 
 In this case you only need to initialize the Dev Env with:

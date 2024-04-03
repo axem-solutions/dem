@@ -11,9 +11,13 @@ To use the DEM on your PC, you need to have the following tools installed:
 
 ## Installation
 
-Use the following install script to get the latest version of DEM:  
+You can download the installer script from the root of the repository:
 
-    `curl -fsSL 'https://raw.githubusercontent.com/axem-solutions/dem/main/install-dem.sh' | bash`
+    curl -O https://raw.githubusercontent.com/axem-solutions/dem/main/install-dem.sh
+
+If you are happy with the content of the script, you can execute it:
+
+    bash install-dem.sh
 
 ### Alternative installation
 

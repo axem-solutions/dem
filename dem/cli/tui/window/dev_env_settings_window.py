@@ -5,7 +5,6 @@ from dem.cli.tui.renderable.menu import ToolImageMenu, DevEnvStatusPanel, Cancel
 from dem.cli.tui.printable_tool_image import PrintableToolImage
 from rich.panel import Panel
 from rich.layout import Layout
-from rich.console import Group
 from rich.align import Align
 from rich.live import Live
 from rich.table import Table
@@ -13,9 +12,9 @@ from readchar import readkey, key
 
 class NavigationHint(Panel):
     hint_text = """
-- [bold]move cursor[/]: arrows or vi mode
-- [bold]select[/]: space or enter
-- [bold]jump to save/cancel[/]: tab
+- [bold]move cursor[/]: up and down arrows or j and k keys
+- [bold]toggle selection[/]: space or enter
+- [bold]jump between save/cancel and the selector[/]: tab
 """
     def __init__(self) -> None:
         super().__init__(self.hint_text, title="Navigation", expand=False)
