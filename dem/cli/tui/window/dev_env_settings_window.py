@@ -8,6 +8,7 @@ from rich.layout import Layout
 from rich.console import Group
 from rich.align import Align
 from rich.live import Live
+from rich.table import Table
 from readchar import readkey, key
 
 class NavigationHint(Panel):
@@ -18,6 +19,11 @@ class NavigationHint(Panel):
 """
     def __init__(self) -> None:
         super().__init__(self.hint_text, title="Navigation", expand=False)
+
+class ErrorMessage(Table):
+    def __init__(self, message: str) -> None:
+        message = f"[red]{message}[/]"
+        super().__init__(message, box=None, expand=False, show_edge=False)
 
 class DevEnvSettingsWindow():
     def __init__(self, printable_tool_images: list[PrintableToolImage], 
@@ -35,6 +41,7 @@ class DevEnvSettingsWindow():
                                                       self.dev_env_status_width)
         self.cancel_save_menu = CancelSaveMenu()
         self.navigation_hint_panel = NavigationHint()
+        self.error_message_panel = None
 
         self.build_layout()
         self.cancel_save_menu.remove_cursor()
@@ -47,46 +54,71 @@ class DevEnvSettingsWindow():
         aligned_cancel_save_menu = Align(self.cancel_save_menu, vertical="middle", align="center")
         aligned_navigation_hint_panel = Align(self.navigation_hint_panel, vertical="top", align="center")
 
+        if self.error_message_panel:
+            aligned_error_message_panel = Align(self.error_message_panel, vertical="middle", align="center")
+        else:
+            aligned_error_message_panel = Align(Table(box=None), vertical="middle", align="center")
+
         self.layout = Layout(name="root")
 
         self.layout.split_column(
-            Layout(name="dev_env_settings"),
-            Layout(name="navigation"),
+            Layout(name="upper_half"),
+            Layout(name="lower_half"),
         )
-        self.layout["dev_env_settings"].split_row(
+        self.layout["upper_half"].split_row(
             Layout(name="available"),
             Layout(name="selected")
         )
 
-        self.layout["navigation"].split_column(
+        self.layout["lower_half"].split_column(
             Layout(name="cancel_save", ratio=2),
-            Layout(name="navigation_hint", ratio=7)
+            Layout(name="navigation_hint", ratio=6),
+            Layout(name="error", ratio=2),
         )
 
         self.layout["available"].update(aligned_tool_image_menu)
         self.layout["selected"].update(aligned_dev_env_status_panel)
         self.layout["cancel_save"].update(aligned_cancel_save_menu)
         self.layout["navigation_hint"].update(aligned_navigation_hint_panel)
+        self.layout["error"].update(aligned_error_message_panel)
+
+    def _move_console(self) -> None:
+        self.active_menu.remove_cursor()
+
+        if self.active_menu is self.tool_image_menu:
+            self.active_menu = self.cancel_save_menu
+        else:
+            self.active_menu = self.tool_image_menu
+
+        self.active_menu.add_cursor()
+
+    def _handle_user_input(self, input: str, live: Live) -> None:
+        self.active_menu.handle_user_input(input)
+
+        if (self.active_menu is self.tool_image_menu) and (input in [key.ENTER, key.SPACE]):
+            self.dev_env_status_panel = DevEnvStatusPanel(self.tool_image_menu.get_selected_tool_images(),
+                                                        self.dev_env_status_height,
+                                                        self.dev_env_status_width)
+            self.build_layout()
+            live.update(self.layout)
+        elif (self.active_menu is self.cancel_save_menu) and (input is key.ENTER) and \
+            (not self.tool_image_menu.get_selected_tool_images()) and \
+            ("save" in self.cancel_save_menu.get_selection()):
+            self.error_message_panel = ErrorMessage("Error: No Tool Images selected.")
+            self.cancel_save_menu.is_selected = False
+            self.build_layout()
+            live.update(self.layout)
 
     def wait_for_user(self) -> None:
         with Live(self.layout, refresh_per_second=8, screen=True) as live:
             while self.cancel_save_menu.is_selected is False:
                 input = readkey()
                 if input is key.TAB:
-                    self.active_menu.remove_cursor()
+                    self._move_console()
 
-                    if self.active_menu is self.tool_image_menu:
-                        self.active_menu = self.cancel_save_menu
-                    else:
-                        self.active_menu = self.tool_image_menu
-
-                    self.active_menu.add_cursor()
-                else:
-                    self.active_menu.handle_user_input(input)
-
-                    if (self.active_menu is self.tool_image_menu) and (input in [key.ENTER, key.SPACE]):
-                        self.dev_env_status_panel = DevEnvStatusPanel(self.tool_image_menu.get_selected_tool_images(),
-                                                                      self.dev_env_status_height,
-                                                                      self.dev_env_status_width)
+                    if self.error_message_panel:
+                        self.error_message_panel = None
                         self.build_layout()
                         live.update(self.layout)
+                else:
+                    self._handle_user_input(input, live)
