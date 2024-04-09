@@ -2,10 +2,17 @@
 # dem/core/dev_env.py
 
 from dem.core.tool_images import ToolImage, ToolImages
+from enum import Enum
 import json, os
 
 class DevEnv():
     """ A Development Environment. """
+
+    class Status(Enum):
+        """ The status of an installed Development Environment. """
+        OK = 0
+        REINSTALL_NEEDED = 1
+        UNAVAILABLE_IMAGE = 2
 
     def __init__(self, descriptor: dict | None = None, descriptor_path: str | None = None) -> None:
         """ Init the DevEnv class. 
@@ -45,10 +52,41 @@ class DevEnv():
             self.is_installed = False
 
     def assign_tool_image_instances(self, tool_images: ToolImages) -> None:
+        """ Assign the Tool Images to the Development Environment.
+        
+            After creating a DevEnv instance, the Tool Images are not yet assigned to it. This 
+            method must be called if the Tool Images are needed.
+            
+            Args:
+                tool_images -- the Tool Images to assign
+                
+                Exceptions:
+                    ToolImageError -- if the Tool Image name is invalid
+        """
         for tool_descriptor in self.tool_image_descriptors:
             tool_image_name = tool_descriptor["image_name"] + ':' + tool_descriptor["image_version"]
             tool_image = tool_images.all_tool_images.get(tool_image_name, ToolImage(tool_image_name))
             self.tool_images.append(tool_image)
+
+    def get_tool_image_status(self) -> Status:
+        """ Get the status of the Tool Images.
+
+            Can only be used if the Dev Env is insalled.
+        
+            This method checks the availability of the assigned Tool Images. 
+            If at least one of the Tool Images is unkonwn: NOT_AVAILABLE. 
+            If at least one of the Tool Images is only available in the registry: REINSTALL_NEEDED. 
+            If all the Tool Images are available: OK.
+
+            Returns:
+                Status -- the status of the Dev Env
+        """
+        for tool_image in self.tool_images:
+            if tool_image.availability == ToolImage.NOT_AVAILABLE:
+                return self.Status.UNAVAILABLE_IMAGE
+            elif tool_image.availability == ToolImage.REGISTRY_ONLY:
+                return self.Status.REINSTALL_NEEDED
+        return self.Status.OK
 
     def get_deserialized(self, omit_is_installed: bool = False) -> dict[str, str]:
         """ Create the deserialized json. 

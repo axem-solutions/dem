@@ -131,6 +131,75 @@ def test_DevEnv_assign_tool_image_instances() -> None:
     for tool_image in test_dev_env.tool_images:
         assert tool_image is mock_tool_images.all_tool_images[tool_image.name]
 
+@patch.object(dev_env.DevEnv, "__init__")
+def test_DevEnv_get_tool_image_status(mock___init__: MagicMock) -> None:
+    # Test setup
+    mock___init__.return_value = None
+
+    test_dev_env = dev_env.DevEnv(MagicMock())
+    mock_tool_image1 = MagicMock()
+    mock_tool_image1.availability = dev_env.ToolImage.LOCAL_AND_REGISTRY
+    mock_tool_image2 = MagicMock()
+    mock_tool_image2.availability = dev_env.ToolImage.LOCAL_ONLY
+    test_dev_env.tool_images = [
+        mock_tool_image1,
+        mock_tool_image2
+    ]
+
+    # Run unit under test
+    actual_status = test_dev_env.get_tool_image_status()
+
+    # Check expectations
+    assert actual_status == dev_env.DevEnv.Status.OK
+
+    mock___init__.assert_called_once()
+
+@patch.object(dev_env.DevEnv, "__init__")
+def test_DevEnv_get_tool_image_status_unavailable_image(mock___init__: MagicMock) -> None:
+    # Test setup
+    mock___init__.return_value = None
+
+    test_dev_env = dev_env.DevEnv(MagicMock())
+    mock_tool_image1 = MagicMock()
+    mock_tool_image1.availability = dev_env.ToolImage.NOT_AVAILABLE
+    mock_tool_image2 = MagicMock()
+    mock_tool_image2.availability = dev_env.ToolImage.LOCAL_ONLY
+    test_dev_env.tool_images = [
+        mock_tool_image1,
+        mock_tool_image2
+    ]
+
+    # Run unit under test
+    actual_status = test_dev_env.get_tool_image_status()
+
+    # Check expectations
+    assert actual_status == dev_env.DevEnv.Status.UNAVAILABLE_IMAGE
+
+    mock___init__.assert_called_once()
+
+@patch.object(dev_env.DevEnv, "__init__")
+def test_DevEnv_get_tool_image_status_reinstall_needed(mock___init__: MagicMock) -> None:
+    # Test setup
+    mock___init__.return_value = None
+
+    test_dev_env = dev_env.DevEnv(MagicMock())
+    mock_tool_image1 = MagicMock()
+    mock_tool_image1.availability = dev_env.ToolImage.REGISTRY_ONLY
+    mock_tool_image2 = MagicMock()
+    mock_tool_image2.availability = dev_env.ToolImage.LOCAL_ONLY
+    test_dev_env.tool_images = [
+        mock_tool_image1,
+        mock_tool_image2
+    ]
+
+    # Run unit under test
+    actual_status = test_dev_env.get_tool_image_status()
+
+    # Check expectations
+    assert actual_status == dev_env.DevEnv.Status.REINSTALL_NEEDED
+
+    mock___init__.assert_called_once()
+
 def test_DevEnv_get_deserialized_is_installed_true() -> None:
     # Test setup
     test_descriptor: dict[str, Any] = {

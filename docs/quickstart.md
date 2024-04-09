@@ -9,7 +9,7 @@ Now that you have the DEM installed, you might find yourself in one of the follo
 Here at axem we'd like to create a template for every target out there. List the currently available
 ones with:
 
-    dem list --all --env
+    dem list --cat
 
 You can clone the selected template with:
 

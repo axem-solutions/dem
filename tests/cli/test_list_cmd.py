@@ -9,294 +9,255 @@ import dem.cli.command.list_cmd as list_cmd
 from typer.testing import CliRunner
 from unittest.mock import patch, MagicMock, call
 
-import io
-from rich.console import Console
-from rich.table import Table
-
 ## Global test variables
 
 # In order to test stdout and stderr separately, the stderr can't be mixed into 
 # the stdout.
 runner = CliRunner(mix_stderr=False)
 
-## Test cases
+def test_add_dev_env_info_to_table_installed() -> None:
+    # Setup
+    mock_platform = MagicMock()
+    mock_tool_image = MagicMock()
+    mock_platform.tool_images = mock_tool_image
+    mock_table = MagicMock()
+    mock_dev_env = MagicMock()
+    mock_dev_env.is_installed = True
+    mock_dev_env.name = "test_dev_env"
+    mock_dev_env.get_tool_image_status.return_value = list_cmd.DevEnv.Status.OK
 
-## Test listing the local dev envs.
+    # Run the test
+    list_cmd.add_dev_env_info_to_table(mock_platform, mock_table, mock_dev_env)
+
+    # Check the result
+    mock_dev_env.assign_tool_image_instances.assert_called_once_with(mock_platform.tool_images)
+    mock_dev_env.get_tool_image_status.assert_called_once()
+    mock_table.add_row.assert_called_once_with("test_dev_env", "[green]Yes[/]", "Ok")
+
+def test_add_dev_env_info_to_table_installed_unavailable_image() -> None:
+    # Setup
+    mock_platform = MagicMock()
+    mock_tool_image = MagicMock()
+    mock_platform.tool_images = mock_tool_image
+    mock_table = MagicMock()
+    mock_dev_env = MagicMock()
+    mock_dev_env.is_installed = True
+    mock_dev_env.name = "test_dev_env"
+    mock_dev_env.get_tool_image_status.return_value = list_cmd.DevEnv.Status.UNAVAILABLE_IMAGE
+
+    # Run the test
+    list_cmd.add_dev_env_info_to_table(mock_platform, mock_table, mock_dev_env)
+
+    # Check the result
+    mock_dev_env.assign_tool_image_instances.assert_called_once_with(mock_platform.tool_images)
+    mock_dev_env.get_tool_image_status.assert_called_once()
+    mock_table.add_row.assert_called_once_with("test_dev_env", "[green]Yes[/]", "[red]Error: Required image is not available![/]")
+
+def test_add_dev_env_info_to_table_installed_reinstall_needed() -> None:
+    # Setup
+    mock_platform = MagicMock()
+    mock_tool_image = MagicMock()
+    mock_platform.tool_images = mock_tool_image
+    mock_table = MagicMock()
+    mock_dev_env = MagicMock()
+    mock_dev_env.is_installed = True
+    mock_dev_env.name = "test_dev_env"
+    mock_dev_env.get_tool_image_status.return_value = list_cmd.DevEnv.Status.REINSTALL_NEEDED
+
+    # Run the test
+    list_cmd.add_dev_env_info_to_table(mock_platform, mock_table, mock_dev_env)
+
+    # Check the result
+    mock_dev_env.assign_tool_image_instances.assert_called_once_with(mock_platform.tool_images)
+    mock_dev_env.get_tool_image_status.assert_called_once()
+    mock_table.add_row.assert_called_once_with("test_dev_env", "[green]Yes[/]", "[red]Error: Incomplete local install![/]")
+
+def test_add_dev_env_info_to_table_not_installed() -> None:
+    # Setup
+    mock_platform = MagicMock()
+    mock_tool_image = MagicMock()
+    mock_platform.tool_images = mock_tool_image
+    mock_table = MagicMock()
+    mock_dev_env = MagicMock()
+    mock_dev_env.is_installed = False
+    mock_dev_env.name = "test_dev_env"
+
+    # Run the test
+    list_cmd.add_dev_env_info_to_table(mock_platform, mock_table, mock_dev_env)
+
+    # Check the result
+    mock_dev_env.assign_tool_image_instances.assert_not_called()
+    mock_dev_env.get_tool_image_status.assert_not_called()
+    mock_table.add_row.assert_called_once_with("test_dev_env", "No", "Ok")
 
 @patch("dem.cli.command.list_cmd.stdout.print")
-@patch("dem.cli.command.list_cmd.get_local_dev_env_status")
-@patch("dem.cli.command.list_cmd.Table")
-def test_with_valid_dev_env_json(mock_Table: MagicMock, mock_get_local_dev_env_status: MagicMock,
-                                 mock_stdout_print: MagicMock) -> None:
-    # Test setup
+def test_list_local_dev_envs_no_dev_envs(mock_stdout_print: MagicMock) -> None:
+    # Setup
     mock_platform = MagicMock()
-    expected_dev_env_list = [
-        ["demo", "Installed."],
-        ["nagy_cica_project", "[red]Error: Required image is not available![/]"]
-    ]
-    fake_dev_envs = []
-    for expected_dev_env in expected_dev_env_list:
-        fake_dev_env = MagicMock()
-        fake_dev_env.name = expected_dev_env[0]
-        fake_dev_envs.append(fake_dev_env)
-    mock_platform.local_dev_envs = fake_dev_envs
-    main.platform = mock_platform
+    mock_platform.local_dev_envs = []
 
+    # Run the test
+    list_cmd.list_local_dev_envs(mock_platform)
+
+    # Check the result
+    mock_stdout_print.assert_called_once_with("[yellow]No Development Environment descriptors are available.[/]")
+
+@patch("dem.cli.command.list_cmd.stdout.print")
+@patch("dem.cli.command.list_cmd.Table")
+@patch("dem.cli.command.list_cmd.add_dev_env_info_to_table")
+def test_list_local_dev_envs(mock_add_dev_env_info_to_table: MagicMock, mock_Table: MagicMock,
+                             mock_stdout_print: MagicMock) -> None:
+    # Setup
+    mock_platform = MagicMock()
+    mock_table = MagicMock()
+    mock_Table.return_value = mock_table
+    mock_dev_env = MagicMock()
+    mock_dev_env.name = "test_dev_env"
+    mock_platform.local_dev_envs = [mock_dev_env]
+
+    # Run the test
+    list_cmd.list_local_dev_envs(mock_platform)
+
+    # Check the result
+    mock_table.add_column.assert_has_calls([call("Name"), call("Installed"), call("Status")])
+    mock_add_dev_env_info_to_table.assert_called_once_with(mock_platform, mock_table, mock_dev_env)
+    mock_stdout_print.assert_has_calls([call(f"\n [italic]Local Development Environments[/]"), 
+                                        call(mock_table)])
+
+@patch("dem.cli.command.list_cmd.stdout.print")
+def test_list_actual_cat_dev_envs_no_dev_envs(mock_stdout_print: MagicMock) -> None:
+    # Setup
+    mock_catalog = MagicMock()
+    mock_catalog.name = "test_catalog"
+    mock_catalog.dev_envs = []
+
+    # Run the test
+    list_cmd.list_actual_cat_dev_envs(mock_catalog)
+
+    # Check the result
+    mock_catalog.request_dev_envs.assert_called_once()
+    mock_stdout_print.assert_called_once_with("[yellow]No Development Environments are available in the test_catalog catalog.[/]")
+
+@patch("dem.cli.command.list_cmd.stdout.print")
+@patch("dem.cli.command.list_cmd.Table")
+def test_list_actual_cat_dev_envs(mock_Table: MagicMock, mock_stdout_print: MagicMock) -> None:
+    # Setup
+    mock_catalog = MagicMock()
+    mock_catalog.name = "test_catalog"
+    mock_dev_env = MagicMock()
+    mock_dev_env.name = "test_dev_env"
+    mock_catalog.dev_envs = [mock_dev_env]
     mock_table = MagicMock()
     mock_Table.return_value = mock_table
 
-    mock_get_local_dev_env_status.side_effect = [
-        expected_dev_env_list[0][1],
-        expected_dev_env_list[1][1]
-    ]
+    # Run the test
+    list_cmd.list_actual_cat_dev_envs(mock_catalog)
 
-    # Run unit under test
-    runner_result = runner.invoke(main.typer_cli, ["list", "--local", "--env"])
-
-    # Check expectations
-    assert 0 == runner_result.exit_code
-
-    mock_Table.assert_called_once()
-    mock_table.add_column.assert_has_calls([call("Development Environment"), call("Status")])
-    mock_table.add_row.assert_has_calls([call(*(expected_dev_env_list[0])), 
-                                         call(*(expected_dev_env_list[1]))])
-    mock_stdout_print.assert_called_once_with(mock_table)
-
-def test_with_empty_dev_env_json():
-    # Test setup
-    mock_platform = MagicMock()
-    mock_platform.local_dev_envs = []
-    main.platform = mock_platform
-
-    # Run unit under test
-    runner_result = runner.invoke(main.typer_cli, ["list", "--local", "--env"])
-
-    # Check expectations
-    assert 0 == runner_result.exit_code
-
-    console = Console(file=io.StringIO())
-    console.print("[yellow]No installed Development Environments.[/]")
-    expected_output = console.file.getvalue()
-    assert expected_output == runner_result.stdout
-
-## Test listing the org dev envs.
-
+    # Check the result
+    mock_catalog.request_dev_envs.assert_called_once()
+    mock_table.add_column.assert_called_once_with("Name")
+    mock_table.add_row.assert_called_once_with("test_dev_env")
+    mock_stdout_print.assert_has_calls([call(f"\n [italic]Development Environments in the test_catalog catalog:[/]"), 
+                                        call(mock_table)])
+                                        
 @patch("dem.cli.command.list_cmd.stdout.print")
-def test_without_avialable_catalogs(mock_stdout_print: MagicMock):
-    # Test setup
+def test_list_all_cat_dev_envs_no_catalogs(mock_stdout_print: MagicMock) -> None:
+    # Setup
     mock_platform = MagicMock()
     mock_platform.dev_env_catalogs.catalogs = []
-    main.platform = mock_platform
 
-    # Run unit under test
-    runner_result = runner.invoke(main.typer_cli, ["list", "--all", "--env"])
+    # Run the test
+    list_cmd.list_all_cat_dev_envs(mock_platform)
 
-    # Check expectations
-    assert 0 == runner_result.exit_code
-
+    # Check the result
     mock_stdout_print.assert_called_once_with("[yellow]No Development Environment Catalogs are available!")
 
-def test_with_empty_catalog():
-    # Test setup
-    mock_catalog = MagicMock()
-    mock_catalog.dev_envs = []
+@patch("dem.cli.command.list_cmd.list_actual_cat_dev_envs")
+def test_list_all_cat_dev_envs(mock_list_actual_cat_dev_envs: MagicMock) -> None:
+    # Setup
     mock_platform = MagicMock()
-    mock_platform.dev_env_catalogs.catalogs = [mock_catalog]
-    main.platform = mock_platform
-
-    # Run unit under test
-    runner_result = runner.invoke(main.typer_cli, ["list", "--all", "--env"])
-
-    # Check expectations
-    assert 0 == runner_result.exit_code
-
-    console = Console(file=io.StringIO())
-    console.print("[yellow]No Development Environments are available in the catalogs.[/]")
-    assert console.file.getvalue() == runner_result.stdout
-
-@patch("dem.cli.command.list_cmd.get_catalog_dev_env_status")
-def test_with_valid_dev_env_org_json(mock_get_catalog_dev_env_status: MagicMock) -> None:
-    # Test setup
-    mock_platform = MagicMock()
-    main.platform = mock_platform
-
-    expected_dev_env_list = [
-        ["org_only_env", "Ready to be installed."],
-        ["demo", "Installed locally."],
-        ["nagy_cica_project", "Incomplete local install. The missing images are available in the registry. Use `dem pull` to reinstall."],
-        ["unavailable_image_env", "[red]Error: Required image is not available in the registry![/]"]
-    ]
-    fake_catalog_dev_envs = []
-    for expected_dev_env in expected_dev_env_list:
-        fake_dev_env = MagicMock()
-        fake_dev_env.name = expected_dev_env[0]
-        fake_catalog_dev_envs.append(fake_dev_env)
     mock_catalog = MagicMock()
     mock_platform.dev_env_catalogs.catalogs = [mock_catalog]
-    mock_catalog.dev_envs = fake_catalog_dev_envs
-    mock_platform.get_dev_env_by_name.side_effect = [None, MagicMock(), MagicMock()]
 
-    mock_get_catalog_dev_env_status.side_effect = [
-        expected_dev_env_list[0][1],
-        expected_dev_env_list[1][1],
-        expected_dev_env_list[2][1],
-        expected_dev_env_list[3][1]
-    ]
+    # Run the test
+    list_cmd.list_all_cat_dev_envs(mock_platform)
 
-    # Run unit under test
-    runner_result = runner.invoke(main.typer_cli, ["list", "--all", "--env"])
+    # Check the result
+    mock_list_actual_cat_dev_envs.assert_called_once_with(mock_catalog)
 
-    # Check expectations
-    calls = []
-    for fake_dev_env in fake_catalog_dev_envs:
-        calls.append(call(fake_dev_env))
-    mock_platform.get_dev_env_by_name.has_calls(calls)
-
-    expected_table = Table()
-    expected_table.add_column("Development Environment")
-    expected_table.add_column("Status")
-    for expected_dev_env in expected_dev_env_list:
-        expected_table.add_row(*expected_dev_env)
-    console = Console(file=io.StringIO())
-    console.print(expected_table)
-    assert console.file.getvalue() == runner_result.stdout
-
-def test_without_options():
-    # Run unit under test
-    runner_result = runner.invoke(main.typer_cli, ["list"], color=True)
-    
-    # Check expectations
-    assert 0 == runner_result.exit_code
-
-    console = Console(file=io.StringIO())
-    console.print(\
-"""Usage: dem list [OPTIONS]
-Try 'dem list --help' for help.
-
-Error: You need to set the scope and what to list!""")
-    expected_output = console.file.getvalue()
-    assert expected_output == runner_result.stderr
-
-def test_with_invalid_option():
-    # Run unit under test
-    runner_result = runner.invoke(main.typer_cli, ["list", "--local", "--all", "--env"], color=True)
-
-    # Check expectations
-    assert 0 == runner_result.exit_code
-
-    console = Console(file=io.StringIO())
-    console.print("[red]Error: Invalid options.[/]")
-    assert console.file.getvalue() == runner_result.stderr
-
-## Test listing the local tool images.
-
-def test_local_tool_images():
-    # Test setup
-    test_local_tool_images = [
-        "axemsolutions/cpputest:latest",
-        "axemsolutions/stlink_org:latest",
-        "axemsolutions/make_gnu_arm:latest",
-    ]
+@patch("dem.cli.command.list_cmd.list_actual_cat_dev_envs")
+def test_list_selected_cat_dev_envs(mock_list_actual_cat_dev_envs: MagicMock) -> None:
+    # Setup
     mock_platform = MagicMock()
-    mock_platform.container_engine.get_local_tool_images.return_value = test_local_tool_images
+    mock_catalog = MagicMock()
+    test_catalog_name = "test_catalog"
+    mock_catalog.name = test_catalog_name
+    mock_platform.dev_env_catalogs.catalogs = [mock_catalog]
+
+    # Run the test
+    list_cmd.list_selected_cat_dev_envs(mock_platform, [test_catalog_name])
+
+    # Check the result
+    mock_list_actual_cat_dev_envs.assert_called_once_with(mock_catalog)
+
+@patch("dem.cli.command.list_cmd.stderr.print")
+def test_list_selected_cat_dev_envs_catalog_not_found(mock_stderr_print: MagicMock) -> None:
+    # Setup
+    mock_platform = MagicMock()
+    mock_catalog = MagicMock()
+    test_catalog_name = "test_catalog"
+    mock_catalog.name = test_catalog_name
+    mock_platform.dev_env_catalogs.catalogs = [mock_catalog]
+
+    # Run the test
+    list_cmd.list_selected_cat_dev_envs(mock_platform, ["wrong_catalog"])
+
+    # Check the result
+    mock_stderr_print.assert_called_once_with("[red]Error: Catalog 'wrong_catalog' not found![/]")
+
+@patch("dem.cli.command.list_cmd.list_all_cat_dev_envs")
+def test_execute_list_all_cat_dev_envs(mock_list_all_cat_dev_envs: MagicMock) -> None:
+    # Setup
+    mock_platform = MagicMock()
+
+    # Run the test
+    list_cmd.execute(mock_platform, True, [])
+
+    # Check the result
+    mock_list_all_cat_dev_envs.assert_called_once_with(mock_platform)
+
+@patch("dem.cli.command.list_cmd.list_selected_cat_dev_envs")
+def test_execute_list_selected_cat_dev_envs(mock_list_selected_cat_dev_envs: MagicMock) -> None:
+    # Setup
+    mock_platform = MagicMock()
+
+    # Run the test
+    list_cmd.execute(mock_platform, True, ["test_catalog"])
+
+    # Check the result
+    mock_list_selected_cat_dev_envs.assert_called_once_with(mock_platform, ["test_catalog"])
+
+@patch("dem.cli.command.list_cmd.list_local_dev_envs")
+def test_execute_list_local_dev_envs(mock_list_local_dev_envs: MagicMock) -> None:
+    # Setup
+    mock_platform = MagicMock()
+
+    # Run the test
+    list_cmd.execute(mock_platform, False, [])
+
+    # Check the result
+    mock_list_local_dev_envs.assert_called_once_with(mock_platform)
+
+@patch("dem.cli.command.list_cmd.execute")
+def test_main_list(mock_execute: MagicMock) -> None:
+    # Setup
+    mock_platform = MagicMock()
     main.platform = mock_platform
 
-    # Run unit under test
-    runner_result = runner.invoke(main.typer_cli, ["list", "--local", "--tool"])
+    # Run the test
+    result = runner.invoke(main.typer_cli, ["list", "--cat", "test_catalog"])
 
-    # Check expectations
-    assert 0 == runner_result.exit_code
+    # Check the result
+    assert result.exit_code == 0
 
-    mock_platform.container_engine.get_local_tool_images.assert_called_once()
-
-    expected_table = Table()
-    expected_table.add_column("Repository")
-    expected_table.add_row("axemsolutions/cpputest:latest")
-    expected_table.add_row("axemsolutions/stlink_org:latest")
-    expected_table.add_row("axemsolutions/make_gnu_arm:latest")
-    console = Console(file=io.StringIO())
-    console.print(expected_table)
-    assert console.file.getvalue() == runner_result.stdout
-
-def test_no_local_tool_images():
-    # Test setup
-    test_local_tool_images = []
-    mock_platform = MagicMock()
-    mock_platform.container_engine.get_local_tool_images.return_value = test_local_tool_images
-    main.platform = mock_platform
-
-    # Run unit under test
-    runner_result = runner.invoke(main.typer_cli, ["list", "--local", "--tool"])
-
-    # Check expectations
-    assert 0 == runner_result.exit_code
-
-    mock_platform.container_engine.get_local_tool_images.assert_called_once()
-    
-    expected_table = Table()
-    expected_table.add_column("Repository")
-    console = Console(file=io.StringIO())
-    console.print(expected_table)
-    assert console.file.getvalue() == runner_result.stdout
-
-## Test listing the local tool images.
-
-def test_registry_tool_images():
-    # Test setup
-    test_registry_tool_images = [
-        "axemsolutions/cpputest:latest",
-        "axemsolutions/stlink_org:latest",
-        "axemsolutions/make_gnu_arm:latest",
-    ]
-    mock_platform = MagicMock()
-    mock_platform.registries.list_repos.return_value = test_registry_tool_images
-    main.platform = mock_platform
-
-    # Run unit under test
-    runner_result = runner.invoke(main.typer_cli, ["list", "--all", "--tool"])
-
-    # Check expectations
-    assert 0 == runner_result.exit_code
-
-    mock_platform.registries.list_repos.assert_called_once()
-    
-    expected_table = Table()
-    expected_table.add_column("Repository")
-    expected_table.add_row("axemsolutions/cpputest:latest")
-    expected_table.add_row("axemsolutions/stlink_org:latest")
-    expected_table.add_row("axemsolutions/make_gnu_arm:latest")
-    console = Console(file=io.StringIO())
-    console.print(expected_table)
-    assert console.file.getvalue() == runner_result.stdout
-
-@patch("dem.cli.command.list_cmd.stdout.print")
-def test_empty_repository(mock_stdout_print: MagicMock):
-    # Test setup
-    test_registry_tool_images = []
-    mock_platform = MagicMock()
-    mock_platform.registries.list_repos.return_value = test_registry_tool_images
-    main.platform = mock_platform
-
-    # Run unit under test
-    runner_result = runner.invoke(main.typer_cli, ["list", "--all", "--tool"])
-
-    # Check expectations
-    assert 0 == runner_result.exit_code
-
-    mock_platform.registries.list_repos.assert_called_once()
-    mock_stdout_print.assert_called_once_with("[yellow]No images are available in the registries!")
-
-@patch("dem.cli.command.list_cmd.stdout.print")
-def test_no_registries_available(mock_stdout_print: MagicMock):
-    # Test setup
-    mock_platform = MagicMock()
-    mock_platform.registries.registries = []
-    main.platform = mock_platform
-
-    # Run unit under test
-    runner_result = runner.invoke(main.typer_cli, ["list", "--all", "--tool"])
-
-    # Check expectations
-    assert 0 == runner_result.exit_code
-
-    mock_stdout_print.assert_called_once_with("[yellow]No registries are available!")
+    mock_execute.assert_called_once_with(mock_platform, True, ["test_catalog"])

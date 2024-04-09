@@ -29,10 +29,6 @@ div {
 	font-size: 20px;
 }
 
-span {
-	font-size: 24px;
-}
-
 @font-face {
 	font-family: 'DarkerGrotesque-Medium';
 	src: url(../Darker_Grotesque/DarkerGrotesque-Medium.ttf) format('truetype');
