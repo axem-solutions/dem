@@ -76,26 +76,19 @@ def autocomplete_host_name(incomplete: str) -> Generator:
                 yield host_config["name"]
 
 # DEM commands
-@typer_cli.command("list") # "list" is a Python keyword
-def list_(local: Annotated[bool, typer.Option(help="Scope is the local host.")] = False,
-          all: Annotated[bool, typer.Option(help="Scope is the catalogs.")] = False,
-          env: Annotated[bool, typer.Option(help="List the environments.")] = False,
-          tool: Annotated[bool, typer.Option(help="List the tool images.")] = False) -> None:
+@typer_cli.command("list", context_settings={"allow_extra_args": True}) # "list" is a Python keyword
+def list_(cat: Annotated[bool, typer.Option(help="List the Dev Envs available from the catalogs.",
+                                            show_default=False)] = False,
+          ctx: Annotated[typer.Context, typer.Option()] = None) -> None:
     """
-    List the Development Environments available locally or from the catalogs.
+    List the locally available Dev Envs.
     
-    The following option combinations are suppported:
-
-        --local --env -> List the local Development Environments.
-
-        --all --env -> List the Development Environments available from the catalogs.
-
-        --local --tool -> List the local tool images.
-
-        --all --tool -> List the tool images available from the registries.
+    --cat: List the available Dev Envs from the catalogs. Specify the catalogs' name to list the Dev 
+    Envs from. More then one catalog can be specified. If no catalog is specified, all the available
+    catalogs will be used.
     """
-    if platform:
-        list_cmd.execute(platform, local, all, env, tool)
+    if platform and ctx:
+        list_cmd.execute(platform, cat, ctx.args)
     else:
         raise InternalError("Error: The platform hasn't been initialized properly!")
 

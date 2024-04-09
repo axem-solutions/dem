@@ -14,6 +14,14 @@ class ToolImage():
     ) = range(4)
 
     def __init__(self, name: str) -> None:
+        """ Init the class.
+        
+            Args:
+                name -- the name of the tool image
+                
+            Exceptions:
+                ToolImageError -- if the name is invalid
+        """
         self.name = name
         try:
             self.repository = self.name.split(":")[0]

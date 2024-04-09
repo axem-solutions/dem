@@ -1,22 +1,17 @@
 ## **`dem list [OPTIONS]`**
 
-List the Development Environments installed locally or available in the catalog.
+List the locally available Dev Envs.
 
 Options:
 
-- Level 1:
-    - `--local` Scope is the local host.
-    - `--all` Scope is the catalog.
-- Level 2:
-    - `--env` List the Development Environments.
-    - `--tool` List the tool images.
+`--cat`: List the available Dev Envs from the catalogs. Specify the catalogs' name to list the Dev 
+Envs from. More then one catalog can be specified. If no catalog is specified, all the available
+catalogs will be used.
 
-!!! abstract "The following option combinations are supported:"
+Examples:
 
-    `--local --env` -> List the local Development Environments.  
-    `--all --env` -> List the catalog Development Environments.  
-    `--local --tool` -> List the local tool images.  
-    `--all --tool` -> List the tool images available in the registries.
+- `dem list --cat` List all the Dev Envs from all the available catalogs.
+- `dem list --cat catalog1 catalog2` List all the Dev Envs from the catalog1 and catalog2.
 
 ---
 
