@@ -1,4 +1,6 @@
-## **`dem list [OPTIONS]`**
+# Development Environment management
+
+## **`dem list [OPTIONS] [*CATALOG_NAMES]`**
 
 List the locally available Dev Envs.
 
@@ -10,12 +12,27 @@ catalogs will be used.
 
 Examples:
 
+- `dem list` List the locally available Dev Envs.
 - `dem list --cat` List all the Dev Envs from all the available catalogs.
 - `dem list --cat catalog1 catalog2` List all the Dev Envs from the catalog1 and catalog2.
 
 ---
 
-# Development Environment management
+## **`dem list-tools [OPTIONS] [*REGISTRY_NAMES]`**
+
+List the available tools.
+
+Options:
+
+`--reg`: List the available tools from the registries. Specify the registries' name to list the 
+tools from. More then one registry can be specified. If no registry is specified, all the available
+registries will be used.
+
+Examples:
+
+- `dem list-tools` List the locally available tools.
+- `dem list-tools --reg` List all the tools from all the available registries.
+- `dem list-tools --reg registry1 registry2` List all the tools from the registry1 and registry2.
 
 ## **`dem info DEV_ENV_NAME`**
 

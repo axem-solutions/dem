@@ -11,7 +11,11 @@ class DataStorageError(Exception):
 
 class RegistryError(Exception):
     """Raised when the communication with registry fails."""
-    pass
+
+    base_message = "Registry error: "
+
+    def __init__(self, message: str) -> None:
+        super().__init__(self.base_message + message)
 
 class ToolImageError(Exception):
     """Raised when there is a problem with the tool image."""

@@ -91,6 +91,8 @@ def test_Platform_tool_images(mock___init__: MagicMock, mock_ToolImages: MagicMo
     test_platform._container_engine = mock_container_engine
     test_platform._registries = mock_registries
     test_platform._tool_images = None
+    test_platform.disable_tool_update = False
+    test_platform.local_only = False
 
     mock_tool_images = MagicMock()
     mock_ToolImages.return_value = mock_tool_images
@@ -104,7 +106,7 @@ def test_Platform_tool_images(mock___init__: MagicMock, mock_ToolImages: MagicMo
 
     mock___init__.assert_called_once()
     mock_ToolImages.assert_called_once_with(mock_container_engine, mock_registries)
-    mock_tool_images.update.assert_called_once()
+    mock_tool_images.update.assert_called_once_with(local_only=test_platform.local_only)
 
 @patch("dem.core.platform.ContainerEngine")
 @patch.object(platform.Platform, "__init__")

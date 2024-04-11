@@ -10,7 +10,7 @@ from dem.cli.command import cp_cmd, info_cmd, list_cmd, create_cmd, modify_cmd, 
                             rename_cmd, run_cmd, export_cmd, load_cmd, clone_cmd, add_reg_cmd, \
                             list_reg_cmd, del_reg_cmd, add_cat_cmd, list_cat_cmd, del_cat_cmd, \
                             add_host_cmd, uninstall_cmd, install_cmd, assign_cmd, init_cmd, \
-                            list_host_cmd, del_host_cmd
+                            list_host_cmd, del_host_cmd, list_tools_cmd
 from dem.cli.console import stdout
 from dem.core.platform import Platform
 from dem.core.exceptions import InternalError
@@ -81,7 +81,9 @@ def list_(cat: Annotated[bool, typer.Option(help="List the Dev Envs available fr
                                             show_default=False)] = False,
           ctx: Annotated[typer.Context, typer.Option()] = None) -> None:
     """
-    List the locally available Dev Envs.
+    List the Dev Envs.
+
+    By default the local Dev Envs will be listed.
     
     --cat: List the available Dev Envs from the catalogs. Specify the catalogs' name to list the Dev 
     Envs from. More then one catalog can be specified. If no catalog is specified, all the available
@@ -89,6 +91,24 @@ def list_(cat: Annotated[bool, typer.Option(help="List the Dev Envs available fr
     """
     if platform and ctx:
         list_cmd.execute(platform, cat, ctx.args)
+    else:
+        raise InternalError("Error: The platform hasn't been initialized properly!")
+
+@typer_cli.command(context_settings={"allow_extra_args": True})
+def list_tools(reg: Annotated[bool, typer.Option(help="List the available tools in the registries.",
+                                                  show_default=False)] = False,
+               ctx: Annotated[typer.Context, typer.Option()] = None) -> None:
+    """
+    List the available tools.
+
+    By default the local tools will be listed.
+
+    --reg: List the available tools in the registries. Specify the registry's name to list the tools
+    from. More then one registry can be specified. If no registry is specified, all the available
+    registries will be used.
+    """
+    if platform and ctx:
+        list_tools_cmd.execute(platform, reg, ctx.args)
     else:
         raise InternalError("Error: The platform hasn't been initialized properly!")
 

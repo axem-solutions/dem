@@ -3,6 +3,7 @@
 
 from dem.core.core import Core
 from dem.core.container_engine import ContainerEngine
+from dem.core.exceptions import RegistryError
 import requests
 from typing import Generator
 from abc import ABC, abstractmethod
@@ -185,19 +186,24 @@ class Registries(Core):
         else:
             self.registries.append(DockerRegistry(self._container_engine, registry_config))
 
-    def list_repos(self) -> list[str]:
+    def list_repos(self, reg_selection: list[str]) -> list[str]:
         """ List the available repositories.
+
+            Args:
+                reg_selection -- the selected registries, empty list means all registries
         
             Return with the list of repositories.
         """
         repo_list: list[str] = []
 
         for registry in self.registries:
-            try:
-                repo_list.extend(registry.repos)
-            except Exception as e:
-                self.user_output.error(str(e))
-                self.user_output.error("[red]Error: The " + registry._registry_config["name"] + " registry is not available.[/]")
+            if not reg_selection or registry._registry_config["name"] in reg_selection:
+                try:
+                    repo_list.extend(registry.repos)
+                except Exception as e:
+                    self.user_output.error(str(e))
+                    self.user_output.error("[red]Error: The " + registry._registry_config["name"] + \
+                                           " registry is not available.[/]")
 
         return repo_list
 

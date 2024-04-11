@@ -46,7 +46,8 @@ class ToolImages():
         self.registries = registries
         self.all_tool_images = {}
 
-    def update(self, local_only = False, registry_only = False) -> None:
+    def update(self, local_only: bool = False, registry_only: bool = False, 
+               reg_selection: list[str] = []) -> None:
         """ Update the list of available tools.
         
             Args:
@@ -60,7 +61,7 @@ class ToolImages():
             local_tool_image_names = self.container_engine.get_local_tool_images()
 
         if not local_only:
-            registry_tool_image_names = self.registries.list_repos()
+            registry_tool_image_names = self.registries.list_repos(reg_selection)
 
         for tool_image_name in local_tool_image_names:
             tool_image = ToolImage(tool_image_name)

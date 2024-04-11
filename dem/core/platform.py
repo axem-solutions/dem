@@ -19,11 +19,7 @@ class Platform(Core):
         - The available tool images.
         - The available Development Environments.
         - External resources.
-
-        Class variables:
-            local_only -- work with the local tool images only
     """
-    local_only = False
 
     def _dev_env_json_version_check(self, dev_env_json_major_version: int) -> None:
         """ Check that the json file is supported.
@@ -42,6 +38,12 @@ class Platform(Core):
         self._container_engine = None
         self._registries = None
         self._hosts = None
+
+        # Set this to true in the platform instance to work with the local tool images only
+        self.local_only = False
+        # Set this to true in the platform instance so when first accessing the `tool_images` 
+        # instance variable, do not automatically update the tool images from the registries
+        self.disable_tool_update = False
 
     def load_dev_envs(self) -> None:
         """ Load the Development Environments from the dev_env.json file.
@@ -69,7 +71,8 @@ class Platform(Core):
         """
         if self._tool_images is None:
             self._tool_images = ToolImages(self.container_engine, self.registries)
-            self._tool_images.update(local_only=self.local_only)
+            if not self.disable_tool_update:
+                self._tool_images.update(local_only=self.local_only)
         return self._tool_images
     
     @property
