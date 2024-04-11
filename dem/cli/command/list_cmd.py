@@ -82,14 +82,14 @@ def list_all_cat_dev_envs(platform: Platform) -> None:
     for catalog in platform.dev_env_catalogs.catalogs:
         list_actual_cat_dev_envs(catalog)
 
-def list_selected_cat_dev_envs(platform: Platform, cat: List[str]) -> None:
+def list_selected_cat_dev_envs(platform: Platform, selected_cats: List[str]) -> None:
     """ List the Development Environments from the specified catalogs.
     
         Args:
             platform -- the Platform
-            cat -- the specified catalogs
+            selected_cats -- the specified catalogs
     """
-    for cat_name in cat:
+    for cat_name in selected_cats:
         for catalog in platform.dev_env_catalogs.catalogs:
             if catalog.name == cat_name:
                 list_actual_cat_dev_envs(catalog)
@@ -97,16 +97,16 @@ def list_selected_cat_dev_envs(platform: Platform, cat: List[str]) -> None:
         else:
             stderr.print(f"[red]Error: Catalog '{cat_name}' not found![/]")
 
-def execute(platform: Platform, cat: bool, specified_cats: list[str]) -> None:
+def execute(platform: Platform, cat: bool, selected_cats: list[str]) -> None:
     """ List Development Environments
     
     Args:
         cat -- if true list all Development Environments in the catalogs
-        specified_cats -- list the Development Environments from the specified catalogs
+        selected_cats -- list the Development Environments from the specified catalogs
     """
-    if cat and not specified_cats:
+    if cat and not selected_cats:
         list_all_cat_dev_envs(platform)
-    elif specified_cats:
-        list_selected_cat_dev_envs(platform, specified_cats)
+    elif selected_cats:
+        list_selected_cat_dev_envs(platform, selected_cats)
     else:
         list_local_dev_envs(platform)

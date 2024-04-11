@@ -528,7 +528,7 @@ def test_Registries_list_repos(mock_DockerHub: MagicMock, mock_DockerRegistry: M
     test_registries = registry.Registries(mock_container_engine)
 
     # Run unit under test
-    actual_repos = test_registries.list_repos()
+    actual_repos = test_registries.list_repos([])
 
     # Check expectations
     expected_repos = [*test_repos * 2]
@@ -566,7 +566,7 @@ def test_Registries_list_repos_handle_exception(mock___init__: MagicMock,
     test_registries.registries = [StubRegistry()]
 
     # Run unit under test
-    test_registries.list_repos()
+    test_registries.list_repos([])
 
     # Check expectations
     mock___init__.assert_called_once()
