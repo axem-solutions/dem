@@ -29,12 +29,12 @@ def list_local_tools(platform: Platform) -> None:
         # tool_image[0] is the name of the tool image and tool_image[1] is the ToolImage instance
         stdout.print(f"  {tool_image[0]}")
 
-def update_tools_from_selected_regs(platform: Platform, specified_regs: list[str]) -> None:
+def update_tools_from_selected_regs(platform: Platform, selected_regs: list[str]) -> None:
     """ Update the tools from the selected registries only. 
     
         Args:
             platform -- the Platform
-            specified_regs -- the selected registry names
+            selected_regs -- the selected registry names
 
         Exceptions:
             typer.Abort -- if an unknown registry is specified
@@ -44,14 +44,14 @@ def update_tools_from_selected_regs(platform: Platform, specified_regs: list[str
     platform.disable_tool_update = True
 
     available_regs = set([reg["name"] for reg in platform.config_file.registries])
-    specified_regs = set(specified_regs)
+    selected_regs = set(selected_regs)
 
-    if not specified_regs.issubset(available_regs):
-        for unkown_reg in specified_regs - available_regs:
+    if not selected_regs.issubset(available_regs):
+        for unkown_reg in selected_regs - available_regs:
             stderr.print(f"[red]Error: Registry {unkown_reg} is not available![/]")
         raise typer.Abort()
 
-    platform.tool_images.update(reg_selection=specified_regs)
+    platform.tool_images.update(reg_selection=selected_regs)
 
 def list_tools_from_regs(platform: Platform, table: Table) -> None:
     """ List the available tools from the registries.

@@ -112,16 +112,23 @@ def list_tools(reg: Annotated[bool, typer.Option(help="List the available tools 
     else:
         raise InternalError("Error: The platform hasn't been initialized properly!")
 
-@typer_cli.command()
+@typer_cli.command(context_settings={"allow_extra_args": True})
 def info(dev_env_name: Annotated[str, typer.Argument(help="Name of the Development Environment to get info about.",
-                                                     autocompletion=autocomplete_dev_env_name)]) -> None:
+                                                     autocompletion=autocomplete_dev_env_name)],
+         cat: Annotated[bool, typer.Option(help="Get the Dev Env from the catalogs")] = False,
+         ctx: Annotated[typer.Context, typer.Option()] = None) -> None:
     """
     Get information about the specified Development Environment available locally or in the catalogs.
 
+    --cat: DEM will search for the Dev Env in the catalogs and will print the details of the first
+    match. You can specifiy the catalogs' name to search in after this option. If no catalog is 
+    specified, all the available catalogs will be used. If the Dev Env is not found in the catalogs,
+    an error message will be printed.
+
     Note: Autocomplete only works with the locally avialable Dev Envs.
     """
-    if platform:
-        info_cmd.execute(platform, dev_env_name)
+    if platform and ctx:
+        info_cmd.execute(platform, dev_env_name, cat, ctx.args)
     else:
         raise InternalError("Error: The platform hasn't been initialized properly!")
 

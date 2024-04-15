@@ -71,8 +71,6 @@ class DevEnv():
     def get_tool_image_status(self) -> Status:
         """ Get the status of the Tool Images.
 
-            Can only be used if the Dev Env is insalled.
-        
             This method checks the availability of the assigned Tool Images. 
             If at least one of the Tool Images is unkonwn: NOT_AVAILABLE. 
             If at least one of the Tool Images is only available in the registry: REINSTALL_NEEDED. 
