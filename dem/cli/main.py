@@ -6,8 +6,8 @@ from typing import Generator
 from typing_extensions import Annotated
 import os
 from dem import __command__, __app_name__
-from dem.cli.command import cp_cmd, info_cmd, list_cmd, create_cmd, modify_cmd, delete_cmd, \
-                            rename_cmd, run_cmd, export_cmd, load_cmd, clone_cmd, add_reg_cmd, \
+from dem.cli.command import cp_cmd, import_cmd, info_cmd, list_cmd, create_cmd, modify_cmd, delete_cmd, \
+                            rename_cmd, run_cmd, export_cmd, clone_cmd, add_reg_cmd, \
                             list_reg_cmd, del_reg_cmd, add_cat_cmd, list_cat_cmd, del_cat_cmd, \
                             add_host_cmd, uninstall_cmd, install_cmd, assign_cmd, init_cmd, \
                             list_host_cmd, del_host_cmd, list_tools_cmd
@@ -166,13 +166,13 @@ def export(dev_env_name: Annotated[str, typer.Argument(help="Name of the Develop
     else:
         raise InternalError("Error: The platform hasn't been initialized properly!")
 
-@typer_cli.command()
-def load(path_to_dev_env: Annotated[str, typer.Argument(help="Path to the Dev Env to import.")]) -> None:
+@typer_cli.command("import")
+def import_(path_to_dev_env: Annotated[str, typer.Argument(help="Path to the Dev Env to import.")]) -> None:
     """
     Import the Development Environment.
     """
     if platform:
-        load_cmd.execute(platform, path_to_dev_env)
+        import_cmd.execute(platform, path_to_dev_env)
     else:
         raise InternalError("Error: The platform hasn't been initialized properly!")
 
