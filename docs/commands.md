@@ -121,6 +121,25 @@ directory will be used.
 
 ---
 
+## **`dem import PATH_TO_DEV_ENV`**
+
+Imports a Development Environment descriptor.
+
+:information_source: After the import, the Development Environment can be installed with the `install` 
+command.
+
+!!! Note
+
+    The file to import only contains the Development Environment descriptor. To install the Dev Env
+    the DEM needs access to all the registries where the required images are stored.
+
+Arguments:
+
+`PATH_TO_DEV_ENV` Path of the JSON file to import. Can be an absolute path or a relative path to the 
+current directory.
+
+---
+
 ## **`dem info DEV_ENV_NAME [OPTIONS] [*CATALOG_NAMES]`**
 
 Get information about the specified Development Environment available locally or in the catalogs.
@@ -218,25 +237,6 @@ Examples:
 - `dem list-tools --reg registry1 registry2` List all the tools from the registry1 and registry2.
 
 ---
-
-## **`dem load PATH_TO_DEV_ENV`**
-
-Imports a Development Environment.
-
-!!! Note
-
-    The file to import only contains the Development Environment descriptor. For a successful import
-    the DEM needs access to all the registries where the required images are stored.
-
-:information_source: After the import, the Development Environment can be installed with the `install` command.
-
-Arguments:
-
-`PATH_TO_DEV_ENV` Path of the JSON file to import. Can be an absolute path or a relative path to the 
-current directory.
-
----
-
 
 ## **`dem modify DEV_ENV_NAME`**
 
