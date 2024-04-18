@@ -11,6 +11,6 @@ def execute(platform: Platform, dev_env_name_to_rename: str, new_dev_env_name: s
 
     if dev_env_to_rename is not None:
         dev_env_to_rename.name = new_dev_env_name
-        platform.flush_descriptors()
+        platform.flush_dev_env_properties()
     else:
         stderr.print("[red]Error: The input Development Environment does not exist.[/]")

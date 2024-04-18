@@ -47,7 +47,7 @@ def test_handle_user_confirm_confirmed():
     modify_cmd.handle_user_confirm("confirm", MagicMock(), mock_platform)
 
     # Check expectation
-    mock_platform.flush_descriptors.assert_called_once()
+    mock_platform.flush_dev_env_properties.assert_called_once()
 
 @patch("dem.cli.command.modify_cmd.typer.prompt")
 def test_handle_user_confirm_save_as(mock_prompt):
@@ -66,7 +66,7 @@ def test_handle_user_confirm_save_as(mock_prompt):
 
     # Check expectation
     mock_prompt.assert_called_once_with("Name of the new Development Environment")
-    mock_platform.flush_descriptors.assert_called_once()
+    mock_platform.flush_dev_env_properties.assert_called_once()
 
     assert "fake dev env" == mock_platform.local_dev_envs[0].name
     assert "test new name" == mock_platform.local_dev_envs[1].name

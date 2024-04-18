@@ -48,6 +48,6 @@ def execute(platform: Platform, path_to_dev_env: str) -> None:
     """
     if os.path.exists(path_to_dev_env):
         import_dev_env_from_json(platform,path_to_dev_env)        
-        platform.flush_descriptors()
+        platform.flush_dev_env_properties()
     else:
         stderr.print("[red]Error: The input file does not exist.[/]")

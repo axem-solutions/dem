@@ -37,6 +37,40 @@ def test_autocomplete_dev_env_name():
     # Check expectations
     assert expected_completions == actual_completions
 
+def test_autocomplete_installed_dev_env_name():
+    # Test setup
+    mock_platform = MagicMock()
+    mock_dev_env1 = MagicMock()
+    mock_dev_env1.name = "TeSt"
+    mock_dev_env1.is_installed = True
+    mock_dev_env2 = MagicMock()
+    mock_dev_env2.name = "TeSS"
+    mock_dev_env2.is_installed = True
+    mock_dev_env3 = MagicMock()
+    mock_dev_env3.name = "TeSSo"
+    mock_dev_env3.is_installed = False
+    mock_dev_env4 = MagicMock()
+    mock_dev_env4.name = "NotMatching"
+    mock_dev_env4.is_installed = True
+
+    mock_platform.local_dev_envs = [
+        mock_dev_env1,
+        mock_dev_env2,
+        mock_dev_env3,
+        mock_dev_env4
+    ]
+    main.platform = mock_platform
+
+
+    # Run unit under test
+    actual_completions = []
+    for result in main.autocomplete_installed_dev_env_name("TeS"):
+        actual_completions.append(result)
+
+    # Check expectations
+    expected_completions = [mock_dev_env1.name, mock_dev_env2.name]
+    assert expected_completions == actual_completions
+
 def test_autocomplete_cat_name():
     # Test setup
     mock_platform = MagicMock()
@@ -163,6 +197,7 @@ def test_platform_not_initialized() -> None:
     main.platform = None
 
     units_to_test = {
+        main.set_default: [test_dev_env_name],
         main.list_: [],
         main.list_tools: [],
         main.info: [test_dev_env_name],

@@ -16,20 +16,24 @@ def add_dev_env_info_to_table(platform: Platform, table: Table, dev_env: DevEnv)
             table -- the Table
             dev_env -- the Development Environment
     """
+    installed_column = ""
+    default_column = ""
     if dev_env.is_installed:
         dev_env.assign_tool_image_instances(platform.tool_images)
-        installed_column = "[green]Yes[/]"
+        installed_column = "[green]✓[/]"
         tool_image_status = dev_env.get_tool_image_status()
         if tool_image_status == DevEnv.Status.UNAVAILABLE_IMAGE:
             status_column = "[red]Error: Required image is not available![/]"
         elif tool_image_status == DevEnv.Status.REINSTALL_NEEDED:
             status_column = "[red]Error: Incomplete local install![/]"
         else:
-            status_column = "Ok"
+            status_column = "[green]Ok[/]"
+
+        if dev_env.name == platform.default_dev_env_name:
+            default_column = "[green]✓[/]"
     else:
-        installed_column = "No"
-        status_column = "Ok"
-    table.add_row(dev_env.name, installed_column, status_column)
+        status_column = "[green]Ok[/]"
+    table.add_row(dev_env.name, installed_column, default_column, status_column)
 
 def list_local_dev_envs(platform: Platform) -> None:
     """ List the local Development Environments.
@@ -44,6 +48,7 @@ def list_local_dev_envs(platform: Platform) -> None:
         table = Table()
         table.add_column("Name")
         table.add_column("Installed")
+        table.add_column("Default")
         table.add_column("Status")
 
         for dev_env in sorted(platform.local_dev_envs, key=lambda dev_env: dev_env.name.lower()):
@@ -110,3 +115,6 @@ def execute(platform: Platform, cat: bool, selected_cats: list[str]) -> None:
         list_selected_cat_dev_envs(platform, selected_cats)
     else:
         list_local_dev_envs(platform)
+
+        if platform.default_dev_env_name:
+            stdout.print(f"\n[bold]The default Development Environment: {platform.default_dev_env_name}[/]")

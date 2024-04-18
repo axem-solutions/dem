@@ -123,4 +123,4 @@ def test_execution(mock_os_path_exists: MagicMock, mock_import_dev_env_from_json
 
     mock_os_path_exists.assert_called_with("asd")
     mock_import_dev_env_from_json.assert_called_once_with(mock_platform, "asd")
-    mock_platform.flush_descriptors.assert_called_once()
+    mock_platform.flush_dev_env_properties.assert_called_once()

@@ -27,5 +27,5 @@ def execute(platform: Platform, dev_env_name: str) -> None:
 
         stdout.print("Deleting the Development Environment...")
         platform.local_dev_envs.remove(dev_env_to_delete)
-        platform.flush_descriptors()
+        platform.flush_dev_env_properties()
         stdout.print(f"[green]Successfully deleted the {dev_env_name}![/]")

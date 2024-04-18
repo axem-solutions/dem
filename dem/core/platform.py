@@ -38,6 +38,8 @@ class Platform(Core):
         self._container_engine = None
         self._registries = None
         self._hosts = None
+        self.default_dev_env_name: str = ""
+        self.local_dev_envs: list[DevEnv] = []
 
         # Set this to true in the platform instance to work with the local tool images only
         self.local_only = False
@@ -54,7 +56,7 @@ class Platform(Core):
         self.dev_env_json.update()
         self.version = self.dev_env_json.deserialized["version"]
         self._dev_env_json_version_check(int(self.version.split('.', 1)[0]))
-        self.local_dev_envs: list[DevEnv] = []
+        self.default_dev_env_name = self.dev_env_json.deserialized.get("default_dev_env", "")
         for dev_env_descriptor in self.dev_env_json.deserialized["development_environments"]:
             self.local_dev_envs.append(DevEnv(descriptor=dev_env_descriptor))
 
@@ -126,6 +128,7 @@ class Platform(Core):
             """
             dev_env_json_deserialized: dict[str, Any] = {
                 "version": self.version,
+                "default_dev_env": self.default_dev_env_name,
                 "development_environments": [
                     dev_env.get_deserialized()
                     for dev_env in self.local_dev_envs
@@ -167,7 +170,7 @@ class Platform(Core):
                     raise PlatformError(f"Dev Env install failed. --> {str(e)}")
 
         dev_env_to_install.is_installed = True
-        self.flush_descriptors()
+        self.flush_dev_env_properties()
 
     def uninstall_dev_env(self, dev_env_to_uninstall: DevEnv) -> None:
         """ Uninstall the Dev Env by removing the images not required anymore.
@@ -197,9 +200,9 @@ class Platform(Core):
                 raise PlatformError(f"Dev Env uninstall failed. --> {str(e)}")
             
         dev_env_to_uninstall.is_installed = False
-        self.flush_descriptors()
+        self.flush_dev_env_properties()
 
-    def flush_descriptors(self) -> None:
+    def flush_dev_env_properties(self) -> None:
         """ Writes the deserialized json to the dev_env.json file."""
         # Get the up-to-date deserialized data.
         self.dev_env_json.deserialized = self.get_deserialized()

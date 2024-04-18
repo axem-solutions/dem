@@ -369,6 +369,23 @@ info.
 
 ---
 
+## **`dem set-default DEV_ENV_NAME`**
+
+**Description:**
+
+Set the selected Development Environment as the default one.
+
+The default Development Environment is used when the `dem run` command is run without specifying a
+Development Environment.
+
+**Arguments:**
+
+| Argument         | Description                                             | Required        |
+|------------------|---------------------------------------------------------|----------------:|
+| `DEV_ENV_NAME`   | Name of the Development Environment to set as default.  | :material-check:|
+
+---
+
 ## **`dem uninstall DEV_ENV_NAME`**
 
 **Description:**

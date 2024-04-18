@@ -118,6 +118,6 @@ def execute(platform: Platform, dev_env_name: str) -> None:
     platform.assign_tool_image_instances_to_all_dev_envs()
 
     create_dev_env(platform, dev_env_name)
-    platform.flush_descriptors()
+    platform.flush_dev_env_properties()
     stdout.print(f"The [green]{dev_env_name}[/] Development Environment has been created!")
     stdout.print("Run [italic]dem install[/] to install it.")

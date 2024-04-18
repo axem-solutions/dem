@@ -40,7 +40,7 @@ def test_delete(mock_stdout_print: MagicMock, mock_config: MagicMock) -> None:
         call("Deleting the Development Environment..."),
         call(f"[green]Successfully deleted the {test_dev_env_name}![/]")
     ])
-    mock_platform.flush_descriptors.assert_called_once()
+    mock_platform.flush_dev_env_properties.assert_called_once()
 
 @patch("dem.cli.command.delete_cmd.typer.confirm")
 @patch("dem.cli.command.delete_cmd.stderr.print")

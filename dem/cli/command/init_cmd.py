@@ -14,8 +14,6 @@ def execute(platform: Platform, project_path: str) -> None:
             platform -- the platform
             project_path -- the path to the project to initialize
     """
-
-
     if not os.path.isdir(project_path):
         stderr.print(f"[red]Error: The {project_path} path does not exist.[/]")
         return
@@ -45,6 +43,6 @@ def execute(platform: Platform, project_path: str) -> None:
             break
 
     platform.local_dev_envs.append(dev_env)
-    platform.flush_descriptors()
+    platform.flush_dev_env_properties()
     stdout.print(f"[green]Successfully initialized the {dev_env.name} Dev Env for the project at {project_path}![/]")
     stdout.print(f"\nNow you can install the Dev Env with the `dem install {dev_env.name}` command.")

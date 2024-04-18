@@ -50,7 +50,7 @@ def handle_user_confirm(confirmation: str, dev_env_local: DevEnv, platform: Plat
             stderr.print("[red]The Development Environment already exist.")
             raise typer.Abort()
 
-    platform.flush_descriptors()
+    platform.flush_dev_env_properties()
 
 def get_already_selected_tool_images(dev_env: DevEnv) -> set[str]:
     """ Get the already selected Tool Images.
