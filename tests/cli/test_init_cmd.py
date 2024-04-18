@@ -32,7 +32,7 @@ def test_execute(mock_DevEnv, mock_confirm, mock_stdout_print, mock_isdir) -> No
     mock_DevEnv.assert_called_once_with(descriptor_path=f"{mock_project_path}/.axem/dev_env_descriptor.json")
     mock_confirm.assert_not_called()
     mock_platform.uninstall_dev_env.assert_not_called()
-    mock_platform.flush_descriptors.assert_called_once()
+    mock_platform.flush_dev_env_properties.assert_called_once()
     mock_stdout_print.assert_has_calls([call(f"[green]Successfully initialized the {mock_dev_env_name} Dev Env for the project at {mock_project_path}![/]"),
                                         call(f"\nNow you can install the Dev Env with the `dem install {mock_dev_env_name}` command.")])
 
@@ -99,7 +99,7 @@ def test_execute_reinit_installed(mock_DevEnv, mock_confirm, mock_stdout_print, 
     mock_confirm.assert_has_calls([call("Would you like to re-init the Dev Env? All local changes will be lost!", abort=True),
                                    call("The Development Environment is installed, so it can't be deleted. Do you want to uninstall it first?", abort=True)])
     mock_platform.uninstall_dev_env.assert_called_once_with(mock_local_dev_env)
-    mock_platform.flush_descriptors.assert_called_once()
+    mock_platform.flush_dev_env_properties.assert_called_once()
     mock_stdout_print.assert_has_calls([call(f"[green]Successfully initialized the {mock_dev_env_name} Dev Env for the project at {mock_project_path}![/]"),
                                         call(f"\nNow you can install the Dev Env with the `dem install {mock_dev_env_name}` command.")])
 

@@ -17,8 +17,8 @@ runner = CliRunner(mix_stderr=False)
 
 @patch("dem.cli.command.info_cmd.stdout.print")
 @patch("dem.cli.command.info_cmd.Table")
-def test_print_local_dev_env_info_installed(mock_Table: MagicMock, 
-                                            mock_stdout_print: MagicMock) -> None:
+def test_print_local_dev_env_info_installed_default(mock_Table: MagicMock, 
+                                                    mock_stdout_print: MagicMock) -> None:
     # Setup
     mock_dev_env = MagicMock()
     mock_dev_env.name = "test_dev_env"
@@ -34,8 +34,11 @@ def test_print_local_dev_env_info_installed(mock_Table: MagicMock,
     mock_dev_env.tool_images = [mock_tool_image1, mock_tool_image2]
     mock_dev_env.is_installed = True
 
+    mock_platform = MagicMock()
+    mock_platform.default_dev_env_name = "test_dev_env"
+
     # Run the test
-    info_cmd.print_local_dev_env_info(mock_dev_env)
+    info_cmd.print_local_dev_env_info(mock_platform, mock_dev_env)
 
     # Verify the output
     mock_Table.assert_called_once()
@@ -43,7 +46,7 @@ def test_print_local_dev_env_info_installed(mock_Table: MagicMock,
     mock_table.add_row.assert_has_calls([call("tool_image1", "Local"),
                                         call("tool_image2", "Local and Registry")])
     mock_stdout_print.assert_has_calls([call("\n[bold]Development Environment: test_dev_env[/]\n"),
-                                        call("Installation state: [green]Installed[/]\n"),
+                                        call("Status: [green]Installed | Default[/]\n"),
                                         call(mock_table)])
 
 @patch("dem.cli.command.info_cmd.stdout.print")
@@ -66,7 +69,7 @@ def test_print_local_dev_env_info_not_installed(mock_Table: MagicMock,
     mock_dev_env.is_installed = False
 
     # Run the test
-    info_cmd.print_local_dev_env_info(mock_dev_env)
+    info_cmd.print_local_dev_env_info(MagicMock(), mock_dev_env)
 
     # Verify the output
     mock_Table.assert_called_once()
@@ -74,7 +77,7 @@ def test_print_local_dev_env_info_not_installed(mock_Table: MagicMock,
     mock_table.add_row.assert_has_calls([call("tool_image1", "Local"),
                                         call("tool_image2", "Local and Registry")])
     mock_stdout_print.assert_has_calls([call("\n[bold]Development Environment: test_dev_env[/]\n"),
-                                        call("Installation state: Not installed\n"),
+                                        call("Status: Not installed\n"),
                                         call(mock_table)])
 
 @patch("dem.cli.command.info_cmd.stdout.print")
@@ -100,7 +103,7 @@ def test_print_local_dev_env_info_reinstall_needed(mock_Table: MagicMock,
     mock_dev_env.get_tool_image_status.return_value = info_cmd.DevEnv.Status.REINSTALL_NEEDED
 
     # Run the test
-    info_cmd.print_local_dev_env_info(mock_dev_env)
+    info_cmd.print_local_dev_env_info(MagicMock(), mock_dev_env)
 
     # Verify the output
     mock_Table.assert_called_once()
@@ -108,7 +111,7 @@ def test_print_local_dev_env_info_reinstall_needed(mock_Table: MagicMock,
     mock_table.add_row.assert_has_calls([call("tool_image1", "Local"),
                                         call("tool_image2", "Local and Registry")])
     mock_stdout_print.assert_has_calls([call("\n[bold]Development Environment: test_dev_env[/]\n"),
-                                        call("Installation state: [green]Installed[/]\n"),
+                                        call("Status: [green]Installed[/]\n"),
                                         call(mock_table)])
     mock_stderr_print.assert_called_once_with("\n[red]Error: Incomplete local install! The Dev Env must be reinstalled![/]")
 
@@ -135,7 +138,7 @@ def test_print_local_dev_env_info_unavailable_image(mock_Table: MagicMock,
     mock_dev_env.get_tool_image_status.return_value = info_cmd.DevEnv.Status.UNAVAILABLE_IMAGE
 
     # Run the test
-    info_cmd.print_local_dev_env_info(mock_dev_env)
+    info_cmd.print_local_dev_env_info(MagicMock(), mock_dev_env)
 
     # Verify the output
     mock_Table.assert_called_once()
@@ -143,7 +146,7 @@ def test_print_local_dev_env_info_unavailable_image(mock_Table: MagicMock,
     mock_table.add_row.assert_has_calls([call("tool_image1", "Local"),
                                         call("tool_image2", "Local and Registry")])
     mock_stdout_print.assert_has_calls([call("\n[bold]Development Environment: test_dev_env[/]\n"),
-                                        call("Installation state: Not installed\n"),
+                                        call("Status: Not installed\n"),
                                         call(mock_table)])
     mock_stderr_print.assert_called_once_with("\n[red]Error: Required image could not be found either locally or in the registry![/]")
 
@@ -160,7 +163,7 @@ def test_local_info(mock_print_local_dev_env_info: MagicMock) -> None:
     # Verify the output
     mock_platform.assign_tool_image_instances_to_all_dev_envs.assert_called_once()
     mock_platform.get_dev_env_by_name.assert_called_once_with("test_dev_env")
-    mock_print_local_dev_env_info.assert_called_once_with(mock_dev_env)
+    mock_print_local_dev_env_info.assert_called_once_with(mock_platform, mock_dev_env)
 
 @patch("dem.cli.command.info_cmd.stderr.print")
 def test_local_info_unknown_dev_env(mock_stderr_print: MagicMock) -> None:

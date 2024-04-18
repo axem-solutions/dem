@@ -248,7 +248,7 @@ def test_execute(mock_create_dev_env: MagicMock, mock_stdout_print: MagicMock) -
     assert 0 == runner_result.exit_code
 
     mock_create_dev_env.assert_called_once_with(mock_platform, expected_dev_env_name)
-    mock_platform.flush_descriptors.assert_called_once()
+    mock_platform.flush_dev_env_properties.assert_called_once()
     mock_stdout_print.assert_has_calls([
         call(f"The [green]{expected_dev_env_name}[/] Development Environment has been created!"),
         call("Run [italic]dem install[/] to install it.")

@@ -7,9 +7,8 @@ from typing_extensions import Annotated
 import os
 from dem import __command__, __app_name__
 from dem.cli.command import cp_cmd, import_cmd, info_cmd, list_cmd, create_cmd, modify_cmd, delete_cmd, \
-                            rename_cmd, run_cmd, export_cmd, clone_cmd, add_reg_cmd, \
-                            list_reg_cmd, del_reg_cmd, add_cat_cmd, list_cat_cmd, del_cat_cmd, \
-                            add_host_cmd, uninstall_cmd, install_cmd, assign_cmd, init_cmd, \
+                            rename_cmd, run_cmd, export_cmd, clone_cmd, add_reg_cmd, list_reg_cmd, del_reg_cmd, add_cat_cmd, list_cat_cmd, del_cat_cmd, \
+                            add_host_cmd, set_default_cmd, uninstall_cmd, install_cmd, assign_cmd, init_cmd, \
                             list_host_cmd, del_host_cmd, list_tools_cmd
 from dem.cli.console import stdout
 from dem.core.platform import Platform
@@ -31,6 +30,20 @@ def autocomplete_dev_env_name(incomplete: str) -> Generator:
     if platform is not None:
         for dev_env in platform.local_dev_envs:
             if dev_env.name.startswith(incomplete) or (incomplete == ""):
+                yield dev_env.name
+
+def autocomplete_installed_dev_env_name(incomplete: str) -> Generator:
+    """ 
+    Autocomplete the input Dev Env name with the available matching installed Dev Envs.
+
+    Return with the matching Dev Env names by a Generator.
+    
+    Args:
+        incomplete -- the parameter the user supplied so far when the tab was pressed
+    """
+    if platform is not None:
+        for dev_env in platform.local_dev_envs:
+            if dev_env.is_installed and (dev_env.name.startswith(incomplete) or (incomplete == "")):
                 yield dev_env.name
 
 def autocomplete_cat_name(incomplete: str) -> Generator:
@@ -76,6 +89,21 @@ def autocomplete_host_name(incomplete: str) -> Generator:
                 yield host_config["name"]
 
 # DEM commands
+@typer_cli.command()
+def set_default(dev_env_name: Annotated[str, 
+                                     typer.Argument(help="The name of the Development Environment to set as default.",
+                                                    autocompletion=autocomplete_installed_dev_env_name)]) -> None:
+    """
+    Set the Development Environment as the default one.
+
+    The default Development Environment will be used by the run command when no Development 
+    Environment is specified.
+    """
+    if platform:
+        set_default_cmd.execute(platform, dev_env_name)
+    else:
+        raise InternalError("Error: The platform hasn't been initialized properly!")
+
 @typer_cli.command("list", context_settings={"allow_extra_args": True}) # "list" is a Python keyword
 def list_(cat: Annotated[bool, typer.Option(help="List the Dev Envs available from the catalogs.",
                                             show_default=False)] = False,

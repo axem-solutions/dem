@@ -15,7 +15,7 @@ image_status_messages = {
     ToolImage.LOCAL_AND_REGISTRY: "Local and Registry",
 }
 
-def print_local_dev_env_info(dev_env: DevEnv) -> None:
+def print_local_dev_env_info(platform: Platform, dev_env: DevEnv) -> None:
     """ Print information about the given local Development Environment.
     
         Args:
@@ -29,11 +29,13 @@ def print_local_dev_env_info(dev_env: DevEnv) -> None:
         tool_info_table.add_row(tool_image.name,
                                 image_status_messages[tool_image.availability])
     if dev_env.is_installed:
-        installation_status = "[green]Installed[/]"
+        status = "[green]Installed[/]"
+        if dev_env.name == platform.default_dev_env_name:
+            status = status.replace("[/]", " | Default[/]")
     else:
-        installation_status = "Not installed"
+        status = "Not installed"
     stdout.print(f"\n[bold]Development Environment: {dev_env.name}[/]\n")
-    stdout.print(f"Installation state: {installation_status}\n")
+    stdout.print(f"Status: {status}\n")
     stdout.print(tool_info_table)
 
     if dev_env.is_installed and dev_env.get_tool_image_status() == DevEnv.Status.REINSTALL_NEEDED:
@@ -60,7 +62,7 @@ def local_info(platform: Platform, dev_env_name: str) -> None:
         stderr.print(f"[red]Error: Unknown Development Environment: {dev_env_name}[/]\n")
         raise typer.Abort()
 
-    print_local_dev_env_info(dev_env)
+    print_local_dev_env_info(platform, dev_env)
 
 def print_cat_dev_env_info(dev_env: DevEnv, cat_name: str) -> None:
     """ Print information about the given catalog Development Environment.
