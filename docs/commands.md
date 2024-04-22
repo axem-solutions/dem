@@ -1,60 +1,73 @@
-The commands are grouped by their functionality. The commands are listed in alphabetical order.  
-The groupings are:
+---
+title: Commands
+---
 
-- Development Environment management
-- Development Environment Catalog management
-- Registry management
-- Host management
+#Commands
+
+!!! question "Bug report"
+
+    We encourage you to join our open-source community and use DEM. 
+    If you find any errors, inaccuracies, or have suggestions to improve our documentation or tool, please report your findings on [GitHub](https://github.com/axem-solutions/dem/issues) or start a conversation in our community through [Discord](https://discord.gg/3aHuJBNvrJ).
 
 # Development Environment management
 
+
 ## **`dem assign DEV_ENV_NAME, [PROJECT_PATH]`**
+
+**Description:**
 
 Assign a Development Environment to a project.
 
-If the project already has a Development Environment assigned, the user will be asked if they want to
+ If the project already has a Development Environment assigned, the user will be asked if they want to
 overwrite it or not.
+ Projects that have a Development Environment assigned, can be initialized with the `init` command.
 
-Projects that have a Development Environment assigned, can be initialized with the `init` command.
+**Arguments:**
 
-Arguments:
+| Argument                  | Description                                    | Required                             |
+| --------------------------| ---------------------------------------------- | :------------------------------------: |
+| `DEV_ENV_NAME`            | Name of the Development Environment to assign.  | :material-check:                   |
+| `[PROJECT_PATH]`          | Path of the project to assign the Development Environment to. If not set, the current working directory will be used. | |
 
-`DEV_ENV_NAME` Name of the Development Environment to assign. [required]
-
-`[PROJECT_PATH]` Path of the project to assign the Development Environment to. If not set, the current
-working directory will be used.
 
 ---
 
 ## **`dem clone DEV_ENV_NAME`**
 
+**Description:**
+
 Clone a Development Environment descriptor from the catalogs. 
 
-Only the Development Environment descriptor will be cloned, the required tool images won't be pulled.
-If a Development Environment with the same name has been already available on the host PC, the user
-will be asked if they want to overwrite it or not.
+Only the Development Environment descriptor will be cloned, the required tool images won't be pulled. If a Development Environment with the same name has been already available on the host PC, the user will be asked if they want to overwrite it or not.
 
 :information_source: After cloning, the Development Environment can be installed with the `install` command.
 
-Arguments:
+**Arguments:**
 
-`DEV_ENV_NAME` Clone the descriptor of the Dev Env. [required]
+| Argument         | Description                                             | Required        |
+|------------------|---------------------------------------------------------|:---------------:|
+| `DEV_ENV_NAME`   | Clone the descriptor of the Dev Env.                    | :material-check:|
 
 ---
 
 ## **`dem cp DEV_ENV_NAME NEW_DEV_ENV_NAME`**
 
+**Description:**
+
 Create a copy of an existing local Development Environment.
 
-Arguments:
+**Arguments:**
 
-`DEV_ENV_NAME` Name of the Development Environment to copy. [required]
-
-`NEW_DEV_ENV_NAME` Name of the New Development Environment. [required]
+| Argument           | Description                                       | Required        |
+|--------------------|---------------------------------------------------|:---------------:|
+| `DEV_ENV_NAME`     | Name of the Development Environment to copy.      | :material-check:|
+| `NEW_DEV_ENV_NAME` | Name of the New Development Environment.          | :material-check:|
 
 ---
 
 ## **`dem create DEV_ENV_NAME`**
+
+**Description:**
 
 Create a new Development Environment descriptor and save it to the local descriptor storage (catalog).
 
@@ -74,36 +87,46 @@ When the Dev Env is ready, press :material-keyboard-return: on the `save` button
 
     After creation, the Development Environment can be installed with the `install` command.
 
-Arguments:
 
-`DEV_ENV_NAME` Name of the Development Environment to create. [required]
+**Arguments:**
+
+| Argument         | Description                                             | Required        |
+|------------------|---------------------------------------------------------|:---------------:|
+| `DEV_ENV_NAME`   | Name of the Development Environment to create.          | :material-check:|
 
 ---
 
 ## **`dem delete DEV_ENV_NAME`**
 
-Delete the Dev Env descriptor from the local descriptor storage.
-If the Dev Env is installed, the user will be asked whether they want to uninstall it. 
+**Description:**
 
-Arguments:
+Delete the Dev Env descriptor from the local descriptor storage. If the Dev Env is installed, the user will be asked whether they want to uninstall it.
 
-`DEV_ENV_NAME` Name of the Development Environment to delete. [required]
+**Arguments:**
+
+| Argument         | Description                                             | Required        |
+|------------------|---------------------------------------------------------|:---------------:|
+| `DEV_ENV_NAME`   | Name of the Development Environment to delete.          | :material-check:|
 
 ---
 
 ## **`dem export DEV_ENV_NAME [PATH_TO_EXPORT]`**
 
-Export a Development Environment descriptor in JSON format to a text file. This file can be imported with the `load` command on another host. 
+**Description:**
 
-The way the file gets named can be set by the PATH_TO_EXPORT argument:
+Export a Development Environment descriptor in JSON format to a text file. 
 
-1. If it's not set, the file gets saved to the current directory with the name of the Development 
+This file can be imported with the `load` command on another host.
+
+The way the file gets named can be set by the `PATH_TO_EXPORT` argument:
+
+- **Not set**: The file gets saved to the current directory with the name of the Development 
 Environment and without extension.
-2. If only a name is set, the file gets saved with that name to the current directory, optionally 
+- **Only a name is set**: The file gets saved with that name to the current directory, optionally 
 with the set extension.
-3. If the argument is a directory path, the file gets saved there with the name of the Development 
+- **The argument is a directory path**: The file gets saved there with the name of the Development 
 Environment, without extension.
-4. If the argument is a path with the file name, then the exported content gets saved into that file.
+- **The argument is a path with the file name**: The exported content gets saved into that file.
 The extension can be set with the file name.
 
 !!! Note
@@ -112,16 +135,18 @@ The extension can be set with the file name.
     successful import the DEM needs access to all the registries where the required images are 
     stored.
 
-Arguments:
+**Arguments:**
 
-`DEV_ENV_NAME` The name of the Development Environment to export.
-
-`[PATH_TO_EXPORT]` Where to save the exported descriptor in JSON format. If not set, the current 
-directory will be used.
+| Argument         | Description                                             | Required        |
+|------------------|---------------------------------------------------------|:---------------:|
+| `DEV_ENV_NAME`   | The name of the Development Environment to export.      | :material-check:|
+| `[PATH_TO_EXPORT]` | Where to save the exported descriptor in JSON format. If not set, the current directory will be used. |  |
 
 ---
 
 ## **`dem import PATH_TO_DEV_ENV`**
+
+**Description:**
 
 Imports a Development Environment descriptor.
 
@@ -133,112 +158,149 @@ command.
     The file to import only contains the Development Environment descriptor. To install the Dev Env
     the DEM needs access to all the registries where the required images are stored.
 
-Arguments:
 
-`PATH_TO_DEV_ENV` Path of the JSON file to import. Can be an absolute path or a relative path to the 
-current directory.
+**Arguments:**
+
+| Argument         | Description                                             | Required        |
+|------------------|---------------------------------------------------------|:---------------:|
+| `PATH_TO_DEV_ENV`| Path of the JSON file to import.                        | :material-check:|
 
 ---
 
 ## **`dem info DEV_ENV_NAME [OPTIONS] [*CATALOG_NAMES]`**
 
+**Description:**
+
 Get information about the specified Development Environment available locally or in the catalogs.
 
-`--cat`: DEM will search for the Dev Env in the catalogs and will print the details of the first
-match. You can specifiy the catalogs' name to search in after this option. If no catalog is 
-specified, all the available catalogs will be used. If the Dev Env is not found in the catalogs,
-an error message will be printed.
+**Options:**
+
+| Options             | Description                                             |
+|--------------------|---------------------------------------------------------|
+| `--cat`            | DEM will search for the Dev Env in the catalogs and will print the details of the first match. You can specifiy the catalogs' name to search in after this option. If no catalog is specified, all the available catalogs will be used. If the Dev Env is not found in the catalogs, an error message will be printed.  |
+
+
 
 :information_source: Autocomplete only works with the locally avialable Dev Envs.
 
-Arguments:
+**Arguments:**
 
-`DEV_ENV_NAME` Name of the Development Environment to get info about. [required]
-`[OPTIONS]` --cat: Search in the catalogs. [optional]
-`[*CATALOG_NAMES]` Catalogs to search in. [optional
+| Argument           | Description                                             | Required        |
+|--------------------|---------------------------------------------------------|:---------------:|
+| `DEV_ENV_NAME`     | Name of the Development Environment to get info about.  | :material-check:|
+| `[OPTIONS]`        | `--cat`: Search in the catalogs.                        |                 |
+| `[*CATALOG_NAMES]` | List of catalogs to search in (separated by space).                                  |                 |
 
-Examples:
+**Examples:**
 
-- `dem info dev_env_name` Get information about the locally available Development Environment.
-- `dem info dev_env_name --cat` Get information about the Development Environment from the catalogs.
-- `dem info dev_env_name --cat catalog1 catalog2` Get information about the Development Environment from the catalog1 and catalog2.
+| Example            | Description                                             |
+|--------------------|---------------------------------------------------------|
+| `dem info dev_env_name`     | Get information about the **locally** available Development Environment.  |
+| `dem info dev_env_name --cat`     | Get information about the Development Environment from the **catalogs**.  |
+| `dem info dev_env_name --cat catalog1 catalog2`     | Get information about the Development Environment from the **catalog1 and catalog2**.  |
+
 
 ---
 
 ## **`dem init [PROJECT_PATH]`**
+
+**Description:**
 
 Initialize a project with the assigned Development Environment.
 
 :information_source: After the initialization, the Development Environment can be installed with the `install` 
 command.
 
-Arguments:
+**Arguments:**
 
-`PROJECT_PATH` Path of the project to initialize. If not set, the current working directory will be
-used.
+| Argument         | Description                                             | Required        |
+|------------------|---------------------------------------------------------|:---------------:|
+| `[PROJECT_PATH]` | Path of the project to initialize. If not set, the current working directory will be used. |                  |
 
 ---
 
 ## **`dem install DEV_ENV_NAME`**
+
+**Description:**
 
 Install the selected Development Environment. DEM pulls all the required containerized tools (which 
 are not yet available on the host PC) from the registry and install the Development Environment 
 locally. If the same Development Environment is already installed, but the installation is not 
 complete, the missing tool images get obtained from the registry.
 
-Arguments:
 
-`DEV_ENV_NAME` Name of the Development Environment to install. [required]
+**Arguments:**
+
+| Argument         | Description                                             | Required        |
+|------------------|---------------------------------------------------------|:---------------:|
+| `DEV_ENV_NAME`   | Name of the Development Environment to install.         | :material-check:|
 
 ---
 
 ## **`dem list [OPTIONS] [*CATALOG_NAMES]`**
 
+**Description:**
+
 List the locally available Dev Envs.
 
-Options:
+**Options:**
 
-`--cat`: List the available Dev Envs from the catalogs. Specify the catalogs' name to list the Dev 
-Envs from. More then one catalog can be specified. If no catalog is specified, all the available
-catalogs will be used.
+| Options            | Description                                             |
+|--------------------|---------------------------------------------------------|
+| `--cat`            | List the available Dev Envs from the catalogs. Specify the catalogs' name to list the Dev Envs from. More then one catalog can be specified. If no catalog is specified, all the available catalogs will be used.  |
 
-Arguments:
 
-`[OPTIONS]` --cat: List the Dev Envs from the catalogs. [optional]
-`[*CATALOG_NAMES]` Catalogs to list the Dev Envs from. [optional]
 
-Examples:
+**Arguments:**
 
-- `dem list` List the locally available Dev Envs.
-- `dem list --cat` List all the Dev Envs from all the available catalogs.
-- `dem list --cat catalog1 catalog2` List all the Dev Envs from the catalog1 and catalog2.
+| Argument           | Description                                                       | Required        |
+|--------------------|-------------------------------------------------------------------|:---------------:|
+| `[OPTIONS]`        | `--cat`: List the Dev Envs from the catalogs.                     |                 |
+| `[*CATALOG_NAMES]` | List of catalogs to list the Dev Envs from (separated by space).  |                 |
+
+**Examples:**
+
+| Example            | Description                                             |
+|--------------------|---------------------------------------------------------|
+| `dem list`     | List the **locally** available Dev Envs.  |
+| `dem list --cat`     | List all the Dev Envs from **all** the available **catalogs**.  |
+| `dem list --cat catalog1 catalog2`     | List all the Dev Envs from the **catalog1 and catalog2.**  |
 
 ---
 
 ## **`dem list-tools [OPTIONS] [*REGISTRY_NAMES]`**
 
+**Description:**
+
 List the available tools.
 
-Options:
+**Options:**
 
-`--reg`: List the available tools from the registries. Specify the registries' name to list the 
-tools from. More then one registry can be specified. If no registry is specified, all the available
-registries will be used.
+| Options             | Description                                             |
+|--------------------|---------------------------------------------------------|
+| `--reg`            | List the available tools from the registries. Specify the registries' name to list the tools from. More then one registry can be specified. If no registry is specified, all the available registries will be used.  |
 
-Arguments:
 
-`[OPTIONS]` --reg: List the tools from the registries. [optional
-`[*REGISTRY_NAMES]` Registries to list the tools from. [optional]
+**Arguments:**
 
-Examples:
+| Argument           | Description                                                      | Required        |
+|--------------------|------------------------------------------------------------------|:---------------:|
+| `[OPTIONS]`        | `--reg`: List the tools from the registries.                     |                 |
+| `[*REGISTRY_NAMES]`| Registries to list the tools from (separated by space).          |                 |
 
-- `dem list-tools` List the locally available tools.
-- `dem list-tools --reg` List all the tools from all the available registries.
-- `dem list-tools --reg registry1 registry2` List all the tools from the registry1 and registry2.
+**Examples:**
+
+| Example            | Description                                             |
+|--------------------|---------------------------------------------------------|
+| `dem list-tools`     | List the **locally** available tools.  |
+| `dem list-tools --reg`     | List all the tools from **all** the available **registries**.  |
+| `dem list-tools --reg registry1 registry2`     | List all the tools from the **registry1** and **registry2.**  |
 
 ---
 
 ## **`dem modify DEV_ENV_NAME`**
+
+**Description:**
 
 Modify a Development Environment descriptor available from the local descriptor storage (catalog).
 
@@ -258,20 +320,26 @@ When the Dev Env is ready, press :material-keyboard-return: on the `save` button
 
     After the modification, the Development Environment can be installed with the `install` command.
 
-Arguments:
+**Arguments:**
 
-`DEV_ENV_NAME` Name of the Development Environment to modify. [required]  
+| Argument         | Description                                             | Required        |
+|------------------|---------------------------------------------------------|:---------------:|
+| `DEV_ENV_NAME`   | Name of the Development Environment to modify.          | :material-check:|
 
 ---
 
 ## **`dem rename DEV_ENV_NAME NEW_DEV_ENV_NAME`**
 
+**Description:**
+
 Rename the Development Environment.
 
-Arguments:
+**Arguments:**
 
-`DEV_ENV_NAME`      Name of the Development Environment to rename. [required]
-`NEW_DEV_ENV_NAME`  The new name.  [required]
+| Argument         | Description                                             | Required        |
+|------------------|---------------------------------------------------------|----------------:|
+| `DEV_ENV_NAME`   | Name of the Development Environment to rename.          | :material-check:|
+| `NEW_DEV_ENV_NAME`| The new name.                                          | :material-check:|
 
 ---
 
@@ -279,7 +347,10 @@ Arguments:
 
 :warning: Experimental feature!
 
-Run a container in the context of a Development Environment.
+
+**Description:**
+
+Run a container in the context of a Development Environment. (Experimental feature)
 
 This command works the same way as the `docker run`, but with some restrictions, and the first
 argument is the name of the Development Environment.
@@ -289,53 +360,70 @@ argument is the name of the Development Environment.
 See the [Docker documentation](https://docs.docker.com/engine/reference/commandline/run/) for more
 info.
 
-Arguments:
+**Arguments:**
 
-`DEV_ENV_NAME` Name of the Development Environment. [required]
-
-`*` Variable-length argument list that will be passed to the `docker run` command.
+| Argument         | Description                                              | Required        |
+|------------------|----------------------------------------------------------|----------------:|
+| `DEV_ENV_NAME`   | Name of the Development Environment.                     | :material-check:|
+| `*`              | Variable-length argument list for `docker run` command.  |                 |
 
 ---
 
 ## **`dem uninstall DEV_ENV_NAME`**
 
-Uninstall the selected Development Environment. Sets the installed flag to False. DEM checks whether 
-a tool image is required or not by any of the remaining installed local Development Environments. In 
-case the tool image is not required anymore, the DEM tries to delete it. 
+**Description:**
 
-Arguments:
+Uninstall the selected Development Environment.
 
-`DEV_ENV_NAME` Name of the Development Environment to uninstall. [required]
+Sets the installed flag to False. DEM checks whether 
+a tool image is required or not by any of the remaining installed local Development Environments. In case the tool image is not required anymore, the DEM tries to delete it. 
+
+**Arguments:**
+
+| Argument         | Description                                             | Required        |
+|------------------|---------------------------------------------------------|----------------:|
+| `DEV_ENV_NAME`   | Name of the Development Environment to uninstall.       | :material-check:|
 
 ---
 
-# Development Environment Catalog management
+# Catalog management
+
 
 ## **`dem add-cat NAME URL`**
 
+**Description:**
+
 Add a new catalog.
+
 You can name the catalog as you wish.
 The URL must point to an HTTP(S) server where the Catalog JSON file is available.
 
-Arguments:
+**Arguments:**
 
-`NAME` Name of the catalog to add. [required]
-
-`URL` URL of the catalog file. [required]
+| Argument         | Description                                             | Required        |
+|------------------|---------------------------------------------------------|----------------:|
+| `NAME`           | Name of the catalog to add.                             | :material-check:|
+| `URL`            | URL of the catalog file.                                | :material-check:|
 
 ---
 
 ## **`dem del-cat NAME`**
 
+**Description:**
+
 Delete a catalog.
 
-Arguments:
+**Arguments:**
 
-`NAME` Name of the catalog to delete. [required]
+| Argument         | Description                                             | Required        |
+|------------------|---------------------------------------------------------|----------------:|
+| `NAME`           | Name of the catalog to delete.                          | :material-check:|
 
 ---
 
 ## **`dem list-cat`**
+
+**Description:**
 
 List the available catalogs.
 
@@ -343,35 +431,52 @@ List the available catalogs.
 
 # Registry management
 
+
 ## **`dem add-reg NAME URL`**
 
+**Description:**
+
 Add a new registry.
+
 The name of the registry is what you would normally use to pull an image.
 Examples:
 
-- If the full image tag is: repository/image:tag -> the name should be repository.
-- If the full image tag is: 192.168.1.1:5000/image:tag -> the name should be 192.168.1.1:5000
+
+| Full image tag                   | Name              |
+|----------------------------------|-------------------|
+| `repository/image:tag`           | a repository      |
+| `192.168.1.1:5000/image:tag`     | 192.168.1.1:5000  |
+
 
 The URL should point to the registry's API. For the Docker Hub https://registry.hub.docker.com, 
 or it can be http://localhost:5000 for a self-hosted one.
 
-Arguments:
+**Arguments:**
 
-`NAME` Name of the registry to add. [required]
-
-`URL` API URL of the registry. [required]
+| Argument         | Description                                             | Required        |
+|------------------|---------------------------------------------------------|----------------:|
+| `NAME`           | Name of the registry to add.                            | :material-check:|
+| `URL`            | API URL of the registry.                                | :material-check:|
 
 ---
 
 ## **`dem del-reg NAME`**
 
+**Description:**
+
 Delete a registry.
 
-Arguments:
+**Arguments:**
 
-`NAME` Name of the registry to delete. [required]
+| Argument         | Description                                             | Required        |
+|------------------|---------------------------------------------------------|----------------:|
+| `NAME`           | Name of the registry to delete.                         | :material-check:|
+
+---
 
 ## **`dem list-reg`**
+
+**Description:**
 
 List the available registries.
 
@@ -379,28 +484,39 @@ List the available registries.
 
 # Host management
 
+
 ## **`dem add-host NAME ADDRESS`**
+
+**Description:**
 
 Add a new host to the configuration.
 
-Arguments:
+**Arguments:**
 
-`NAME` Name of the host. [required]
-
-`ADDRESS` IP or hostname of the host. [required]
+| Argument         | Description                                             | Required        |
+|------------------|---------------------------------------------------------|----------------:|
+| `NAME`           | Name of the host.                                       | :material-check:|
+| `ADDRESS`        | IP or hostname of the host.                             | :material-check:|
 
 ---
 
 ## **`dem del-host NAME`**
 
+**Description:**
+
 Delete a host from the config file.
 
-Arguments:
+**Arguments:**
 
-`NAME` Name of the host to delete. [required]
+| Argument         | Description                                             | Required        |
+|------------------|---------------------------------------------------------|----------------:|
+| `NAME`           | Name of the host to delete.                             | :material-check:|
+
+---
 
 ## **`dem list-host`**
 
+**Description:**
+
 List the available hosts from the config file.
 
----

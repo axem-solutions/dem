@@ -8,9 +8,9 @@ This chapter contains the technical documentation of the design.
 
 The Development Environment Manager (DEM) provides an abstraction layer for the Development 
 Platform, which encompasses a collection of available resources, such as registries, catalogs, 
-container engines, and more. The modules that compose the platform form the core of the DEM.
+container engines, and more. The modules that compose the platform form the core of DEM.
 
-The DEM implements commands that can interact with the platform. These commands can be executed 
+DEM implements commands that can interact with the platform. These commands can be executed 
 using the command line interface (CLI). Additionally, some commands utilize a Text-based User 
 Interface (TUI) that can be presented on the user's terminal.
 
