@@ -29,6 +29,10 @@ extra_css:
   - stylesheets/scheme.css
   - stylesheets/extra.css
 
+extra_javascript:
+  - |
+    <script id="mcjs">!function(c,h,i,m,p){m=c.createElement(h),p=c.getElementsByTagName(h)[0],m.async=1,m.src=i,p.parentNode.insertBefore(m,p)}(document,"script","https://chimpstatic.com/mcjs-connected/js/users/9cb3c89bff7c933104c900f1c/c08e31824bbfc07d7880976a8.js");</script>
+
 extra:
   consent:
     title: Cookie consent
@@ -74,6 +78,11 @@ markdown_extensions:
   - md_in_html
   - pymdownx.details
   - pymdownx.superfences
+  - pymdownx.critic
+  - pymdownx.caret
+  - pymdownx.keys
+  - pymdownx.mark
+  - pymdownx.tilde
   - pymdownx.emoji:
       emoji_index: !!python/name:material.extensions.emoji.twemoji
       emoji_generator: !!python/name:material.extensions.emoji.to_svg
@@ -83,6 +92,36 @@ nav:
   - 'index.md'
   - 'installation.md'
   - 'basics.md'
+  - Commands: 
+    - 'DevEnv Management':
+      - 'assign': 'commands/#dem-assign-dev_env_name-project_path'
+      - 'clone': 'commands/#dem-clone-dev_env_name'
+      - 'cp': 'commands/#dem-cp-dev_env_name-new_dev_env_name'
+      - 'create': 'commands/#dem-create-dev_env_name'
+      - 'delete': 'commands/#dem-delete-dev_env_name'
+      - 'export': 'commands/#dem-export-dev_env_name-path_to_export'
+      - 'import': 'commands/#dem-import-path_to_dev_env'
+      - 'info': 'commands/#dem-info-dev_env_name-options-catalog_names'
+      - 'init': 'commands/#dem-init-project_path'
+      - 'install': 'commands/#dem-install-dev_env_name'
+      - 'list': 'commands/#dem-list-options-catalog_names'
+      - 'list-tools': 'commands/#dem-list-tools-options-registry_names'
+      - 'modify': 'commands/#dem-modify-dev_env_name'
+      - 'rename': 'commands/#dem-rename-dev_env_name-new_dev_env_name'
+      - 'run': 'commands/#dem-run-dev_env_name-*'
+      - 'uninstall': 'commands/#dem-uninstall-dev_env_name'
+    - 'Catalog Management':
+      - 'add-cat': 'commands/#dem-add-cat-name-url'
+      - 'del-cat': 'commands/#dem-del-cat-name'
+      - 'list-cat': 'commands/#dem-list-cat'
+    - 'Registry Management':
+      - 'add-reg': 'commands/#dem-add-reg-name-url'
+      - 'del-reg': 'commands/#dem-del-reg-name'
+      - 'list-reg': 'commands/#dem-list-reg'
+    - 'Host Management':
+      - 'add-host': 'commands/#dem-add-host-name-address'
+      - 'del-host': 'commands/#dem-del-host-name'
+      - 'list-host': 'commands/#dem-list-host'
   - 'quickstart.md'
-  - 'commands.md'
   - 'design.md'
+  - Join us on Discord  : 'https://discord.gg/3aHuJBNvrJ'

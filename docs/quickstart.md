@@ -2,7 +2,12 @@
 title: Quickstart
 ---
 
-Now that you have the DEM installed, you might find yourself in one of the following scenarios:
+!!! example "Learn by doing!"
+
+    Try our [tutorial](https://www.axemsolutions.io/tutorial/index.html) 
+    with a simple embedded project!
+
+Now that you have DEM installed, you might find yourself in one of the following scenarios:
 
 ## I'd like to start with a template...
 
@@ -57,3 +62,4 @@ Finally, if you are ready to use it, you can install it with:
 
 >For more detailed instructions about the commands please refer to the
 [Commands chapter](commands.md).
+
