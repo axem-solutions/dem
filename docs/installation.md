@@ -47,7 +47,7 @@ DEM can be run as a Python module. To do this, you need to add the `-m` flag to 
 
 For example:
 
-    python -m dem list --local --env
+    python -m dem list
 
 We use [poetry](https://python-poetry.org/) to manage dependencies. To ensure that you use the 
 correct versions of the required modules, you should enter the preconfigured virtual environment.
@@ -62,4 +62,4 @@ Enter the virtual environment:
 
 Inside the virtual environment, you can run DEM the same way as it was an installed package:
 
-    dem list --local --env
+    dem list

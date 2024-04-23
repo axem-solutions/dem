@@ -6,7 +6,7 @@ title: Commands
 
 !!! question "Bug report"
 
-    We encourage you to join our open-source community and use DEM. 
+    We encourage you to join our open-source community. 
     If you find any errors, inaccuracies, or have suggestions to improve our documentation or tool, please report your findings on [GitHub](https://github.com/axem-solutions/dem/issues) or start a conversation in our community through [Discord](https://discord.gg/3aHuJBNvrJ).
 
 # Development Environment management
@@ -116,7 +116,7 @@ Delete the Dev Env descriptor from the local descriptor storage. If the Dev Env 
 
 Export a Development Environment descriptor in JSON format to a text file. 
 
-This file can be imported with the `load` command on another host.
+This file can be imported with the `import` command on another host.
 
 The way the file gets named can be set by the `PATH_TO_EXPORT` argument:
 
@@ -444,7 +444,7 @@ Examples:
 
 | Full image tag                   | Name              |
 |----------------------------------|-------------------|
-| `repository/image:tag`           | a repository      |
+| `repository/image:tag`           | repository        |
 | `192.168.1.1:5000/image:tag`     | 192.168.1.1:5000  |
 
 

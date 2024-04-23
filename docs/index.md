@@ -3,11 +3,11 @@
 
 ## **What is DEM?**
 
-DEM (Development Environment Manager) is an **open-source command line tool for setting up, managing, and sharing Development Environments** for software teams.
+DEM (Development Environment Manager) is an **open-source command line tool for setting up, managing, and sharing Development Environments**.
 
-DEM empowers developers to **create, modify, and maintain consistent Development Environments with ease**, bridging the gap between code creation and deployment.
+DEM empowers developers to **create, modify, and maintain consistent Development Environments with ease**.
 
-With DEM, you can manage your development infrastructure just as you manage your codebase. By adopting DEM's methodologies for environment setup and management, you can significantly reduce context switching and the time between ideation and execution.
+By adopting DEM's methodologies for environment setup and management, you can significantly reduce context switching and time to market.
 
 ## **Pain points addressed by DEM**
 
@@ -68,7 +68,9 @@ With DEM, you can manage your development infrastructure just as you manage your
     in our community through [Discord](https://discord.gg/3aHuJBNvrJ).
 
 !!! windows_support "DEM for Windows"
-    Coming soon...
+    DEM can be used in Windows Subsystem for Linux (WSL).
+    
+    Native Windows support is coming soon...
 
     Feel free to join our open-source community and test DEM on different OSs. Please report your findings on [GitHub](https://github.com/axem-solutions/dem/issues) or in our community through [Discord](https://discord.gg/3aHuJBNvrJ).
 
