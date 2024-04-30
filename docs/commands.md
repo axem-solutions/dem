@@ -12,6 +12,32 @@ title: Commands
 # Development Environment management
 
 
+## **`dem add-task DEV_ENV_NAME TASK_NAME COMMAND`**
+
+**Description:**
+
+Add a new task to the Development Environment.
+
+A task is a command that can be run in the context of the Development Environment. 
+The task can be run with the `dem run` command. 
+
+**Arguments:**
+
+| Argument         | Description                                             | Required        |
+|------------------|---------------------------------------------------------|----------------:|
+| `DEV_ENV_NAME`   | Name of the Development Environment.                    | :material-check:|
+| `TASK_NAME`      | Name of the task.                                       | :material-check:|
+| `COMMAND`        | Command to run. Must be enclosed with quotes.           | :material-check:|
+
+**Examples:**
+
+| Example            | Description                                             |
+|--------------------|---------------------------------------------------------|
+| `dem add-task dev_env_name list-dir "ls -la"`     | Add a new command called `list-dir` that lists the content of the current directory. The task can be executed with `dem run dev_env_name list-dir`. |
+| `dem add-task dev_env_name build "docker run --rm -v \"$(pwd)\":/work axemsolutions/make_gnu-arm:13.2 make"`     | Add a new command called `build` that builds the project in a docker container. The task can be executed with `dem run dev_env_name build`. |
+
+---
+
 ## **`dem assign DEV_ENV_NAME, [PROJECT_PATH]`**
 
 **Description:**

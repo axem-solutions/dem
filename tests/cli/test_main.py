@@ -193,10 +193,12 @@ def test_platform_not_initialized() -> None:
     test_path = "test_path"
     test_name = "test_name"
     test_url = "test_url"
+    test_command = "test_command"
     mock_ctx = MagicMock()
     main.platform = None
 
     units_to_test = {
+        main.add_task: [test_dev_env_name, test_name, test_command],
         main.set_default: [test_dev_env_name],
         main.list_: [],
         main.list_tools: [],

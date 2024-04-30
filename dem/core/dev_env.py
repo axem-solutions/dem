@@ -45,8 +45,8 @@ class DevEnv():
         self.name: str = descriptor["name"]
         self.tool_image_descriptors: list[dict[str, str]] = descriptor["tools"]
         self.tool_images: list[ToolImage] = []
-        descriptor_installed = descriptor.get("installed", "False")
-        if "True" == descriptor_installed:
+        self.tasks: dict[str, str] = descriptor.get("tasks", {})
+        if "True" == descriptor.get("installed", "False"):
             self.is_installed = True
         else:
             self.is_installed = False
@@ -67,6 +67,9 @@ class DevEnv():
             tool_image_name = tool_descriptor["image_name"] + ':' + tool_descriptor["image_version"]
             tool_image = tool_images.all_tool_images.get(tool_image_name, ToolImage(tool_image_name))
             self.tool_images.append(tool_image)
+
+    def add_task(self, task_name: str, command: str) -> None:
+        self.tasks[task_name] = command
 
     def get_tool_image_status(self) -> Status:
         """ Get the status of the Tool Images.
@@ -93,7 +96,8 @@ class DevEnv():
         """
         dev_env_json_deserialized: dict = {
             "name": self.name,
-            "tools": self.tool_image_descriptors
+            "tools": self.tool_image_descriptors,
+            "tasks": self.tasks
         }
         
         if omit_is_installed is False:

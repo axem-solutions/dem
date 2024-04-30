@@ -6,10 +6,11 @@ from typing import Generator
 from typing_extensions import Annotated
 import os
 from dem import __command__, __app_name__
-from dem.cli.command import cp_cmd, import_cmd, info_cmd, list_cmd, create_cmd, modify_cmd, delete_cmd, \
-                            rename_cmd, run_cmd, export_cmd, clone_cmd, add_reg_cmd, list_reg_cmd, del_reg_cmd, add_cat_cmd, list_cat_cmd, del_cat_cmd, \
-                            add_host_cmd, set_default_cmd, uninstall_cmd, install_cmd, assign_cmd, init_cmd, \
-                            list_host_cmd, del_host_cmd, list_tools_cmd
+from dem.cli.command import cp_cmd, import_cmd, info_cmd, list_cmd, create_cmd, modify_cmd, \
+                            delete_cmd, rename_cmd, run_cmd, export_cmd, clone_cmd, add_reg_cmd, \
+                            list_reg_cmd, del_reg_cmd, add_cat_cmd, list_cat_cmd, del_cat_cmd, \
+                            add_host_cmd, set_default_cmd, uninstall_cmd, install_cmd, assign_cmd, \
+                            init_cmd, list_host_cmd, del_host_cmd, list_tools_cmd, add_task_cmd
 from dem.cli.console import stdout
 from dem.core.platform import Platform
 from dem.core.exceptions import InternalError
@@ -89,6 +90,21 @@ def autocomplete_host_name(incomplete: str) -> Generator:
                 yield host_config["name"]
 
 # DEM commands
+@typer_cli.command()
+def add_task(dev_env_name: Annotated[str, typer.Argument(help="Name of the Development Environment to add the task to.",
+                                                         autocompletion=autocomplete_dev_env_name)],
+             task_name: Annotated[str, typer.Argument(help="Name of the task.")], 
+             command: Annotated[str, typer.Argument(help="The command the task should execute.")]) -> None:
+    """
+    Add a new task to the Development Environment.
+
+    The command will be executed when the `dem run dev_env_name task_name` command is called. The 
+    command must be surrounded by quotes.
+    """
+    if platform:
+        add_task_cmd.execute(platform, dev_env_name, task_name, command)
+    else:
+        raise InternalError("Error: The platform hasn't been initialized properly!")
 @typer_cli.command()
 def set_default(dev_env_name: Annotated[str, 
                                      typer.Argument(help="The name of the Development Environment to set as default.",
