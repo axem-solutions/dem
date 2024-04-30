@@ -15,7 +15,12 @@ def test_DevEnv() -> None:
     test_descriptor = {
         "name": "test_name",
         "installed": "True",
-        "tools": [MagicMock()]
+        "tools": [MagicMock()],
+        "tasks": {
+            "test_task_name1": "test_task_command1",
+            "test_task_name2": "test_task_command2",
+            "test_task_name3": "test_task_command3"
+        }
     }
 
     # Run unit under test
@@ -24,6 +29,7 @@ def test_DevEnv() -> None:
     # Check expectations
     assert test_dev_env.name is test_descriptor["name"]
     assert test_dev_env.tool_image_descriptors is test_descriptor["tools"]
+    assert test_dev_env.tasks is test_descriptor["tasks"]
 
 @patch("dem.core.dev_env.json.load")
 @patch("dem.core.dev_env.open")
@@ -35,7 +41,12 @@ def test_DevEnv_with_descriptor_path(mock_path_exists: MagicMock, mock_open: Mag
     test_descriptor = {
         "name": "test_name",
         "installed": "True",
-        "tools": [MagicMock()]
+        "tools": [MagicMock()],
+        "tasks": {
+            "test_task_name1": "test_task_command1",
+            "test_task_name2": "test_task_command2",
+            "test_task_name3": "test_task_command3"
+        }
     }
     mock_path_exists.return_value = True
     mock_file = MagicMock()
@@ -49,6 +60,7 @@ def test_DevEnv_with_descriptor_path(mock_path_exists: MagicMock, mock_open: Mag
     assert test_dev_env.name is test_descriptor["name"]
     assert test_dev_env.tool_image_descriptors is test_descriptor["tools"]
     assert test_dev_env.is_installed is True
+    assert test_dev_env.tasks is test_descriptor["tasks"]
 
     mock_path_exists.assert_called_once_with(test_descriptor_path)
     mock_open.assert_called_once_with(test_descriptor_path, "r")
@@ -130,6 +142,29 @@ def test_DevEnv_assign_tool_image_instances() -> None:
     assert len(test_dev_env.tool_images) == 3
     for tool_image in test_dev_env.tool_images:
         assert tool_image is mock_tool_images.all_tool_images[tool_image.name]
+
+def test_DevEnv_add_task() -> None:
+    # Test setup
+    test_descriptor = {
+        "name": "test_name",
+        "installed": "True",
+        "tools": [MagicMock()],
+        "tasks": {
+            "test_task_name1": "test_task_command1",
+            "test_task_name2": "test_task_command2",
+            "test_task_name3": "test_task_command3"
+        }
+    }
+    test_dev_env = dev_env.DevEnv(test_descriptor)
+
+    test_task_name = "test_task_name4"
+    test_command = "test_task_command4"
+
+    # Run unit under test
+    test_dev_env.add_task(test_task_name, test_command)
+
+    # Check expectations
+    assert test_dev_env.tasks[test_task_name] == test_command
 
 @patch.object(dev_env.DevEnv, "__init__")
 def test_DevEnv_get_tool_image_status(mock___init__: MagicMock) -> None:
@@ -222,7 +257,12 @@ def test_DevEnv_get_deserialized_is_installed_true() -> None:
                 "image_name": "test_image_name4",
                 "image_version": "test_image_tag4"
             },
-        ]
+        ],
+        "tasks": {
+            "test_task_name1": "test_task_command1",
+            "test_task_name2": "test_task_command2",
+            "test_task_name3": "test_task_command3"
+        }
     }
     test_dev_env = dev_env.DevEnv(test_descriptor)
 
@@ -254,7 +294,8 @@ def test_DevEnv_get_deserialized_is_installed_false() -> None:
                 "image_name": "test_image_name4",
                 "image_version": "test_image_tag4"
             },
-        ]
+        ],
+        "tasks": {}
     }
     test_dev_env = dev_env.DevEnv(test_descriptor)
 
@@ -286,7 +327,8 @@ def test_DevEnv_get_deserialized_omit_is_installed() -> None:
                 "image_name": "test_image_name4",
                 "image_version": "test_image_tag4"
             },
-        ]
+        ],
+        "tasks": {}
     }
     test_dev_env = dev_env.DevEnv(test_descriptor)
 
