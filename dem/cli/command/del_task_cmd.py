@@ -1,21 +1,26 @@
-"""add-task CLI command implementation."""
-# dem/cli/command/add_task_cmd.py
+"""del-task CLI command implementation."""
+# dem/cli/command/del_task_cmd.py
 
 from dem.core.platform import Platform
 from dem.cli.console import stderr
 
-def execute(platform: Platform, dev_env_name: str, task_name: str, command: str) -> None:
-    """ Add a task to a Development Environment.
+def execute(platform: Platform, dev_env_name: str, task_name: str) -> None:
+    """ Delete a task from a Development Environment.
     
         Args:
             platform -- the Platform
             dev_env_name -- the Development Environment name
             task_name -- the task name
-            command -- the command
     """
     dev_env = platform.get_dev_env_by_name(dev_env_name)
     if dev_env is None:
         stderr.print(f"[red]Error: Development Environment '{dev_env_name}' not found![/]")
         return
-    dev_env.add_task(task_name, command)
+
+    try:
+        dev_env.del_task(task_name)
+    except KeyError as e:
+        stderr.print(f"[red] Error: {str(e)}[/]")
+        return
+
     platform.flush_dev_env_properties()

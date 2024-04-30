@@ -166,6 +166,51 @@ def test_DevEnv_add_task() -> None:
     # Check expectations
     assert test_dev_env.tasks[test_task_name] == test_command
 
+def test_DevEnv_del_task() -> None:
+    # Test setup
+    test_descriptor = {
+        "name": "test_name",
+        "installed": "True",
+        "tools": [MagicMock()],
+        "tasks": {
+            "test_task_name1": "test_task_command1",
+            "test_task_name2": "test_task_command2",
+            "test_task_name3": "test_task_command3"
+        }
+    }
+    test_dev_env = dev_env.DevEnv(test_descriptor)
+
+    test_task_name = "test_task_name2"
+
+    # Run unit under test
+    test_dev_env.del_task(test_task_name)
+
+    # Check expectations
+    assert test_task_name not in test_dev_env.tasks
+
+def test_DevEnv_del_task_not_existing() -> None:
+    # Test setup
+    test_descriptor = {
+        "name": "test_name",
+        "installed": "True",
+        "tools": [MagicMock()],
+        "tasks": {
+            "test_task_name1": "test_task_command1",
+            "test_task_name2": "test_task_command2",
+            "test_task_name3": "test_task_command3"
+        }
+    }
+    test_dev_env = dev_env.DevEnv(test_descriptor)
+
+    test_task_name = "test_task_name4"
+
+    # Run unit under test
+    with pytest.raises(KeyError) as exc_info:
+        test_dev_env.del_task(test_task_name)
+
+    # Check expectations
+    assert str(exc_info.value) == f"\'Task [bold]{test_task_name}[/] not found.\'"
+
 @patch.object(dev_env.DevEnv, "__init__")
 def test_DevEnv_get_tool_image_status(mock___init__: MagicMock) -> None:
     # Test setup

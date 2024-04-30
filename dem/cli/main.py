@@ -10,7 +10,8 @@ from dem.cli.command import cp_cmd, import_cmd, info_cmd, list_cmd, create_cmd, 
                             delete_cmd, rename_cmd, run_cmd, export_cmd, clone_cmd, add_reg_cmd, \
                             list_reg_cmd, del_reg_cmd, add_cat_cmd, list_cat_cmd, del_cat_cmd, \
                             add_host_cmd, set_default_cmd, uninstall_cmd, install_cmd, assign_cmd, \
-                            init_cmd, list_host_cmd, del_host_cmd, list_tools_cmd, add_task_cmd
+                            init_cmd, list_host_cmd, del_host_cmd, list_tools_cmd, add_task_cmd, \
+                            del_task_cmd
 from dem.cli.console import stdout
 from dem.core.platform import Platform
 from dem.core.exceptions import InternalError
@@ -89,6 +90,23 @@ def autocomplete_host_name(incomplete: str) -> Generator:
             if host_config["name"].startswith(incomplete) or (incomplete == ""):
                 yield host_config["name"]
 
+def autocomplete_task_name(ctx: typer.Context, incomplete: str) -> Generator:
+    """ 
+    Autocomplete the input Task name with the available matching Task names.
+
+    Return with the matching Task name by a Generator.
+    
+    Args:
+        incomplete -- the parameter the user supplied so far when the tab was pressed
+    """
+    dev_env_name = ctx.params.get("dev_env_name", None)
+    if platform is not None and dev_env_name is not None:
+        for dev_env in platform.local_dev_envs:
+            if dev_env.name == dev_env_name:
+                for task_name in dev_env.tasks:
+                    if task_name.startswith(incomplete) or (incomplete == ""):
+                        yield task_name
+
 # DEM commands
 @typer_cli.command()
 def add_task(dev_env_name: Annotated[str, typer.Argument(help="Name of the Development Environment to add the task to.",
@@ -105,6 +123,20 @@ def add_task(dev_env_name: Annotated[str, typer.Argument(help="Name of the Devel
         add_task_cmd.execute(platform, dev_env_name, task_name, command)
     else:
         raise InternalError("Error: The platform hasn't been initialized properly!")
+
+@typer_cli.command()
+def del_task(dev_env_name: Annotated[str, typer.Argument(help="Name of the Development Environment to delete the task from.",
+                                                         autocompletion=autocomplete_dev_env_name)],
+             task_name: Annotated[str, typer.Argument(help="Name of the task to delete.",
+                                                      autocompletion=autocomplete_task_name)]) -> None:
+    """
+    Delete a task from the Development Environment.
+    """
+    if platform:
+        del_task_cmd.execute(platform, dev_env_name, task_name)
+    else:
+        raise InternalError("Error: The platform hasn't been initialized properly!")
+
 @typer_cli.command()
 def set_default(dev_env_name: Annotated[str, 
                                      typer.Argument(help="The name of the Development Environment to set as default.",
