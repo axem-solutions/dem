@@ -69,7 +69,29 @@ class DevEnv():
             self.tool_images.append(tool_image)
 
     def add_task(self, task_name: str, command: str) -> None:
+        """ Add a task to the Development Environment.
+
+            If the task already exists, it will be overwritten.
+        
+            Args:
+                task_name -- the task name
+                command -- the command
+        """
         self.tasks[task_name] = command
+
+    def del_task(self, task_name: str) -> None:
+        """ Delete a task from the Development Environment.
+
+            Args:
+                task_name -- the task name
+
+            Exceptions:
+                KeyError -- if the task doesn't exist
+        """
+        if task_name in self.tasks:
+            del self.tasks[task_name]
+        else:
+            raise KeyError(f"Task [bold]{task_name}[/] not found.")
 
     def get_tool_image_status(self) -> Status:
         """ Get the status of the Tool Images.

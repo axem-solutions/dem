@@ -132,6 +132,39 @@ def test_autocomplete_host_name() -> None:
 
     mock_platform.hosts.list_host_configs.assert_called_once()
 
+def test_autocomplete_task_name() -> None:
+    # Test setup
+    mock_platform = MagicMock()
+    mock_dev_env1 = MagicMock()
+    mock_dev_env1.name = "dev_env_1"
+    mock_dev_env1.tasks = {
+        "test": "test",
+        "task": "command"
+    }
+    mock_dev_env2 = MagicMock()
+    mock_dev_env2.name = "dev_env_2"
+    mock_platform.local_dev_envs = [
+        mock_dev_env1,
+        mock_dev_env2
+    ]
+
+    mock_ctx = MagicMock()
+    mock_ctx.params = {
+        "dev_env_name": "dev_env_1"
+    }
+
+    main.platform = mock_platform
+
+    expected_completions = [mock_dev_env1.tasks["test"]]
+
+    # Run unit under test
+    actual_completions = []
+    for result in main.autocomplete_task_name(mock_ctx, "tes"):
+        actual_completions.append(result)
+
+    # Check expectations
+    assert expected_completions == actual_completions
+
 @patch("dem.cli.main.__app_name__", "axem-dem")
 @patch("dem.cli.main.stdout.print")
 @patch("dem.cli.main.importlib.metadata.version")
@@ -199,6 +232,7 @@ def test_platform_not_initialized() -> None:
 
     units_to_test = {
         main.add_task: [test_dev_env_name, test_name, test_command],
+        main.del_task: [test_dev_env_name, test_name],
         main.set_default: [test_dev_env_name],
         main.list_: [],
         main.list_tools: [],

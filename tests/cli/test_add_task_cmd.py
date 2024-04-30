@@ -7,7 +7,7 @@ import dem.cli.command.add_task_cmd as add_task_cmd
 
 # Test framework
 from typer.testing import CliRunner
-from unittest.mock import patch, MagicMock, call
+from unittest.mock import patch, MagicMock
 
 ## Global test variables
 

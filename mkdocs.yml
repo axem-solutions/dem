@@ -94,11 +94,13 @@ nav:
   - 'basics.md'
   - Commands: 
     - 'DevEnv Management':
+      - 'add-task': 'commands/#dem-add-task-dev_env_name-task_name-command'
       - 'assign': 'commands/#dem-assign-dev_env_name-project_path'
       - 'clone': 'commands/#dem-clone-dev_env_name'
       - 'cp': 'commands/#dem-cp-dev_env_name-new_dev_env_name'
       - 'create': 'commands/#dem-create-dev_env_name'
       - 'delete': 'commands/#dem-delete-dev_env_name'
+      - 'del-task': 'commands/#dem-del-task-dev_env_name-task_name'
       - 'export': 'commands/#dem-export-dev_env_name-path_to_export'
       - 'import': 'commands/#dem-import-path_to_dev_env'
       - 'info': 'commands/#dem-info-dev_env_name-options-catalog_names'

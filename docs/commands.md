@@ -136,6 +136,21 @@ Delete the Dev Env descriptor from the local descriptor storage. If the Dev Env 
 
 ---
 
+## **`dem del-task DEV_ENV_NAME TASK_NAME`**
+
+**Description:**
+
+Delete a task from the Development Environment.
+
+**Arguments:**
+
+| Argument         | Description                                             | Required        |
+|------------------|---------------------------------------------------------|:---------------:|
+| `DEV_ENV_NAME`   | Name of the Development Environment.                    | :material-check:|
+| `TASK_NAME`      | Name of the task to delete.                             | :material-check:|
+
+---
+
 ## **`dem export DEV_ENV_NAME [PATH_TO_EXPORT]`**
 
 **Description:**
