@@ -386,27 +386,19 @@ Rename the Development Environment.
 
 ## **`dem run DEV_ENV_NAME *`**
 
-:warning: Experimental feature!
-
-
 **Description:**
 
-Run a container in the context of a Development Environment. (Experimental feature)
+Run the task of the Development Environment. The Dev Env must be installed.
 
-This command works the same way as the `docker run`, but with some restrictions, and the first
-argument is the name of the Development Environment.
-
-:warning: The supported docker run options:  
-`-p, --name, -v, --privileged, --rm, --name, -d`  
-See the [Docker documentation](https://docs.docker.com/engine/reference/commandline/run/) for more
-info.
+If the Dev Env is not specified, the default Dev Env will be used. If the default Dev Env is not
+set, an error message will be printed.
 
 **Arguments:**
 
 | Argument         | Description                                              | Required        |
 |------------------|----------------------------------------------------------|----------------:|
-| `DEV_ENV_NAME`   | Name of the Development Environment.                     | :material-check:|
-| `*`              | Variable-length argument list for `docker run` command.  |                 |
+| `DEV_ENV_NAME`   | Name of the Development Environment to run the task in. If not set, the default Dev Env will be used. | 
+| `TASK_NAME`      | The name of the task to run.                             | :material-check:|
 
 ---
 

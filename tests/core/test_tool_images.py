@@ -44,6 +44,11 @@ def test_ToolImages_update() -> None:
     mock_registries.list_repos.return_value = test_registry_tool_images
 
     tool_images_instance = tool_images.ToolImages(mock_container_engine, mock_registries)
+    tool_images_instance.all_tool_images = {
+        "local_tool_image_1:tag": tool_images.ToolImage("local_tool_image_1:tag"),
+        "registry_tool_image_1:tag": tool_images.ToolImage("registry_tool_image_1:tag"),
+        "local_and_registry_tool_image:tag": tool_images.ToolImage("local_and_registry_tool_image:tag")
+    }
 
     # Run unit under test
     tool_images_instance.update()

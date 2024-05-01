@@ -118,6 +118,8 @@ def test_DevEnv_assign_tool_image_instances() -> None:
         ]
     }
     test_dev_env = dev_env.DevEnv(test_descriptor)
+    mock_previous_tool_images = MagicMock()
+    test_dev_env.tool_images = [mock_previous_tool_images]
 
     mock_tool_images = MagicMock()
     mock_tool_image1 = MagicMock()

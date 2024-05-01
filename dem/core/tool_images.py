@@ -48,7 +48,7 @@ class ToolImages():
 
     def update(self, local_only: bool = False, registry_only: bool = False, 
                reg_selection: list[str] = []) -> None:
-        """ Update the list of available tools.
+        """ Update the list of available tools. If the tool image already exists, it will be updated.
         
             Args:
                 local_only -- update the local tools only
@@ -64,7 +64,7 @@ class ToolImages():
             registry_tool_image_names = self.registries.list_repos(reg_selection)
 
         for tool_image_name in local_tool_image_names:
-            tool_image = ToolImage(tool_image_name)
+            tool_image = self.all_tool_images.get(tool_image_name, ToolImage(tool_image_name))
             if tool_image_name in registry_tool_image_names:
                 tool_image.availability = ToolImage.LOCAL_AND_REGISTRY
             else:
@@ -73,7 +73,7 @@ class ToolImages():
 
         for tool_image_name in registry_tool_image_names:
             if tool_image_name not in local_tool_image_names:
-                tool_image = ToolImage(tool_image_name)
+                tool_image = self.all_tool_images.get(tool_image_name, ToolImage(tool_image_name))
                 tool_image.availability = ToolImage.REGISTRY_ONLY
                 self.all_tool_images[tool_image_name] = tool_image
 
