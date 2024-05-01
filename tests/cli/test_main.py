@@ -227,7 +227,7 @@ def test_platform_not_initialized() -> None:
     test_name = "test_name"
     test_url = "test_url"
     test_command = "test_command"
-    mock_ctx = MagicMock()
+    test_task_name = "test_task_name"
     main.platform = None
 
     units_to_test = {
@@ -249,7 +249,7 @@ def test_platform_not_initialized() -> None:
         main.uninstall: [test_dev_env_name],
         main.assign: [test_dev_env_name, test_path],
         main.init: [test_path],
-        main.run: [test_dev_env_name, mock_ctx],
+        main.run: [test_dev_env_name, test_task_name],
         main.add_reg: [test_name, test_url],
         main.list_reg: [],
         main.del_reg: [test_name],

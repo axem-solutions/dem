@@ -18,120 +18,201 @@ import typer
 runner = CliRunner(mix_stderr=False)
 
 ## Test cases
-@patch("dem.cli.command.run_cmd.stderr.print")
-def test_handle_invalid_dev_env(mock_stderr_print: MagicMock):
-    # Test setup
-    mock_platform = MagicMock()
-    mock_platform.get_dev_env_by_name.return_value = None
-    test_dev_env_name = "test_dev_env_name"
-
-    # Run unit under test
-    with pytest.raises(typer.Abort):
-        # execute() gets tested directly to see if the exception is raised
-        run_cmd.execute(mock_platform, test_dev_env_name, [])
-
-    # Check expectations
-    mock_stderr_print.assert_called_once_with("[red]Error: Unknown Development Environment: " + test_dev_env_name + "[/]")
-
-    mock_platform.get_dev_env_by_name.assert_called_once_with(test_dev_env_name)
-
 
 @patch("dem.cli.command.run_cmd.typer.confirm")
+@patch("dem.cli.command.run_cmd.stdout.print")
 @patch("dem.cli.command.run_cmd.stderr.print")
-def test_handle_missing_tool_images_no_fix(mock_stderr_print, mock_confirm):
-    # Test setup
-    test_missing_tool_images = {
-        "missing_tool_image_1",
-        "missing_tool_image_2",
-        "missing_tool_image_3",
-    }
-    mock_dev_env_local = MagicMock()
+def test_dev_env_health_check(mock_stderr_print: MagicMock, mock_stdout_print: MagicMock, 
+                              mock_typer_confirm: MagicMock) -> None:
+    # Setup
     mock_platform = MagicMock()
-    mock_confirm.side_effect = Exception()
+    mock_platform.local_only = False
+    mock_dev_env = MagicMock()
+    mock_dev_env.name = "my-dev-env"
 
-    # Run unit under test
-    # The exception doesn't metter, only the fact that the function execution has stopped.
-    with pytest.raises(Exception):
-        run_cmd.handle_missing_tool_images(test_missing_tool_images, mock_dev_env_local, 
-                                           mock_platform)
+    mock_dev_env.get_tool_image_status.side_effect = [run_cmd.DevEnv.Status.UNAVAILABLE_IMAGE,
+                                                      run_cmd.DevEnv.Status.REINSTALL_NEEDED]
 
-        # Check expectations
-        calls = [
-            call("[red]Error: The following tool images are not available locally:[/]")
-        ]
-        for missing_tool_image in test_missing_tool_images:
-            calls.append(call("[red]" + missing_tool_image + "[/]"))
-        mock_stderr_print.assert_has_calls(calls)
-        mock_confirm.assert_called_once_with("Should DEM try to fix the faulty Development Environment?", abort=True)
+    # Run
+    run_cmd.dev_env_health_check(mock_platform, mock_dev_env)
+
+    # Check
+    assert mock_platform.local_only == True
+
+    mock_dev_env.assign_tool_image_instances.assert_called_with(mock_platform.tool_images)
+    mock_dev_env.get_tool_image_status.assert_called()
+    mock_stderr_print.assert_called_once_with("[red]Error: Required tool images are not available![/]")
+    mock_stdout_print.assert_has_calls([
+        call("Trying to locate the missing tool images..."),
+        call("The missing images are available from the registries."),
+        call(f"[green]DEM successfully fixed the {mock_dev_env.name} Development Environment![/]")
+    ])
+    mock_typer_confirm.assert_called_once_with("Should DEM reinstall the missing images?", 
+                                               abort=True)
+    mock_platform.install_dev_env.assert_called_once_with(mock_dev_env)
 
 @patch("dem.cli.command.run_cmd.stdout.print")
-@patch("dem.cli.command.run_cmd.typer.confirm")
 @patch("dem.cli.command.run_cmd.stderr.print")
-def test_handle_missing_tool_images_do_fix(mock_stderr_print, mock_confirm, mock_stdout_print):
-    # Test setup
-    test_missing_tool_images = {
-        "missing_tool_image_1",
-        "missing_tool_image_2",
-        "missing_tool_image_3",
-    }
-    mock_dev_env_local = MagicMock()
+def test_dev_env_health_check_missing_images_not_found(mock_stderr_print: MagicMock, 
+                                                       mock_stdout_print: MagicMock) -> None:
+    # Setup
     mock_platform = MagicMock()
+    mock_platform.local_only = False
+    mock_dev_env = MagicMock()
+    mock_dev_env.name = "my-dev-env"
 
-    # Run unit under test
-    run_cmd.handle_missing_tool_images(test_missing_tool_images, mock_dev_env_local, 
-                                       mock_platform)
+    mock_dev_env.get_tool_image_status.return_value = run_cmd.DevEnv.Status.UNAVAILABLE_IMAGE
 
-    # Check expectations
-    calls = [
-        call("[red]Error: The following tool images are not available locally:[/]")
-    ]
-    for missing_tool_image in test_missing_tool_images:
-        calls.append(call("[red]" + missing_tool_image + "[/]"))
-    mock_stderr_print.assert_has_calls(calls)
-    mock_confirm.assert_called_once_with("Should DEM try to fix the faulty Development Environment?", abort=True)
-    mock_platform.install_dev_env.assert_called_once_with(mock_dev_env_local)
-    mock_stdout_print.assert_called_once_with("[green]DEM fixed the " + mock_dev_env_local.name + "![/]")
+    # Run
+    with pytest.raises(typer.Abort):
+        run_cmd.dev_env_health_check(mock_platform, mock_dev_env)
 
-@patch("dem.cli.command.run_cmd.handle_missing_tool_images")
-def test_execute(mock_handle_missing_tool_images):
-    # Test setup
-    test_dev_env_name = "test_dev_env_name"
-    test_tool_type = "test_tool_type"
-    test_workspace_path = "test_workspace_path"
-    test_command = "test_command"
-    test_args = ["run", test_dev_env_name, test_tool_type, test_workspace_path, test_command]
-    
+    # Check
+    assert mock_platform.local_only == True
+
+    mock_dev_env.assign_tool_image_instances.assert_called_with(mock_platform.tool_images)
+    mock_dev_env.get_tool_image_status.assert_called()
+    mock_stderr_print.assert_has_calls([
+        call("[red]Error: Required tool images are not available![/]"),
+        call("[red]Error: The missing tool images could not be found in the registries![/]")
+    ])
+    mock_stdout_print.assert_called_once_with("Trying to locate the missing tool images...")
+
+
+@patch("dem.cli.command.run_cmd.subprocess.run")
+@patch("dem.cli.command.run_cmd.dev_env_health_check")
+@patch("dem.cli.command.run_cmd.stdout.print")
+@patch("dem.cli.command.run_cmd.stderr.print")
+def test_run_cmd(mock_stderr_print: MagicMock, mock_stdout_print: MagicMock, 
+                 mock_dev_env_health_check: MagicMock, mock_subprocess_run: MagicMock) -> None:
+    # Setup
     mock_platform = MagicMock()
-    mock_platform.tool_images.get_local_ones.return_value = {
-        "test_image_name:test_image_version": MagicMock()
-    }
     main.platform = mock_platform
-    mock_dev_env_local = MagicMock()
-    mock_platform.get_dev_env_by_name.return_value = mock_dev_env_local
 
-    mock_dev_env_local.tool_image_descriptors = [
-        {
-            "image_name": "test_image_name",
-            "image_version": "test_image_version",
-            "type": test_tool_type
-        },
-        {
-            "image_name": "missing_image_name",
-            "image_version": "missing_image_version",
-            "type": "missing_tool_type"
-        },
-    ]
+    mock_dev_env = MagicMock()
+    mock_dev_env.is_installed = True
+    mock_dev_env.tasks = {
+        "my-task": "echo 'Hello, World!'"
+    }
+    mock_platform.get_dev_env_by_name.return_value = mock_dev_env
 
-    # Run unit under test
-    runner_result = runner.invoke(main.typer_cli, test_args, color=True)
+    # Run
+    result = runner.invoke(main.typer_cli, ["run", "my-dev-env", "my-task"])
 
-    # Check expectations
-    assert 0 == runner_result.exit_code
+    # Check
+    assert result.exit_code == 0
 
-    mock_platform.get_dev_env_by_name.assert_called_once_with(test_dev_env_name)
+    mock_platform.get_dev_env_by_name.assert_called_once_with("my-dev-env")
+    mock_dev_env_health_check.assert_called_once_with(mock_platform, mock_dev_env)
+    mock_stdout_print.assert_has_calls([
+        call("[green]Running task [bold]my-task[/bold] in Development Environment [bold]my-dev-env[/bold]...[/]\n"),
+        call("")
+    ])
+    mock_subprocess_run.assert_called_once_with("echo 'Hello, World!'", shell=True)
 
-    expected_missing_tool_image = {"missing_image_name:missing_image_version"}
-    mock_handle_missing_tool_images.assert_called_once_with(expected_missing_tool_image, 
-                                                            mock_dev_env_local, 
-                                                            mock_platform)
-    mock_platform.container_engine.run.assert_called_once_with(test_args[2:])
+@patch("dem.cli.command.run_cmd.execute")
+def test_run_without_dev_env_name(mock_execute: MagicMock) -> None:
+    # Setup
+    mock_platform = MagicMock()
+    main.platform = mock_platform
+
+    # Run
+    result = runner.invoke(main.typer_cli, ["run", "my-task"])
+
+    # Check
+    assert result.exit_code == 0
+
+    mock_execute.assert_called_once_with(mock_platform, "", "my-task")
+
+@patch("dem.cli.command.run_cmd.subprocess.run")
+@patch("dem.cli.command.run_cmd.dev_env_health_check")
+@patch("dem.cli.command.run_cmd.stdout.print")
+@patch("dem.cli.command.run_cmd.stderr.print")
+def test_run_cmd_default_dev_env(mock_stderr_print: MagicMock, mock_stdout_print: MagicMock, 
+                                 mock_dev_env_health_check: MagicMock, mock_subprocess_run: MagicMock) -> None:
+    # Setup
+    mock_platform = MagicMock()
+    main.platform = mock_platform
+
+    mock_dev_env = MagicMock()
+    mock_dev_env.is_installed = True
+    mock_dev_env.tasks = {
+        "my-task": "echo 'Hello, World!'"
+    }
+    mock_platform.get_dev_env_by_name.return_value = mock_dev_env
+    test_default_dev_env_name = "my-default-dev-env"
+    mock_platform.default_dev_env_name = test_default_dev_env_name
+
+    # Run
+    run_cmd.execute(mock_platform, "", "my-task")
+
+    # Check
+    mock_platform.get_dev_env_by_name.assert_called_once_with(test_default_dev_env_name)
+    mock_dev_env_health_check.assert_called_once_with(mock_platform, mock_dev_env)
+    mock_stdout_print.assert_has_calls([
+        call(f"[green]Running task [bold]my-task[/bold] in Development Environment [bold]{test_default_dev_env_name}[/bold]...[/]\n"),
+        call("")
+    ])
+    mock_subprocess_run.assert_called_once_with("echo 'Hello, World!'", shell=True)
+
+@patch("dem.cli.command.run_cmd.stderr.print")
+def test_run_cmd_no_dev_env_name_no_default(mock_stderr_print: MagicMock) -> None:
+    # Setup
+    mock_platform = MagicMock()
+    mock_platform.default_dev_env_name = ""
+    main.platform = mock_platform
+
+    # Run
+    run_cmd.execute(mock_platform, "", "my-task")
+
+    # Check
+    mock_stderr_print.assert_called_once_with("[red]Error: Only one parameter is supplied but no default Dev Env is set! Please specify the Dev Env to run the task in or set a default one![/]")
+
+@patch("dem.cli.command.run_cmd.stderr.print")
+def test_run_cmd_dev_env_not_found(mock_stderr_print: MagicMock) -> None:
+    # Setup
+    mock_platform = MagicMock()
+    main.platform = mock_platform
+    mock_platform.get_dev_env_by_name.return_value = None
+
+    # Run
+    run_cmd.execute(mock_platform, "my-dev-env", "my-task")
+
+    # Check
+    mock_stderr_print.assert_called_once_with("[red]Error: Unknown Development Environment: my-dev-env[/]")
+
+@patch("dem.cli.command.run_cmd.stderr.print")
+def test_run_cmd_dev_env_not_installed(mock_stderr_print: MagicMock) -> None:
+    # Setup
+    mock_platform = MagicMock()
+    main.platform = mock_platform
+
+    mock_dev_env = MagicMock()
+    mock_dev_env.is_installed = False
+    mock_platform.get_dev_env_by_name.return_value = mock_dev_env
+
+    # Run
+    run_cmd.execute(mock_platform, "my-dev-env", "my-task")
+
+    # Check
+    mock_stderr_print.assert_called_once_with("[red]Error: Development Environment [bold]my-dev-env[/bold] is not installed![/]")
+
+@patch("dem.cli.command.run_cmd.dev_env_health_check")
+@patch("dem.cli.command.run_cmd.stderr.print")
+def test_run_cmd_task_not_found(mock_stderr_print: MagicMock, 
+                                mock_dev_env_health_check: MagicMock) -> None:
+    # Setup
+    mock_platform = MagicMock()
+    main.platform = mock_platform
+
+    mock_dev_env = MagicMock()
+    mock_dev_env.is_installed = True
+    mock_dev_env.tasks = {}
+    mock_platform.get_dev_env_by_name.return_value = mock_dev_env
+
+    # Run
+    run_cmd.execute(mock_platform, "my-dev-env", "my-task")
+
+    # Check
+    mock_dev_env_health_check.assert_called_once_with(mock_platform, mock_dev_env)
+    mock_stderr_print.assert_called_once_with("[red]Error: Task [bold]my-task[/bold] not found in Development Environment [bold]my-dev-env[/bold]![/]")

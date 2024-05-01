@@ -63,6 +63,7 @@ class DevEnv():
                 Exceptions:
                     ToolImageError -- if the Tool Image name is invalid
         """
+        self.tool_images = []
         for tool_descriptor in self.tool_image_descriptors:
             tool_image_name = tool_descriptor["image_name"] + ':' + tool_descriptor["image_version"]
             tool_image = tool_images.all_tool_images.get(tool_image_name, ToolImage(tool_image_name))

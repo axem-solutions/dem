@@ -348,21 +348,23 @@ def init(project_path: Annotated[str, typer.Argument(help="Path of the project."
     else:
         raise InternalError("Error: The platform hasn't been initialized properly!")
 
-@typer_cli.command(context_settings={"allow_extra_args": True, "ignore_unknown_options": True})
-def run(dev_env_name: Annotated[str, typer.Argument(help="Run the container in this Development Environment context",
-                                                    autocompletion=autocomplete_dev_env_name)],
-        ctx: Annotated[typer.Context, typer.Option()]) -> None:
+@typer_cli.command()
+def run(dev_env_name: Annotated[str, typer.Argument(help="Name of the Development Environment to run the task in. If not set, the default Dev Env will be used.",
+                                                    autocompletion=autocomplete_installed_dev_env_name)] = "",
+        task_name: Annotated[str, typer.Argument(help="The name of the task to run.",
+                                                 autocompletion=autocomplete_task_name)] = "") -> None:
     """
-    Run the `docker run` command in the Development Environment's context with the given parameters.  
+    Run the task of the Development Environment. The Dev Env must be installed.
 
-    This command can be used as the docker CLI one, except as first argument the name of the 
-    Development Environment must be set. 
-    Example: dem run dev_env --name test test_image_name:latest ls -la
-
-    See the documentation for the list of currently supported docker run parameters.
+    If the Dev Env is not specified, the default Dev Env will be used. If the default Dev Env is not
+    set, an error message will be printed.
     """
     if platform:
-        run_cmd.execute(platform, dev_env_name, ctx.args)
+        # If only a single parameter is supplied, we assume it's the task name
+        if not task_name and dev_env_name:
+            task_name = dev_env_name
+            dev_env_name = ""
+        run_cmd.execute(platform, dev_env_name, task_name)
     else:
         raise InternalError("Error: The platform hasn't been initialized properly!")
 
