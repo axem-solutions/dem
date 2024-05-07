@@ -47,9 +47,9 @@ def list_local_dev_envs(platform: Platform) -> None:
     else:
         table = Table()
         table.add_column("Name")
-        table.add_column("Installed")
-        table.add_column("Default")
-        table.add_column("Status")
+        table.add_column("Installed", justify="center")
+        table.add_column("Default", justify="center")
+        table.add_column("Status", justify="center")
 
         for dev_env in sorted(platform.local_dev_envs, key=lambda dev_env: dev_env.name.lower()):
             add_dev_env_info_to_table(platform, table, dev_env)

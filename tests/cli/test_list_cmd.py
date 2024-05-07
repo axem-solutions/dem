@@ -121,8 +121,10 @@ def test_list_local_dev_envs(mock_add_dev_env_info_to_table: MagicMock, mock_Tab
     list_cmd.list_local_dev_envs(mock_platform)
 
     # Check the result
-    mock_table.add_column.assert_has_calls([call("Name"), call("Installed"), call("Default"),
-                                            call("Status")])
+    mock_table.add_column.assert_has_calls([call("Name"), 
+                                            call("Installed", justify="center"), 
+                                            call("Default", justify="center"), 
+                                            call("Status", justify="center")])
     mock_add_dev_env_info_to_table.assert_called_once_with(mock_platform, mock_table, mock_dev_env)
     mock_stdout_print.assert_has_calls([call(f"\n [italic]Local Development Environments[/]"), 
                                         call(mock_table)])
