@@ -177,7 +177,8 @@ def execute(platform: Platform, dev_env_name: str) -> None:
         stdout.print("[yellow]The Development Environment is installed, so it can't be modified.[/]")
         typer.confirm("Do you want to uninstall it first?", abort=True)
         try:
-            platform.uninstall_dev_env(dev_env)
+            for status in platform.uninstall_dev_env(dev_env):
+                stdout.print(status)
         except PlatformError as e:
             stderr.print(f"[red]{str(e)}[/]")
             return

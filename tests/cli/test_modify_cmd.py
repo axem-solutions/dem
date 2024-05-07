@@ -8,7 +8,7 @@ import dem.cli.command.modify_cmd as modify_cmd
 # Test framework
 import pytest
 from typer.testing import CliRunner
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch, MagicMock, call
 
 from rich.console import Console
 import io, typer
@@ -241,6 +241,7 @@ def test_execute_invalid_name():
     # Check expectations
     assert 0 == runner_result.exit_code
 
+    mock_platform.assign_tool_image_instances_to_all_dev_envs.assert_called_once()
     mock_platform.get_dev_env_by_name.assert_called_once_with(test_dev_env_name)
 
     console = Console(file=io.StringIO())
@@ -262,15 +263,48 @@ def test_execute(mock_modify_with_tui: MagicMock, mock_stdout_print: MagicMock) 
     modify_cmd.execute(mock_platform, test_dev_env_name)
 
     # Check expectations
+    mock_platform.assign_tool_image_instances_to_all_dev_envs.assert_called_once()
     mock_platform.get_dev_env_by_name.assert_called_once_with(test_dev_env_name)
     mock_modify_with_tui.assert_called_once_with(mock_platform, mock_dev_env)
     mock_stdout_print.assert_called_once_with("[green]The Development Environment has been modified successfully![/]")
 
+@patch("dem.cli.command.modify_cmd.modify_with_tui")
+@patch("dem.cli.command.modify_cmd.typer.confirm")
+@patch("dem.cli.command.modify_cmd.stdout.print")
+def test_execute_installed(mock_stdout_print: MagicMock, mock_confirm: MagicMock,
+                           mock_modify_with_tui: MagicMock) -> None:
+    # Test setup
+    mock_platform = MagicMock()
+    test_dev_env_name = "test_dev_env_name"
+
+    mock_dev_env = MagicMock()
+    mock_dev_env.is_installed = True
+    mock_platform.get_dev_env_by_name.return_value = mock_dev_env
+
+    test_uninstall_dev_env_status = ["test_uninstall_dev_env_status", 
+                                     "test_uninstall_dev_env_status2"]
+    mock_platform.uninstall_dev_env.return_value = test_uninstall_dev_env_status
+
+    # Run unit under test
+    modify_cmd.execute(mock_platform, test_dev_env_name)
+
+    # Check expectations
+    mock_platform.assign_tool_image_instances_to_all_dev_envs.assert_called_once()
+    mock_platform.get_dev_env_by_name.assert_called_once_with(test_dev_env_name)
+    mock_stdout_print.assert_has_calls([
+        call("[yellow]The Development Environment is installed, so it can't be modified.[/]"),
+        call(test_uninstall_dev_env_status[0]), call(test_uninstall_dev_env_status[1]),
+        call("[green]The Development Environment has been modified successfully![/]"),
+    ])
+    mock_confirm.assert_called_once_with("Do you want to uninstall it first?", abort=True)
+    mock_platform.uninstall_dev_env.assert_called_once_with(mock_dev_env)
+    mock_modify_with_tui.assert_called_once_with(mock_platform, mock_dev_env)
+
 @patch("dem.cli.command.modify_cmd.stderr.print")
 @patch("dem.cli.command.modify_cmd.typer.confirm")
 @patch("dem.cli.command.modify_cmd.stdout.print")
-def test_execute_PlatformError(mock_stdout_print: MagicMock, mock_confirm: MagicMock,
-                               mock_stderr_print: MagicMock) -> None:
+def test_execute_installed_PlatformError(mock_stdout_print: MagicMock, mock_confirm: MagicMock,
+                                         mock_stderr_print: MagicMock) -> None:
     # Test setup
     mock_platform = MagicMock()
     test_dev_env_name = "test_dev_env_name"
@@ -285,6 +319,7 @@ def test_execute_PlatformError(mock_stdout_print: MagicMock, mock_confirm: Magic
     modify_cmd.execute(mock_platform, test_dev_env_name)
 
     # Check expectations
+    mock_platform.assign_tool_image_instances_to_all_dev_envs.assert_called_once()
     mock_platform.get_dev_env_by_name.assert_called_once_with(test_dev_env_name)
     mock_stdout_print.assert_called_once_with("[yellow]The Development Environment is installed, so it can't be modified.[/]")
     mock_confirm.assert_called_once_with("Do you want to uninstall it first?", abort=True)

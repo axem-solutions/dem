@@ -20,11 +20,17 @@ def test_handle_existing_local_dev_env(mock_stdout_print: MagicMock, mock_typer_
     mock_platform = MagicMock()
     mock_local_dev_env = MagicMock()
 
+    test_uninstall_dev_env_status = ["test_uninstall_dev_env_status", 
+                                     "test_uninstall_dev_env_status2"]
+    mock_platform.uninstall_dev_env.return_value = test_uninstall_dev_env_status
+
     # Run unit under test
     clone_cmd.handle_existing_local_dev_env(mock_platform, mock_local_dev_env)
 
     # Check expectations
-    mock_stdout_print.assert_called_once_with("[yellow]The Dev Env already exists.[/]")
+    mock_stdout_print.assert_has_calls([call("[yellow]The Dev Env already exists.[/]"),
+                                        call(test_uninstall_dev_env_status[0]),
+                                        call(test_uninstall_dev_env_status[1])])
     mock_typer_confirm.assert_has_calls([call("Continue with overwrite?", abort=True),
                                          call("The Dev Env to overwrite is installed. Do you want to uninstall it?", 
                                               abort=True)])

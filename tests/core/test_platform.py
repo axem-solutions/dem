@@ -73,11 +73,14 @@ def test_Platform_assign_tool_image_instances_to_all_dev_envs() -> None:
     test_platform._tool_images = mock_tool_images
     mock_dev_env = MagicMock()
     test_platform.local_dev_envs = [mock_dev_env]
+    test_platform.are_tool_images_assigned = False
 
     # Run unit under test
     test_platform.assign_tool_image_instances_to_all_dev_envs()
 
     # Check expectations
+    assert test_platform.are_tool_images_assigned == True
+
     mock_dev_env.assign_tool_image_instances.assert_called_once_with(mock_tool_images)
 
 @patch("dem.core.platform.ToolImages")
@@ -394,63 +397,119 @@ def test_Platform_install_dev_env_with_not_avilable_tool_image(mock___init__: Ma
 
 @patch.object(platform.Platform, "flush_dev_env_properties")
 @patch.object(platform.Platform, "container_engine")
+@patch.object(platform.Platform, "assign_tool_image_instances_to_all_dev_envs")
 @patch.object(platform.Platform, "__init__")
 def test_Platform_uninstall_dev_env_success(mock___init__: MagicMock,
+                                            mock_assign_tool_image_instances_to_all_dev_envs: MagicMock,
                                             mock_container_engine: MagicMock, 
                                             mock_flush_dev_env_properties: MagicMock) -> None:
     # Test setup
     mock___init__.return_value = None
 
     test_platform = platform.Platform()
+    test_platform.are_tool_images_assigned = False
+
+    mock_tool_image1 = MagicMock()
+    mock_tool_image1.name = "test_image_name1:test_image_version1"
+    mock_tool_image2 = MagicMock()
+    mock_tool_image2.name = "test_image_name2:test_image_version2"
+    mock_tool_image3 = MagicMock()
+    mock_tool_image3.name = "test_image_name3:test_image_version3"
+    mock_tool_image4 = MagicMock()
+    mock_tool_image4.name = "test_image_name4:test_image_version4"
+
     mock_dev_env1 = MagicMock()
     mock_dev_env2 = MagicMock()
     mock_dev_env_to_uninstall = MagicMock()
+    mock_dev_env_to_uninstall.name = "test_dev_env_to_uninstall"
+
     test_platform.local_dev_envs = [
         mock_dev_env1, mock_dev_env2, mock_dev_env_to_uninstall
     ]
-    mock_dev_env1.tool_image_descriptors = [
-        {
-            "image_name": "test_image_name1",
-            "image_version": "test_image_version1"
-        },
-        {
-            "image_name": "test_image_name2",
-            "image_version": "test_image_version2"
-        }
-    ]
+
+    mock_dev_env1.tool_images = [mock_tool_image1, mock_tool_image2]
+    mock_dev_env2.tool_images = [mock_tool_image3]
+    mock_dev_env_to_uninstall.tool_images = [mock_tool_image1, mock_tool_image3, mock_tool_image4]
+
     mock_dev_env1.is_installed = True
-    mock_dev_env2.tool_image_descriptors = [
-        {
-            "image_name": "test_image_name3",
-            "image_version": "test_image_version3"
-        }
-    ]
     mock_dev_env2.is_installed = True
-    mock_dev_env_to_uninstall.tool_image_descriptors = [
-        {
-            "image_name": "test_image_name1",
-            "image_version": "test_image_version1"
-        },
-        {
-            "image_name": "test_image_name3",
-            "image_version": "test_image_version3"
-        },
-        {
-            "image_name": "test_image_name4",
-            "image_version": "test_image_version4"
-        }
-    ]
     mock_dev_env_to_uninstall.is_installed = True
 
-    mock_container_engine.remove.return_value = True
+    test_platform.default_dev_env_name = mock_dev_env_to_uninstall.name
 
     # Run unit under test
-    test_platform.uninstall_dev_env(mock_dev_env_to_uninstall)
+    actual_status = []
+    for status in test_platform.uninstall_dev_env(mock_dev_env_to_uninstall):
+        actual_status.append(status)
 
     # Check expectations
     mock___init__.assert_called_once()
 
     assert mock_dev_env_to_uninstall.is_installed == False
+    assert actual_status == [f"The {mock_tool_image4.name} image has been removed."]
+    assert test_platform.default_dev_env_name == ""
+
+    mock_assign_tool_image_instances_to_all_dev_envs.assert_called_once()
+
+    mock_container_engine.remove.asssert_called_once_with("test_image_name4:test_image_version4")
+    mock_flush_dev_env_properties.assert_called_once()
+
+@patch.object(platform.Platform, "flush_dev_env_properties")
+@patch.object(platform.Platform, "container_engine")
+@patch.object(platform.Platform, "assign_tool_image_instances_to_all_dev_envs")
+@patch.object(platform.Platform, "__init__")
+def test_Platform_uninstall_dev_env_with_duplicate_images(mock___init__: MagicMock,
+                                                          mock_assign_tool_image_instances_to_all_dev_envs: MagicMock,
+                                                          mock_container_engine: MagicMock, 
+                                                          mock_flush_dev_env_properties: MagicMock) -> None:
+    # Test setup
+    mock___init__.return_value = None
+
+    test_platform = platform.Platform()
+    test_platform.are_tool_images_assigned = False
+
+    mock_tool_image1 = MagicMock()
+    mock_tool_image1.name = "test_image_name1:test_image_version1"
+    mock_tool_image2 = MagicMock()
+    mock_tool_image2.name = "test_image_name2:test_image_version2"
+    mock_tool_image3 = MagicMock()
+    mock_tool_image3.name = "test_image_name3:test_image_version3"
+    mock_tool_image4 = MagicMock()
+    mock_tool_image4.name = "test_image_name4:test_image_version4"
+
+    mock_dev_env1 = MagicMock()
+    mock_dev_env2 = MagicMock()
+    mock_dev_env_to_uninstall = MagicMock()
+    mock_dev_env_to_uninstall.name = "test_dev_env_to_uninstall"
+
+    test_platform.local_dev_envs = [
+        mock_dev_env1, mock_dev_env2, mock_dev_env_to_uninstall
+    ]
+
+    mock_dev_env1.tool_images = [mock_tool_image1, mock_tool_image2]
+    mock_dev_env2.tool_images = [mock_tool_image3]
+    mock_dev_env_to_uninstall.tool_images = [mock_tool_image1, mock_tool_image3, mock_tool_image4, 
+                                             mock_tool_image4]
+
+    mock_dev_env1.is_installed = True
+    mock_dev_env2.is_installed = True
+    mock_dev_env_to_uninstall.is_installed = True
+
+    test_platform.default_dev_env_name = mock_dev_env_to_uninstall.name
+
+    # Run unit under test
+    actual_status = []
+    for status in test_platform.uninstall_dev_env(mock_dev_env_to_uninstall):
+        actual_status.append(status)
+
+    # Check expectations
+    mock___init__.assert_called_once()
+
+    assert mock_dev_env_to_uninstall.is_installed == False
+    assert actual_status == [f"The {mock_tool_image4.name} image has been removed."]
+    assert test_platform.default_dev_env_name == ""
+
+    mock_assign_tool_image_instances_to_all_dev_envs.assert_called_once()
 
     mock_container_engine.remove.asssert_called_once_with("test_image_name4:test_image_version4")
     mock_flush_dev_env_properties.assert_called_once()
@@ -458,66 +517,59 @@ def test_Platform_uninstall_dev_env_success(mock___init__: MagicMock,
 @patch.object(platform.Platform, "flush_dev_env_properties")
 @patch.object(platform.Platform, "container_engine")
 @patch.object(platform.Platform, "__init__")
-def test_Platform_uninstall_dev_env_with_duplicate_images(mock___init__: MagicMock,
-                                                          mock_container_engine: MagicMock, 
-                                                          mock_flush_dev_env_properties: MagicMock) -> None:
+def test_Platform_uninstall_dev_env_image_not_found(mock___init__: MagicMock,
+                                                    mock_container_engine: MagicMock, 
+                                                    mock_flush_dev_env_properties: MagicMock) -> None:
     # Test setup
     mock___init__.return_value = None
 
     test_platform = platform.Platform()
+    test_platform.are_tool_images_assigned = True
+
+    mock_tool_image1 = MagicMock()
+    mock_tool_image1.name = "test_image_name1:test_image_version1"
+    mock_tool_image1.availability = platform.ToolImage.NOT_AVAILABLE
+    mock_tool_image2 = MagicMock()
+    mock_tool_image2.name = "test_image_name2:test_image_version2"
+    mock_tool_image3 = MagicMock()
+    mock_tool_image3.name = "test_image_name3:test_image_version3"
+    mock_tool_image3.availability = platform.ToolImage.REGISTRY_ONLY
+    mock_tool_image4 = MagicMock()
+    mock_tool_image4.name = "test_image_name4:test_image_version4"
+
     mock_dev_env1 = MagicMock()
     mock_dev_env2 = MagicMock()
     mock_dev_env_to_uninstall = MagicMock()
+    mock_dev_env_to_uninstall.name = "test_dev_env_to_uninstall"
+
     test_platform.local_dev_envs = [
         mock_dev_env1, mock_dev_env2, mock_dev_env_to_uninstall
     ]
-    mock_dev_env1.tool_image_descriptors = [
-        {
-            "image_name": "test_image_name1",
-            "image_version": "test_image_version1"
-        },
-        {
-            "image_name": "test_image_name2",
-            "image_version": "test_image_version2"
-        }
-    ]
+
+    mock_dev_env1.tool_images = [mock_tool_image1, mock_tool_image2]
+    mock_dev_env2.tool_images = [mock_tool_image3]
+    mock_dev_env_to_uninstall.tool_images = [mock_tool_image1, mock_tool_image3, mock_tool_image4]
+
     mock_dev_env1.is_installed = True
-    mock_dev_env2.tool_image_descriptors = [
-        {
-            "image_name": "test_image_name3",
-            "image_version": "test_image_version3"
-        }
-    ]
     mock_dev_env2.is_installed = True
-    mock_dev_env_to_uninstall.tool_image_descriptors = [
-        {
-            "image_name": "test_image_name1",
-            "image_version": "test_image_version1"
-        },
-        {
-            "image_name": "test_image_name3",
-            "image_version": "test_image_version3"
-        },
-        {
-            "image_name": "test_image_name4",
-            "image_version": "test_image_version4"
-        },
-        {
-            "image_name": "test_image_name4",
-            "image_version": "test_image_version4"
-        }
-    ]
     mock_dev_env_to_uninstall.is_installed = True
 
-    mock_container_engine.remove.return_value = True
+    test_platform.default_dev_env_name = mock_dev_env_to_uninstall.name
 
     # Run unit under test
-    test_platform.uninstall_dev_env(mock_dev_env_to_uninstall)
+    actual_status = []
+    for status in test_platform.uninstall_dev_env(mock_dev_env_to_uninstall):
+        actual_status.append(status)
 
     # Check expectations
     mock___init__.assert_called_once()
 
     assert mock_dev_env_to_uninstall.is_installed == False
+    assert actual_status == [
+        f"[yellow]Warning: The {mock_tool_image1.name} image could not be removed, because it is not available locally.[/]",
+        f"[yellow]Warning: The {mock_tool_image3.name} image could not be removed, because it is not available locally.[/]",
+        f"The {mock_tool_image4.name} image has been removed."]
+    assert test_platform.default_dev_env_name == ""
 
     mock_container_engine.remove.asssert_called_once_with("test_image_name4:test_image_version4")
     mock_flush_dev_env_properties.assert_called_once()
@@ -530,51 +582,40 @@ def test_Platform_uninstall_dev_env_failure(mock___init__: MagicMock,
     mock___init__.return_value = None
 
     test_platform = platform.Platform()
+    test_platform.are_tool_images_assigned = True
+
+    mock_tool_image1 = MagicMock()
+    mock_tool_image1.name = "test_image_name1:test_image_version1"
+    mock_tool_image2 = MagicMock()
+    mock_tool_image2.name = "test_image_name2:test_image_version2"
+    mock_tool_image3 = MagicMock()
+    mock_tool_image3.name = "test_image_name3:test_image_version3"
+    mock_tool_image4 = MagicMock()
+    mock_tool_image4.name = "test_image_name4:test_image_version4"
+
     mock_dev_env1 = MagicMock()
     mock_dev_env2 = MagicMock()
     mock_dev_env_to_uninstall = MagicMock()
+    mock_dev_env_to_uninstall.name = "test_dev_env_to_uninstall"
+
     test_platform.local_dev_envs = [
         mock_dev_env1, mock_dev_env2, mock_dev_env_to_uninstall
     ]
-    mock_dev_env1.tool_image_descriptors = [
-        {
-            "image_name": "test_image_name1",
-            "image_version": "test_image_version1"
-        },
-        {
-            "image_name": "test_image_name2",
-            "image_version": "test_image_version2"
-        }
-    ]
+
+    mock_dev_env1.tool_images = [mock_tool_image1, mock_tool_image2]
+    mock_dev_env2.tool_images = [mock_tool_image3]
+    mock_dev_env_to_uninstall.tool_images = [mock_tool_image1, mock_tool_image3, mock_tool_image4]
+
     mock_dev_env1.is_installed = True
-    mock_dev_env2.tool_image_descriptors = [
-        {
-            "image_name": "test_image_name3",
-            "image_version": "test_image_version3"
-        }
-    ]
     mock_dev_env2.is_installed = True
-    mock_dev_env_to_uninstall.tool_image_descriptors = [
-        {
-            "image_name": "test_image_name1",
-            "image_version": "test_image_version1"
-        },
-        {
-            "image_name": "test_image_name3",
-            "image_version": "test_image_version3"
-        },
-        {
-            "image_name": "test_image_name4",
-            "image_version": "test_image_version4"
-        }
-    ]
     mock_dev_env_to_uninstall.is_installed = True
 
     mock_container_engine.remove.side_effect = platform.ContainerEngineError("")
 
     # Run unit under test
     with pytest.raises(platform.PlatformError) as exported_exception_info:
-        test_platform.uninstall_dev_env(mock_dev_env_to_uninstall)
+        for _ in test_platform.uninstall_dev_env(mock_dev_env_to_uninstall):
+            pass
 
     # Check expectations
     mock___init__.assert_called_once()

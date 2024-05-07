@@ -20,12 +20,13 @@ def execute(platform: Platform, dev_env_name: str) -> None:
                           abort=True)
 
             try:
-                platform.uninstall_dev_env(dev_env_to_delete)
+                for status in platform.uninstall_dev_env(dev_env_to_delete):
+                    stdout.print(status)
             except PlatformError as e:
                 stderr.print(f"[red]{str(e)}[/]")
                 return
 
-        stdout.print("Deleting the Development Environment...")
+        stdout.print("Deleting the Development Environment descriptor...")
         platform.local_dev_envs.remove(dev_env_to_delete)
         platform.flush_dev_env_properties()
         stdout.print(f"[green]Successfully deleted the {dev_env_name}![/]")

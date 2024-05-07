@@ -25,6 +25,10 @@ def test_delete(mock_stdout_print: MagicMock, mock_config: MagicMock) -> None:
     mock_platform.get_dev_env_by_name.return_value = test_dev_env
     mock_platform.local_dev_envs = [test_dev_env]
 
+    test_uninstall_dev_env_status = ["test_uninstall_dev_env_status",
+                                     "test_uninstall_dev_env_status2"]
+    mock_platform.uninstall_dev_env.return_value = test_uninstall_dev_env_status
+
     # Run unit under test
     runner_result = runner.invoke(main.typer_cli, ["delete", test_dev_env_name])
 
@@ -37,7 +41,8 @@ def test_delete(mock_stdout_print: MagicMock, mock_config: MagicMock) -> None:
                                         abort=True)
     mock_platform.uninstall_dev_env.assert_called_once_with(test_dev_env)
     mock_stdout_print.assert_has_calls([
-        call("Deleting the Development Environment..."),
+        call(test_uninstall_dev_env_status[0]), call(test_uninstall_dev_env_status[1]),
+        call("Deleting the Development Environment descriptor..."),
         call(f"[green]Successfully deleted the {test_dev_env_name}![/]")
     ])
     mock_platform.flush_dev_env_properties.assert_called_once()

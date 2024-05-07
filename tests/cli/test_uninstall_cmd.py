@@ -6,7 +6,7 @@ import dem.cli.command.uninstall_cmd as uninstall_cmd
 
 # Test framework
 from typer.testing import CliRunner
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch, MagicMock, call
 
 ## Global test variables
 runner = CliRunner()
@@ -30,7 +30,7 @@ def test_uninstall_dev_env_invalid_name(mock_stderr_print):
     mock_stderr_print.assert_called_once_with(f"[red]Error: The {test_invalid_name} Development Environment does not exist.[/]")
 
 @patch("dem.cli.command.uninstall_cmd.stdout.print")
-def test_uninstall_dev_env_valid_name(mock_stdout_print):
+def test_uninstall_dev_env_valid_name(mock_stdout_print: MagicMock) -> None:
      # Test setup
     fake_dev_env_to_uninstall = MagicMock()
     fake_dev_env_to_uninstall.name = "dev_env"
@@ -39,15 +39,24 @@ def test_uninstall_dev_env_valid_name(mock_stdout_print):
     mock_platform.get_dev_env_by_name.return_value = fake_dev_env_to_uninstall
     main.platform = mock_platform
 
+    test_uninstall_dev_env_status = ["test_uninstall_dev_env_status", 
+                                     "test_uninstall_dev_env_status2"]
+    mock_platform.uninstall_dev_env.return_value = test_uninstall_dev_env_status
+
     # Run unit under test
-    runner_result = runner.invoke(main.typer_cli, ["uninstall", fake_dev_env_to_uninstall.name ], color=True)
+    runner_result = runner.invoke(main.typer_cli, ["uninstall", fake_dev_env_to_uninstall.name], 
+                                  color=True)
 
     # Check expectations
     assert 0 == runner_result.exit_code
     
     mock_platform.get_dev_env_by_name.assert_called_once_with(fake_dev_env_to_uninstall.name )
     mock_platform.uninstall_dev_env.assert_called_once_with(fake_dev_env_to_uninstall)
-    mock_stdout_print.assert_called_once_with(f"[green]Successfully uninstalled the {fake_dev_env_to_uninstall.name}![/]")
+    mock_stdout_print.assert_has_calls([
+        call(test_uninstall_dev_env_status[0]),
+        call(test_uninstall_dev_env_status[1]), 
+        call(f"[green]Successfully uninstalled the {fake_dev_env_to_uninstall.name}![/]")
+    ])
 
 @patch("dem.cli.command.uninstall_cmd.stderr.print")
 def test_uninstall_dev_env_valid_name_not_installed(mock_stderr_print):

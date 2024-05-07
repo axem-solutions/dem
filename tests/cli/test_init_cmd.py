@@ -87,6 +87,10 @@ def test_execute_reinit_installed(mock_DevEnv, mock_confirm, mock_stdout_print, 
     mock_local_dev_env.is_installed = True
     mock_platform.local_dev_envs = [mock_local_dev_env]
 
+    test_uninstall_dev_env_status = ["test_uninstall_dev_env_status",
+                                     "test_uninstall_dev_env_status2"]
+    mock_platform.uninstall_dev_env.return_value = test_uninstall_dev_env_status
+
     # Run unit under test
     init_cmd.execute(mock_platform, mock_project_path)
 
@@ -100,8 +104,10 @@ def test_execute_reinit_installed(mock_DevEnv, mock_confirm, mock_stdout_print, 
                                    call("The Development Environment is installed, so it can't be deleted. Do you want to uninstall it first?", abort=True)])
     mock_platform.uninstall_dev_env.assert_called_once_with(mock_local_dev_env)
     mock_platform.flush_dev_env_properties.assert_called_once()
-    mock_stdout_print.assert_has_calls([call(f"[green]Successfully initialized the {mock_dev_env_name} Dev Env for the project at {mock_project_path}![/]"),
-                                        call(f"\nNow you can install the Dev Env with the `dem install {mock_dev_env_name}` command.")])
+    mock_stdout_print.assert_has_calls([
+        call(test_uninstall_dev_env_status[0]), call(test_uninstall_dev_env_status[1]),
+        call(f"[green]Successfully initialized the {mock_dev_env_name} Dev Env for the project at {mock_project_path}![/]"),
+        call(f"\nNow you can install the Dev Env with the `dem install {mock_dev_env_name}` command.")])
 
 @patch("dem.cli.command.init_cmd.os.path.isdir")
 @patch("dem.cli.command.init_cmd.stderr.print")

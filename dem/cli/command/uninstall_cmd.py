@@ -23,7 +23,8 @@ def execute(platform: Platform, dev_env_name: str) -> None:
         stderr.print(f"[red]Error: The {dev_env_name} Development Environment is not installed.[/]")
     else:
         try:
-            platform.uninstall_dev_env(dev_env_to_uninstall)
+            for status in platform.uninstall_dev_env(dev_env_to_uninstall):
+                stdout.print(status)
         except PlatformError as e:
             stderr.print(f"[red]{str(e)}[/]")
         else:

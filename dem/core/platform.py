@@ -2,7 +2,7 @@
 """
 
 import os
-from typing import Any
+from typing import Any, Generator
 from dem.core.core import Core
 from dem.core.properties import __supported_dev_env_major_version__
 from dem.core.exceptions import DataStorageError, PlatformError, ContainerEngineError
@@ -40,6 +40,7 @@ class Platform(Core):
         self._hosts = None
         self.default_dev_env_name: str = ""
         self.local_dev_envs: list[DevEnv] = []
+        self.are_tool_images_assigned: bool = False
 
         # Set this to true in the platform instance to work with the local tool images only
         self.local_only = False
@@ -64,6 +65,7 @@ class Platform(Core):
         """ Assign the ToolImage instances to all Development Environments."""
         for dev_env in self.local_dev_envs:
             dev_env.assign_tool_image_instances(self.tool_images)
+        self.are_tool_images_assigned = True
 
     @property
     def tool_images(self) -> ToolImages:
@@ -172,34 +174,47 @@ class Platform(Core):
         dev_env_to_install.is_installed = True
         self.flush_dev_env_properties()
 
-    def uninstall_dev_env(self, dev_env_to_uninstall: DevEnv) -> None:
+    def uninstall_dev_env(self, dev_env_to_uninstall: DevEnv) -> Generator:
         """ Uninstall the Dev Env by removing the images not required anymore.
 
             Args:
                 dev_env_to_uninstall -- the Development Environment to uninstall
 
-            Exceptions:
+            Returns:
+                Generator -- the status messages
+
+            Raises:
                 PlatformError -- if the uninstall fails
         """
+        if not self.are_tool_images_assigned:
+            self.assign_tool_image_instances_to_all_dev_envs()
+
         all_required_tool_images = set()
         for dev_env in self.local_dev_envs:
             if (dev_env is not dev_env_to_uninstall) and dev_env.is_installed:
-                for tool_image_descriptor in dev_env.tool_image_descriptors:
-                    all_required_tool_images.add(tool_image_descriptor["image_name"] + ":" + tool_image_descriptor["image_version"])
+                for tool_image in dev_env.tool_images:
+                    all_required_tool_images.add(tool_image.name)
 
         tool_images_to_remove = set()
-        for tool_image_descriptor in dev_env_to_uninstall.tool_image_descriptors:
-            tool_image_name = tool_image_descriptor["image_name"] + ":" + tool_image_descriptor["image_version"]
-            if tool_image_name not in all_required_tool_images:
-                tool_images_to_remove.add(tool_image_name)
+        for tool_image in dev_env_to_uninstall.tool_images:
+            if tool_image.availability == ToolImage.NOT_AVAILABLE or tool_image.availability == ToolImage.REGISTRY_ONLY:
+                yield f"[yellow]Warning: The {tool_image.name} image could not be removed, because it is not available locally.[/]"
+                continue
+
+            if tool_image.name not in all_required_tool_images:
+                tool_images_to_remove.add(tool_image.name)
 
         for tool_image_name in tool_images_to_remove:
             try:
                 self.container_engine.remove(tool_image_name)
             except ContainerEngineError as e:
                 raise PlatformError(f"Dev Env uninstall failed. --> {str(e)}")
+            else:
+                yield f"The {tool_image_name} image has been removed."
             
         dev_env_to_uninstall.is_installed = False
+        if self.default_dev_env_name == dev_env_to_uninstall.name:
+            self.default_dev_env_name = ""
         self.flush_dev_env_properties()
 
     def flush_dev_env_properties(self) -> None:
