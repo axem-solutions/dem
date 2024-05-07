@@ -110,7 +110,8 @@ nav:
       - 'list-tools': 'commands/#dem-list-tools-options-registry_names'
       - 'modify': 'commands/#dem-modify-dev_env_name'
       - 'rename': 'commands/#dem-rename-dev_env_name-new_dev_env_name'
-      - 'run': 'commands/#dem-run-dev_env_name-*'
+      - 'run': 'commands/#dem-run-dev_env_name-task_name'
+      - 'set-default': 'commands/#dem-set-default-dev_env_name'
       - 'uninstall': 'commands/#dem-uninstall-dev_env_name'
     - 'Catalog Management':
       - 'add-cat': 'commands/#dem-add-cat-name-url'
