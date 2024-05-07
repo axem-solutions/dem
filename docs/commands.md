@@ -384,7 +384,7 @@ Rename the Development Environment.
 
 ---
 
-## **`dem run DEV_ENV_NAME *`**
+## **`dem run [DEV_ENV_NAME] TASK_NAME`**
 
 **Description:**
 
