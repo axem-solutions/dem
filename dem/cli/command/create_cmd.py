@@ -92,7 +92,8 @@ def create_dev_env(platform: Platform, dev_env_name: str) -> None:
             typer.confirm("The Development Environment is installed, so it can't be overwritten. " + \
                           "Uninstall it first?", abort=True)
             try:
-                platform.uninstall_dev_env(dev_env_original)
+                for status in platform.uninstall_dev_env(dev_env_original):
+                    stdout.print(status)
             except PlatformError as e:
                 stderr.print(f"[red]{str(e)}[/]")
                 raise typer.Abort()

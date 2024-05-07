@@ -254,7 +254,6 @@ def test_remove(mock_from_env: MagicMock, mock_user_output: MagicMock) -> None:
 
     # Check expectations
     mock_docker_client.images.remove.assert_called_once_with(test_image_to_remove)
-    mock_user_output.msg.assert_called_once_with(f"[green]Successfully removed the {test_image_to_remove}![/]\n")
 
 @patch.object(container_engine.ContainerEngine, "user_output")
 @patch("docker.from_env")

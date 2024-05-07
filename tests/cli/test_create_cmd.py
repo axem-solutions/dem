@@ -145,8 +145,9 @@ def test_create_dev_env_new(mock_open_dev_env_settings_panel: MagicMock,
 
 @patch("dem.cli.command.create_cmd.create_new_dev_env_descriptor")
 @patch("dem.cli.command.create_cmd.open_dev_env_settings_panel")
+@patch("dem.cli.command.create_cmd.stdout.print")
 @patch("dem.cli.command.create_cmd.typer.confirm")
-def test_create_dev_env_overwrite_installed(mock_confirm: MagicMock, 
+def test_create_dev_env_overwrite_installed(mock_confirm: MagicMock, mock_stdout_print: MagicMock,
                                             mock_open_dev_env_settings_panel: MagicMock, 
                                             mock_create_new_dev_env_descriptor: MagicMock) -> None:
     # Test setup
@@ -162,6 +163,9 @@ def test_create_dev_env_overwrite_installed(mock_confirm: MagicMock,
 
     mock_selected_tool_images = MagicMock()
     mock_open_dev_env_settings_panel.return_value = mock_selected_tool_images
+
+    test_uninstall_dev_env_status = ["status1", "status2"]
+    mock_platform.uninstall_dev_env.return_value = test_uninstall_dev_env_status
 
     test_dev_env_name = "test_dev_env"
 
@@ -179,6 +183,10 @@ def test_create_dev_env_overwrite_installed(mock_confirm: MagicMock,
              "Uninstall it first?", abort=True)
     ])
     mock_platform.uninstall_dev_env.assert_called_once_with(mock_dev_env_original)
+    mock_stdout_print.assert_has_calls([
+        call("status1"),
+        call("status2")
+    ])
     mock_open_dev_env_settings_panel.assert_called_once_with(mock_platform.tool_images.all_tool_images)
     mock_create_new_dev_env_descriptor.assert_called_once_with(test_dev_env_name, 
                                                                mock_selected_tool_images)

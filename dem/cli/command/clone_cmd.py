@@ -21,7 +21,8 @@ def handle_existing_local_dev_env(platform: Platform, local_dev_env: DevEnv) -> 
         typer.confirm("The Dev Env to overwrite is installed. Do you want to uninstall it?", 
                       abort=True)
         try:
-            platform.uninstall_dev_env(local_dev_env)
+            for status in platform.uninstall_dev_env(local_dev_env):
+                stdout.print(status)
         except PlatformError as e:
             stderr.print(f"[red]{str(e)}[/]")
             raise typer.Abort()
