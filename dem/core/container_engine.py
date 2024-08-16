@@ -118,14 +118,14 @@ class ContainerEngine(Core):
             raise ContainerEngineError(f"The {image} is used by a container. Unable to remove it.\n")
 
     def search(self, registry: str) -> list[str]:
-        """ Search repository in the axemsolutions registry.
+        """ Search for repositories on Docker Hub.
         
             Args:
                 registry -- registry to search
         """
-        local_registryimagelist = []
+        repositories = []
 
         for repositories in self._docker_client.images.search(registry):
-            local_registryimagelist.append(repositories['name'])
+            repositories.append(repositories['name'])
 
-        return local_registryimagelist
+        return repositories
