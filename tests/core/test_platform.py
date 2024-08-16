@@ -144,9 +144,6 @@ def test_Platform_registries(mock___init__: MagicMock, mock_Registries: MagicMoc
     test_platform = platform.Platform()
     test_platform._registries = None
 
-    mock_container_engine = MagicMock()
-    test_platform._container_engine = mock_container_engine
-
     mock_registries = MagicMock()
     mock_Registries.return_value = mock_registries
 
@@ -158,7 +155,7 @@ def test_Platform_registries(mock___init__: MagicMock, mock_Registries: MagicMoc
     assert test_platform._registries is mock_registries
 
     mock___init__.assert_called_once()
-    mock_Registries.assert_called_once_with(mock_container_engine)
+    mock_Registries.assert_called_once()
 
 @patch("dem.core.platform.DevEnvCatalogs")
 @patch.object(platform.Platform, "__init__")

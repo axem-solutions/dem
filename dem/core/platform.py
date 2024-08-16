@@ -97,7 +97,7 @@ class Platform(Core):
             The Registries() gets instantiated only at the first access.
         """
         if self._registries is None:
-            self._registries = Registries(self.container_engine)
+            self._registries = Registries()
 
         return self._registries
 
