@@ -293,30 +293,3 @@ def test_remove_APIError(mock_from_env: MagicMock) -> None:
         assert str(exported_exception_info) == f"The {test_image_to_remove} is used by a container. Unable to remove it.[/]\n"
 
         mock_docker_client.images.remove.assert_called_once_with(test_image_to_remove)
-
-@patch("docker.from_env")
-def test_search(mock_from_env):
-    # Test setup
-    mock_docker_client = MagicMock()
-    mock_from_env.return_value = mock_docker_client
-    test_registry = "test_registry"
-    test_repositories = [
-        {
-            "name": "repo1"
-        },
-        {
-            "name": "repo2"
-        },
-    ]
-    mock_docker_client.images.search.return_value = test_repositories
-
-    test_container_engine = container_engine.ContainerEngine()
-
-    # Run unit under test
-    actual_registry_image_list = test_container_engine.search(test_registry)
-
-    # Check expectations
-    mock_docker_client.images.search.assert_called_once_with(test_registry)
-
-    expected_registry_image_list = ["repo1", "repo2"]
-    assert actual_registry_image_list == expected_registry_image_list

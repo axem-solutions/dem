@@ -116,16 +116,3 @@ class ContainerEngine(Core):
             self.user_output.msg(f"[yellow]The {image} doesn't exist. Unable to remove it.[/]\n")
         except docker.errors.APIError:
             raise ContainerEngineError(f"The {image} is used by a container. Unable to remove it.\n")
-
-    def search(self, registry: str) -> list[str]:
-        """ Search for repositories on Docker Hub.
-        
-            Args:
-                registry -- registry to search
-        """
-        repositories = []
-
-        for repositories in self._docker_client.images.search(registry):
-            repositories.append(repositories['name'])
-
-        return repositories
