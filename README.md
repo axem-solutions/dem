@@ -28,10 +28,6 @@ Manage your isolated Development Environments with ease
 :star2: Join our Community on  <a href="https://discord.com/invite/Nv6hSzXruK">Discord</a> :star2:
 </h3>
 
-<h4 align="center">
-Get answers to your challenges, and learn more about DEM, embedded development tools, and development platforms.
-</h4>
-
 <br />
 
 ## Overview
@@ -44,13 +40,27 @@ Get answers to your challenges, and learn more about DEM, embedded development t
 </strong>
 </p>
 
-The DEM is a command line tool that provides an easy, reproducible, and scalable way to set up 
-Development Environments for embedded software development.
-> The DEM can be used locally, but it is in alpha state, so expect major new features!
+DEM is a command-line tool that provides an easy, reproducible, and scalable way to set up 
+multi-container-based Development Environments for software development.
+
+> DEM can be used locally, but it is in alpha state, so expect major changes in the future!
 
 <p align="center">
 Contributors and early adopters are welcome!
 </p>
+
+## :fallen_leaf: Hacktoberfest 2024
+DEM is participating again in Hacktoberfest! We are looking for contributors to help us improve 
+the tool. If you are interested, here how to get started:
+1. Read the [Hacktoberfest guide](https://hacktoberfest.com/participation/).
+2. Check the [documentation](https://www.axemsolutions.io/dem_doc/index.html) and try out DEM to get 
+familiar with the tool.
+3. Look for issues with the `hacktoberfest` label in the 
+[issue tracker](https://github.com/axem-solutions/dem/issues).
+4. Read the [Code of Conduct](https://github.com/axem-solutions/dem?tab=coc-ov-file#readme) and the 
+[Contribution Guide](https://github.com/axem-solutions/.github/blob/4bdc1be72b0a2c97da19408c59d6dd5d1845a469/CONTRIBUTING.md).
+5. Join our [Discord server](https://discord.com/invite/Nv6hSzXruK) to get help and discuss the 
+issues. There is a dedicated channel called `#hacktoberfest` for this purpose.
 
 ## The Concept in a Nutshell
 A set of software tools used for a specific development project is called a Development Environment.
@@ -58,6 +68,12 @@ These tools for example can be the build system, debugger, test framework, etc..
 
 The idea is to pack the tools separately into container images, which are then can be stored in 
 registries.
+
+> How is DEM different from other container-based development environments?  
+Instead of putting all the tools into a single image and then the user must enter the container 
+using an interactive shell, DEM creates a separate one for each tool. This means the user can work 
+on their host system, with their usual setup, but the Development Environment specific tools are 
+isolated in containers.
 
 Each Development Environment has a descriptor. A descriptor, like a blueprint, indicates which tools 
 are required in the project, and the place their container images are stored.
@@ -77,7 +93,6 @@ based on the tools available in the registries or on their local system.
 ## Key features
 
 - Create scalable, reliable, and reproducible containerized Development Environments
-- Manage your containerized tools
 - Install preconfigured Development Environments from catalogs
 - Ensure that everyone in the team works with the same toolset
 - Share Development Environments outside of your organization
@@ -125,10 +140,9 @@ We got you covered in all scenarios:
 
 ### I'd like to start with a template...
 
-Here at axem we'd like to create a template for every target out there. List the currently available
-ones with:
+By default, DEM comes with a few templates available from the axem catalog. You can list them with:
 
-    dem list --all --env
+    dem list --cat axem
 
 You can clone the selected template with:
 
@@ -136,7 +150,7 @@ You can clone the selected template with:
 
 ### I'd like to work on a project already configured with DEM...
 
-In this case you only need to initialize the Dev Env with:
+In this case you only need to enter the project's root directory and initialize the Dev Env with:
 
     dem init
 
@@ -158,7 +172,6 @@ Create a brand new Dev Env with the following command:
 Now you have the Dev Env descriptor in your local catalog, but you might want to set a few things:
 - Add/remove tools.
 - Change the tool image for a given tool.
-- Set the host where the image should be placed.
 
 You can edit it with:
 
