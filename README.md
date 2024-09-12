@@ -51,7 +51,7 @@ Contributors and early adopters are welcome!
 
 ## :fallen_leaf: Hacktoberfest 2024
 DEM is participating again in Hacktoberfest! We are looking for contributors to help us improve 
-the tool. If you are interested, here how to get started:
+the tool. If you are interested, here is how to get started:
 1. Read the [Hacktoberfest guide](https://hacktoberfest.com/participation/).
 2. Check the [documentation](https://www.axemsolutions.io/dem_doc/index.html) and try out DEM to get 
 familiar with the tool.
