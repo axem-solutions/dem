@@ -387,9 +387,11 @@ def test_DockerHub__append_repo_with_tag(mock___init__: MagicMock) -> None:
         ]
     }
     test_repo = "test_repo"
+    test_namespace = "test_namespace"
 
     test_docker_hub = registry.DockerHub(test_registry_config)
     test_docker_hub._repos = []
+    test_docker_hub._namespace = test_namespace
 
     # Run unit under test
     test_docker_hub._append_repo_with_tag(test_endpoint_response, test_repo)
@@ -397,7 +399,7 @@ def test_DockerHub__append_repo_with_tag(mock___init__: MagicMock) -> None:
     # Check expectations
     expected_repos = []
     for test_result in test_endpoint_response["results"]:
-        expected_repos.append(test_repo + ":" + test_result["name"])
+        expected_repos.append(test_namespace + "/" + test_repo + ":" + test_result["name"])
     assert expected_repos == test_docker_hub._repos
 
     mock___init__.assert_called_once()
@@ -450,15 +452,17 @@ def test_DockerRegistry__append_repo_with_tag(mock___init__: MagicMock) -> None:
         "tags": ["latest", "v0.0.1"]
     }
     test_repo = "test_repo"
+    test_registry_url = "test_registry_url"
 
     test_docker_registry = registry.DockerRegistry(test_registry_config)
     test_docker_registry._repos = []
+    test_docker_registry._url = test_registry_url
 
     # Run unit under test
     test_docker_registry._append_repo_with_tag(test_endpoint_response, test_repo)
 
     # Check expectations
-    expected_repos = [test_repo + ":" + test_result for test_result in test_endpoint_response["tags"]]
+    expected_repos = [test_registry_url + "/" + test_repo + ":" + test_result for test_result in test_endpoint_response["tags"]]
     assert expected_repos == test_docker_registry._repos
 
     mock___init__.assert_called_once()
