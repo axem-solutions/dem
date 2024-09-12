@@ -148,7 +148,7 @@ class DockerHub(Registry):
                 repo -- append the tags of this repoistory
         """
         for result in endpoint_response[self._tag_endpoint_response_key]:
-            self._repos.append(repo + ":" + result["name"])
+            self._repos.append(self._namespace + "/" + repo + ":" + result["name"])
 
     def _get_repo_endpoint_url(self) -> str:
         """ Get the Docker Hub specific endpoint url to obtain the repositories.
@@ -186,7 +186,7 @@ class DockerRegistry(Registry):
                 repo -- append the tags of this repoistory
         """
         for result in endpoint_response[self._tag_endpoint_response_key]:
-            self._repos.append(repo + ":" + result)
+            self._repos.append(self._url + "/" + repo + ":" + result)
 
     def _get_repo_endpoint_url(self) -> str:
         """ Get the Docker Registry specific endpoint url to obtain the repositories.
