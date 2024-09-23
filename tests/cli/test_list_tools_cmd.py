@@ -41,7 +41,7 @@ def test_list_local_tools(mock_print: MagicMock) -> None:
     list_tools_cmd.list_local_tools(mock_platform)
 
     # Check the result
-    mock_print.assert_has_calls([call("\n [italic]Local Tool Images[/]"), 
+    mock_print.assert_has_calls([call("\n [#8f64eb][italic]Local Tool Images[/]"), 
                                  call("  test_tool_image")])
 
 @patch("dem.cli.command.list_tools_cmd.stderr.print")
@@ -171,7 +171,7 @@ def test_list_tools_from_all_regs(mock_Table: MagicMock, mock_list_tools_from_re
     mock_platform.tool_images.get_registry_ones.assert_called_once()
     mock_Table.assert_called_once()
     mock_list_tools_from_regs.assert_called_once_with(mock_platform, mock_table)
-    mock_print.assert_has_calls([call("\n [italic]Available Tool Images from all registries[/]"),
+    mock_print.assert_has_calls([call("\n [#8f64eb][italic]Available Tool Images from all registries[/]"),
                                  call(mock_table)])
 
 @patch("dem.cli.command.list_tools_cmd.stdout.print")

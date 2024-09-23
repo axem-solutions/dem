@@ -23,7 +23,7 @@ def list_local_tools(platform: Platform) -> None:
         stdout.print("[yellow]No local tool images are available.[/]")
         raise typer.Abort()
 
-    stdout.print(f"\n [italic]Local Tool Images[/]")
+    stdout.print(f"\n [#8f64eb][italic]Local Tool Images[/]")
     # sorted will return a list of tuples, so we can iterate over the items
     for tool_image in sorted(platform.tool_images.all_tool_images.items()):
         # tool_image[0] is the name of the tool image and tool_image[1] is the ToolImage instance
@@ -111,7 +111,7 @@ def list_tools_from_all_regs(platform: Platform) -> None:
 
     table = Table()
     list_tools_from_regs(platform, table)
-    stdout.print(f"\n [italic]Available Tool Images from all registries[/]")
+    stdout.print(f"\n [#8f64eb][italic]Available Tool Images from all registries[/]")
     stdout.print(table)
 
 def execute(platform: Platform, reg: bool, selected_regs: list[str]) -> None:
