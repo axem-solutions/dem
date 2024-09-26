@@ -182,7 +182,8 @@ def test_ConfigFile(mock_PurePath: MagicMock):
     assert local_dev_env_json._default_json == """{
     "registries": [
         {
-            "name": "axemsolutions",
+            "name": "axem",
+            "namespace": "axemsolutions",
             "url": "https://registry.hub.docker.com"
         }
     ],
