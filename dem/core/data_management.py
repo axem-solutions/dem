@@ -92,7 +92,8 @@ class ConfigFile(BaseJSON):
         self._default_json = """{
     "registries": [
         {
-            "name": "axemsolutions",
+            "name": "axem",
+            "namespace": "axemsolutions",
             "url": "https://registry.hub.docker.com"
         }
     ],
