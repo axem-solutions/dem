@@ -482,31 +482,41 @@ List the available catalogs.
 # Registry management
 
 
-## **`dem add-reg NAME URL`**
+## **`dem add-reg NAME URL [NAMESPACE]`**
 
 **Description:**
 
 Add a new registry.
 
-The name of the registry is what you would normally use to pull an image.
+The name of the registry must be unique. The URL must point to the registry's API. 
+
+The namespace is only required for the Docker Hub.
+
 Examples:
 
+*Add a Docker Hub registry called `axem` with the namespace `axemsolutions`*
 
-| Full image tag                   | Name              |
-|----------------------------------|-------------------|
-| `repository/image:tag`           | repository        |
-| `192.168.1.1:5000/image:tag`     | 192.168.1.1:5000  |
+```bash
+dem add-reg axem https://registry.hub.docker.com axemsolutions
+```
 
+*Add a self-hosted registry called `local`*
 
-The URL should point to the registry's API. For the Docker Hub https://registry.hub.docker.com, 
-or it can be http://localhost:5000 for a self-hosted one.
+```bash
+dem add-reg local http://localhost:5000
+```
+
+!!! Note
+
+    The Docker Hub API URL is https://registry.hub.docker.com.
 
 **Arguments:**
 
 | Argument         | Description                                             | Required        |
 |------------------|---------------------------------------------------------|----------------:|
-| `NAME`           | Name of the registry to add.                            | :material-check:|
+| `NAME`           | Unique name for the registry.                           | :material-check:|
 | `URL`            | API URL of the registry.                                | :material-check:|
+| `NAMESPACE`      | Namespace inside the registry.                          |                 |
 
 ---
 

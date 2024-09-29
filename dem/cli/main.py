@@ -369,21 +369,21 @@ def run(dev_env_name: Annotated[str, typer.Argument(help="Name of the Developmen
         raise InternalError("Error: The platform hasn't been initialized properly!")
 
 @typer_cli.command()
-def add_reg(name: Annotated[str, typer.Argument(help="Name of the registry to add")], 
-            url: Annotated[str, typer.Argument(help="API URL of the registry")]) -> None:
+def add_reg(name: Annotated[str, typer.Argument(help="Unique name for the registry")], 
+            url: Annotated[str, typer.Argument(help="API URL of the registry")],
+            namespace: Annotated[str, typer.Argument(help="Namespace inside the registry")] = "")-> None:
     """
     Add a new registry.
 
-    The name of the registry is what you would normally use to pull an image. 
-    Examples:
-        - If the full image tag: repository/image:tag -> the name should be repository.
-        - If the full image tag: 192.168.1.1:5000/image:tag -> the name should be 192.168.1.1:5000
+    The name of the registry must be unique.
+
+    The namespace is only mandatory for Docker Hub registries.
 
     The URL should point to the registry's REST API. For the Docker Hub its 
     https://registry.hub.docker.com, or it can be http://localhost:5000 for a self-hosted one.
     """
     if platform:
-        add_reg_cmd.execute(platform, name, url)
+        add_reg_cmd.execute(platform, name, url, namespace)
     else:
         raise InternalError("Error: The platform hasn't been initialized properly!")
 
@@ -398,7 +398,7 @@ def list_reg() -> None:
         raise InternalError("Error: The platform hasn't been initialized properly!")
 
 @typer_cli.command()
-def del_reg(registry_name: Annotated[str, typer.Argument(help="Name or IP address of the registry to delete.",
+def del_reg(registry_name: Annotated[str, typer.Argument(help="Name of the registry to delete.",
                                                          autocompletion=autocomplete_reg_name)]) -> None:
     """
     Delete a registry.

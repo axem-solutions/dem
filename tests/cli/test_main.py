@@ -225,6 +225,7 @@ def test_platform_not_initialized() -> None:
     test_dev_env_name = "test_dev_env_name"
     test_path = "test_path"
     test_name = "test_name"
+    test_namespace = "test_namespace"
     test_url = "test_url"
     test_command = "test_command"
     test_task_name = "test_task_name"
@@ -250,7 +251,7 @@ def test_platform_not_initialized() -> None:
         main.assign: [test_dev_env_name, test_path],
         main.init: [test_path],
         main.run: [test_dev_env_name, test_task_name],
-        main.add_reg: [test_name, test_url],
+        main.add_reg: [test_name, test_url, test_namespace],
         main.list_reg: [],
         main.del_reg: [test_name],
         main.add_cat: [test_name, test_url],

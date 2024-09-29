@@ -6,7 +6,9 @@ from dem.cli.console import stdout, stderr
 
 def execute(platform: Platform, registry_name: str) -> None:
     """ Delete the registry.
+
         Args:
+            platform -- the Platform
             registry_name -- name of the registry to delete
     """
     for registry in platform.registries.list_registry_configs():
