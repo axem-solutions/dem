@@ -247,8 +247,10 @@ class Registries(Core):
             Args:
                 registry_config -- the registry to add
         """
+        # Create the registry instance
         self._add_registry_instance(registry_config)
 
+        # Add the registry config to the config file
         self.config_file.registries.append(registry_config)
         self.config_file.flush()
 

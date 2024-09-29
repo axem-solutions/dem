@@ -24,10 +24,12 @@ def test_list_reg(mock_stdout_print: MagicMock, mock_Table: MagicMock):
     test_registries = [
         {
             "name": "test_name1",
+            "namespace": "test_namespace1",
             "url": "test_url1"
         },
         {
             "name": "test_name2",
+            "namespace": "",
             "url": "test_url2"
         },
     ]
@@ -42,14 +44,14 @@ def test_list_reg(mock_stdout_print: MagicMock, mock_Table: MagicMock):
     assert runner_result.exit_code == 0
 
     mock_Table.assert_called_once()
-    calls = [call("name"), call("url")]
+    calls = [call("name"), call("url"), call("namespace")]
     mock_table.add_column.assert_has_calls(calls)
 
     mock_platform.registries.list_registry_configs.assert_called_once()
     
     calls = []
     for registry in test_registries:
-        calls.append(call(registry["name"], registry["url"]))
+        calls.append(call(registry["name"], registry["url"], registry["namespace"]))
     mock_table.add_row.assert_has_calls(calls)
 
     mock_stdout_print.assert_called_once_with(mock_table)
@@ -71,7 +73,7 @@ def test_list_reg_non_available(mock_stdout_print: MagicMock, mock_Table):
     assert runner_result.exit_code == 0
 
     mock_Table.assert_called_once()
-    calls = [call("name"), call("url")]
+    calls = [call("name"), call("url"), call("namespace")]
     mock_table.add_column.assert_has_calls(calls)
 
     mock_platform.registries.list_registry_configs.assert_called_once()
