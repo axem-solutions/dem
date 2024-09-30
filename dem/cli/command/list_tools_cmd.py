@@ -3,9 +3,11 @@
 
 from dem.core.platform import Platform
 from dem.core.tool_images import ToolImage
-from dem.cli.console import stdout, stderr
+from dem.cli.console import stdout, stderr, console 
+from rich.__main__ import make_test_card
 from rich.table import Table
 import typer
+
 
 def list_local_tools(platform: Platform) -> None:
     """ List the local tools.
@@ -126,9 +128,18 @@ def execute(platform: Platform, reg: bool, selected_regs: list[str]) -> None:
             typer.Abort -- if no tool images are available either locally or in the registries or 
                            if an unknown registry is specified
     """
+    # from rich.console import Console
+    # console = Console()
+    # with console.pager():
+    #     console.print(make_test_card())
     if not reg:
-        list_local_tools(platform)
+        with console.pager():
+            # console.print(make_test_card())
+            console.print(list_local_tools(platform))
+        # list_local_tools(platform)
     elif selected_regs:
-        list_tools_from_selected_regs(platform, selected_regs)
+        with console.pager():
+            console.print(list_tools_from_selected_regs(platform, selected_regs))
     else:
-        list_tools_from_all_regs(platform)
+        with console.pager():
+            console.print(list_tools_from_all_regs(platform))
