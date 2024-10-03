@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "axem-dem"
-version = "0.7.0"
+version = "0.7.1"
 description = "Manager for Containerized Development Environments"
 authors = ["Janos Murai <janos.murai@axemsolutions.io>"]
 license = "Eclipse Public License - v2.0"
