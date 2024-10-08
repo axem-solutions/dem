@@ -3,8 +3,8 @@
 
 from dem.core.platform import Platform
 from dem.core.tool_images import ToolImage
-from dem.cli.console import stdout, stderr, console 
-from rich.__main__ import make_test_card
+from dem.cli.console import stdout, stderr
+# from rich.__main__ import make_test_card
 from rich.table import Table
 import typer
 
@@ -95,8 +95,11 @@ def list_tools_from_selected_regs(platform: Platform, specified_regs: list[str])
 
     table = Table()
     list_tools_from_regs(platform, table)
+    table.add_row()
     stdout.print(f"\n [italic]Available Tool Images from the selected registries[/]")
-    stdout.print(table)
+    # print content of table using pager
+    with stdout.pager(styles=True):
+        stdout.print(table)
 
 def list_tools_from_all_regs(platform: Platform) -> None:
     """ List the available tools from all registries.
@@ -113,8 +116,9 @@ def list_tools_from_all_regs(platform: Platform) -> None:
 
     table = Table()
     list_tools_from_regs(platform, table)
-    stdout.print(f"\n [#8f64eb][italic]Available Tool Images from all registries[/]")
-    stdout.print(table)
+    with stdout.pager(styles=True):
+        stdout.print(f"\n [#8f64eb][italic]Available Tool Images from all registries[/]")
+        stdout.print(table)
 
 def execute(platform: Platform, reg: bool, selected_regs: list[str]) -> None:
     """ List the available tools.
@@ -133,13 +137,15 @@ def execute(platform: Platform, reg: bool, selected_regs: list[str]) -> None:
     # with console.pager():
     #     console.print(make_test_card())
     if not reg:
-        with console.pager():
-            # console.print(make_test_card())
-            console.print(list_local_tools(platform))
-        # list_local_tools(platform)
+        # with console.pager():
+        #     # console.print(make_test_card())
+        #     list_local_tools(platform))
+        list_local_tools(platform)
     elif selected_regs:
-        with console.pager():
-            console.print(list_tools_from_selected_regs(platform, selected_regs))
+        # with console.pager():
+            # console.print(list_tools_from_selected_regs(platform, selected_regs))
+        list_tools_from_selected_regs(platform, selected_regs)
     else:
-        with console.pager():
-            console.print(list_tools_from_all_regs(platform))
+        # with console.pager():
+            # console.print(list_tools_from_all_regs(platform))
+        list_tools_from_selected_regs(platform, selected_regs)
