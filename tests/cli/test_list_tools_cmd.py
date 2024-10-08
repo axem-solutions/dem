@@ -66,7 +66,7 @@ def test_update_tools_from_seleted_regs() -> None:
     list_tools_cmd.update_tools_from_selected_regs(mock_platform, ["test_reg"])
 
     # Check the result
-    mock_platform.tool_images.update.assert_called_once_with(reg_selection={"test_reg"})
+    mock_platform.tool_images.update.assert_called_once_with(False, True, reg_selection={"test_reg"})
 
 def test_list_tools_from_regs() -> None:
     # Setup
@@ -168,6 +168,7 @@ def test_list_tools_from_all_regs(mock_Table: MagicMock, mock_list_tools_from_re
     list_tools_cmd.list_tools_from_all_regs(mock_platform)
 
     # Check the result
+    mock_platform.tool_images.update.assert_called_once_with(False, True)
     mock_platform.tool_images.get_registry_ones.assert_called_once()
     mock_Table.assert_called_once()
     mock_list_tools_from_regs.assert_called_once_with(mock_platform, mock_table)

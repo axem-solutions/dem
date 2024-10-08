@@ -246,7 +246,7 @@ def test_execute(mock_create_dev_env: MagicMock, mock_stdout_print: MagicMock) -
     mock_platform = MagicMock()
     main.platform = mock_platform
 
-    mock_dev_env = MagicMock()
+    mock_platform.get_tool_image_info_from_registries = False
     expected_dev_env_name = "test_dev_env"
 
     # Run unit under test
@@ -254,29 +254,15 @@ def test_execute(mock_create_dev_env: MagicMock, mock_stdout_print: MagicMock) -
 
     # Check expectations
     assert 0 == runner_result.exit_code
+    assert mock_platform.get_tool_image_info_from_registries is True
 
+    mock_platform.assign_tool_image_instances_to_all_dev_envs.assert_called_once()
     mock_create_dev_env.assert_called_once_with(mock_platform, expected_dev_env_name)
     mock_platform.flush_dev_env_properties.assert_called_once()
     mock_stdout_print.assert_has_calls([
         call(f"The [green]{expected_dev_env_name}[/] Development Environment has been created!"),
         call("Run [italic]dem install[/] to install it.")
     ])
-
-@patch("dem.cli.command.create_cmd.create_dev_env")
-def test_execute_failure(mock_create_dev_env):
-    # Test setup
-    mock_platform = MagicMock()
-    main.platform = mock_platform
-
-    expected_dev_env_name = "test_dev_env"
-
-    # Run unit under test
-    runner_result = runner.invoke(main.typer_cli, ["create", expected_dev_env_name], color=True)
-
-    # Check expectations
-    assert 0 == runner_result.exit_code
-
-    mock_create_dev_env.assert_called_once_with(mock_platform, expected_dev_env_name)
 
 @patch("dem.cli.command.create_cmd.stderr.print")
 def test_create_dev_env_with_whitespace(mock_stderr_print):

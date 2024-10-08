@@ -25,14 +25,14 @@ def test_add_dev_env_info_to_table_installed_default() -> None:
     mock_dev_env = MagicMock()
     mock_dev_env.is_installed = True
     mock_dev_env.name = "test_dev_env"
-    mock_dev_env.get_tool_image_status.return_value = list_cmd.DevEnv.Status.OK
+    mock_dev_env.is_installation_correct.return_value = True
 
     # Run the test
     list_cmd.add_dev_env_info_to_table(mock_platform, mock_table, mock_dev_env)
 
     # Check the result
     mock_dev_env.assign_tool_image_instances.assert_called_once_with(mock_platform.tool_images)
-    mock_dev_env.get_tool_image_status.assert_called_once()
+    mock_dev_env.is_installation_correct.assert_called_once()
     mock_table.add_row.assert_called_once_with("test_dev_env", "[green]✓[/]", "[green]✓[/]", 
                                                "[green]Ok[/]")
 
@@ -45,34 +45,15 @@ def test_add_dev_env_info_to_table_installed_unavailable_image() -> None:
     mock_dev_env = MagicMock()
     mock_dev_env.is_installed = True
     mock_dev_env.name = "test_dev_env"
-    mock_dev_env.get_tool_image_status.return_value = list_cmd.DevEnv.Status.UNAVAILABLE_IMAGE
+    mock_dev_env.is_installation_correct.return_value = False
 
     # Run the test
     list_cmd.add_dev_env_info_to_table(mock_platform, mock_table, mock_dev_env)
 
     # Check the result
     mock_dev_env.assign_tool_image_instances.assert_called_once_with(mock_platform.tool_images)
-    mock_dev_env.get_tool_image_status.assert_called_once()
-    mock_table.add_row.assert_called_once_with("test_dev_env", "[green]✓[/]", "", "[red]Error: Required image is not available![/]")
-
-def test_add_dev_env_info_to_table_installed_reinstall_needed() -> None:
-    # Setup
-    mock_platform = MagicMock()
-    mock_tool_image = MagicMock()
-    mock_platform.tool_images = mock_tool_image
-    mock_table = MagicMock()
-    mock_dev_env = MagicMock()
-    mock_dev_env.is_installed = True
-    mock_dev_env.name = "test_dev_env"
-    mock_dev_env.get_tool_image_status.return_value = list_cmd.DevEnv.Status.REINSTALL_NEEDED
-
-    # Run the test
-    list_cmd.add_dev_env_info_to_table(mock_platform, mock_table, mock_dev_env)
-
-    # Check the result
-    mock_dev_env.assign_tool_image_instances.assert_called_once_with(mock_platform.tool_images)
-    mock_dev_env.get_tool_image_status.assert_called_once()
-    mock_table.add_row.assert_called_once_with("test_dev_env", "[green]✓[/]", "", "[red]Error: Incomplete local install![/]")
+    mock_dev_env.is_installation_correct.assert_called_once()
+    mock_table.add_row.assert_called_once_with("test_dev_env", "[green]✓[/]", "", "[red]Error: Incorrect installation![/]")
 
 def test_add_dev_env_info_to_table_not_installed() -> None:
     # Setup

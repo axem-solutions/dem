@@ -30,54 +30,18 @@ def test_dev_env_health_check(mock_stderr_print: MagicMock, mock_stdout_print: M
     mock_dev_env = MagicMock()
     mock_dev_env.name = "my-dev-env"
 
-    mock_dev_env.get_tool_image_status.side_effect = [run_cmd.DevEnv.Status.UNAVAILABLE_IMAGE,
-                                                      run_cmd.DevEnv.Status.REINSTALL_NEEDED]
+    mock_dev_env.is_installation_correct.return_value = False
 
     # Run
     run_cmd.dev_env_health_check(mock_platform, mock_dev_env)
 
     # Check
-    assert mock_platform.local_only == True
-
     mock_dev_env.assign_tool_image_instances.assert_called_with(mock_platform.tool_images)
-    mock_dev_env.get_tool_image_status.assert_called()
-    mock_stderr_print.assert_called_once_with("[red]Error: Required tool images are not available![/]")
-    mock_stdout_print.assert_has_calls([
-        call("Trying to locate the missing tool images..."),
-        call("The missing images are available from the registries."),
-        call(f"[green]DEM successfully fixed the {mock_dev_env.name} Development Environment![/]")
-    ])
-    mock_typer_confirm.assert_called_once_with("Should DEM reinstall the missing images?", 
-                                               abort=True)
+    mock_dev_env.is_installation_correct.assert_called()
+    mock_stderr_print.assert_called_once_with("[red]Error: Incorrect installation![/]")
+    mock_typer_confirm.assert_called_once_with("Should DEM reinstall the DevEnv?", abort=True)
     mock_platform.install_dev_env.assert_called_once_with(mock_dev_env)
-
-@patch("dem.cli.command.run_cmd.stdout.print")
-@patch("dem.cli.command.run_cmd.stderr.print")
-def test_dev_env_health_check_missing_images_not_found(mock_stderr_print: MagicMock, 
-                                                       mock_stdout_print: MagicMock) -> None:
-    # Setup
-    mock_platform = MagicMock()
-    mock_platform.local_only = False
-    mock_dev_env = MagicMock()
-    mock_dev_env.name = "my-dev-env"
-
-    mock_dev_env.get_tool_image_status.return_value = run_cmd.DevEnv.Status.UNAVAILABLE_IMAGE
-
-    # Run
-    with pytest.raises(typer.Abort):
-        run_cmd.dev_env_health_check(mock_platform, mock_dev_env)
-
-    # Check
-    assert mock_platform.local_only == True
-
-    mock_dev_env.assign_tool_image_instances.assert_called_with(mock_platform.tool_images)
-    mock_dev_env.get_tool_image_status.assert_called()
-    mock_stderr_print.assert_has_calls([
-        call("[red]Error: Required tool images are not available![/]"),
-        call("[red]Error: The missing tool images could not be found in the registries![/]")
-    ])
-    mock_stdout_print.assert_called_once_with("Trying to locate the missing tool images...")
-
+    mock_stdout_print.assert_called_once_with(f"[green]DEM successfully fixed the {mock_dev_env.name} Development Environment![/]")
 
 @patch("dem.cli.command.run_cmd.subprocess.run")
 @patch("dem.cli.command.run_cmd.dev_env_health_check")

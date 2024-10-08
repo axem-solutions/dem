@@ -257,12 +257,15 @@ def test_execute(mock_modify_with_tui: MagicMock, mock_stdout_print: MagicMock) 
 
     mock_dev_env = MagicMock()
     mock_dev_env.is_installed = False
+    mock_platform.get_tool_image_info_from_registries = False
     mock_platform.get_dev_env_by_name.return_value = mock_dev_env
 
     # Run unit under test
     modify_cmd.execute(mock_platform, test_dev_env_name)
 
     # Check expectations
+    assert mock_platform.get_tool_image_info_from_registries is True
+
     mock_platform.assign_tool_image_instances_to_all_dev_envs.assert_called_once()
     mock_platform.get_dev_env_by_name.assert_called_once_with(test_dev_env_name)
     mock_modify_with_tui.assert_called_once_with(mock_platform, mock_dev_env)
@@ -279,6 +282,7 @@ def test_execute_installed(mock_stdout_print: MagicMock, mock_confirm: MagicMock
 
     mock_dev_env = MagicMock()
     mock_dev_env.is_installed = True
+    mock_platform.get_tool_image_info_from_registries = False
     mock_platform.get_dev_env_by_name.return_value = mock_dev_env
 
     test_uninstall_dev_env_status = ["test_uninstall_dev_env_status", 
@@ -289,6 +293,9 @@ def test_execute_installed(mock_stdout_print: MagicMock, mock_confirm: MagicMock
     modify_cmd.execute(mock_platform, test_dev_env_name)
 
     # Check expectations
+    assert mock_platform.get_tool_image_info_from_registries is True
+
+    mock_platform.assign_tool_image_instances_to_all_dev_envs.assert_called_once()
     mock_platform.assign_tool_image_instances_to_all_dev_envs.assert_called_once()
     mock_platform.get_dev_env_by_name.assert_called_once_with(test_dev_env_name)
     mock_stdout_print.assert_has_calls([
@@ -310,7 +317,7 @@ def test_execute_installed_PlatformError(mock_stdout_print: MagicMock, mock_conf
     test_dev_env_name = "test_dev_env_name"
     mock_dev_env = MagicMock()
     mock_dev_env.is_installed = True
-
+    mock_platform.get_tool_image_info_from_registries = False
     mock_platform.get_dev_env_by_name.return_value = mock_dev_env
     test_exception_text = "test_exception_text"
     mock_platform.uninstall_dev_env.side_effect = modify_cmd.PlatformError(test_exception_text)
@@ -319,6 +326,9 @@ def test_execute_installed_PlatformError(mock_stdout_print: MagicMock, mock_conf
     modify_cmd.execute(mock_platform, test_dev_env_name)
 
     # Check expectations
+    assert mock_platform.get_tool_image_info_from_registries is True
+
+    mock_platform.assign_tool_image_instances_to_all_dev_envs.assert_called_once()
     mock_platform.assign_tool_image_instances_to_all_dev_envs.assert_called_once()
     mock_platform.get_dev_env_by_name.assert_called_once_with(test_dev_env_name)
     mock_stdout_print.assert_called_once_with("[yellow]The Development Environment is installed, so it can't be modified.[/]")

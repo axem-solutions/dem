@@ -214,11 +214,12 @@ def test_DevEnv_del_task_not_existing() -> None:
     assert str(exc_info.value) == f"\'Task [bold]{test_task_name}[/] not found.\'"
 
 @patch.object(dev_env.DevEnv, "__init__")
-def test_DevEnv_get_tool_image_status(mock___init__: MagicMock) -> None:
+def test_DevEnv_is_installation_correct_true(mock___init__: MagicMock) -> None:
     # Test setup
     mock___init__.return_value = None
 
     test_dev_env = dev_env.DevEnv(MagicMock())
+
     mock_tool_image1 = MagicMock()
     mock_tool_image1.availability = dev_env.ToolImage.LOCAL_AND_REGISTRY
     mock_tool_image2 = MagicMock()
@@ -227,21 +228,23 @@ def test_DevEnv_get_tool_image_status(mock___init__: MagicMock) -> None:
         mock_tool_image1,
         mock_tool_image2
     ]
+    test_dev_env.is_installed = True
 
     # Run unit under test
-    actual_status = test_dev_env.get_tool_image_status()
+    actual_status = test_dev_env.is_installation_correct()
 
     # Check expectations
-    assert actual_status == dev_env.DevEnv.Status.OK
+    assert actual_status is True
 
     mock___init__.assert_called_once()
 
 @patch.object(dev_env.DevEnv, "__init__")
-def test_DevEnv_get_tool_image_status_unavailable_image(mock___init__: MagicMock) -> None:
+def test_DevEnv_is_installation_correct_false(mock___init__: MagicMock) -> None:
     # Test setup
     mock___init__.return_value = None
 
     test_dev_env = dev_env.DevEnv(MagicMock())
+
     mock_tool_image1 = MagicMock()
     mock_tool_image1.availability = dev_env.ToolImage.NOT_AVAILABLE
     mock_tool_image2 = MagicMock()
@@ -250,21 +253,23 @@ def test_DevEnv_get_tool_image_status_unavailable_image(mock___init__: MagicMock
         mock_tool_image1,
         mock_tool_image2
     ]
+    test_dev_env.is_installed = True
 
     # Run unit under test
-    actual_status = test_dev_env.get_tool_image_status()
+    actual_status = test_dev_env.is_installation_correct()
 
     # Check expectations
-    assert actual_status == dev_env.DevEnv.Status.UNAVAILABLE_IMAGE
+    assert actual_status is False
 
     mock___init__.assert_called_once()
 
 @patch.object(dev_env.DevEnv, "__init__")
-def test_DevEnv_get_tool_image_status_reinstall_needed(mock___init__: MagicMock) -> None:
+def test_DevEnv_is_installation_correct_not_istalled(mock___init__: MagicMock) -> None:
     # Test setup
     mock___init__.return_value = None
 
     test_dev_env = dev_env.DevEnv(MagicMock())
+
     mock_tool_image1 = MagicMock()
     mock_tool_image1.availability = dev_env.ToolImage.REGISTRY_ONLY
     mock_tool_image2 = MagicMock()
@@ -273,12 +278,13 @@ def test_DevEnv_get_tool_image_status_reinstall_needed(mock___init__: MagicMock)
         mock_tool_image1,
         mock_tool_image2
     ]
+    test_dev_env.is_installed = False
 
     # Run unit under test
-    actual_status = test_dev_env.get_tool_image_status()
+    actual_status = test_dev_env.is_installation_correct()
 
     # Check expectations
-    assert actual_status == dev_env.DevEnv.Status.REINSTALL_NEEDED
+    assert actual_status is False
 
     mock___init__.assert_called_once()
 

@@ -339,7 +339,7 @@ def assign(dev_env_name: Annotated[str, typer.Argument(help="Name of the Dev Env
 @typer_cli.command()
 def init(project_path: Annotated[str, typer.Argument(help="Path of the project.")] = os.getcwd()) -> None:
     """
-    Initialize a project to use a Development Environment.
+    Initialize the DevEnv assigned to the project.
 
     If the project path is not specified, the current working directory will be used.
     """
