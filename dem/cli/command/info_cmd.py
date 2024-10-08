@@ -2,18 +2,11 @@
 # dem/cli/command/info_cmd.py
 
 from dem.core.tool_images import ToolImage
-from dem.core.dev_env import DevEnv, DevEnv
-from dem.cli.console import stdout, stderr
+from dem.core.dev_env import DevEnv
 from dem.core.platform import Platform
+from dem.cli.console import stdout, stderr
 from rich.table import Table
 import typer
-
-image_status_messages = {
-    ToolImage.NOT_AVAILABLE: "[red]Error: not available![/]",
-    ToolImage.LOCAL_ONLY: "Local",
-    ToolImage.REGISTRY_ONLY: "Registry",
-    ToolImage.LOCAL_AND_REGISTRY: "Local and Registry",
-}
 
 def print_status(platform: Platform, dev_env: DevEnv) -> None:
     """ Print the status of the Development Environment.
@@ -41,13 +34,24 @@ def print_tools_info_table(dev_env: DevEnv, is_local: bool, platform: Platform =
     """
     tool_info_table = Table(title="Tools")
     tool_info_table.add_column("Image")
-    tool_info_table.add_column("Availability")
+
+    if is_local:
+        tool_info_table.add_column("Available Locally")
 
     for tool_image in sorted(dev_env.tool_images, key=lambda x: x.name):
-        tool_info_table.add_row(tool_image.name,
-                                image_status_messages[tool_image.availability])
+        if is_local:
+            if tool_image.availability == ToolImage.LOCAL_ONLY:
+                available_locally_output = "[green]\u2713[/]"
+            else:
+                available_locally_output = "[red]\u2717[/]"
+
+            tool_info_table.add_row(tool_image.name, available_locally_output)
+        else:
+            tool_info_table.add_row(tool_image.name)
+
     if is_local:
         print_status(platform, dev_env)
+
     stdout.print(tool_info_table)
 
 def print_tasks_info_table(dev_env: DevEnv) -> None:
@@ -77,11 +81,8 @@ def print_local_dev_env_info(platform: Platform, dev_env: DevEnv) -> None:
     if dev_env.tasks:
         print_tasks_info_table(dev_env)
 
-    if dev_env.is_installed and dev_env.get_tool_image_status() == DevEnv.Status.REINSTALL_NEEDED:
-        stderr.print("\n[red]Error: Incomplete local install! The Dev Env must be reinstalled![/]")
-
-    if dev_env.get_tool_image_status() == DevEnv.Status.UNAVAILABLE_IMAGE:
-        stderr.print("\n[red]Error: Required image could not be found either locally or in the registry![/]")
+    if dev_env.is_installed and not dev_env.is_installation_correct():
+        stderr.print("\n[red]Error: Incorrect local install![/]")
 
 def local_info(platform: Platform, dev_env_name: str) -> None:
     """ Gather and print information about the given local Development Environment.
@@ -116,9 +117,6 @@ def print_cat_dev_env_info(dev_env: DevEnv, cat_name: str) -> None:
     if dev_env.tasks:
         print_tasks_info_table(dev_env)
 
-    if dev_env.get_tool_image_status() == DevEnv.Status.UNAVAILABLE_IMAGE:
-        stderr.print("\n[red]Error: Required image could not be found in the registry![/]")
-    
 def cat_dev_env_info(platform: Platform, dev_env_name: str, selected_cats: list[str]) -> None:
     """ Gather and print information about the given catalog Development Environment.
     

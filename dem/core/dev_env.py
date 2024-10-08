@@ -8,12 +8,6 @@ import json, os
 class DevEnv():
     """ A Development Environment. """
 
-    class Status(Enum):
-        """ The status of an installed Development Environment. """
-        OK = 0
-        REINSTALL_NEEDED = 1
-        UNAVAILABLE_IMAGE = 2
-
     def __init__(self, descriptor: dict | None = None, descriptor_path: str | None = None) -> None:
         """ Init the DevEnv class. 
         
@@ -94,23 +88,19 @@ class DevEnv():
         else:
             raise KeyError(f"Task [bold]{task_name}[/] not found.")
 
-    def get_tool_image_status(self) -> Status:
-        """ Get the status of the Tool Images.
+    def is_installation_correct(self) -> bool:
+        """ Check if the installation is correct.
 
-            This method checks the availability of the assigned Tool Images. 
-            If at least one of the Tool Images is unkonwn: NOT_AVAILABLE. 
-            If at least one of the Tool Images is only available in the registry: REINSTALL_NEEDED. 
-            If all the Tool Images are available: OK.
-
-            Returns:
-                Status -- the status of the Dev Env
+            Return True if the Dev Env is in installed state and all the Tool Images are available, 
+            otherwise False.
         """
-        for tool_image in self.tool_images:
-            if tool_image.availability == ToolImage.NOT_AVAILABLE:
-                return self.Status.UNAVAILABLE_IMAGE
-            elif tool_image.availability == ToolImage.REGISTRY_ONLY:
-                return self.Status.REINSTALL_NEEDED
-        return self.Status.OK
+        if self.is_installed:
+            for tool_image in self.tool_images:
+                if tool_image.availability == ToolImage.NOT_AVAILABLE:
+                    break
+            else:
+                return True
+        return False
 
     def get_deserialized(self, omit_is_installed: bool = False) -> dict[str, str]:
         """ Create the deserialized json. 

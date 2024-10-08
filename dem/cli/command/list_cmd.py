@@ -21,13 +21,11 @@ def add_dev_env_info_to_table(platform: Platform, table: Table, dev_env: DevEnv)
     if dev_env.is_installed:
         dev_env.assign_tool_image_instances(platform.tool_images)
         installed_column = "[green]✓[/]"
-        tool_image_status = dev_env.get_tool_image_status()
-        if tool_image_status == DevEnv.Status.UNAVAILABLE_IMAGE:
-            status_column = "[red]Error: Required image is not available![/]"
-        elif tool_image_status == DevEnv.Status.REINSTALL_NEEDED:
-            status_column = "[red]Error: Incomplete local install![/]"
-        else:
+        
+        if dev_env.is_installation_correct():
             status_column = "[green]Ok[/]"
+        else:
+            status_column = "[red]Error: Incorrect installation![/]"
 
         if dev_env.name == platform.default_dev_env_name:
             default_column = "[green]✓[/]"

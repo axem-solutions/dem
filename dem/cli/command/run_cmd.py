@@ -16,28 +16,13 @@ def dev_env_health_check(platform: Platform, dev_env: DevEnv) -> None:
         Raises:
             typer.Abort -- if the Development Environment has missing tool images
     """
-    # Don't load the registry images to save time.
-    platform.local_only = True
-
     dev_env.assign_tool_image_instances(platform.tool_images)
-    dev_env_tool_status = dev_env.get_tool_image_status()
 
-    if dev_env_tool_status == DevEnv.Status.UNAVAILABLE_IMAGE:
-        stderr.print("[red]Error: Required tool images are not available![/]")
-        stdout.print("Trying to locate the missing tool images...")
-        # Now we need to load the registry images.
-        platform.tool_images.update()
-        dev_env.assign_tool_image_instances(platform.tool_images)
-        # Get the tool status again.
-        dev_env_tool_status = dev_env.get_tool_image_status()
-        if dev_env_tool_status == DevEnv.Status.REINSTALL_NEEDED:
-            stdout.print("The missing images are available from the registries.")
-            typer.confirm("Should DEM reinstall the missing images?", abort=True)
-            platform.install_dev_env(dev_env)
-            stdout.print(f"[green]DEM successfully fixed the {dev_env.name} Development Environment![/]")
-        else:
-            stderr.print("[red]Error: The missing tool images could not be found in the registries![/]")
-            raise typer.Abort()
+    if not dev_env.is_installation_correct():
+        stderr.print("[red]Error: Incorrect installation![/]")
+        typer.confirm("Should DEM reinstall the DevEnv?", abort=True)
+        platform.install_dev_env(dev_env)
+        stdout.print(f"[green]DEM successfully fixed the {dev_env.name} Development Environment![/]")
 
 def execute(platform: Platform, dev_env_name: str, task_name: str) -> None:
     """ Run a task in a Development Environment.

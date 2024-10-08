@@ -51,7 +51,7 @@ def test_ToolImages_update() -> None:
     }
 
     # Run unit under test
-    tool_images_instance.update()
+    tool_images_instance.update(True, True)
 
     # Check expectations
     assert len(tool_images_instance.all_tool_images) == 5
@@ -79,7 +79,7 @@ def test_ToolImages_get_local_ones() -> None:
     mock_registries.list_repos.return_value = test_registry_tool_images
 
     tool_images_instance = tool_images.ToolImages(mock_container_engine, mock_registries)
-    tool_images_instance.update()
+    tool_images_instance.update(True, True)
 
     # Run unit under test
     local_tool_images = tool_images_instance.get_local_ones()
@@ -108,7 +108,7 @@ def test_ToolImages_get_registry_ones() -> None:
     mock_registries.list_repos.return_value = test_registry_tool_images
 
     tool_images_instance = tool_images.ToolImages(mock_container_engine, mock_registries)
-    tool_images_instance.update()
+    tool_images_instance.update(True, True)
 
     # Run unit under test
     registry_tool_images = tool_images_instance.get_registry_ones()

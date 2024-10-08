@@ -42,11 +42,8 @@ class Platform(Core):
         self.local_dev_envs: list[DevEnv] = []
         self.are_tool_images_assigned: bool = False
 
-        # Set this to true in the platform instance to work with the local tool images only
-        self.local_only = False
-        # Set this to true in the platform instance so when first accessing the `tool_images` 
-        # instance variable, do not automatically update the tool images from the registries
-        self.disable_tool_update = False
+        # Set this to true in the platform instance to get the tool image info from the registries
+        self.get_tool_image_info_from_registries = False
 
     def load_dev_envs(self) -> None:
         """ Load the Development Environments from the dev_env.json file.
@@ -75,8 +72,7 @@ class Platform(Core):
         """
         if self._tool_images is None:
             self._tool_images = ToolImages(self.container_engine, self.registries)
-            if not self.disable_tool_update:
-                self._tool_images.update(local_only=self.local_only)
+            self._tool_images.update(True, self.get_tool_image_info_from_registries)
         return self._tool_images
     
     @property
@@ -157,14 +153,9 @@ class Platform(Core):
             Args:
                 dev_env_to_install -- the Development Environment to install
         """
-        # First check if the missing images are available in the registries, so DEM won't start to 
-        # pull the images and then fail.
         for tool_image in dev_env_to_install.tool_images:
-            if tool_image.availability == ToolImage.NOT_AVAILABLE:
-                raise PlatformError(f"The {tool_image.name} image is not available.")
-
-        for tool_image in dev_env_to_install.tool_images:
-            if tool_image.availability == ToolImage.REGISTRY_ONLY:
+            if tool_image.availability is ToolImage.REGISTRY_ONLY or \
+               tool_image.availability is ToolImage.NOT_AVAILABLE:
                 self.user_output.msg(f"\nPulling image {tool_image.name}", is_title=True)
                 try:                
                     self.container_engine.pull(tool_image.name)

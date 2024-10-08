@@ -44,23 +44,22 @@ class ToolImages():
         """
         self.container_engine = container_engine
         self.registries = registries
-        self.all_tool_images = {}
+        self.all_tool_images: dict[str, ToolImage] = {}
 
-    def update(self, local_only: bool = False, registry_only: bool = False, 
-               reg_selection: list[str] = []) -> None:
+    def update(self, local: bool, registry: bool, reg_selection: list[str] = []) -> None:
         """ Update the list of available tools. If the tool image already exists, it will be updated.
         
             Args:
-                local_only -- update the local tools only
-                registry_only -- update the registry tools only
+                local -- get the local tools
+                registry -- get the registry tools
         """
         registry_tool_image_names = []
         local_tool_image_names = []
 
-        if not registry_only:
+        if local:
             local_tool_image_names = self.container_engine.get_local_tool_images()
 
-        if not local_only:
+        if registry:
             registry_tool_image_names = self.registries.list_repos(reg_selection)
 
         for tool_image_name in local_tool_image_names:

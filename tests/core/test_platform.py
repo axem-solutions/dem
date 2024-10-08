@@ -96,8 +96,7 @@ def test_Platform_tool_images(mock___init__: MagicMock, mock_ToolImages: MagicMo
     test_platform._container_engine = mock_container_engine
     test_platform._registries = mock_registries
     test_platform._tool_images = None
-    test_platform.disable_tool_update = False
-    test_platform.local_only = False
+    test_platform.get_tool_image_info_from_registries = False
 
     mock_tool_images = MagicMock()
     mock_ToolImages.return_value = mock_tool_images
@@ -111,7 +110,7 @@ def test_Platform_tool_images(mock___init__: MagicMock, mock_ToolImages: MagicMo
 
     mock___init__.assert_called_once()
     mock_ToolImages.assert_called_once_with(mock_container_engine, mock_registries)
-    mock_tool_images.update.assert_called_once_with(local_only=test_platform.local_only)
+    mock_tool_images.update.assert_called_once_with(True, test_platform.get_tool_image_info_from_registries)
 
 @patch("dem.core.platform.ContainerEngine")
 @patch.object(platform.Platform, "__init__")
@@ -363,34 +362,6 @@ def test_Platform_install_dev_env_pull_failure(mock___init__: MagicMock, mock_us
     mock_user_output.msg.assert_called_once_with(f"\nPulling image {expected_registry_only_tool_image}", 
                                                  is_title=True)
     mock_container_engine.pull.assert_called_once_with(expected_registry_only_tool_image)
-
-@patch.object(platform.Platform, "tool_images")
-@patch.object(platform.Platform, "container_engine")
-@patch.object(platform.Platform, "user_output")
-@patch.object(platform.Platform, "__init__")
-def test_Platform_install_dev_env_with_not_avilable_tool_image(mock___init__: MagicMock, 
-                                                               mock_user_output: MagicMock,
-                                                               mock_container_engine: MagicMock,
-                                                               mock_tool_images) -> None:
-    # Test setup
-    mock___init__.return_value = None
-
-    mock_dev_env = MagicMock()    
-    mock_tool_image = MagicMock()
-    mock_tool_image.name = "test_image_name1:test_image_version1"
-    mock_tool_image.availability = platform.ToolImage.NOT_AVAILABLE
-    mock_dev_env.tool_images = [mock_tool_image]
-
-    test_platform = platform.Platform()
-
-    # Run unit under test
-    with pytest.raises(platform.PlatformError) as exported_exception_info:
-        test_platform.install_dev_env(mock_dev_env)
-
-    # Check expectations
-    assert str(exported_exception_info.value) == f"Platform error: The test_image_name1:test_image_version1 image is not available."
-
-    mock___init__.assert_called_once()
 
 @patch.object(platform.Platform, "flush_dev_env_properties")
 @patch.object(platform.Platform, "container_engine")

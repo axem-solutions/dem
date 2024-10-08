@@ -16,9 +16,6 @@ def list_local_tools(platform: Platform) -> None:
         Exceptions:
             typer.Abort -- if no local tool images are available
     """
-    # by settings this to True, the update method won't try to update the registry tools
-    platform.local_only = True
-
     if not platform.tool_images.all_tool_images:
         stdout.print("[yellow]No local tool images are available.[/]")
         raise typer.Abort()
@@ -39,10 +36,6 @@ def update_tools_from_selected_regs(platform: Platform, selected_regs: list[str]
         Exceptions:
             typer.Abort -- if an unknown registry is specified
     """
-    # by settings this to True, the update method won't start automatically so we can provide
-    # the selected registry names
-    platform.disable_tool_update = True
-
     available_regs = set([reg["name"] for reg in platform.config_file.registries])
     selected_regs = set(selected_regs)
 
@@ -51,7 +44,7 @@ def update_tools_from_selected_regs(platform: Platform, selected_regs: list[str]
             stderr.print(f"[red]Error: Registry {unkown_reg} is not available![/]")
         raise typer.Abort()
 
-    platform.tool_images.update(reg_selection=selected_regs)
+    platform.tool_images.update(False, True, reg_selection=selected_regs)
 
 def list_tools_from_regs(platform: Platform, table: Table) -> None:
     """ List the available tools from the registries.
@@ -105,6 +98,7 @@ def list_tools_from_all_regs(platform: Platform) -> None:
         Exceptions:
             typer.Abort -- if no tool images are available in the registries
     """
+    platform.tool_images.update(False, True)
     if not platform.tool_images.get_registry_ones():
         stdout.print("[yellow]No tool images are available in the registries.[/]")
         raise typer.Abort()
