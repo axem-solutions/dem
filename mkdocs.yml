@@ -118,7 +118,7 @@ nav:
       - 'del-cat': 'commands/#dem-del-cat-name'
       - 'list-cat': 'commands/#dem-list-cat'
     - 'Registry Management':
-      - 'add-reg': 'commands/#dem-add-reg-name-url'
+      - 'add-reg': 'commands/#dem-add-reg-name-url-namespace'
       - 'del-reg': 'commands/#dem-del-reg-name'
       - 'list-reg': 'commands/#dem-list-reg'
     - 'Host Management':
