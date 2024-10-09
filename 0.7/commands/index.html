@@ -1936,31 +1936,22 @@ The URL must point to an HTTP(S) server where the Catalog JSON file is available
 <p>List the available catalogs.</p>
 <hr />
 <h1 id="registry-management">Registry management</h1>
-<h2 id="dem-add-reg-name-url"><strong><code>dem add-reg NAME URL</code></strong></h2>
+<h2 id="dem-add-reg-name-url-namespace"><strong><code>dem add-reg NAME URL [NAMESPACE]</code></strong></h2>
 <p><strong>Description:</strong></p>
 <p>Add a new registry.</p>
-<p>The name of the registry is what you would normally use to pull an image.
-Examples:</p>
-<table>
-<thead>
-<tr>
-<th>Full image tag</th>
-<th>Name</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>repository/image:tag</code></td>
-<td>repository</td>
-</tr>
-<tr>
-<td><code>192.168.1.1:5000/image:tag</code></td>
-<td>192.168.1.1:5000</td>
-</tr>
-</tbody>
-</table>
-<p>The URL should point to the registry's API. For the Docker Hub https://registry.hub.docker.com, 
-or it can be http://localhost:5000 for a self-hosted one.</p>
+<p>The name of the registry must be unique. The URL must point to the registry's API. </p>
+<p>The namespace is only required for the Docker Hub.</p>
+<p>Examples:</p>
+<p><em>Add a Docker Hub registry called <code>axem</code> with the namespace <code>axemsolutions</code></em></p>
+<div class="highlight"><pre><span></span><code>dem<span class="w"> </span>add-reg<span class="w"> </span>axem<span class="w"> </span>https://registry.hub.docker.com<span class="w"> </span>axemsolutions
+</code></pre></div>
+<p><em>Add a self-hosted registry called <code>local</code></em></p>
+<div class="highlight"><pre><span></span><code>dem<span class="w"> </span>add-reg<span class="w"> </span><span class="nb">local</span><span class="w"> </span>http://localhost:5000
+</code></pre></div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The Docker Hub API URL is https://registry.hub.docker.com.</p>
+</div>
 <p><strong>Arguments:</strong></p>
 <table>
 <thead>
@@ -1973,13 +1964,18 @@ or it can be http://localhost:5000 for a self-hosted one.</p>
 <tbody>
 <tr>
 <td><code>NAME</code></td>
-<td>Name of the registry to add.</td>
+<td>Unique name for the registry.</td>
 <td style="text-align: right;"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 7 9 19l-5.5-5.5 1.41-1.41L9 16.17 19.59 5.59 21 7Z"/></svg></span></td>
 </tr>
 <tr>
 <td><code>URL</code></td>
 <td>API URL of the registry.</td>
 <td style="text-align: right;"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 7 9 19l-5.5-5.5 1.41-1.41L9 16.17 19.59 5.59 21 7Z"/></svg></span></td>
+</tr>
+<tr>
+<td><code>NAMESPACE</code></td>
+<td>Namespace inside the registry.</td>
+<td style="text-align: right;"></td>
 </tr>
 </tbody>
 </table>
