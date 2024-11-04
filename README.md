@@ -64,13 +64,15 @@ development-specific tools are isolated in containers.
 
 ## Prerequisites
 
+Linux and Windows are supported.
+
+:information_source: macOS is not yet officially supported. However, if all prerequisites are met, 
+DEM should work on macOS as well.
+
 DEM depends on Python and Docker. Ensure you have the following versions:
 
 - Python 3.10+
 - Docker Engine 24.0+
-
-:information_source: macOS is not yet officially supported. However, if all prerequisites are met, 
-DEM should work on macOS as well.
 
 ## Installation
 

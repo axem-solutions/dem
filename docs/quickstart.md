@@ -30,7 +30,7 @@ In this case you only need to initialize the Dev Env with:
 
 You can import a Dev Env descriptor JSON with: 
 
-    dem load DEV_ENV_NAME
+    dem import DEV_ENV_NAME
 
 ## I'd like to create my own Dev Env from scratch...
 
