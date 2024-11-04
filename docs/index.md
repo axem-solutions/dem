@@ -64,22 +64,27 @@ By adopting DEM's methodologies for environment setup and management, you can si
 !!! linux_support "DEM for Linux"
     Linux operating system is fully supported.
 
-    Check out the [Installation](https://www.axemsolutions.io/dem_doc/latest/installation/) section and feel free to ask any questions
-    in our community through [Discord](https://discord.gg/3aHuJBNvrJ).
+    Check out the [Installation](https://www.axemsolutions.io/dem_doc/latest/installation/) section 
+    and feel free to ask any questions in our community through 
+    [Discord](https://discord.gg/3aHuJBNvrJ).
 
 !!! windows_support "DEM for Windows"
-    DEM can be used in Windows Subsystem for Linux (WSL).
-    
-    Native Windows support is coming soon...
+    DEM can be used both natively on Windows and in Windows Subsystem for Linux (WSL).
 
-    Feel free to join our open-source community and test DEM on different OSs. Please report your findings on [GitHub](https://github.com/axem-solutions/dem/issues) or in our community through [Discord](https://discord.gg/3aHuJBNvrJ).
+    Check out the [Installation](https://www.axemsolutions.io/dem_doc/latest/installation/) section 
+    and feel free to ask any questions in our community through 
+    [Discord](https://discord.gg/3aHuJBNvrJ).
 
 
 !!! apple_support "DEM for Mac"
     Coming soon...
 
-    Feel free to join our open-source community and test DEM on different OSs. Please report your findings on [GitHub](https://github.com/axem-solutions/dem/issues) or in our community through [Discord](https://discord.gg/3aHuJBNvrJ).
+    macOS is not yet officially supported. However, if all prerequisites are met, DEM should work on 
+    macOS as well.
 
+    Feel free to join our open-source community and test DEM on macOS. Please report your findings 
+    on [GitHub](https://github.com/axem-solutions/dem/issues) or in our community through 
+    [Discord](https://discord.gg/3aHuJBNvrJ).
 
 
 !!! info "Container engines"
