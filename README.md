@@ -35,151 +35,136 @@ Manage your isolated Development Environments with ease
 <p align="center">
 <strong>
 <a href="https://www.axemsolutions.io/dem_doc/index.html">Documentation</a> • <a href="https://www.axemsolutions.io/tutorial/index.html">Tutorial</a> • 
-<a href="https://github.com/axem-solutions/.github/blob/4bdc1be72b0a2c97da19408c59d6dd5d1845a469/CONTRIBUTING.md">Contribution guide</a> • 
+<a href="https://github.com/axem-solutions/.github/blob/4bdc1be72b0a2c97da19408c59d6dd5d1845a469/CONTRIBUTING.md">Contribution Guide</a> • 
 <a href="https://github.com/axem-solutions/.github/blob/4bdc1be72b0a2c97da19408c59d6dd5d1845a469/SUPPORT.md">Support</a>
 </strong>
 </p>
 
-DEM is a command-line tool that provides an easy, reproducible, and scalable way to set up 
-multi-container-based Development Environments for software development.
+**DEM** is a command-line tool that provides an easy, reproducible, and scalable way to set up 
+multi-container-based Development Environments (DevEnvs for short) for software development.
 
-> DEM can be used locally, but it is in alpha state, so expect major changes in the future!
+> DEM is currently in alpha state, so expect major changes in the future!
 
 <p align="center">
 Contributors and early adopters are welcome!
 </p>
 
-## :fallen_leaf: Hacktoberfest 2024
-DEM is participating again in Hacktoberfest! We are looking for contributors to help us improve 
-the tool. If you are interested, here is how to get started:
-1. Read the [Hacktoberfest guide](https://hacktoberfest.com/participation/).
-2. Check the [documentation](https://www.axemsolutions.io/dem_doc/index.html) and try out DEM to get 
-familiar with the tool.
-3. Look for issues with the `hacktoberfest` label in the 
-[issue tracker](https://github.com/axem-solutions/dem/issues).
-4. Read the [Code of Conduct](https://github.com/axem-solutions/dem?tab=coc-ov-file#readme) and the 
-[Contribution Guide](https://github.com/axem-solutions/.github/blob/4bdc1be72b0a2c97da19408c59d6dd5d1845a469/CONTRIBUTING.md).
-5. Join our [Discord server](https://discord.com/invite/Nv6hSzXruK) to get help and discuss the 
-issues. There is a dedicated channel called `#hacktoberfest` for this purpose.
-
-## The Concept in a Nutshell
-A set of software tools used for a specific development project is called a Development Environment.
-These tools for example can be the build system, debugger, test framework, etc...  
-
-The idea is to pack the tools separately into container images, which are then can be stored in 
-registries.
-
-> How is DEM different from other container-based development environments?  
-Instead of putting all the tools into a single image and then the user must enter the container 
-using an interactive shell, DEM creates a separate one for each tool. This means the user can work 
-on their host system, with their usual setup, but the Development Environment specific tools are 
-isolated in containers.
-
-Each Development Environment has a descriptor. A descriptor, like a blueprint, indicates which tools 
-are required in the project, and the place their container images are stored.
-
-![Dev Env descriptor](/docs/wp-content/dev_env_descriptor.png)
-
-The descriptors can be stored in the Development Environment Catalogs. The users can browse these 
-catalogs, and download a copy of the Development Environment descriptor to their local catalog.
-
-![Catalogs](/docs/wp-content/dem_catalogs.png)
-
-The users can install a Development Environments from their local catalog or freely create their own 
-based on the tools available in the registries or on their local system.
-
-![Dev Env installation](/docs/wp-content/dev_env_installation.png)
-
 ## Key features
 
-- Create scalable, reliable, and reproducible containerized Development Environments
-- Install preconfigured Development Environments from catalogs
-- Ensure that everyone in the team works with the same toolset
-- Share Development Environments outside of your organization
+- Create scalable, reliable, and reproducible containerized Development Environments where each tool 
+is isolated in its own container.
+- Install preconfigured Development Environments from catalogs.
+- Ensure that everyone on your team works with the same toolset.
+
+## How is DEM Different?
+Unlike other container-based development environments that pack all tools into a single image 
+requiring users to enter the container via an interactive shell, DEM creates a separate container 
+for each tool. This allows you to work on your host system with your usual setup while the 
+development-specific tools are isolated in containers.
 
 ## Prerequisites
 
-To be able to use the DEM on your PC, you need to have the following software installed:
+DEM depends on Python and Docker. Ensure you have the following versions:
 
 - Python 3.10+
 - Docker Engine 24.0+
 
-:information_source: Currently only the Linux operating system and the Docker Engine are supported.
+:information_source: macOS is not yet officially supported. However, if all prerequisites are met, 
+DEM should work on macOS as well.
 
 ## Installation
 
-You can download the installer script from the root of the repository:
+First, install Python and Docker if you haven't already:
 
-    curl -O https://raw.githubusercontent.com/axem-solutions/dem/main/install-dem.sh
+- [Python](https://www.python.org/downloads/)
+- [Docker](https://docs.docker.com/get-docker/)
 
-If you are happy with the content of the script, you can execute it:
+Make sure to include **pip** during Python installation.
 
-    bash install-dem.sh
-
-### Alternative installation
-
-If all the prerequisites are fulfilled, the DEM can be installed from the 
-[PyPI repository](https://pypi.org/project/axem-dem/):
+Install DEM from the PyPI repository using:
 
     pip install axem-dem
 
-:information_source: The package name is axem-dem, but the command is `dem`.
+- The package name is 'axem-dem', but the command is `dem`.
+- Ensure the Docker daemon is running before using DEM.
 
-### Enable autocompletion
+### Enable Autocompletion
 
-After installation, you can enable the autocompletion for bash and zsh shells
+Enable autocompletion for PowerShell, Bash, and Zsh shells:
 
     dem --install-completion
 
-> If the command didn't work, supply your shell type as input parameter (bash or zsh)
-> Note for zsh users: `compinit` must be called from your .zshrc.
+If the command doesn't work, specify your shell type as an input parameter (powershell, bash, or zsh).
+
+> **Note for Zsh users:** `compinit` must be called from your .zshrc.
 
 ## Quick start
 
-We got you covered in all scenarios:
+We got you covered in all scenarios!
 
 ### I'd like to start with a template...
 
-By default, DEM comes with a few templates available from the axem catalog. You can list them with:
+DEM comes with a few templates available from the `axem` catalog. List them with:
 
     dem list --cat axem
 
-You can clone the selected template with:
+Clone the selected template:
 
     dem clone DEV_ENV_NAME
 
+Replace DEV_ENV_NAME with the name of the Development Environment you want to clone.
+
 ### I'd like to work on a project already configured with DEM...
 
-In this case you only need to enter the project's root directory and initialize the Dev Env with:
+Enter the project's root directory and initialize the DevEnv:
 
     dem init
 
-### I'd like to use a Dev Env someone shared with me...
+### I'd like to use a DevEnv someone shared with me...
 
-You can import a Dev Env descriptor JSON with: 
+Import a DevEnv descriptor JSON:
 
-    dem load PATH_TO_DEV_ENV
+    dem import PATH_TO_DEV_ENV
 
 where PATH_TO_DEV_ENV is the path to the JSON file.
 
-### I'd like to create my own Dev Env from scratch...
+### I'd like to create my own DevEnv from scratch...
 
-Create a brand new Dev Env with the following command:
+Create a new DevEnv:
 
     dem create DEV_ENV_NAME
 
-
-Now you have the Dev Env descriptor in your local catalog, but you might want to set a few things:
-- Add/remove tools.
+Customize your DevEnv:
+- Add or remove tools.
 - Change the tool image for a given tool.
 
-You can edit it with:
+You can edit the DevEnv with:
 
     dem modify DEV_ENV_NAME
 
-Finally, if you are ready to use the Development Environment, you can install it with:
+Finally, if you are ready to use the Development Environment, install it with:
 
     dem install DEV_ENV_NAME
 
 >For more detailed instructions please refer to the
 [Documentation](https://www.axemsolutions.io/dem_doc/index.html)
+
+## The Concept in a Nutshell
+A Development Environment (DevEnv) is a set of software tools used for a specific development 
+project (e.g., build system, debugger, test framework).
+
+The idea is to pack the tools separately into container images, which are then can be stored in 
+registries.
+
+Each DevEnv has a descriptor, like a blueprint, indicating which tools are required.
+
+![DevEnv descriptor](/docs/wp-content/dev_env_descriptor.png)
+
+Sample descriptors can be stored in the Development Environment **Catalogs**. You can browse these 
+catalogs and download a copy of the Development Environment descriptor to your local catalog.
+
+![Catalogs](/docs/wp-content/dem_catalogs.png)
+
+A DevEnv can be installed from your local catalog.
+
+![DevEnv installation](/docs/wp-content/dev_env_installation.png)
