@@ -137,7 +137,7 @@ class DockerHub(Registry):
         super().__init__(registry_config)
 
         if not self._namespace:
-            raise RegistryError("Invalid registry configuration. For Docker Hub the namesapce must be set.")
+            raise RegistryError("Invalid registry configuration. For Docker Hub the namespace must be set.")
 
     def _append_repo_with_tag(self, endpoint_response: dict, repo: str) -> None:
         """ Get the tags from the endpoint response. Save the tags alongside with the actual repo

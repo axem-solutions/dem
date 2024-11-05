@@ -92,7 +92,7 @@ def test_cli_RegistryError(mock_Platform: MagicMock, mock_cli_main: MagicMock, m
     mock_Core.set_user_output.assert_called_once_with(mock_tui_user_output)
     mock_platform.config_file.update.assert_called_once()
     mock_cli_main.typer_cli.assert_called_once_with(prog_name=__command__)
-    mock_stderr_print.assert_called_once_with("[red]Registry error: " + test_exception_text + "\nUsing local tool images only![/]")
+    mock_stderr_print.assert_called_once_with(f"[red]Registry error: {test_exception_text}[/]")
 
 @patch("dem.__main__.stdout.print")
 @patch("dem.__main__.stderr.print")

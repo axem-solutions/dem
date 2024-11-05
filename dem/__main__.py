@@ -33,7 +33,7 @@ def main() -> None:
     except LookupError as e:
         stderr.print("[red]" + str(e) + "[/]")
     except RegistryError as e:
-        stderr.print("[red]" + str(e) + "\nUsing local tool images only![/]")
+        stderr.print(f"[red]{str(e)}[/]")
     except docker.errors.DockerException as e:
         stderr.print("[red]" + str(e) + "[/]")
 
