@@ -366,8 +366,11 @@ def test_DockerHub_invalid_registry_config() -> None:
     }
 
     # Run unit under test
-    with pytest.raises(registry.RegistryError):
+    with pytest.raises(registry.RegistryError) as exported_exception_info:
         registry.DockerHub(test_registry_config)
+
+    # Check expectations
+    assert "Registry error: Invalid registry configuration. For Docker Hub the namespace must be set." == str(exported_exception_info.value)
 
 @patch.object(registry.DockerHub, "__init__")
 def test_DockerHub__append_repo_with_tag(mock___init__: MagicMock) -> None:
