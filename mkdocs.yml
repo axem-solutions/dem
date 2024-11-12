@@ -92,6 +92,7 @@ nav:
   - 'index.md'
   - 'installation.md'
   - 'basics.md'
+  - 'quickstart.md'
   - Commands: 
     - 'DevEnv Management':
       - 'add-task': 'commands/#dem-add-task-dev_env_name-task_name-command'
@@ -125,6 +126,6 @@ nav:
       - 'add-host': 'commands/#dem-add-host-name-address'
       - 'del-host': 'commands/#dem-del-host-name'
       - 'list-host': 'commands/#dem-list-host'
-  - 'quickstart.md'
+  - 'configuration.md'
   - 'design.md'
   - Join us on Discord  : 'https://discord.gg/3aHuJBNvrJ'

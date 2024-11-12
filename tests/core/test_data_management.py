@@ -170,10 +170,6 @@ def test_ConfigFile(mock_PurePath: MagicMock):
     test_path = "test_path"
     data_management.BaseJSON._config_dir = test_path
 
-    mock_registries = MagicMock()
-    mock_catalogs = MagicMock()
-    mock_hosts = MagicMock()
-
     # Run unit under test
     local_dev_env_json = data_management.ConfigFile()
 
@@ -194,13 +190,15 @@ def test_ConfigFile(mock_PurePath: MagicMock):
         }
     ],
     "hosts": [],
-    "http_request_timeout_s": 2
+    "http_request_timeout_s": 2,
+    "use_native_system_cert_store": false
 }"""
 
     mock_PurePath.assert_called_once_with(test_path + "/config.json")
 
+@patch.object(data_management.BaseJSON, "flush")
 @patch.object(data_management.BaseJSON, "update")
-def test_ConfigFile_update(mock_update: MagicMock) -> None:
+def test_ConfigFile_update(mock_update: MagicMock, mock_flush: MagicMock) -> None:
     # Test setup
     test_config_file = data_management.ConfigFile()
     test_registry = MagicMock()
@@ -224,28 +222,7 @@ def test_ConfigFile_update(mock_update: MagicMock) -> None:
     assert test_config_file.http_request_timeout_s == test_http_request_timeout_s
 
     mock_update.assert_called_once()
-
-@patch.object(data_management.BaseJSON, "update")
-def test_ConfigFile_update_missing_http_request_timeout_s(mock_update: MagicMock) -> None:
-    # Test setup
-    test_config_file = data_management.ConfigFile()
-    test_registry = MagicMock()
-    test_catalog = MagicMock()
-    test_host = MagicMock()
-    test_config_file.deserialized = {
-        "registries": [test_registry],
-        "catalogs": [test_catalog],
-        "hosts": [test_host],
-    }
-
-    with pytest.raises(data_management.DataStorageError) as e:
-        # Run unit under test
-        test_config_file.update()
-
-    # Check expectations
-    assert "Invalid file: The http_request_timeout_s is not set in the config.json file." == str(e.value)
-
-    mock_update.assert_called_once()
+    mock_flush.assert_called_once()
 
 @patch.object(data_management.BaseJSON, "update")
 def test_ConfigFile_update_JSONDecodeError(mock_update: MagicMock) -> None:
