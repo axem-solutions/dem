@@ -1,7 +1,7 @@
 """Repesents the Development Platform. The platform resources can be accessed through this interface.  
 """
 
-import os
+import os, truststore
 from typing import Any, Generator
 from dem.core.core import Core
 from dem.core.properties import __supported_dev_env_major_version__
@@ -44,6 +44,11 @@ class Platform(Core):
 
         # Set this to true in the platform instance to get the tool image info from the registries
         self.get_tool_image_info_from_registries = False
+
+    def configure(self) -> None:
+        """ Configure the Development Platform."""
+        if self.config_file.use_native_system_cert_store:
+            truststore.inject_into_ssl()
 
     def load_dev_envs(self) -> None:
         """ Load the Development Environments from the dev_env.json file.

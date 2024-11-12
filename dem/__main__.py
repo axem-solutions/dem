@@ -25,6 +25,9 @@ def main() -> None:
         # Load the configuration file
         dem.cli.main.platform.config_file.update()
 
+        # Configure the Development Platform
+        dem.cli.main.platform.configure()
+
         # Load the Dev Env descriptors
         dem.cli.main.platform.load_dev_envs()
 

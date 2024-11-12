@@ -89,23 +89,25 @@ class ConfigFile(BaseJSON):
     def __init__(self) -> None:
         """ Init the class."""
         self._path = PurePath(self._config_dir + "/config.json")
-        self._default_json = """{
-    "registries": [
-        {
-            "name": "axem",
-            "namespace": "axemsolutions",
-            "url": "https://registry.hub.docker.com"
+        self._default_options = {
+            "registries": [        
+                {
+                    "name": "axem",
+                    "namespace": "axemsolutions",
+                    "url": "https://registry.hub.docker.com"
+                }
+            ],
+            "catalogs": [
+                {
+                    "name": "axem",
+                    "url": "https://axemsolutions.io/dem/dev_env_org.json"
+                }
+            ],
+            "hosts": [],
+            "http_request_timeout_s": 2,
+            "use_native_system_cert_store": False
         }
-    ],
-    "catalogs": [
-        {
-            "name": "axem",
-            "url": "https://axemsolutions.io/dem/dev_env_org.json"
-        }
-    ],
-    "hosts": [],
-    "http_request_timeout_s": 2
-}"""
+        self._default_json = json.dumps(self._default_options, indent=4)
         super().__init__()
 
     def update(self) -> None:
@@ -114,10 +116,37 @@ class ConfigFile(BaseJSON):
         except json.decoder.JSONDecodeError as e:
             raise DataStorageError(f"The config.json file is corrupted.\n{str(e)}") from e
 
-        self.registries: list[dict] = self.deserialized.get("registries", [])
-        self.catalogs: list[dict] = self.deserialized.get("catalogs", [])
-        self.hosts: list[dict] = self.deserialized.get("hosts", [])
+        flush_needed = False
+
+        self.registries: list[dict] | None = self.deserialized.get("registries", None)
+        if self.registries is None:
+            self.deserialized["registries"] = self._default_options["registries"]
+            self.registries = self._default_options["registries"]
+            flush_needed = True
+
+        self.catalogs: list[dict] | None = self.deserialized.get("catalogs", None)
+        if self.catalogs is None:
+            self.deserialized["catalogs"] = self._default_options["catalogs"]
+            self.catalogs = self._default_options["catalogs"]
+            flush_needed = True
+
+        self.hosts: list[dict] | None = self.deserialized.get("hosts", None)
+        if self.hosts is None:
+            self.deserialized["hosts"] = self._default_options["hosts"]
+            self.hosts = self._default_options["hosts"]
+            flush_needed = True
+
         self.http_request_timeout_s: float = self.deserialized.get("http_request_timeout_s", None)
-        
         if self.http_request_timeout_s is None:
-            raise DataStorageError("The http_request_timeout_s is not set in the config.json file.")
+            self.deserialized["http_request_timeout_s"] = self._default_options["http_request_timeout_s"]
+            self.http_request_timeout_s = self._default_options["http_request_timeout_s"]
+            flush_needed = True
+
+        self.use_native_system_cert_store: bool | None = self.deserialized.get("use_native_system_cert_store", None)
+        if self.use_native_system_cert_store is None:
+            self.deserialized["use_native_system_cert_store"] = self._default_options["use_native_system_cert_store"]
+            self.use_native_system_cert_store = self._default_options["use_native_system_cert_store"]
+            flush_needed = True
+
+        if flush_needed:
+            self.flush()
