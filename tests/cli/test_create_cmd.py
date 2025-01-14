@@ -16,60 +16,6 @@ from pytest import raises
 # In order to test stdout and stderr separately, the stderr can't be mixed into the stdout.
 runner = CliRunner(mix_stderr=False)
 
-@patch("dem.cli.command.create_cmd.DevEnvSettingsWindow")
-@patch("dem.cli.command.create_cmd.convert_to_printable_tool_images")
-def test_open_dev_env_settings_panel(mock_convert_to_printable_tool_images : MagicMock,
-                                     mock_DevEnvSettingsWindow: MagicMock) -> None:
-    # Test setup
-    mock_all_tool_images = MagicMock()
-    mock_printable_tool_images = MagicMock()
-    mock_convert_to_printable_tool_images.return_value = mock_printable_tool_images
-
-    mock_dev_env_settings_panel = MagicMock()
-    mock_selected_tool_images = MagicMock()
-    mock_dev_env_settings_panel.tool_image_menu.get_selected_tool_images.return_value = mock_selected_tool_images
-    mock_DevEnvSettingsWindow.return_value = mock_dev_env_settings_panel
-
-    mock_dev_env_settings_panel.cancel_save_menu.get_selection.return_value = "save"
-
-    # Run unit under test
-    actual_selected_tool_image_name = create_cmd.open_dev_env_settings_panel(mock_all_tool_images)
-
-    # Check expectations
-    assert actual_selected_tool_image_name is mock_selected_tool_images
-
-    mock_convert_to_printable_tool_images.assert_called_once_with(mock_all_tool_images)
-    mock_DevEnvSettingsWindow.assert_called_once_with(mock_printable_tool_images)
-    mock_dev_env_settings_panel.wait_for_user.assert_called_once()
-    mock_dev_env_settings_panel.cancel_save_menu.get_selection.assert_called_once()
-    mock_dev_env_settings_panel.tool_image_menu.get_selected_tool_images.assert_called_once()
-
-@patch("dem.cli.command.create_cmd.DevEnvSettingsWindow")
-@patch("dem.cli.command.create_cmd.convert_to_printable_tool_images")
-def test_open_dev_env_settings_panel_cancel(mock_convert_to_printable_tool_images: MagicMock,
-                                            mock_DevEnvSettingsWindow: MagicMock) -> None:
-    # Test setup
-    mock_all_tool_images = MagicMock()
-    mock_printable_tool_images = MagicMock()
-    mock_convert_to_printable_tool_images.return_value = mock_printable_tool_images
-
-    mock_dev_env_settings_panel = MagicMock()
-    mock_selected_tool_images = MagicMock()
-    mock_dev_env_settings_panel.selected_tool_images = mock_selected_tool_images
-    mock_DevEnvSettingsWindow.return_value = mock_dev_env_settings_panel
-
-    mock_dev_env_settings_panel.cancel_save_menu.get_selection.return_value = "cancel"
-
-    # Run unit under test
-    with raises(create_cmd.typer.Abort):
-        create_cmd.open_dev_env_settings_panel(mock_all_tool_images)
-
-    # Check expectations
-    mock_convert_to_printable_tool_images.assert_called_once_with(mock_all_tool_images)
-    mock_DevEnvSettingsWindow.assert_called_once_with(mock_printable_tool_images)
-    mock_dev_env_settings_panel.wait_for_user.assert_called_once()
-    mock_dev_env_settings_panel.cancel_save_menu.get_selection.assert_called_once()
-
 def test_create_new_dev_env_descriptor() -> None:
     # Test setup
     test_dev_env_name = "test_dev_env"

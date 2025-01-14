@@ -1,123 +1,178 @@
-"""Image selector panel."""
-# dem/cli/tui/panel/image_selector.py
+"""The DevEnv Settings Screen for the TUI."""
+# dem/cli/tui/window/dev_env_settings_screen.py
 
-from dem.cli.tui.renderable.menu import ToolImageMenu, DevEnvStatusPanel, CancelSaveMenu
-from dem.cli.tui.printable_tool_image import PrintableToolImage
-from rich.panel import Panel
-from rich.layout import Layout
-from rich.align import Align
-from rich.live import Live
+from textual import on
+from textual.app import App, ComposeResult
+from textual.containers import Container
+from textual.widgets import Button, Header, Label, SelectionList
+from textual.widgets.selection_list import Selection
+from textual.screen import Screen
+from textual.events import Mount
+from textual.binding import Binding, BindingType
+from typing import ClassVar
 from rich.table import Table
-from readchar import readkey, key
 
-class NavigationHint(Panel):
-    hint_text = """
-- [bold]move cursor[/]: up and down arrows or j and k keys
-- [bold]toggle selection[/]: space or enter
-- [bold]jump between save/cancel and the selector[/]: tab
-"""
-    def __init__(self) -> None:
-        super().__init__(self.hint_text, title="Navigation", expand=False)
+from dem.cli.tui.printable_tool_image import PrintableToolImage
 
-class ErrorMessage(Table):
-    def __init__(self, message: str) -> None:
-        message = f"[red]{message}[/]"
-        super().__init__(message, box=None, expand=False, show_edge=False)
+class SelectionListVimMode(SelectionList):
+    """ A SelectionList with Vim-like keybindings. """
+    BINDINGS: ClassVar[list[BindingType]] = [
+        Binding("j", "cursor_down", "Vim Down", show=False),
+        Binding("k", "cursor_up", "Vim Up", show=False)
+    ]
 
-class DevEnvSettingsWindow():
+class DevEnvSettingsScreen(Screen):
+    """ The Development Environment Settings Screen. """
+    TITLE = "Development Environment Settings"
+
     def __init__(self, printable_tool_images: list[PrintableToolImage], 
                  already_selected_tool_images: list[str] = []) -> None:
-        # Panel content
-        self.dev_env_status_height = len(printable_tool_images)
-        self.dev_env_status_width = 0
-        for printable_tool_image in printable_tool_images:
-            if len(printable_tool_image.name) > self.dev_env_status_width:
-                self.dev_env_status_width = len(printable_tool_image.name)
+        """ Initialize the Development Environment Settings Screen. 
 
-        self.tool_image_menu = ToolImageMenu(printable_tool_images, already_selected_tool_images)
-        self.dev_env_status_panel = DevEnvStatusPanel(already_selected_tool_images, 
-                                                      self.dev_env_status_height, 
-                                                      self.dev_env_status_width)
-        self.cancel_save_menu = CancelSaveMenu()
-        self.navigation_hint_panel = NavigationHint()
-        self.error_message_panel = None
+        Args:
+            printable_tool_images (list[PrintableToolImage]): The list of PrintableToolImage objects.
+            already_selected_tool_images (list[str]): The list of already selected tool images.
+        """
+        super().__init__()
+        self.printable_tool_images = printable_tool_images
+        self.already_selected_tool_images = already_selected_tool_images
 
-        self.build_layout()
-        self.cancel_save_menu.remove_cursor()
-        self.active_menu = self.tool_image_menu
+        self._create_widgets()
 
-    def build_layout(self) -> None:
-        # Set the alignments
-        aligned_tool_image_menu = Align(self.tool_image_menu, vertical="bottom", align="right")
-        aligned_dev_env_status_panel = Align(self.dev_env_status_panel, vertical="bottom", align="left")
-        aligned_cancel_save_menu = Align(self.cancel_save_menu, vertical="middle", align="center")
-        aligned_navigation_hint_panel = Align(self.navigation_hint_panel, vertical="top", align="center")
+    def _create_widgets(self) -> None:
+        """ Create the widgets. """
+        dev_env_selections: list[Selection] = []
+        for tool_image in self.printable_tool_images:
+            if tool_image.name in self.already_selected_tool_images:
+                selected = True
+            else:
+                selected = False
 
-        if self.error_message_panel:
-            aligned_error_message_panel = Align(self.error_message_panel, vertical="middle", align="center")
+            dev_env_selections.append(Selection(tool_image.name, tool_image.name, selected))
+
+        self.tool_image_selector_widget = SelectionListVimMode(*dev_env_selections, 
+                                                                id="tool_image_selector_widget", 
+                                                                classes="tool_image_selector")
+        self.tool_image_selector_widget.border_title = "Select the Tool Images for the Development Environment"
+        self.dev_env_status_widget = Label("", id="dev_env_status_widget", classes="dev_env_status")
+        self.dev_env_status_widget.border_title = "Selected Tool Images"
+        self.cancel_button = Button("Cancel", id=self.app.cancel_button_id, classes="cancel_button")
+        self.save_button = Button("Save", id=self.app.save_button_id, classes="save_button")
+
+    def compose(self) -> ComposeResult:
+        """ Compose the screen. 
+
+        Returns:
+            ComposeResult: The composed screen.
+        """
+        yield Header()
+        with Container(id="dev_env_settings_screen", classes="dev_env_settings_screen"):
+            yield self.tool_image_selector_widget
+            yield self.dev_env_status_widget
+            with Container(id="cancel_container", classes="cancel_container"):
+                yield self.cancel_button
+            with Container(id="save_container", classes="save_container"):
+                yield self.save_button
+
+    def on_mount(self) -> None:
+        """ Handle the mount event. """
+        self.set_focus(self.tool_image_selector_widget)
+
+    def on_button_pressed(self, event: Button.Pressed) -> None:
+        """ Handle the button pressed event.
+
+        Args:
+            event (Button.Pressed): Information about the event.
+        """
+        self.app.last_button_pressed = event.button.id
+        if (event.button.id == self.app.save_button_id) and not self.app.selected_tool_images:
+            self.notify("Please select at least one Tool Image.", title="Error", severity="error")
+            return
+
+        if (event.button.id == self.app.save_button_id) and self.already_selected_tool_images:
+            # The user is about to overwrite the DevEnv
+            self.app.push_screen(ConfirmScreen("Are you sure you want to overwrite the Development Environment?"))
         else:
-            aligned_error_message_panel = Align(Table(box=None), vertical="middle", align="center")
+            self.app.exit()
 
-        self.layout = Layout(name="root")
+    @on(Mount)
+    @on(SelectionList.SelectedChanged)
+    def update_dev_env_status(self) -> None:
+        """ Update the Development Environment status. """
+        selected_tool_images_table = Table(show_header=False, show_lines=False, show_edge=False)
+        for tool_image in self.tool_image_selector_widget.selected:
+            selected_tool_images_table.add_row(tool_image)
+        self.dev_env_status_widget.update(selected_tool_images_table)
+        
+        self.app.selected_tool_images = self.tool_image_selector_widget.selected
 
-        self.layout.split_column(
-            Layout(name="upper_half"),
-            Layout(name="lower_half"),
-        )
-        self.layout["upper_half"].split_row(
-            Layout(name="available"),
-            Layout(name="selected")
-        )
+class ConfirmScreen(Screen):
+    """ The Confirm Screen. """
+    TITLE = "Confirm"
 
-        self.layout["lower_half"].split_column(
-            Layout(name="cancel_save", ratio=2),
-            Layout(name="navigation_hint", ratio=6),
-            Layout(name="error", ratio=2),
-        )
+    def __init__(self, message: str) -> None:
+        """ Initialize the Confirm Screen. 
 
-        self.layout["available"].update(aligned_tool_image_menu)
-        self.layout["selected"].update(aligned_dev_env_status_panel)
-        self.layout["cancel_save"].update(aligned_cancel_save_menu)
-        self.layout["navigation_hint"].update(aligned_navigation_hint_panel)
-        self.layout["error"].update(aligned_error_message_panel)
+        Args:
+            message (str): The message to display.
+        """
+        super().__init__()
+        self.message = Label(message, id="confirm_message")
+        self.confirm_button = Button("Confirm", id=self.app.confirm_screen_confirm_button_id, 
+                                     classes="confirm_screen_buttons")
+        self.save_as_button = Button("Save As", id=self.app.confirm_screen_save_as_button_id, 
+                                     classes="confirm_screen_buttons")
+        self.cancel_button = Button("Cancel", id="cancel_button", classes="confirm_screen_buttons")
 
-    def _move_console(self) -> None:
-        self.active_menu.remove_cursor()
+    def compose(self) -> ComposeResult:
+        """ Compose the screen."""
+        with Container(id="confirm_container"):
+            yield self.message
+            with Container(id="confirm_buttons", classes="confirm_buttons"):
+                yield self.confirm_button
+                yield self.save_as_button
+                yield self.cancel_button
 
-        if self.active_menu is self.tool_image_menu:
-            self.active_menu = self.cancel_save_menu
+    def on_mount(self) -> None:
+        """ Handle the mount event. """
+        self.set_focus(self.confirm_button)
+
+    def on_button_pressed(self, event: Button.Pressed) -> None:
+        """ Handle the button pressed event.
+
+        Args:
+            event (Button.Pressed): Information about the event.
+        """
+        if (event.button.id ==self.app.confirm_screen_confirm_button_id) or \
+           (event.button.id == self.app.confirm_screen_save_as_button_id):
+            self.app.last_button_pressed = event.button.id
+            self.app.exit()
         else:
-            self.active_menu = self.tool_image_menu
+            self.app.pop_screen()
 
-        self.active_menu.add_cursor()
+class DevEnvSettingsWindow(App):
+    """ The Development Environment Settings Window. """
+    CSS_PATH = "dev_env_settings_window.tcss"
+    save_button_id = "save_button"
+    cancel_button_id = "cancel_button"
+    confirm_screen_confirm_button_id = "confirm_button"
+    confirm_screen_save_as_button_id = "save_as_button"
 
-    def _handle_user_input(self, input: str, live: Live) -> None:
-        self.active_menu.handle_user_input(input)
+    def __init__(self, printable_tool_images: list[PrintableToolImage], 
+                 already_selected_tool_images: list[str] = []) -> None:
+        """ Initialize the Development Environment Settings Window.
 
-        if (self.active_menu is self.tool_image_menu) and (input in [key.ENTER, key.SPACE]):
-            self.dev_env_status_panel = DevEnvStatusPanel(self.tool_image_menu.get_selected_tool_images(),
-                                                        self.dev_env_status_height,
-                                                        self.dev_env_status_width)
-            self.build_layout()
-            live.update(self.layout)
-        elif (self.active_menu is self.cancel_save_menu) and (input is key.ENTER) and \
-            (not self.tool_image_menu.get_selected_tool_images()) and \
-            ("save" in self.cancel_save_menu.get_selection()):
-            self.error_message_panel = ErrorMessage("Error: No Tool Images selected.")
-            self.cancel_save_menu.is_selected = False
-            self.build_layout()
-            live.update(self.layout)
+        Args:
+            printable_tool_images (list[PrintableToolImage]): The list of PrintableToolImage objects.
+            already_selected_tool_images (list[str]): The list of already selected tool images.
+        """
+        super().__init__()
+        self.printable_tool_images = printable_tool_images
+        self.already_selected_tool_images = already_selected_tool_images
+        self.last_button_pressed = None
+        self.selected_tool_images = []
 
-    def wait_for_user(self) -> None:
-        with Live(self.layout, refresh_per_second=8, screen=True) as live:
-            while self.cancel_save_menu.is_selected is False:
-                input = readkey()
-                if input is key.TAB:
-                    self._move_console()
-
-                    if self.error_message_panel:
-                        self.error_message_panel = None
-                        self.build_layout()
-                        live.update(self.layout)
-                else:
-                    self._handle_user_input(input, live)
+    def on_mount(self) -> None:
+        """ Handle the mount event. """
+        self.push_screen(DevEnvSettingsScreen(self.printable_tool_images, 
+                                              self.already_selected_tool_images))

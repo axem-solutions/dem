@@ -18,81 +18,6 @@ import io, typer
 # In order to test stdout and stderr separately, the stderr can't be mixed into the stdout.
 runner = CliRunner(mix_stderr=False)
 
-@patch("dem.cli.command.modify_cmd.SelectMenu")
-def test_get_confirm_from_user(mock_SelectMenu):
-    # Test setup
-    mock_select_menu = MagicMock()
-    mock_SelectMenu.return_value = mock_select_menu
-    expected_selected_item = "confirm"
-    mock_select_menu.get_selected.return_value = expected_selected_item
-
-    # Run unit under test
-    actual_selected_item = modify_cmd.get_confirm_from_user()
-
-    # Check expectations
-    expected_menu_items = ["confirm", "save as", "cancel"]
-    mock_SelectMenu.assert_called_once_with(expected_menu_items)
-    mock_select_menu.set_title.assert_called_once_with("Are you sure to overwrite the Development Environment?")
-    mock_select_menu.wait_for_user.assert_called_once()
-
-    assert actual_selected_item == expected_selected_item
-
-def test_handle_user_confirm_confirmed():
-    # Test setup
-    mock_deserialized_local_dev_env = MagicMock()
-    mock_platform = MagicMock()
-    mock_platform.get_deserialized.return_value = mock_deserialized_local_dev_env
-
-    # Run unit under test
-    modify_cmd.handle_user_confirm("confirm", MagicMock(), mock_platform)
-
-    # Check expectation
-    mock_platform.flush_dev_env_properties.assert_called_once()
-
-@patch("dem.cli.command.modify_cmd.typer.prompt")
-def test_handle_user_confirm_save_as(mock_prompt):
-    # Test setup    
-    mock_prompt.return_value = "test new name"
-    mock_deserialized_local_dev_env = MagicMock()
-    mock_platform = MagicMock()
-    mock_platform.get_deserialized.return_value = mock_deserialized_local_dev_env
-    mock_platform.get_dev_env_by_name.return_value = None
-    mock_dev_env_local = MagicMock()
-    mock_dev_env_local.name = "fake dev env"
-    mock_platform.local_dev_envs = [mock_dev_env_local]
-    
-    # Run unit under test
-    modify_cmd.handle_user_confirm("save as", mock_dev_env_local, mock_platform)
-
-    # Check expectation
-    mock_prompt.assert_called_once_with("Name of the new Development Environment")
-    mock_platform.flush_dev_env_properties.assert_called_once()
-
-    assert "fake dev env" == mock_platform.local_dev_envs[0].name
-    assert "test new name" == mock_platform.local_dev_envs[1].name
-
-@patch("dem.cli.command.modify_cmd.typer.prompt")
-def test_handle_user_confirm_save_as_already_exist(mock_prompt):
-    # Test setup    
-    mock_prompt.return_value = "test new name"
-    mock_deserialized_local_dev_env = MagicMock()
-    mock_platform = MagicMock()
-    mock_platform.get_deserialized.return_value = mock_deserialized_local_dev_env
-    mock_platform.get_dev_env_by_name.return_value = True
-    mock_dev_env_local = MagicMock()
-    mock_dev_env_local.name = "fake dev env"
-    mock_platform.dev_envs = [mock_dev_env_local]
-    
-    # Run unit under test
-    with pytest.raises(typer.Abort):
-        modify_cmd.handle_user_confirm("save as", mock_dev_env_local, mock_platform)
-
-def test_handle_user_confirm_cancel():
-    # Test setup
-    # Run unit under test
-    with pytest.raises(typer.Abort):
-        modify_cmd.handle_user_confirm("cancel", MagicMock(), MagicMock())
-
 def test_get_already_selected_tool_images() -> None:
     # Test setup
     mock_dev_env = MagicMock()
@@ -130,48 +55,6 @@ def test_remove_missing_tool_images(mock_confirm: MagicMock, mock_stderr_print: 
     mock_confirm.assert_called_once_with("By continuing, the missing tool images will be removed from the Development Environment.",
                                          abort=True)
 
-@patch("dem.cli.command.modify_cmd.DevEnvSettingsWindow")
-def test_open_dev_env_settings_panel(mock_DevEnvSettingsWindow: MagicMock) -> None:
-    # Test setup
-    mock_dev_env_settings_panel = MagicMock()
-    mock_DevEnvSettingsWindow.return_value = mock_dev_env_settings_panel
-    expected_selected_tool_images = ["test1:1.0", "test2:2.0"]
-    mock_dev_env_settings_panel.tool_image_menu.get_selected_tool_images.return_value = expected_selected_tool_images
-    mock_dev_env_settings_panel.cancel_save_menu.get_selection.return_value = "save"
-
-    mock_printable_tool_images = MagicMock()
-
-    # Run unit under test
-    actual_selected_tool_images = modify_cmd.open_dev_env_settings_panel(["test1:1.0", "test2:2.0"], 
-                                                                         mock_printable_tool_images)
-
-    # Check expectations
-    assert actual_selected_tool_images == expected_selected_tool_images
-
-    mock_DevEnvSettingsWindow.assert_called_once_with(mock_printable_tool_images, 
-                                                     ["test1:1.0", "test2:2.0"])
-    mock_dev_env_settings_panel.wait_for_user.assert_called_once()
-
-@patch("dem.cli.command.modify_cmd.DevEnvSettingsWindow")
-def test_open_dev_env_settings_panel_cancel(mock_DevEnvSettingsWindow: MagicMock) -> None:
-    # Test setup
-    mock_dev_env_settings_panel = MagicMock()
-    mock_DevEnvSettingsWindow.return_value = mock_dev_env_settings_panel
-    expected_selected_tool_images = ["test1:1.0", "test2:2.0"]
-    mock_dev_env_settings_panel.selected_tool_images = expected_selected_tool_images
-    mock_dev_env_settings_panel.cancel_save_menu.get_selection.return_value = "cancel"
-
-    mock_printable_tool_images = MagicMock()
-
-    # Run unit under test
-    with pytest.raises(typer.Abort):
-        modify_cmd.open_dev_env_settings_panel(["test1:1.0", "test2:2.0"], mock_printable_tool_images)
-
-    # Check expectations
-    mock_DevEnvSettingsWindow.assert_called_once_with(mock_printable_tool_images, 
-                                                     ["test1:1.0", "test2:2.0"])
-    mock_dev_env_settings_panel.wait_for_user.assert_called_once()
-
 def test_update_dev_env() -> None:
     # Test setup
     mock_dev_env = MagicMock()
@@ -186,47 +69,6 @@ def test_update_dev_env() -> None:
         {"image_name": "test2", "image_version": "2.0"}
     ]
     assert mock_dev_env.tool_image_descriptors == expected_tool_image_descriptors
-
-@patch("dem.cli.command.modify_cmd.handle_user_confirm")
-@patch("dem.cli.command.modify_cmd.get_confirm_from_user")
-@patch("dem.cli.command.modify_cmd.update_dev_env")
-@patch("dem.cli.command.modify_cmd.open_dev_env_settings_panel")
-@patch("dem.cli.command.modify_cmd.convert_to_printable_tool_images")
-@patch("dem.cli.command.modify_cmd.remove_missing_tool_images")
-@patch("dem.cli.command.modify_cmd.get_already_selected_tool_images")
-def test_modify_with_tui(mock_get_already_selected_tool_images: MagicMock,
-                         mock_remove_missing_tool_images: MagicMock,
-                         mock_convert_to_printable_tool_images: MagicMock,
-                         mock_open_dev_env_settings_panel: MagicMock,
-                         mock_update_dev_env: MagicMock,
-                         mock_get_confirm_from_user: MagicMock,
-                         mock_handle_user_confirm: MagicMock) -> None:
-    # Test setup
-    mock_platform = MagicMock()
-    mock_dev_env = MagicMock()
-
-    mock_already_selected_tool_images = MagicMock()
-    mock_get_already_selected_tool_images.return_value = mock_already_selected_tool_images
-    mock_printable_tool_images = MagicMock()
-    mock_convert_to_printable_tool_images.return_value = mock_printable_tool_images
-    mock_selected_tool_images = MagicMock()
-    mock_open_dev_env_settings_panel.return_value = mock_selected_tool_images
-    mock_confirmation = MagicMock()
-    mock_get_confirm_from_user.return_value = mock_confirmation
-
-    # Run unit under test
-    modify_cmd.modify_with_tui(mock_platform, mock_dev_env)
-
-    # Check expectations
-    mock_get_already_selected_tool_images.assert_called_once_with(mock_dev_env)
-    mock_remove_missing_tool_images.assert_called_once_with(mock_platform.tool_images.all_tool_images,
-                                                            mock_already_selected_tool_images)
-    mock_convert_to_printable_tool_images.assert_called_once_with(mock_platform.tool_images.all_tool_images)
-    mock_open_dev_env_settings_panel.assert_called_once_with(mock_already_selected_tool_images, 
-                                                             mock_printable_tool_images)
-    mock_update_dev_env.assert_called_once_with(mock_dev_env, mock_selected_tool_images)
-    mock_get_confirm_from_user.assert_called_once()
-    mock_handle_user_confirm.assert_called_once_with(mock_confirmation, mock_dev_env, mock_platform)
 
 def test_execute_invalid_name():
     # Test setup
