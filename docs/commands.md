@@ -103,11 +103,10 @@ Running this command will open up the Dev Env Settings Window:
 
 The table on the left shows the available tool types. Select the ones you want to use in the 
 Development Environment. You can navigate with the :material-arrow-up: and :material-arrow-down: or 
-:material-alpha-k: and :material-alpha-j: keys. Move the cursor to the tool image you would like to 
-select or deselect  and press the :material-keyboard-return:. 
+:material-alpha-k: and :material-alpha-j: keys.  
 On the right side, you can see the tool images that are selected.
 
-When the Dev Env is ready, press :material-keyboard-return: on the `save` button.
+When the Dev Env is ready, click or press :material-keyboard-return: on the `Save` button.
 
 !!! info 
 
@@ -351,11 +350,10 @@ Running this command will open up the Dev Env Settings Window, prefilled with th
 
 The table on the left shows the available tool types. Select the ones you want to use in the 
 Development Environment. You can navigate with the :material-arrow-up: and :material-arrow-down: or 
-:material-alpha-k: and :material-alpha-j: keys. Move the cursor to the tool image you would like to 
-select or deselect  and press the :material-keyboard-return:. 
+:material-alpha-k: and :material-alpha-j: keys.  
 On the right side, you can see the tool images that are selected.
 
-When the Dev Env is ready, press :material-keyboard-return: on the `save` button.
+When the Dev Env is ready, clock or press :material-keyboard-return: on the `Save` button.
 
 !!! info 
 

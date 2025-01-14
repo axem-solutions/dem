@@ -19,13 +19,15 @@ def open_dev_env_settings_panel(all_tool_images: dict[str, ToolImage]) -> list[s
         Returns:
             the selected Tool Image names
     """
-    dev_env_settings_panel = DevEnvSettingsWindow(convert_to_printable_tool_images(all_tool_images))
-    dev_env_settings_panel.wait_for_user()
+    dev_env_settings_window = DevEnvSettingsWindow(convert_to_printable_tool_images(all_tool_images))
+    # This will block the main thread until the window is closed
+    dev_env_settings_window.run()
 
-    if "cancel" in dev_env_settings_panel.cancel_save_menu.get_selection():
+    if dev_env_settings_window.last_button_pressed is None or \
+        dev_env_settings_window.last_button_pressed is dev_env_settings_window.cancel_button_id:
         raise typer.Abort()
 
-    return dev_env_settings_panel.tool_image_menu.get_selected_tool_images()
+    return dev_env_settings_window.selected_tool_images
 
 def create_new_dev_env_descriptor(dev_env_name: str, selected_tool_images: list[str]) -> dict:
     """ Create a new Development Environment descriptor.
