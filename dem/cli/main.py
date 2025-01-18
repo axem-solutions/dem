@@ -6,7 +6,7 @@ from typing import Generator
 from typing_extensions import Annotated
 import os
 from dem import __command__, __app_name__
-from dem.cli.command import cp_cmd, import_cmd, info_cmd, list_cmd, create_cmd, modify_cmd, \
+from dem.core.commands import cp_cmd, import_cmd, info_cmd, list_cmd, create_cmd, modify_cmd, \
                             delete_cmd, rename_cmd, run_cmd, export_cmd, clone_cmd, add_reg_cmd, \
                             list_reg_cmd, del_reg_cmd, add_cat_cmd, list_cat_cmd, del_cat_cmd, \
                             add_host_cmd, set_default_cmd, uninstall_cmd, install_cmd, assign_cmd, \
