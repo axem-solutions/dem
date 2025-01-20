@@ -15,7 +15,7 @@ from click.testing import Result
 runner = CliRunner(mix_stderr=False)
 
 ## Test cases
-@patch("dem.cli.command.del_host_cmd.stdout.print")
+@patch("dem.core.commands.del_host_cmd.stdout.print")
 def test_del_host_cmd(mock_stdout_print: MagicMock) -> None:
     # Test setup
     mock_platform = MagicMock()
@@ -37,7 +37,7 @@ def test_del_host_cmd(mock_stdout_print: MagicMock) -> None:
     mock_platform.hosts.delete_host.assert_called_once_with(test_host_config)
     mock_stdout_print.assert_called_once_with("[green]Host deleted successfully![/]")
 
-@patch("dem.cli.command.del_host_cmd.stderr.print")
+@patch("dem.core.commands.del_host_cmd.stderr.print")
 def test_del_host_cmd_not_existing(mock_stderr_print: MagicMock) -> None:
     # Test setup
     mock_platform = MagicMock()

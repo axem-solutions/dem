@@ -3,7 +3,7 @@
 
 # Unit under test:
 import dem.cli.main as main
-import dem.cli.command.add_task_cmd as add_task_cmd
+import dem.core.commands.add_task_cmd as add_task_cmd
 
 # Test framework
 from typer.testing import CliRunner
@@ -15,7 +15,7 @@ from unittest.mock import patch, MagicMock
 # the stdout.
 runner = CliRunner(mix_stderr=False)
 
-@patch("dem.cli.command.add_task_cmd.stdout.print")
+@patch("dem.core.commands.add_task_cmd.stdout.print")
 def test_add_task_cmd(mock_stdout_print: MagicMock) -> None:
     # Setup
     mock_platform = MagicMock()
@@ -35,7 +35,7 @@ def test_add_task_cmd(mock_stdout_print: MagicMock) -> None:
     mock_platform.flush_dev_env_properties.assert_called_once()
     mock_stdout_print.assert_called_once_with("[green]Task [bold]my-task[/bold] added to Development Environment [bold]my-dev-env[/bold]![/]")
 
-@patch("dem.cli.command.add_task_cmd.stderr.print")
+@patch("dem.core.commands.add_task_cmd.stderr.print")
 def test_execute_dev_env_not_found(mock_stderr_print: MagicMock) -> None:
     # Setup
     mock_platform = MagicMock()

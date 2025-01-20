@@ -3,7 +3,7 @@
 
 # Unit under test:
 import dem.cli.main as main
-import dem.cli.command.info_cmd as info_cmd
+import dem.core.commands.info_cmd as info_cmd
 
 # Test framework
 from typer.testing import CliRunner
@@ -15,7 +15,7 @@ from pytest import raises
 # In order to test stdout and stderr separately, the stderr can't be mixed into the stdout.
 runner = CliRunner(mix_stderr=False)
 
-@patch("dem.cli.command.info_cmd.stdout.print")
+@patch("dem.core.commands.info_cmd.stdout.print")
 def test_print_status_not_installed(mock_stdout_print: MagicMock) -> None:
     # Setup
     mock_platform = MagicMock()
@@ -29,7 +29,7 @@ def test_print_status_not_installed(mock_stdout_print: MagicMock) -> None:
     # Verify the output
     mock_stdout_print.assert_called_once_with("Status: Not installed\n")
 
-@patch("dem.cli.command.info_cmd.stdout.print")
+@patch("dem.core.commands.info_cmd.stdout.print")
 def test_print_status_installed(mock_stdout_print: MagicMock) -> None:
     # Setup
     mock_platform = MagicMock()
@@ -44,7 +44,7 @@ def test_print_status_installed(mock_stdout_print: MagicMock) -> None:
     # Verify the output
     mock_stdout_print.assert_called_once_with("Status: [green]Installed[/]\n")
 
-@patch("dem.cli.command.info_cmd.stdout.print")
+@patch("dem.core.commands.info_cmd.stdout.print")
 def test_print_status_installed_default(mock_stdout_print: MagicMock) -> None:
     # Setup
     mock_platform = MagicMock()
@@ -59,9 +59,9 @@ def test_print_status_installed_default(mock_stdout_print: MagicMock) -> None:
     # Verify the output
     mock_stdout_print.assert_called_once_with("Status: [green]Installed | Default[/]\n")
 
-@patch("dem.cli.command.info_cmd.stdout.print")
-@patch("dem.cli.command.info_cmd.print_status")
-@patch("dem.cli.command.info_cmd.Table")
+@patch("dem.core.commands.info_cmd.stdout.print")
+@patch("dem.core.commands.info_cmd.print_status")
+@patch("dem.core.commands.info_cmd.Table")
 def test_print_tools_info_table(mock_Table: MagicMock, mock_print_status: MagicMock, 
                                 mock_stdout_print: MagicMock) -> None:
     # Setup
@@ -98,9 +98,9 @@ def test_print_tools_info_table(mock_Table: MagicMock, mock_print_status: MagicM
     mock_print_status.assert_called_once_with(mock_platform, mock_dev_env)
     mock_stdout_print.assert_called_once_with(mock_table)
 
-@patch("dem.cli.command.info_cmd.stdout.print")
-@patch("dem.cli.command.info_cmd.print_status")
-@patch("dem.cli.command.info_cmd.Table")
+@patch("dem.core.commands.info_cmd.stdout.print")
+@patch("dem.core.commands.info_cmd.print_status")
+@patch("dem.core.commands.info_cmd.Table")
 def test_print_tools_info_table_catalog(mock_Table: MagicMock, mock_print_status: MagicMock, 
                                         mock_stdout_print: MagicMock) -> None:
     # Setup
@@ -133,8 +133,8 @@ def test_print_tools_info_table_catalog(mock_Table: MagicMock, mock_print_status
     mock_table.add_row.assert_has_calls([call("tool1"), call("tool2"), call("tool3"), call("tool4")])
     mock_stdout_print.assert_called_once_with(mock_table)
 
-@patch("dem.cli.command.info_cmd.Table")
-@patch("dem.cli.command.info_cmd.stdout.print")
+@patch("dem.core.commands.info_cmd.Table")
+@patch("dem.core.commands.info_cmd.stdout.print")
 def test_print_tasks_info_table(mock_stdout_print: MagicMock, mock_Table: MagicMock) -> None:
     # Setup
     mock_dev_env = MagicMock()
@@ -154,9 +154,9 @@ def test_print_tasks_info_table(mock_stdout_print: MagicMock, mock_Table: MagicM
     mock_table.add_row.assert_has_calls([call("task1", "command1"), call("task2", "command2")])
     mock_stdout_print.assert_called_once_with(mock_table)
 
-@patch("dem.cli.command.info_cmd.print_tasks_info_table")
-@patch("dem.cli.command.info_cmd.print_tools_info_table")
-@patch("dem.cli.command.info_cmd.stdout.print")
+@patch("dem.core.commands.info_cmd.print_tasks_info_table")
+@patch("dem.core.commands.info_cmd.print_tools_info_table")
+@patch("dem.core.commands.info_cmd.stdout.print")
 def test_print_local_dev_env_info(mock_stdout_print: MagicMock, 
                                   mock_print_tools_info_table: MagicMock, 
                                   mock_print_tasks_info_table: MagicMock) -> None:
@@ -178,10 +178,10 @@ def test_print_local_dev_env_info(mock_stdout_print: MagicMock,
     mock_print_tasks_info_table.assert_called_once_with(mock_dev_env)
     mock_dev_env.is_installation_correct.assert_called_once()
 
-@patch("dem.cli.command.info_cmd.print_tasks_info_table")
-@patch("dem.cli.command.info_cmd.print_tools_info_table")
-@patch("dem.cli.command.info_cmd.stdout.print")
-@patch("dem.cli.command.info_cmd.stderr.print")
+@patch("dem.core.commands.info_cmd.print_tasks_info_table")
+@patch("dem.core.commands.info_cmd.print_tools_info_table")
+@patch("dem.core.commands.info_cmd.stdout.print")
+@patch("dem.core.commands.info_cmd.stderr.print")
 def test_print_local_dev_env_info_incorrect_install(mock_stderr_print: MagicMock,
                                                     mock_stdout_print: MagicMock, 
                                                     mock_print_tools_info_table: MagicMock,
@@ -205,7 +205,7 @@ def test_print_local_dev_env_info_incorrect_install(mock_stderr_print: MagicMock
     mock_dev_env.is_installation_correct.assert_called_once()
     mock_stderr_print.assert_called_once_with("\n[red]Error: Incorrect local install![/]")
 
-@patch("dem.cli.command.info_cmd.print_local_dev_env_info")
+@patch("dem.core.commands.info_cmd.print_local_dev_env_info")
 def test_local_info(mock_print_local_dev_env_info: MagicMock) -> None:
     # Setup
     mock_platform = MagicMock()
@@ -220,7 +220,7 @@ def test_local_info(mock_print_local_dev_env_info: MagicMock) -> None:
     mock_platform.get_dev_env_by_name.assert_called_once_with("test_dev_env")
     mock_print_local_dev_env_info.assert_called_once_with(mock_platform, mock_dev_env)
 
-@patch("dem.cli.command.info_cmd.stderr.print")
+@patch("dem.core.commands.info_cmd.stderr.print")
 def test_local_info_unknown_dev_env(mock_stderr_print: MagicMock) -> None:
     # Setup
     mock_platform = MagicMock()
@@ -235,9 +235,9 @@ def test_local_info_unknown_dev_env(mock_stderr_print: MagicMock) -> None:
     mock_platform.get_dev_env_by_name.assert_called_once_with("unknown_dev_env")
     mock_stderr_print.assert_called_once_with("[red]Error: Unknown Development Environment: unknown_dev_env[/]\n")
 
-@patch("dem.cli.command.info_cmd.print_tasks_info_table")
-@patch("dem.cli.command.info_cmd.print_tools_info_table")
-@patch("dem.cli.command.info_cmd.stdout.print")
+@patch("dem.core.commands.info_cmd.print_tasks_info_table")
+@patch("dem.core.commands.info_cmd.print_tools_info_table")
+@patch("dem.core.commands.info_cmd.stdout.print")
 def test_print_cat_dev_env_info(mock_stdout_print: MagicMock, 
                                 mock_print_tools_info_table: MagicMock,
                                 mock_print_tasks_info_table: MagicMock) -> None:
@@ -255,7 +255,7 @@ def test_print_cat_dev_env_info(mock_stdout_print: MagicMock,
     mock_print_tools_info_table.assert_called_once_with(mock_dev_env, False)
     mock_print_tasks_info_table.assert_called_once_with(mock_dev_env)
 
-@patch("dem.cli.command.info_cmd.print_cat_dev_env_info")
+@patch("dem.core.commands.info_cmd.print_cat_dev_env_info")
 def test_cat_dev_env_info(mock_print_cat_dev_env_info: MagicMock) -> None:
     # Setup
     mock_dev_env = MagicMock()
@@ -274,7 +274,7 @@ def test_cat_dev_env_info(mock_print_cat_dev_env_info: MagicMock) -> None:
     mock_catalog.get_dev_env_by_name.assert_called_once_with(test_dev_env_name)
     mock_print_cat_dev_env_info.assert_called_once_with(mock_dev_env, "test_cat")
 
-@patch("dem.cli.command.info_cmd.stderr.print")
+@patch("dem.core.commands.info_cmd.stderr.print")
 def test_cat_dev_env_info_unknown_dev_env(mock_stderr_print: MagicMock) -> None:
     # Setup
     mock_platform = MagicMock()
@@ -291,7 +291,7 @@ def test_cat_dev_env_info_unknown_dev_env(mock_stderr_print: MagicMock) -> None:
     mock_catalog.get_dev_env_by_name.assert_called_once_with(test_dev_env_name)
     mock_stderr_print.assert_called_once_with("[red]Error: Unknown Development Environment: test_dev_env[/]\n")
 
-@patch("dem.cli.command.info_cmd.stderr.print")
+@patch("dem.core.commands.info_cmd.stderr.print")
 def test_selected_cats_info_unknown_catalog(mock_stderr_print: MagicMock) -> None:
     # Setup
     mock_platform = MagicMock()
@@ -307,7 +307,7 @@ def test_selected_cats_info_unknown_catalog(mock_stderr_print: MagicMock) -> Non
     # Verify the output
     mock_stderr_print.assert_called_once_with("[red]Error: Unknown catalog(s): unknown_cat[/]\n")
 
-@patch("dem.cli.command.info_cmd.cat_dev_env_info")
+@patch("dem.core.commands.info_cmd.cat_dev_env_info")
 def test_selected_cats_info(mock_cat_dev_env_info: MagicMock) -> None:
     # Setup
     mock_platform = MagicMock()
@@ -322,7 +322,7 @@ def test_selected_cats_info(mock_cat_dev_env_info: MagicMock) -> None:
     # Verify the output
     mock_cat_dev_env_info.assert_called_once_with(mock_platform, test_dev_env_name, { "test_cat" })
 
-@patch("dem.cli.command.info_cmd.cat_dev_env_info")
+@patch("dem.core.commands.info_cmd.cat_dev_env_info")
 def test_all_cats_info(mock_cat_dev_env_info: MagicMock) -> None:
     # Setup
     mock_platform = MagicMock()
@@ -334,7 +334,7 @@ def test_all_cats_info(mock_cat_dev_env_info: MagicMock) -> None:
     # Verify the output
     mock_cat_dev_env_info.assert_called_once_with(mock_platform, test_dev_env_name, [])
 
-@patch("dem.cli.command.info_cmd.local_info")
+@patch("dem.core.commands.info_cmd.local_info")
 def test_execute_local_info(mock_local_info: MagicMock) -> None:
     # Setup
     mock_platform = MagicMock()
@@ -346,7 +346,7 @@ def test_execute_local_info(mock_local_info: MagicMock) -> None:
     # Verify the output
     mock_local_info.assert_called_once_with(mock_platform, test_dev_env_name)
 
-@patch("dem.cli.command.info_cmd.selected_cats_info")
+@patch("dem.core.commands.info_cmd.selected_cats_info")
 def test_execute_selected_cats_info(mock_selected_cats_info: MagicMock) -> None:
     # Setup
     mock_platform = MagicMock()
@@ -358,7 +358,7 @@ def test_execute_selected_cats_info(mock_selected_cats_info: MagicMock) -> None:
     # Verify the output
     mock_selected_cats_info.assert_called_once_with(mock_platform, test_dev_env_name, ["test_cat"])
 
-@patch("dem.cli.command.info_cmd.all_cats_info")
+@patch("dem.core.commands.info_cmd.all_cats_info")
 def test_execute_all_cats_info(mock_all_cats_info: MagicMock) -> None:
     # Setup
     mock_platform = MagicMock()
@@ -370,7 +370,7 @@ def test_execute_all_cats_info(mock_all_cats_info: MagicMock) -> None:
     # Verify the output
     mock_all_cats_info.assert_called_once_with(mock_platform, test_dev_env_name)
 
-@patch("dem.cli.command.info_cmd.execute")
+@patch("dem.core.commands.info_cmd.execute")
 def test_info_cmd(mock_execute: MagicMock) -> None:
     # Setup
     mock_platform = MagicMock()

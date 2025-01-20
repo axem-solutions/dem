@@ -6,6 +6,7 @@ from dem.cli.console import stderr, stdout
 from dem.core.exceptions import RegistryError, ContainerEngineError, InternalError, DataStorageError, \
                                 CatalogError, ToolImageError
 import dem.cli.main
+import dem.api.main
 from dem.core.core import Core
 from dem.core.platform import Platform
 from dem.cli.tui.tui_user_output import TUIUserOutput
@@ -13,10 +14,12 @@ import docker.errors
 import typer
 
 def main() -> None:
-    """ Entry point for the CLI application"""
+    """ Entry point for DEM"""
 
     # Create the Development Platform
-    dem.cli.main.platform = Platform()
+    platform = Platform()
+    dem.cli.main.platform = platform
+    dem.api.main.platform = platform
 
     # Connect the UI to the user output interface
     Core.set_user_output(TUIUserOutput())
@@ -57,6 +60,11 @@ def main() -> None:
             elif "dev_env.json" in str(e):
                 stdout.print("Restoring the original Dev Env descriptor file...")
                 dem.cli.main.platform.dev_env_json.restore()
+    
+    finally:
+        # Close the API server if it's running
+        if platform.api_server.server.started:
+            platform.api_server.stop()
 
 # Call the main() when run as `python -m`
 if __name__ == "__main__":

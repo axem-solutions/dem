@@ -4,7 +4,7 @@
 # Unit under test:
 from mock import patch
 import dem.cli.main as main
-import dem.cli.command.import_cmd as import_cmd
+import dem.core.commands.import_cmd as import_cmd
 
 # Test framework
 import io
@@ -20,9 +20,9 @@ import json
 # the stdout.
 runner = CliRunner(mix_stderr=False)
 
-@patch("dem.cli.command.import_cmd.stderr.print")
-@patch("dem.cli.command.import_cmd.json.load")
-@patch("dem.cli.command.import_cmd.open")
+@patch("dem.core.commands.import_cmd.stderr.print")
+@patch("dem.core.commands.import_cmd.json.load")
+@patch("dem.core.commands.import_cmd.open")
 def test_import_dev_env_from_json_already_exist(mock_open: MagicMock, mock_json: MagicMock, 
                                                 mock_stderr_print: MagicMock):
     # Test setup
@@ -50,9 +50,9 @@ def test_import_dev_env_from_json_already_exist(mock_open: MagicMock, mock_json:
     mock_platform.get_dev_env_by_name.assert_called()
     mock_stderr_print.assert_called_once_with("[red]Error: The Development Environment already exists.[/]")
 
-@patch("dem.cli.command.import_cmd.DevEnv")
-@patch("dem.cli.command.import_cmd.json.load")
-@patch("dem.cli.command.import_cmd.open")
+@patch("dem.core.commands.import_cmd.DevEnv")
+@patch("dem.core.commands.import_cmd.json.load")
+@patch("dem.core.commands.import_cmd.open")
 def test_import_dev_env_from_json(mock_open, mock_json, mock_DevEnvLocal: MagicMock):
     # Test setup
     mock_platform = MagicMock()
@@ -80,8 +80,8 @@ def test_import_dev_env_from_json(mock_open, mock_json, mock_DevEnvLocal: MagicM
     mock_DevEnvLocal.assert_called_once_with(test_dev_env)
     fake_opened_file.close.assert_called() 
 
-@patch("dem.cli.command.import_cmd.open",MagicMock())
-@patch("dem.cli.command.import_cmd.json.load")
+@patch("dem.core.commands.import_cmd.open",MagicMock())
+@patch("dem.core.commands.import_cmd.json.load")
 def test_json_decode_error(mock_json):
      # Test setup
     mock_platform = MagicMock()
@@ -106,8 +106,8 @@ def test_with_invalid_file():
     console.print("[red]Error: The input file does not exist.[/]")
     assert console.file.getvalue() == runner_result.stderr
 
-@patch("dem.cli.command.import_cmd.import_dev_env_from_json")
-@patch("dem.cli.command.import_cmd.os.path.exists")
+@patch("dem.core.commands.import_cmd.import_dev_env_from_json")
+@patch("dem.core.commands.import_cmd.os.path.exists")
 def test_execution(mock_os_path_exists: MagicMock, mock_import_dev_env_from_json: MagicMock) -> None:
     # Test setup
     mock_platform = MagicMock()

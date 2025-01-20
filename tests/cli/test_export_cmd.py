@@ -4,7 +4,7 @@
 # Unit under test:
 from mock import patch
 import dem.cli.main as main
-import dem.cli.command.export_cmd as export_cmd
+import dem.core.commands.export_cmd as export_cmd
 
 # Test framework
 import io
@@ -17,7 +17,7 @@ from rich.console import Console
 # the stdout.
 runner = CliRunner(mix_stderr=False)
 
-@patch("dem.cli.command.export_cmd.os.path.isdir")
+@patch("dem.core.commands.export_cmd.os.path.isdir")
 def test_export_path_is_dir(mock_isdir: MagicMock):
     # Test setup
     test_export_path = "fake_export_path"
@@ -33,7 +33,7 @@ def test_export_path_is_dir(mock_isdir: MagicMock):
     mock_isdir.assert_called_once_with(test_export_path)
     mock_dev_env.export.assert_called_once_with(f"{test_export_path}/{mock_dev_env.name}.json")
 
-@patch("dem.cli.command.export_cmd.os.path.isdir")
+@patch("dem.core.commands.export_cmd.os.path.isdir")
 def test_export_path_is_file(mock_isdir: MagicMock):
     # Test setup
     test_export_path = "fake_export_path.json"
@@ -49,7 +49,7 @@ def test_export_path_is_file(mock_isdir: MagicMock):
     mock_isdir.assert_called_once_with(test_export_path)
     mock_dev_env.export.assert_called_once_with(test_export_path)
 
-@patch("dem.cli.command.export_cmd.os.path.isdir")
+@patch("dem.core.commands.export_cmd.os.path.isdir")
 def test_export_path_is_empty(mock_isdir: MagicMock):
     # Test setup
     test_export_path = ""
@@ -64,7 +64,7 @@ def test_export_path_is_empty(mock_isdir: MagicMock):
     # Check expectations
     mock_dev_env.export.assert_called_once_with(f"{mock_dev_env.name}.json")
 
-@patch("dem.cli.command.export_cmd.export")
+@patch("dem.core.commands.export_cmd.export")
 def test_execute(mock_export: MagicMock):
     # Test setup
     test_dev_env_name = "fake_dev_env_name"
@@ -84,7 +84,7 @@ def test_execute(mock_export: MagicMock):
     mock_platform.get_dev_env_by_name.assert_called_once_with(test_dev_env_name)
     mock_export.assert_called_once_with(mock_dev_env, test_export_path)
 
-@patch("dem.cli.command.export_cmd.stderr.print")
+@patch("dem.core.commands.export_cmd.stderr.print")
 def test_execute_dev_env_not_found(mock_stderr_print: MagicMock):
     # Test setup
     test_dev_env_name = "fake_dev_env_name"
@@ -103,8 +103,8 @@ def test_execute_dev_env_not_found(mock_stderr_print: MagicMock):
     mock_platform.get_dev_env_by_name.assert_called_once_with(test_dev_env_name)
     mock_stderr_print.assert_called_once_with("[red]Error: The input Development Environment does not exist.[/]")
 
-@patch("dem.cli.command.export_cmd.stderr.print")
-@patch("dem.cli.command.export_cmd.export")
+@patch("dem.core.commands.export_cmd.stderr.print")
+@patch("dem.core.commands.export_cmd.export")
 def test_execute_invalid_path(mock_export: MagicMock, mock_stderr_print: MagicMock):
     # Test setup
     test_dev_env_name = "fake_dev_env_name"

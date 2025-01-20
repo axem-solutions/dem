@@ -2,15 +2,15 @@
 # tests/cli/test_assign_cmd.py
 
 # Unit under test:
-import dem.cli.command.init_cmd as init_cmd
+import dem.core.commands.init_cmd as init_cmd
 
 # Test framework
 from unittest.mock import MagicMock, patch, call
 
-@patch("dem.cli.command.init_cmd.os.path.isdir")
-@patch("dem.cli.command.init_cmd.stdout.print")
-@patch("dem.cli.command.init_cmd.typer.confirm")
-@patch("dem.cli.command.init_cmd.DevEnv")
+@patch("dem.core.commands.init_cmd.os.path.isdir")
+@patch("dem.core.commands.init_cmd.stdout.print")
+@patch("dem.core.commands.init_cmd.typer.confirm")
+@patch("dem.core.commands.init_cmd.DevEnv")
 def test_execute(mock_DevEnv, mock_confirm, mock_stdout_print, mock_isdir) -> None:
     # Test setup
     mock_platform = MagicMock()
@@ -36,8 +36,8 @@ def test_execute(mock_DevEnv, mock_confirm, mock_stdout_print, mock_isdir) -> No
     mock_stdout_print.assert_has_calls([call(f"[green]Successfully initialized the {mock_dev_env_name} Dev Env for the project at {mock_project_path}![/]"),
                                         call(f"\nNow you can install the Dev Env with the `dem install {mock_dev_env_name}` command.")])
 
-@patch("dem.cli.command.init_cmd.os.path.isdir")
-@patch("dem.cli.command.init_cmd.stderr.print")
+@patch("dem.core.commands.init_cmd.os.path.isdir")
+@patch("dem.core.commands.init_cmd.stderr.print")
 def test_execute_project_path_not_existing(mock_stderr_print, mock_isdir) -> None:
     # Test setup
     mock_platform = MagicMock()
@@ -51,9 +51,9 @@ def test_execute_project_path_not_existing(mock_stderr_print, mock_isdir) -> Non
     mock_isdir.assert_called_once_with(mock_project_path)
     mock_stderr_print.assert_called_once_with(f"[red]Error: The {mock_project_path} path does not exist.[/]")
 
-@patch("dem.cli.command.init_cmd.os.path.isdir")
-@patch("dem.cli.command.init_cmd.stderr.print")
-@patch("dem.cli.command.init_cmd.DevEnv")
+@patch("dem.core.commands.init_cmd.os.path.isdir")
+@patch("dem.core.commands.init_cmd.stderr.print")
+@patch("dem.core.commands.init_cmd.DevEnv")
 def test_execute_missing_descriptor(mock_DevEnv, mock_stderr_print, mock_isdir) -> None:
     # Test setup
     mock_platform = MagicMock()
@@ -69,10 +69,10 @@ def test_execute_missing_descriptor(mock_DevEnv, mock_stderr_print, mock_isdir) 
     mock_DevEnv.assert_called_once_with(descriptor_path=f"{mock_project_path}/.axem/dev_env_descriptor.json")
     mock_stderr_print.assert_called_once_with("[red]Error: No Dev Env is assigned to this project. You can assign one with `dem assign`.")
 
-@patch("dem.cli.command.init_cmd.os.path.isdir")
-@patch("dem.cli.command.init_cmd.stdout.print")
-@patch("dem.cli.command.init_cmd.typer.confirm")
-@patch("dem.cli.command.init_cmd.DevEnv")
+@patch("dem.core.commands.init_cmd.os.path.isdir")
+@patch("dem.core.commands.init_cmd.stdout.print")
+@patch("dem.core.commands.init_cmd.typer.confirm")
+@patch("dem.core.commands.init_cmd.DevEnv")
 def test_execute_reinit_installed(mock_DevEnv, mock_confirm, mock_stdout_print, mock_isdir) -> None:
     # Test setup
     mock_platform = MagicMock()
@@ -109,10 +109,10 @@ def test_execute_reinit_installed(mock_DevEnv, mock_confirm, mock_stdout_print, 
         call(f"[green]Successfully initialized the {mock_dev_env_name} Dev Env for the project at {mock_project_path}![/]"),
         call(f"\nNow you can install the Dev Env with the `dem install {mock_dev_env_name}` command.")])
 
-@patch("dem.cli.command.init_cmd.os.path.isdir")
-@patch("dem.cli.command.init_cmd.stderr.print")
-@patch("dem.cli.command.init_cmd.typer.confirm")
-@patch("dem.cli.command.init_cmd.DevEnv")
+@patch("dem.core.commands.init_cmd.os.path.isdir")
+@patch("dem.core.commands.init_cmd.stderr.print")
+@patch("dem.core.commands.init_cmd.typer.confirm")
+@patch("dem.core.commands.init_cmd.DevEnv")
 def test_execute_reinit_installed_uninstall_fails(mock_DevEnv, mock_confirm, mock_stderr_print, 
                                                   mock_isdir) -> None:
     # Test setup

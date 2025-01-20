@@ -3,7 +3,7 @@
 
 # Unit under test:
 import dem.cli.main as main
-import dem.cli.command.clone_cmd as clone_cmd
+import dem.core.commands.clone_cmd as clone_cmd
 
 # Test framework
 from typer.testing import CliRunner
@@ -13,8 +13,8 @@ import pytest
 # In order to test stdout and stderr separately, the stderr can't be mixed into the stdout.
 runner = CliRunner(mix_stderr=False)
 
-@patch("dem.cli.command.clone_cmd.typer.confirm")
-@patch("dem.cli.command.clone_cmd.stdout.print")
+@patch("dem.core.commands.clone_cmd.typer.confirm")
+@patch("dem.core.commands.clone_cmd.stdout.print")
 def test_handle_existing_local_dev_env(mock_stdout_print: MagicMock, mock_typer_confirm: MagicMock):
     # Test setup
     mock_platform = MagicMock()
@@ -37,9 +37,9 @@ def test_handle_existing_local_dev_env(mock_stdout_print: MagicMock, mock_typer_
     mock_platform.uninstall_dev_env.assert_called_once_with(mock_local_dev_env)
     mock_platform.local_dev_envs.remove.assert_called_once_with(mock_local_dev_env)
 
-@patch("dem.cli.command.clone_cmd.stderr.print")
-@patch("dem.cli.command.clone_cmd.typer.confirm")
-@patch("dem.cli.command.clone_cmd.stdout.print")
+@patch("dem.core.commands.clone_cmd.stderr.print")
+@patch("dem.core.commands.clone_cmd.typer.confirm")
+@patch("dem.core.commands.clone_cmd.stdout.print")
 def test_handle_existing_local_dev_env_PlatformError(mock_stdout_print: MagicMock, 
                                                      mock_typer_confirm: MagicMock,
                                                      mock_stderr_print: MagicMock):
@@ -97,7 +97,7 @@ def test_execute_dev_env_not_available_in_catalog() -> None:
 
     mock_catalog.get_dev_env_by_name.assert_called_once_with(test_dev_env_name)
 
-@patch("dem.cli.command.clone_cmd.handle_existing_local_dev_env")
+@patch("dem.core.commands.clone_cmd.handle_existing_local_dev_env")
 def test_execute_success(mock_handle_existing_local_dev_env: MagicMock) -> None:
     # Test setup
     mock_platform = MagicMock()

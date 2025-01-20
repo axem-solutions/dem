@@ -3,7 +3,7 @@
 
 # Unit under test:
 import dem.cli.main as main
-import dem.cli.command.assign_cmd as assign_cmd
+import dem.core.commands.assign_cmd as assign_cmd
 
 # Test framework
 from typer.testing import CliRunner
@@ -13,8 +13,8 @@ from click.testing import Result
 # In order to test stdout and stderr separately, the stderr can't be mixed into the stdout.
 runner = CliRunner(mix_stderr=False)
 
-@patch("dem.cli.command.assign_cmd.os.path.isdir")
-@patch("dem.cli.command.assign_cmd.stdout.print")
+@patch("dem.core.commands.assign_cmd.os.path.isdir")
+@patch("dem.core.commands.assign_cmd.stdout.print")
 def test_assign(mock_stdout_print: MagicMock, mock_isdir: MagicMock) -> None:
     # Test setup
     mock_platform = MagicMock()
@@ -40,8 +40,8 @@ def test_assign(mock_stdout_print: MagicMock, mock_isdir: MagicMock) -> None:
     mock_platform.assign_dev_env.assert_called_once_with(mock_dev_env, test_project_path)
     mock_stdout_print.assert_called_once_with(f"\n[green]Successfully assigned the {test_dev_env_name} Dev Env to the project at {test_project_path}![/]")
 
-@patch("dem.cli.command.assign_cmd.stderr.print")
-@patch("dem.cli.command.assign_cmd.os.path.isdir")
+@patch("dem.core.commands.assign_cmd.stderr.print")
+@patch("dem.core.commands.assign_cmd.os.path.isdir")
 def test_assign_invalid_path(mock_isdir: MagicMock, mock_stderr_print: MagicMock) -> None:
     # Test setup
     mock_platform = MagicMock()
@@ -58,8 +58,8 @@ def test_assign_invalid_path(mock_isdir: MagicMock, mock_stderr_print: MagicMock
     mock_isdir.assert_called_once_with(test_project_path)
     mock_stderr_print.assert_called_once_with(f"[red]Error: The {test_project_path} path does not exist.[/]")
 
-@patch("dem.cli.command.assign_cmd.stderr.print")
-@patch("dem.cli.command.assign_cmd.os.path.isdir")
+@patch("dem.core.commands.assign_cmd.stderr.print")
+@patch("dem.core.commands.assign_cmd.os.path.isdir")
 def test_assign_invalid_dev_env(mock_isdir: MagicMock, mock_stderr_print: MagicMock) -> None:
     # Test setup
     mock_platform = MagicMock()

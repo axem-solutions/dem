@@ -3,7 +3,7 @@
 
 # Unit under test:
 import dem.cli.main as main
-from dem.cli.command import list_cat_cmd
+from dem.core.commands import list_cat_cmd
 
 # Test framework
 from typer.testing import CliRunner
@@ -15,8 +15,8 @@ from unittest.mock import patch, MagicMock, call
 runner = CliRunner(mix_stderr=False)
 
 ## Test cases
-@patch("dem.cli.command.list_cat_cmd.Table")
-@patch("dem.cli.command.list_cat_cmd.stdout.print")
+@patch("dem.core.commands.list_cat_cmd.Table")
+@patch("dem.core.commands.list_cat_cmd.stdout.print")
 def test_list_cat(mock_stdout_print: MagicMock, mock_Table: MagicMock) -> None:
     # Test setup
     mock_platform = MagicMock()
@@ -54,8 +54,8 @@ def test_list_cat(mock_stdout_print: MagicMock, mock_Table: MagicMock) -> None:
     mock_table.add_row.assert_has_calls(calls)
     mock_stdout_print.assert_called_once_with(mock_table)
 
-@patch("dem.cli.command.list_cat_cmd.Table")
-@patch("dem.cli.command.list_cat_cmd.stdout.print")
+@patch("dem.core.commands.list_cat_cmd.Table")
+@patch("dem.core.commands.list_cat_cmd.stdout.print")
 def test_list_cat_non_available(mock_stdout_print: MagicMock, mock_Table) -> None:
     # Test setup
     mock_platform = MagicMock()
@@ -76,8 +76,8 @@ def test_list_cat_non_available(mock_stdout_print: MagicMock, mock_Table) -> Non
 
     mock_stdout_print.assert_called_once_with("[yellow]No Development Environment Catalogs are available![/]")
 
-@patch("dem.cli.command.list_cat_cmd.Table")
-@patch("dem.cli.command.list_cat_cmd.stderr.print")
+@patch("dem.core.commands.list_cat_cmd.Table")
+@patch("dem.core.commands.list_cat_cmd.stderr.print")
 def test_list_cat_failure(mock_stderr_print: MagicMock, mock_Table: MagicMock) -> None:
     # Test setup
     mock_platform = MagicMock()

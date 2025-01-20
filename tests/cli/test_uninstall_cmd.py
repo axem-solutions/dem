@@ -2,7 +2,7 @@
 
 # Unit under test:
 import dem.cli.main as main
-import dem.cli.command.uninstall_cmd as uninstall_cmd
+import dem.core.commands.uninstall_cmd as uninstall_cmd
 
 # Test framework
 from typer.testing import CliRunner
@@ -11,7 +11,7 @@ from unittest.mock import patch, MagicMock, call
 ## Global test variables
 runner = CliRunner()
 
-@patch("dem.cli.command.uninstall_cmd.stderr.print")
+@patch("dem.core.commands.uninstall_cmd.stderr.print")
 def test_uninstall_dev_env_invalid_name(mock_stderr_print):
     # Test setup
     test_invalid_name = "fake_dev_env_name"
@@ -29,7 +29,7 @@ def test_uninstall_dev_env_invalid_name(mock_stderr_print):
     mock_platform.get_dev_env_by_name.assert_called_once_with(test_invalid_name)
     mock_stderr_print.assert_called_once_with(f"[red]Error: The {test_invalid_name} Development Environment does not exist.[/]")
 
-@patch("dem.cli.command.uninstall_cmd.stdout.print")
+@patch("dem.core.commands.uninstall_cmd.stdout.print")
 def test_uninstall_dev_env_valid_name(mock_stdout_print: MagicMock) -> None:
      # Test setup
     fake_dev_env_to_uninstall = MagicMock()
@@ -58,7 +58,7 @@ def test_uninstall_dev_env_valid_name(mock_stdout_print: MagicMock) -> None:
         call(f"[green]Successfully uninstalled the {fake_dev_env_to_uninstall.name}![/]")
     ])
 
-@patch("dem.cli.command.uninstall_cmd.stderr.print")
+@patch("dem.core.commands.uninstall_cmd.stderr.print")
 def test_uninstall_dev_env_valid_name_not_installed(mock_stderr_print):
      # Test setup
     fake_dev_env_to_uninstall = MagicMock()
@@ -77,7 +77,7 @@ def test_uninstall_dev_env_valid_name_not_installed(mock_stderr_print):
     mock_platform.get_dev_env_by_name.assert_called_once_with(fake_dev_env_to_uninstall.name)
     mock_stderr_print.assert_called_once_with(f"[red]Error: The {fake_dev_env_to_uninstall.name} Development Environment is not installed.[/]")
 
-@patch("dem.cli.command.uninstall_cmd.stderr.print")
+@patch("dem.core.commands.uninstall_cmd.stderr.print")
 def test_uninstall_dev_env_valid_name_failed(mock_stderr_print):
      # Test setup
     fake_dev_env_to_uninstall = MagicMock()

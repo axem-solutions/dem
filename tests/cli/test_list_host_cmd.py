@@ -14,8 +14,8 @@ from unittest.mock import patch, MagicMock, call
 runner = CliRunner(mix_stderr=False)
 
 ## Test cases
-@patch("dem.cli.command.list_host_cmd.Table")
-@patch("dem.cli.command.list_host_cmd.stdout.print")
+@patch("dem.core.commands.list_host_cmd.Table")
+@patch("dem.core.commands.list_host_cmd.stdout.print")
 def test_list_host(mock_stdout_print: MagicMock, mock_Table: MagicMock):
     # Test setup
     mock_platform = MagicMock()
@@ -50,8 +50,8 @@ def test_list_host(mock_stdout_print: MagicMock, mock_Table: MagicMock):
 
     mock_stdout_print.assert_called_once_with(mock_table)
 
-@patch("dem.cli.command.list_host_cmd.Table")
-@patch("dem.cli.command.list_host_cmd.stdout.print")
+@patch("dem.core.commands.list_host_cmd.Table")
+@patch("dem.core.commands.list_host_cmd.stdout.print")
 def test_list_host_non_available(mock_stdout_print: MagicMock, mock_Table: MagicMock):
 
     # Test setup
