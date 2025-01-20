@@ -13,13 +13,22 @@ from dem.core.registry import Registries
 from dem.core.tool_images import ToolImages, ToolImage
 from dem.core.dev_env import DevEnv
 from dem.core.hosts import Hosts
+from dem.core.api_server import APIServer
+from fastapi import FastAPI
 
 class Platform(Core):
     """ Representation of the Development Platform:
         - The available tool images.
         - The available Development Environments.
         - External resources.
+
+        The Development Platform is a singleton class. The instance can be accessed through the
+        platform variable.
+
+        Attributes:
+            fastapi_app -- the FastAPI application
     """
+    fastapi_app = FastAPI()
 
     def _dev_env_json_version_check(self, dev_env_json_major_version: int) -> None:
         """ Check that the json file is supported.
@@ -41,6 +50,7 @@ class Platform(Core):
         self.default_dev_env_name: str = ""
         self.local_dev_envs: list[DevEnv] = []
         self.are_tool_images_assigned: bool = False
+        self.api_server = APIServer(self.fastapi_app)
 
         # Set this to true in the platform instance to get the tool image info from the registries
         self.get_tool_image_info_from_registries = False

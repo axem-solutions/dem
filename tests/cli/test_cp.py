@@ -3,7 +3,7 @@
 
 # Unit under test:
 import dem.cli.main as main
-import dem.cli.command.cp_cmd as cp_cmd
+import dem.core.commands.cp_cmd as cp_cmd
 
 # Test framework
 from typer.testing import CliRunner
@@ -30,7 +30,7 @@ def test_check_dev_env_to_cp_exist():
 
     dev_env_local_setup.get_dev_env_by_name.assert_called_once_with(test_name)
 
-@patch("dem.cli.command.cp_cmd.stderr.print")
+@patch("dem.core.commands.cp_cmd.stderr.print")
 def test_check_dev_env_to_cp_not_exist(mock_stderr_print):
     # Test setup
     fake_name = "fake_env_name"
@@ -60,7 +60,7 @@ def test_check_new_dev_env_name_not_taken():
 
     dev_env_local_setup.get_dev_env_by_name.assert_called_once_with(cpd_name)
 
-@patch("dem.cli.command.cp_cmd.stderr.print")
+@patch("dem.core.commands.cp_cmd.stderr.print")
 def test_check_new_dev_env_name_taken(mock_stderr_print):
     # Test setup
     cpd_name = "dev_env_name"
@@ -97,9 +97,9 @@ def test_cp_given_dev_env():
 
     mock_platform.flush_dev_env_properties.assert_called_once()
 
-@patch("dem.cli.command.cp_cmd.get_dev_env_to_cp")
-@patch("dem.cli.command.cp_cmd.check_new_dev_env_name_taken")
-@patch("dem.cli.command.cp_cmd.cp_given_dev_env")
+@patch("dem.core.commands.cp_cmd.get_dev_env_to_cp")
+@patch("dem.core.commands.cp_cmd.check_new_dev_env_name_taken")
+@patch("dem.core.commands.cp_cmd.cp_given_dev_env")
 def test_cp(mock_cp_given_dev_env, mock_check_new_dev_env_name_taken, 
                mock_get_dev_env_to_cp):
     # Test setup

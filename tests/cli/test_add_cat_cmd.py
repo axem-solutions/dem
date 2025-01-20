@@ -3,7 +3,7 @@
 
 # Unit under test:
 import dem.cli.main as main
-from dem.cli.command import add_cat_cmd
+from dem.core.commands import add_cat_cmd
 
 # Test framework
 from typer.testing import CliRunner
@@ -15,7 +15,7 @@ from unittest.mock import patch, MagicMock, call
 runner = CliRunner(mix_stderr=False)
 
 ## Test cases
-@patch("dem.cli.command.add_cat_cmd.stdout.print")
+@patch("dem.core.commands.add_cat_cmd.stdout.print")
 def test_add_cat(mock_stdout_print: MagicMock) -> None:
     # Test setup
     mock_platform = MagicMock()
@@ -33,7 +33,7 @@ def test_add_cat(mock_stdout_print: MagicMock) -> None:
     mock_platform.dev_env_catalogs.add_catalog.assert_called_once_with(test_name, test_url)
     mock_stdout_print.assert_called_once_with("[green]The catalog has been successfully added.[/]")
 
-@patch("dem.cli.command.add_cat_cmd.stderr.print")
+@patch("dem.core.commands.add_cat_cmd.stderr.print")
 def test_add_cat_failure(mock_stderr_print: MagicMock) -> None:
     # Test setup
     mock_platform = MagicMock()

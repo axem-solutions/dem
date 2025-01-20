@@ -3,7 +3,7 @@
 
 # Unit under test:
 import dem.cli.main as main
-import dem.cli.command.list_tools_cmd as list_tools_cmd
+import dem.core.commands.list_tools_cmd as list_tools_cmd
 
 # Test framework
 from typer.testing import CliRunner
@@ -16,7 +16,7 @@ from pytest import raises
 # the stdout.
 runner = CliRunner(mix_stderr=False)
 
-@patch("dem.cli.command.list_tools_cmd.stdout.print")
+@patch("dem.core.commands.list_tools_cmd.stdout.print")
 def test_list_local_tools_no_local_tool_images(mock_print: MagicMock) -> None:
     # Setup
     mock_platform = MagicMock()
@@ -29,7 +29,7 @@ def test_list_local_tools_no_local_tool_images(mock_print: MagicMock) -> None:
     # Check the result
     mock_print.assert_called_once_with("[yellow]No local tool images are available.[/]")
 
-@patch("dem.cli.command.list_tools_cmd.stdout.print")
+@patch("dem.core.commands.list_tools_cmd.stdout.print")
 def test_list_local_tools(mock_print: MagicMock) -> None:
     # Setup
     mock_platform = MagicMock()
@@ -44,7 +44,7 @@ def test_list_local_tools(mock_print: MagicMock) -> None:
     mock_print.assert_has_calls([call("\n [italic]Local Tool Images[/]"), 
                                  call("  test_tool_image")])
 
-@patch("dem.cli.command.list_tools_cmd.stderr.print")
+@patch("dem.core.commands.list_tools_cmd.stderr.print")
 def test_update_tools_from_seleted_regs_unknown_registry(mock_print: MagicMock) -> None:
     # Setup
     mock_platform = MagicMock()
@@ -99,10 +99,10 @@ def test_list_tools_from_regs() -> None:
                                          call("test_tool_image1", ""),
                                          call("test_tool_image2", "[green]✔[/]")])
 
-@patch("dem.cli.command.list_tools_cmd.stdout.print")
-@patch("dem.cli.command.list_tools_cmd.list_tools_from_regs")
-@patch("dem.cli.command.list_tools_cmd.Table")
-@patch("dem.cli.command.list_tools_cmd.update_tools_from_selected_regs")
+@patch("dem.core.commands.list_tools_cmd.stdout.print")
+@patch("dem.core.commands.list_tools_cmd.list_tools_from_regs")
+@patch("dem.core.commands.list_tools_cmd.Table")
+@patch("dem.core.commands.list_tools_cmd.update_tools_from_selected_regs")
 def test_list_tools_from_selected_regs(mock_update_tools_from_selected_regs: MagicMock,
                                        mock_Table: MagicMock,
                                        mock_list_tools_from_regs: MagicMock,
@@ -130,8 +130,8 @@ def test_list_tools_from_selected_regs(mock_update_tools_from_selected_regs: Mag
     mock_print.assert_has_calls([call("\n [italic]Available Tool Images from the selected registries[/]"),
                                  call(mock_table)])
 
-@patch("dem.cli.command.list_tools_cmd.stdout.print")
-@patch("dem.cli.command.list_tools_cmd.update_tools_from_selected_regs")
+@patch("dem.core.commands.list_tools_cmd.stdout.print")
+@patch("dem.core.commands.list_tools_cmd.update_tools_from_selected_regs")
 def test_list_tools_from_selected_regs_no_available_tools(mock_update_tools_from_selected_regs: MagicMock,
                                                           mock_print: MagicMock) -> None:
     # Setup
@@ -149,9 +149,9 @@ def test_list_tools_from_selected_regs_no_available_tools(mock_update_tools_from
     mock_platform.tool_images.get_registry_ones.assert_called_once()
     mock_print.assert_called_once_with("[yellow]No tool images are available in the selected registries.[/]")
 
-@patch("dem.cli.command.list_tools_cmd.stdout.print")
-@patch("dem.cli.command.list_tools_cmd.list_tools_from_regs")
-@patch("dem.cli.command.list_tools_cmd.Table")
+@patch("dem.core.commands.list_tools_cmd.stdout.print")
+@patch("dem.core.commands.list_tools_cmd.list_tools_from_regs")
+@patch("dem.core.commands.list_tools_cmd.Table")
 def test_list_tools_from_all_regs(mock_Table: MagicMock, mock_list_tools_from_regs: MagicMock,
                                   mock_print: MagicMock) -> None:
     # Setup
@@ -175,7 +175,7 @@ def test_list_tools_from_all_regs(mock_Table: MagicMock, mock_list_tools_from_re
     mock_print.assert_has_calls([call("\n [italic]Available Tool Images from all registries[/]"),
                                  call(mock_table)])
 
-@patch("dem.cli.command.list_tools_cmd.stdout.print")
+@patch("dem.core.commands.list_tools_cmd.stdout.print")
 def test_list_tools_from_all_regs_no_available_tools(mock_print: MagicMock) -> None:
     # Setup
     mock_platform = MagicMock()
@@ -189,7 +189,7 @@ def test_list_tools_from_all_regs_no_available_tools(mock_print: MagicMock) -> N
     mock_platform.tool_images.get_registry_ones.assert_called_once()
     mock_print.assert_called_once_with("[yellow]No tool images are available in the registries.[/]")
 
-@patch("dem.cli.command.list_tools_cmd.list_local_tools")
+@patch("dem.core.commands.list_tools_cmd.list_local_tools")
 def test_execute_list_local_tools(mock_list_local_tools: MagicMock) -> None:
     # Setup
     mock_platform = MagicMock()
@@ -200,7 +200,7 @@ def test_execute_list_local_tools(mock_list_local_tools: MagicMock) -> None:
     # Check the result
     mock_list_local_tools.assert_called_once_with(mock_platform)
 
-@patch("dem.cli.command.list_tools_cmd.list_tools_from_selected_regs")
+@patch("dem.core.commands.list_tools_cmd.list_tools_from_selected_regs")
 def test_execute_list_tools_from_selected_regs(mock_list_tools_from_selected_regs: MagicMock) -> None:
     # Setup
     mock_platform = MagicMock()
@@ -212,7 +212,7 @@ def test_execute_list_tools_from_selected_regs(mock_list_tools_from_selected_reg
     # Check the result
     mock_list_tools_from_selected_regs.assert_called_once_with(mock_platform, test_specified_regs)
 
-@patch("dem.cli.command.list_tools_cmd.list_tools_from_all_regs")
+@patch("dem.core.commands.list_tools_cmd.list_tools_from_all_regs")
 def test_execute_list_tools_from_all_regs(mock_list_tools_from_all_regs: MagicMock) -> None:
     # Setup
     mock_platform = MagicMock()
@@ -223,7 +223,7 @@ def test_execute_list_tools_from_all_regs(mock_list_tools_from_all_regs: MagicMo
     # Check the result
     mock_list_tools_from_all_regs.assert_called_once_with(mock_platform)
 
-@patch("dem.cli.command.list_tools_cmd.execute")
+@patch("dem.core.commands.list_tools_cmd.execute")
 def test_list_tools_cmd(mock_execute: MagicMock) -> None:
     # Setup
     mock_platform = MagicMock()

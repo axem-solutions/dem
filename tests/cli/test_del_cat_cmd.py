@@ -3,7 +3,7 @@
 
 # Unit under test:
 import dem.cli.main as main
-from dem.cli.command import del_cat_cmd
+from dem.core.commands import del_cat_cmd
 
 # Test framework
 from typer.testing import CliRunner
@@ -13,7 +13,7 @@ from unittest.mock import patch, MagicMock, call
 runner = CliRunner(mix_stderr=False)
 
 ## Test cases
-@patch("dem.cli.command.del_cat_cmd.stdout.print")
+@patch("dem.core.commands.del_cat_cmd.stdout.print")
 def test_del_cat(mock_stdout_print: MagicMock) -> None:
     # Test setup
     mock_platform = MagicMock()
@@ -31,7 +31,7 @@ def test_del_cat(mock_stdout_print: MagicMock) -> None:
     mock_platform.dev_env_catalogs.delete_catalog.assert_called_once_with(test_catalog_to_delete)
     mock_stdout_print.assert_called_once_with(f"[green]The [bold]{test_catalog_to_delete}[/bold] catalog has been successfully deleted.")
 
-@patch("dem.cli.command.del_cat_cmd.stderr.print")
+@patch("dem.core.commands.del_cat_cmd.stderr.print")
 def test_del_cat_failure(mock_stderr_print: MagicMock) -> None:
     # Test setup
     mock_platform = MagicMock()

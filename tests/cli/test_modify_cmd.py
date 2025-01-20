@@ -3,7 +3,7 @@
 
 # Unit under test:
 import dem.cli.main as main
-import dem.cli.command.modify_cmd as modify_cmd
+import dem.core.commands.modify_cmd as modify_cmd
 
 # Test framework
 import pytest
@@ -33,8 +33,8 @@ def test_get_already_selected_tool_images() -> None:
     expected_selected_tool_images = ["test1:1.0", "test2:2.0"]
     assert actual_selected_tool_images == expected_selected_tool_images
 
-@patch("dem.cli.command.modify_cmd.stderr.print")
-@patch("dem.cli.command.modify_cmd.typer.confirm")
+@patch("dem.core.commands.modify_cmd.stderr.print")
+@patch("dem.core.commands.modify_cmd.typer.confirm")
 def test_remove_missing_tool_images(mock_confirm: MagicMock, mock_stderr_print: MagicMock) -> None:
     # Test setup
     test_all_tool_images = {
@@ -90,8 +90,8 @@ def test_execute_invalid_name():
     console.print("[red]The Development Environment doesn't exist.")
     assert console.file.getvalue() == runner_result.stderr
 
-@patch("dem.cli.command.modify_cmd.stdout.print")
-@patch("dem.cli.command.modify_cmd.modify_with_tui")
+@patch("dem.core.commands.modify_cmd.stdout.print")
+@patch("dem.core.commands.modify_cmd.modify_with_tui")
 def test_execute(mock_modify_with_tui: MagicMock, mock_stdout_print: MagicMock) -> None:
     # Test setup
     mock_platform = MagicMock()
@@ -113,9 +113,9 @@ def test_execute(mock_modify_with_tui: MagicMock, mock_stdout_print: MagicMock) 
     mock_modify_with_tui.assert_called_once_with(mock_platform, mock_dev_env)
     mock_stdout_print.assert_called_once_with("[green]The Development Environment has been modified successfully![/]")
 
-@patch("dem.cli.command.modify_cmd.modify_with_tui")
-@patch("dem.cli.command.modify_cmd.typer.confirm")
-@patch("dem.cli.command.modify_cmd.stdout.print")
+@patch("dem.core.commands.modify_cmd.modify_with_tui")
+@patch("dem.core.commands.modify_cmd.typer.confirm")
+@patch("dem.core.commands.modify_cmd.stdout.print")
 def test_execute_installed(mock_stdout_print: MagicMock, mock_confirm: MagicMock,
                            mock_modify_with_tui: MagicMock) -> None:
     # Test setup
@@ -149,9 +149,9 @@ def test_execute_installed(mock_stdout_print: MagicMock, mock_confirm: MagicMock
     mock_platform.uninstall_dev_env.assert_called_once_with(mock_dev_env)
     mock_modify_with_tui.assert_called_once_with(mock_platform, mock_dev_env)
 
-@patch("dem.cli.command.modify_cmd.stderr.print")
-@patch("dem.cli.command.modify_cmd.typer.confirm")
-@patch("dem.cli.command.modify_cmd.stdout.print")
+@patch("dem.core.commands.modify_cmd.stderr.print")
+@patch("dem.core.commands.modify_cmd.typer.confirm")
+@patch("dem.core.commands.modify_cmd.stdout.print")
 def test_execute_installed_PlatformError(mock_stdout_print: MagicMock, mock_confirm: MagicMock,
                                          mock_stderr_print: MagicMock) -> None:
     # Test setup

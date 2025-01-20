@@ -53,11 +53,26 @@ def execute(platform: Platform, dev_env_name: str, task_name: str) -> None:
 
     dev_env_health_check(platform, dev_env)
 
-    if task_name not in dev_env.tasks:
-        stderr.print(f"[red]Error: Task [bold]{task_name}[/bold] not found in Development Environment [bold]{dev_env_name}[/bold]![/]")
-        return
+    if task_name in dev_env.tasks:
+        command = dev_env.tasks[task_name]
+    else:
+        for advanced_task in dev_env.advanced_tasks:
+            if advanced_task["name"] == task_name:
+                command = "docker run"
+                if advanced_task["rm"] == True:
+                    command += " --rm"
+
+                if advanced_task["mount_workdir"] == True:
+                    pass
+
+                command += f" {advanced_task['extra_options']} {advanced_task['image']} {advanced_task['command']}"
+
+                if advanced_task['enable_api'] == True:
+                    platform.api_server.start()
+                break
+        else:
+            stderr.print(f"[red]Error: Task [bold]{task_name}[/bold] not found in Development Environment [bold]{dev_env_name}[/bold]![/]")
+            return
     
     stdout.print(f"[green]Running task [bold]{task_name}[/bold] in Development Environment [bold]{dev_env_name}[/bold]...[/]\n")  
-    command = dev_env.tasks[task_name]
     subprocess.run(command, shell=True)
-    stdout.print("")

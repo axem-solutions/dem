@@ -12,7 +12,7 @@ import pytest
 # Global test variables
 runner = CliRunner(mix_stderr=False)
 
-@patch("dem.cli.command.add_host_cmd.stdout.print")
+@patch("dem.core.commands.add_host_cmd.stdout.print")
 def test_add_host(mock_print: MagicMock) -> None:
     # Test setup
     mocked_platform = MagicMock()
@@ -31,8 +31,8 @@ def test_add_host(mock_print: MagicMock) -> None:
     mocked_platform.hosts.add_host.assert_called_once_with({"name": test_name, "address": test_address})
     mock_print.assert_called_once_with("[green]Host added successfully![/]")
 
-@patch("dem.cli.command.add_host_cmd.stdout.print")
-@patch("dem.cli.command.add_host_cmd.typer.confirm")
+@patch("dem.core.commands.add_host_cmd.stdout.print")
+@patch("dem.core.commands.add_host_cmd.typer.confirm")
 def test_add_host_already_added(mock_confirm: MagicMock, mock_print: MagicMock) -> None:
     # Test setup
     mocked_platform = MagicMock()

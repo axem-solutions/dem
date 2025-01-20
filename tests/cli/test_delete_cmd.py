@@ -3,7 +3,7 @@
 
 # Unit under test:
 import dem.cli.main as main
-import dem.cli.command.delete_cmd as delete_cmd
+import dem.core.commands.delete_cmd as delete_cmd
 
 # Test framework
 from typer.testing import CliRunner
@@ -12,8 +12,8 @@ from unittest.mock import patch, MagicMock, call
 ## Global test variables
 runner = CliRunner()
 
-@patch("dem.cli.command.delete_cmd.typer.confirm")
-@patch("dem.cli.command.delete_cmd.stdout.print")
+@patch("dem.core.commands.delete_cmd.typer.confirm")
+@patch("dem.core.commands.delete_cmd.stdout.print")
 def test_delete(mock_stdout_print: MagicMock, mock_config: MagicMock) -> None:
     # Test setup
     mock_platform = MagicMock()
@@ -47,8 +47,8 @@ def test_delete(mock_stdout_print: MagicMock, mock_config: MagicMock) -> None:
     ])
     mock_platform.flush_dev_env_properties.assert_called_once()
 
-@patch("dem.cli.command.delete_cmd.typer.confirm")
-@patch("dem.cli.command.delete_cmd.stderr.print")
+@patch("dem.core.commands.delete_cmd.typer.confirm")
+@patch("dem.core.commands.delete_cmd.stderr.print")
 def test_delete_uninstall_failed(mock_stderr_print: MagicMock, mock_confirm: MagicMock) -> None:
     # Test setup
     mock_platform = MagicMock()
@@ -73,7 +73,7 @@ def test_delete_uninstall_failed(mock_stderr_print: MagicMock, mock_confirm: Mag
     mock_platform.uninstall_dev_env.assert_called_once_with(test_dev_env)
     mock_stderr_print.assert_called_once_with(f"[red]Platform error: {test_exception_text}[/]")
 
-@patch("dem.cli.command.delete_cmd.stderr.print")
+@patch("dem.core.commands.delete_cmd.stderr.print")
 def test_delete_not_existing(mock_stderr_print: MagicMock) -> None:
     # Test setup
     mock_platform = MagicMock()

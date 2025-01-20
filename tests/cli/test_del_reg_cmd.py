@@ -12,7 +12,7 @@ from unittest.mock import patch, MagicMock
 runner = CliRunner(mix_stderr=False)
 
 ## Test cases
-@patch("dem.cli.command.del_reg_cmd.stdout.print")
+@patch("dem.core.commands.del_reg_cmd.stdout.print")
 def test_del_reg(mock_stdout_print: MagicMock):
     # Test setup
     mock_platform = MagicMock()
@@ -41,7 +41,7 @@ def test_del_reg(mock_stdout_print: MagicMock):
     mock_platform.registries.delete_registry.assert_called_once_with(test_registry_to_delete)
     mock_stdout_print.assert_called_once_with("[green]The input registry has been successfully deleted.")
 
-@patch("dem.cli.command.del_reg_cmd.stderr.print")
+@patch("dem.core.commands.del_reg_cmd.stderr.print")
 def test_del_reg_not_exist(mock_stderr_print: MagicMock):
     # Test setup
     mock_platform = MagicMock()

@@ -3,7 +3,7 @@
 
 # Unit under test:
 import dem.cli.main as main
-import dem.cli.command.list_cmd as list_cmd
+import dem.core.commands.list_cmd as list_cmd
 
 # Test framework
 from typer.testing import CliRunner
@@ -73,7 +73,7 @@ def test_add_dev_env_info_to_table_not_installed() -> None:
     mock_dev_env.get_tool_image_status.assert_not_called()
     mock_table.add_row.assert_called_once_with("test_dev_env", "", "", "[green]Ok[/]")
 
-@patch("dem.cli.command.list_cmd.stdout.print")
+@patch("dem.core.commands.list_cmd.stdout.print")
 def test_list_local_dev_envs_no_dev_envs(mock_stdout_print: MagicMock) -> None:
     # Setup
     mock_platform = MagicMock()
@@ -85,9 +85,9 @@ def test_list_local_dev_envs_no_dev_envs(mock_stdout_print: MagicMock) -> None:
     # Check the result
     mock_stdout_print.assert_called_once_with("[yellow]No Development Environment descriptors are available.[/]")
 
-@patch("dem.cli.command.list_cmd.stdout.print")
-@patch("dem.cli.command.list_cmd.Table")
-@patch("dem.cli.command.list_cmd.add_dev_env_info_to_table")
+@patch("dem.core.commands.list_cmd.stdout.print")
+@patch("dem.core.commands.list_cmd.Table")
+@patch("dem.core.commands.list_cmd.add_dev_env_info_to_table")
 def test_list_local_dev_envs(mock_add_dev_env_info_to_table: MagicMock, mock_Table: MagicMock,
                              mock_stdout_print: MagicMock) -> None:
     # Setup
@@ -110,7 +110,7 @@ def test_list_local_dev_envs(mock_add_dev_env_info_to_table: MagicMock, mock_Tab
     mock_stdout_print.assert_has_calls([call(f"\n [italic]Local Development Environments[/]"), 
                                         call(mock_table)])
 
-@patch("dem.cli.command.list_cmd.stdout.print")
+@patch("dem.core.commands.list_cmd.stdout.print")
 def test_list_actual_cat_dev_envs_no_dev_envs(mock_stdout_print: MagicMock) -> None:
     # Setup
     mock_catalog = MagicMock()
@@ -124,8 +124,8 @@ def test_list_actual_cat_dev_envs_no_dev_envs(mock_stdout_print: MagicMock) -> N
     mock_catalog.request_dev_envs.assert_called_once()
     mock_stdout_print.assert_called_once_with("[yellow]No Development Environments are available in the test_catalog catalog.[/]")
 
-@patch("dem.cli.command.list_cmd.stdout.print")
-@patch("dem.cli.command.list_cmd.Table")
+@patch("dem.core.commands.list_cmd.stdout.print")
+@patch("dem.core.commands.list_cmd.Table")
 def test_list_actual_cat_dev_envs(mock_Table: MagicMock, mock_stdout_print: MagicMock) -> None:
     # Setup
     mock_catalog = MagicMock()
@@ -146,7 +146,7 @@ def test_list_actual_cat_dev_envs(mock_Table: MagicMock, mock_stdout_print: Magi
     mock_stdout_print.assert_has_calls([call(f"\n [italic]Development Environments in the test_catalog catalog:[/]"), 
                                         call(mock_table)])
                                         
-@patch("dem.cli.command.list_cmd.stdout.print")
+@patch("dem.core.commands.list_cmd.stdout.print")
 def test_list_all_cat_dev_envs_no_catalogs(mock_stdout_print: MagicMock) -> None:
     # Setup
     mock_platform = MagicMock()
@@ -158,7 +158,7 @@ def test_list_all_cat_dev_envs_no_catalogs(mock_stdout_print: MagicMock) -> None
     # Check the result
     mock_stdout_print.assert_called_once_with("[yellow]No Development Environment Catalogs are available!")
 
-@patch("dem.cli.command.list_cmd.list_actual_cat_dev_envs")
+@patch("dem.core.commands.list_cmd.list_actual_cat_dev_envs")
 def test_list_all_cat_dev_envs(mock_list_actual_cat_dev_envs: MagicMock) -> None:
     # Setup
     mock_platform = MagicMock()
@@ -171,7 +171,7 @@ def test_list_all_cat_dev_envs(mock_list_actual_cat_dev_envs: MagicMock) -> None
     # Check the result
     mock_list_actual_cat_dev_envs.assert_called_once_with(mock_catalog)
 
-@patch("dem.cli.command.list_cmd.list_actual_cat_dev_envs")
+@patch("dem.core.commands.list_cmd.list_actual_cat_dev_envs")
 def test_list_selected_cat_dev_envs(mock_list_actual_cat_dev_envs: MagicMock) -> None:
     # Setup
     mock_platform = MagicMock()
@@ -186,7 +186,7 @@ def test_list_selected_cat_dev_envs(mock_list_actual_cat_dev_envs: MagicMock) ->
     # Check the result
     mock_list_actual_cat_dev_envs.assert_called_once_with(mock_catalog)
 
-@patch("dem.cli.command.list_cmd.stderr.print")
+@patch("dem.core.commands.list_cmd.stderr.print")
 def test_list_selected_cat_dev_envs_catalog_not_found(mock_stderr_print: MagicMock) -> None:
     # Setup
     mock_platform = MagicMock()
@@ -201,7 +201,7 @@ def test_list_selected_cat_dev_envs_catalog_not_found(mock_stderr_print: MagicMo
     # Check the result
     mock_stderr_print.assert_called_once_with("[red]Error: Catalog 'wrong_catalog' not found![/]")
 
-@patch("dem.cli.command.list_cmd.list_all_cat_dev_envs")
+@patch("dem.core.commands.list_cmd.list_all_cat_dev_envs")
 def test_execute_list_all_cat_dev_envs(mock_list_all_cat_dev_envs: MagicMock) -> None:
     # Setup
     mock_platform = MagicMock()
@@ -212,7 +212,7 @@ def test_execute_list_all_cat_dev_envs(mock_list_all_cat_dev_envs: MagicMock) ->
     # Check the result
     mock_list_all_cat_dev_envs.assert_called_once_with(mock_platform)
 
-@patch("dem.cli.command.list_cmd.list_selected_cat_dev_envs")
+@patch("dem.core.commands.list_cmd.list_selected_cat_dev_envs")
 def test_execute_list_selected_cat_dev_envs(mock_list_selected_cat_dev_envs: MagicMock) -> None:
     # Setup
     mock_platform = MagicMock()
@@ -223,8 +223,8 @@ def test_execute_list_selected_cat_dev_envs(mock_list_selected_cat_dev_envs: Mag
     # Check the result
     mock_list_selected_cat_dev_envs.assert_called_once_with(mock_platform, ["test_catalog"])
 
-@patch("dem.cli.command.list_cmd.stdout.print")
-@patch("dem.cli.command.list_cmd.list_local_dev_envs")
+@patch("dem.core.commands.list_cmd.stdout.print")
+@patch("dem.core.commands.list_cmd.list_local_dev_envs")
 def test_execute_list_local_dev_envs(mock_list_local_dev_envs: MagicMock, 
                                      mock_stdout_print: MagicMock) -> None:
     # Setup
@@ -238,7 +238,7 @@ def test_execute_list_local_dev_envs(mock_list_local_dev_envs: MagicMock,
     mock_list_local_dev_envs.assert_called_once_with(mock_platform)
     mock_stdout_print.assert_called_once_with(f"\n[bold]The default Development Environment: test_dev_env[/]")
 
-@patch("dem.cli.command.list_cmd.execute")
+@patch("dem.core.commands.list_cmd.execute")
 def test_main_list(mock_execute: MagicMock) -> None:
     # Setup
     mock_platform = MagicMock()

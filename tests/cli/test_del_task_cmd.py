@@ -3,7 +3,7 @@
 
 # Unit under test:
 import dem.cli.main as main
-import dem.cli.command.del_task_cmd as del_task_cmd
+import dem.core.commands.del_task_cmd as del_task_cmd
 
 # Test framework
 from typer.testing import CliRunner
@@ -33,7 +33,7 @@ def test_del_task_cmd() -> None:
     mock_dev_env.del_task.assert_called_once_with("my-task")
     mock_platform.flush_dev_env_properties.assert_called_once()
 
-@patch("dem.cli.command.del_task_cmd.stderr")
+@patch("dem.core.commands.del_task_cmd.stderr")
 def test_del_task_cmd_dev_env_not_found(mock_stderr: MagicMock) -> None:
     # Setup
     mock_platform = MagicMock()
@@ -50,7 +50,7 @@ def test_del_task_cmd_dev_env_not_found(mock_stderr: MagicMock) -> None:
     mock_platform.get_dev_env_by_name.assert_called_once_with("my-dev-env")
     mock_stderr.print.assert_called_once_with("[red]Error: Development Environment 'my-dev-env' not found![/]")
 
-@patch("dem.cli.command.del_task_cmd.stderr")
+@patch("dem.core.commands.del_task_cmd.stderr")
 def test_del_task_cmd_task_not_found(mock_stderr: MagicMock) -> None:
     # Setup
     mock_platform = MagicMock()

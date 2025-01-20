@@ -2,7 +2,7 @@
 
 # Unit under test:
 import dem.cli.main as main
-import dem.cli.command.install_cmd as install_cmd
+import dem.core.commands.install_cmd as install_cmd
 
 # Test framework
 from typer.testing import CliRunner
@@ -11,7 +11,7 @@ from unittest.mock import patch, MagicMock
 ## Global test variables
 runner = CliRunner()
 
-@patch("dem.cli.command.install_cmd.stderr.print")
+@patch("dem.core.commands.install_cmd.stderr.print")
 def test_install_dev_env_invalid_name(mock_stderr_print):
     # Test setup
     test_invalid_name = "fake_dev_env_name"
@@ -31,7 +31,7 @@ def test_install_dev_env_invalid_name(mock_stderr_print):
 
 
 
-@patch("dem.cli.command.install_cmd.stdout.print")
+@patch("dem.core.commands.install_cmd.stdout.print")
 def test_install_dev_env_valid_name(mock_stdout_print):
      # Test setup
     fake_dev_env_to_install = MagicMock()
@@ -52,7 +52,7 @@ def test_install_dev_env_valid_name(mock_stdout_print):
     mock_stdout_print.assert_called_once_with(f"[green]Successfully installed the {fake_dev_env_to_install.name}![/]")
 
 
-@patch("dem.cli.command.install_cmd.stderr.print")
+@patch("dem.core.commands.install_cmd.stderr.print")
 def test_install_dev_env_already_installed(mock_stderr_print):
      # Test setup
     fake_dev_env_to_install = MagicMock()
@@ -70,7 +70,7 @@ def test_install_dev_env_already_installed(mock_stderr_print):
     
     mock_stderr_print.assert_called_once_with(f"[red]Error: The {fake_dev_env_to_install.name} Development Environment is already installed.[/]")
 
-@patch("dem.cli.command.install_cmd.stderr.print")
+@patch("dem.core.commands.install_cmd.stderr.print")
 def test_install_dev_env_valid_name_failed(mock_stderr_print):
      # Test setup
     fake_dev_env_to_install = MagicMock()

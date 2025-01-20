@@ -3,7 +3,7 @@
 
 # Unit under test:
 import dem.cli.main as main
-import dem.cli.command.add_reg_cmd as add_reg_cmd
+import dem.core.commands.add_reg_cmd as add_reg_cmd
 
 # Test framework
 from typer.testing import CliRunner
@@ -15,7 +15,7 @@ from unittest.mock import patch, MagicMock
 runner = CliRunner(mix_stderr=False)
 
 ## Test cases
-@patch("dem.cli.command.add_reg_cmd.stdout.print")
+@patch("dem.core.commands.add_reg_cmd.stdout.print")
 def test_add_reg(mock_stdout_print: MagicMock) -> None:
     # Test setup
     mock_platform = MagicMock()
@@ -43,7 +43,7 @@ def test_add_reg(mock_stdout_print: MagicMock) -> None:
     mock_platform.registries.add_registry.assert_called_once_with(expected_registry)
     mock_stdout_print.assert_called_once_with(f"[green]The {test_name} registry has been successfully added![/]")
 
-@patch("dem.cli.command.add_reg_cmd.stderr.print")
+@patch("dem.core.commands.add_reg_cmd.stderr.print")
 def test_add_reg_name_taken(mock_stderr_print: MagicMock) -> None:
     # Test setup
     mock_platform = MagicMock()
@@ -69,7 +69,7 @@ def test_add_reg_name_taken(mock_stderr_print: MagicMock) -> None:
     mock_platform.registries.list_registry_configs.assert_called_once()
     mock_stderr_print.assert_called_once_with("[red]Error: The input registry name is already in use![/]")
 
-@patch("dem.cli.command.add_reg_cmd.stderr.print")
+@patch("dem.core.commands.add_reg_cmd.stderr.print")
 def test_add_reg_registry_error(mock_stderr_print: MagicMock) -> None:
     # Test setup
     mock_platform = MagicMock()

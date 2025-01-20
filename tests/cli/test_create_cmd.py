@@ -3,7 +3,7 @@
 
 # Unit under test
 import dem.cli.main as main
-import dem.cli.command.create_cmd as create_cmd
+import dem.core.commands.create_cmd as create_cmd
 
 # Test framework
 import pytest
@@ -42,7 +42,7 @@ def test_create_new_dev_env_descriptor() -> None:
     
     assert expected_dev_env_descriptor == actual_dev_env_descriptor
 
-@patch("dem.cli.command.create_cmd.DevEnv")
+@patch("dem.core.commands.create_cmd.DevEnv")
 def test_create_new_dev_env(mock_DevEnv: MagicMock) -> None:
     # Test setup
     mock_new_dev_env = MagicMock()
@@ -61,9 +61,9 @@ def test_create_new_dev_env(mock_DevEnv: MagicMock) -> None:
     mock_DevEnv.assert_called_once_with(descriptor=mock_new_dev_env_descriptor)
     mock_new_dev_env.assign_tool_image_instances.assert_called_once_with(mock_platform.tool_images)
 
-@patch("dem.cli.command.create_cmd.create_new_dev_env")
-@patch("dem.cli.command.create_cmd.create_new_dev_env_descriptor")
-@patch("dem.cli.command.create_cmd.open_dev_env_settings_panel")
+@patch("dem.core.commands.create_cmd.create_new_dev_env")
+@patch("dem.core.commands.create_cmd.create_new_dev_env_descriptor")
+@patch("dem.core.commands.create_cmd.open_dev_env_settings_panel")
 def test_create_dev_env_new(mock_open_dev_env_settings_panel: MagicMock, 
                             mock_create_new_dev_env_descriptor: MagicMock,
                             mock_create_new_dev_env: MagicMock) -> None:
@@ -89,10 +89,10 @@ def test_create_dev_env_new(mock_open_dev_env_settings_panel: MagicMock,
                                                                 mock_selected_tool_images)
     mock_create_new_dev_env.assert_called_once_with(mock_platform, mock_dev_env_descriptor)
 
-@patch("dem.cli.command.create_cmd.create_new_dev_env_descriptor")
-@patch("dem.cli.command.create_cmd.open_dev_env_settings_panel")
-@patch("dem.cli.command.create_cmd.stdout.print")
-@patch("dem.cli.command.create_cmd.typer.confirm")
+@patch("dem.core.commands.create_cmd.create_new_dev_env_descriptor")
+@patch("dem.core.commands.create_cmd.open_dev_env_settings_panel")
+@patch("dem.core.commands.create_cmd.stdout.print")
+@patch("dem.core.commands.create_cmd.typer.confirm")
 def test_create_dev_env_overwrite_installed(mock_confirm: MagicMock, mock_stdout_print: MagicMock,
                                             mock_open_dev_env_settings_panel: MagicMock, 
                                             mock_create_new_dev_env_descriptor: MagicMock) -> None:
@@ -137,8 +137,8 @@ def test_create_dev_env_overwrite_installed(mock_confirm: MagicMock, mock_stdout
     mock_create_new_dev_env_descriptor.assert_called_once_with(test_dev_env_name, 
                                                                mock_selected_tool_images)
 
-@patch("dem.cli.command.create_cmd.stderr.print")
-@patch("dem.cli.command.create_cmd.typer.confirm")
+@patch("dem.core.commands.create_cmd.stderr.print")
+@patch("dem.core.commands.create_cmd.typer.confirm")
 def test_create_dev_env_overwrite_PlatformError(mock_confirm: MagicMock, 
                                                 mock_stderr_print: MagicMock) -> None:
     # Test setup
@@ -166,7 +166,7 @@ def test_create_dev_env_overwrite_PlatformError(mock_confirm: MagicMock,
     mock_platform.uninstall_dev_env.assert_called_once_with(mock_dev_env_original)
     mock_stderr_print.assert_called_once_with(f"[red]Platform error: {test_exception_text}[/]")
 
-@patch("dem.cli.command.create_cmd.typer.confirm")
+@patch("dem.core.commands.create_cmd.typer.confirm")
 def test_create_dev_env_abort(mock_confirm: MagicMock) -> None:
     # Test setup
     mock_dev_env_local_setup = MagicMock()
@@ -185,8 +185,8 @@ def test_create_dev_env_abort(mock_confirm: MagicMock) -> None:
     mock_confirm.assert_called_once_with("The input name is already used by a Development Environment. Overwrite it?",
                                         abort=True)
 
-@patch("dem.cli.command.create_cmd.stdout.print")
-@patch("dem.cli.command.create_cmd.create_dev_env")
+@patch("dem.core.commands.create_cmd.stdout.print")
+@patch("dem.core.commands.create_cmd.create_dev_env")
 def test_execute(mock_create_dev_env: MagicMock, mock_stdout_print: MagicMock) -> None:
     # Test setup
     mock_platform = MagicMock()
@@ -210,7 +210,7 @@ def test_execute(mock_create_dev_env: MagicMock, mock_stdout_print: MagicMock) -
         call("Run [italic]dem install[/] to install it.")
     ])
 
-@patch("dem.cli.command.create_cmd.stderr.print")
+@patch("dem.core.commands.create_cmd.stderr.print")
 def test_create_dev_env_with_whitespace(mock_stderr_print):
     # Test setup
     mock_dev_env_local_setup = MagicMock()

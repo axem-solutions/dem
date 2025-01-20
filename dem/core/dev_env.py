@@ -40,6 +40,7 @@ class DevEnv():
         self.tool_image_descriptors: list[dict[str, str]] = descriptor["tools"]
         self.tool_images: list[ToolImage] = []
         self.tasks: dict[str, str] = descriptor.get("tasks", {})
+        self.advanced_tasks: list[dict] = descriptor.get("advanced_tasks", [])
         if "True" == descriptor.get("installed", "False"):
             self.is_installed = True
         else:

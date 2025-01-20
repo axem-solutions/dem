@@ -36,7 +36,7 @@ def test_rename_success():
     fake_local_platform.get_dev_env_by_name.assert_called_once_with(original_dev_env_name)
     fake_local_platform.flush_dev_env_properties.assert_called_once()
 
-@patch("dem.cli.command.rename_cmd.stderr.print")
+@patch("dem.core.commands.rename_cmd.stderr.print")
 def test_rename_non_existing(mock_stderr_print):
     # Test setup
     original_dev_env_name = "original_dev_env_name"
