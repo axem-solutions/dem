@@ -2,7 +2,7 @@
 # dem/cli/main.py
 
 import typer, importlib.metadata
-from typing import Generator
+from typing import Generator, Optional
 from typing_extensions import Annotated
 import os
 from dem import __command__, __app_name__
@@ -352,7 +352,8 @@ def init(project_path: Annotated[str, typer.Argument(help="Path of the project."
 def run(dev_env_name: Annotated[str, typer.Argument(help="Name of the Development Environment to run the task in. If not set, the default Dev Env will be used.",
                                                     autocompletion=autocomplete_installed_dev_env_name)] = "",
         task_name: Annotated[str, typer.Argument(help="The name of the task to run.",
-                                                 autocompletion=autocomplete_task_name)] = "") -> None:
+                                                 autocompletion=autocomplete_task_name)] = "",
+        extra_args: Annotated[str, typer.Option(help="Additional arguments to pass to the task")] = "") -> None:
     """
     Run the task of the Development Environment. The Dev Env must be installed.
 
@@ -364,7 +365,7 @@ def run(dev_env_name: Annotated[str, typer.Argument(help="Name of the Developmen
         if not task_name and dev_env_name:
             task_name = dev_env_name
             dev_env_name = ""
-        run_cmd.execute(platform, dev_env_name, task_name)
+        run_cmd.execute(platform, dev_env_name, task_name, extra_args)
     else:
         raise InternalError("Error: The platform hasn't been initialized properly!")
 
