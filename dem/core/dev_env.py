@@ -2,7 +2,6 @@
 # dem/core/dev_env.py
 
 from dem.core.tool_images import ToolImage, ToolImages
-from enum import Enum
 import json, os
 
 class DevEnv():

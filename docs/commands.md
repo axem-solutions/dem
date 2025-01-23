@@ -382,7 +382,7 @@ Rename the Development Environment.
 
 ---
 
-## **`dem run [DEV_ENV_NAME] TASK_NAME`**
+## **`dem run [DEV_ENV_NAME] TASK_NAME [OPTIONS]`**
 
 **Description:**
 
@@ -390,6 +390,12 @@ Run the task of the Development Environment. The Dev Env must be installed.
 
 If the Dev Env is not specified, the default Dev Env will be used. If the default Dev Env is not
 set, an error message will be printed.
+
+**Options:**
+
+| Options             | Description                                             |
+|---------------------|---------------------------------------------------------|
+| `--extra-args`      | Additional arguments to pass to the container           |
 
 **Arguments:**
 

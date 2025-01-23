@@ -24,7 +24,7 @@ def dev_env_health_check(platform: Platform, dev_env: DevEnv) -> None:
         platform.install_dev_env(dev_env)
         stdout.print(f"[green]DEM successfully fixed the {dev_env.name} Development Environment![/]")
 
-def execute(platform: Platform, dev_env_name: str, task_name: str) -> None:
+def execute(platform: Platform, dev_env_name: str, task_name: str, cmd_extra_args: str) -> None:
     """ Run a task in a Development Environment.
     
         Args:
@@ -65,7 +65,10 @@ def execute(platform: Platform, dev_env_name: str, task_name: str) -> None:
                 if advanced_task["mount_workdir"] == True:
                     pass
 
-                command += f" {advanced_task['extra_options']} {advanced_task['image']} {advanced_task['command']}"
+                command += f" {advanced_task['extra_args']} {advanced_task['image']}"
+
+                if advanced_task['command'] or cmd_extra_args:
+                    command += f" /bin/bash -c \"{advanced_task['command']} {cmd_extra_args}\""
 
                 if advanced_task['enable_api'] == True:
                     platform.api_server.start()

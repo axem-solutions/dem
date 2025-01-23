@@ -10,14 +10,16 @@ platform: Platform | None = None
 class RunCommandRequest(BaseModel):
     dev_env_name: str
     task_name: str
+    extra_args: str
 
 @Platform.fastapi_app.post("/run")
 def run_command(request: RunCommandRequest) -> dict:
     dev_env_name = request.dev_env_name
     task_name = request.task_name
+    extra_args = request.extra_args
 
     try:
-        run_execute(platform, dev_env_name, task_name)
+        run_execute(platform, dev_env_name, task_name, extra_args)
         return {"status": "success", "message": f"Task {task_name} executed in {dev_env_name}"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
