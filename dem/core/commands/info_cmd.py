@@ -64,7 +64,7 @@ def print_tasks_info_table(dev_env: DevEnv) -> None:
     task_table.add_column("Task")
     task_table.add_column("Command")
 
-    for task_name, command in dev_env.tasks.items():
+    for task_name, command in dev_env.custom_tasks.items():
         task_table.add_row(task_name, command)
 
     stdout.print(task_table)
@@ -78,7 +78,7 @@ def print_local_dev_env_info(platform: Platform, dev_env: DevEnv) -> None:
     """
     stdout.print(f"\n[bold]Development Environment: {dev_env.name}[/]\n")
     print_tools_info_table(dev_env, True, platform)
-    if dev_env.tasks:
+    if dev_env.custom_tasks:
         print_tasks_info_table(dev_env)
 
     if dev_env.is_installed and not dev_env.is_installation_correct():
@@ -114,7 +114,7 @@ def print_cat_dev_env_info(dev_env: DevEnv, cat_name: str) -> None:
     stdout.print(f"\n[bold]Development Environment: {dev_env.name}[/]\n")
     stdout.print(f"Catalog: {cat_name}\n")
     print_tools_info_table(dev_env, False)
-    if dev_env.tasks:
+    if dev_env.custom_tasks:
         print_tasks_info_table(dev_env)
 
 def cat_dev_env_info(platform: Platform, dev_env_name: str, selected_cats: list[str]) -> None:
