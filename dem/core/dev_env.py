@@ -38,8 +38,8 @@ class DevEnv():
         self.name: str = descriptor["name"]
         self.tool_image_descriptors: list[dict[str, str]] = descriptor["tools"]
         self.tool_images: list[ToolImage] = []
-        self.tasks: dict[str, str] = descriptor.get("tasks", {})
-        self.advanced_tasks: list[dict] = descriptor.get("advanced_tasks", [])
+        self.custom_tasks: list[dict] = descriptor.get("custom_tasks", [])
+        self.docker_run_tasks: list[dict] = descriptor.get("docker_run_tasks", [])
         if "True" == descriptor.get("installed", "False"):
             self.is_installed = True
         else:
@@ -72,7 +72,7 @@ class DevEnv():
                 task_name -- the task name
                 command -- the command
         """
-        self.tasks[task_name] = command
+        self.custom_tasks[task_name] = command
 
     def del_task(self, task_name: str) -> None:
         """ Delete a task from the Development Environment.
@@ -83,8 +83,8 @@ class DevEnv():
             Exceptions:
                 KeyError -- if the task doesn't exist
         """
-        if task_name in self.tasks:
-            del self.tasks[task_name]
+        if task_name in self.custom_tasks:
+            del self.custom_tasks[task_name]
         else:
             raise KeyError(f"Task [bold]{task_name}[/] not found.")
 
@@ -102,7 +102,7 @@ class DevEnv():
                 return True
         return False
 
-    def get_deserialized(self, omit_is_installed: bool = False) -> dict[str, str]:
+    def get_deserialized(self, omit_is_installed: bool = False) -> dict:
         """ Create the deserialized json. 
         
             Return the Dev Env as a dict.
@@ -110,7 +110,8 @@ class DevEnv():
         dev_env_json_deserialized: dict = {
             "name": self.name,
             "tools": self.tool_image_descriptors,
-            "tasks": self.tasks
+            "custom_tasks": self.custom_tasks,
+            "docker_run_tasks": self.docker_run_tasks
         }
         
         if omit_is_installed is False:

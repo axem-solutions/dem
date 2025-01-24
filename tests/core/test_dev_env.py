@@ -29,7 +29,7 @@ def test_DevEnv() -> None:
     # Check expectations
     assert test_dev_env.name is test_descriptor["name"]
     assert test_dev_env.tool_image_descriptors is test_descriptor["tools"]
-    assert test_dev_env.tasks is test_descriptor["tasks"]
+    assert test_dev_env.custom_tasks is test_descriptor["tasks"]
 
 @patch("dem.core.dev_env.json.load")
 @patch("dem.core.dev_env.open")
@@ -60,7 +60,7 @@ def test_DevEnv_with_descriptor_path(mock_path_exists: MagicMock, mock_open: Mag
     assert test_dev_env.name is test_descriptor["name"]
     assert test_dev_env.tool_image_descriptors is test_descriptor["tools"]
     assert test_dev_env.is_installed is True
-    assert test_dev_env.tasks is test_descriptor["tasks"]
+    assert test_dev_env.custom_tasks is test_descriptor["tasks"]
 
     mock_path_exists.assert_called_once_with(test_descriptor_path)
     mock_open.assert_called_once_with(test_descriptor_path, "r")
@@ -166,7 +166,7 @@ def test_DevEnv_add_task() -> None:
     test_dev_env.add_task(test_task_name, test_command)
 
     # Check expectations
-    assert test_dev_env.tasks[test_task_name] == test_command
+    assert test_dev_env.custom_tasks[test_task_name] == test_command
 
 def test_DevEnv_del_task() -> None:
     # Test setup
@@ -188,7 +188,7 @@ def test_DevEnv_del_task() -> None:
     test_dev_env.del_task(test_task_name)
 
     # Check expectations
-    assert test_task_name not in test_dev_env.tasks
+    assert test_task_name not in test_dev_env.custom_tasks
 
 def test_DevEnv_del_task_not_existing() -> None:
     # Test setup

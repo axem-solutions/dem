@@ -53,10 +53,10 @@ def execute(platform: Platform, dev_env_name: str, task_name: str, cmd_extra_arg
 
     dev_env_health_check(platform, dev_env)
 
-    if task_name in dev_env.tasks:
-        command = dev_env.tasks[task_name]
+    if task_name in dev_env.custom_tasks:
+        command = dev_env.custom_tasks[task_name]
     else:
-        for advanced_task in dev_env.advanced_tasks:
+        for advanced_task in dev_env.docker_run_tasks:
             if advanced_task["name"] == task_name:
                 command = "docker run"
                 if advanced_task["rm"] == True:

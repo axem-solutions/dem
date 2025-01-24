@@ -103,7 +103,7 @@ def autocomplete_task_name(ctx: typer.Context, incomplete: str) -> Generator:
     if platform is not None and dev_env_name is not None:
         for dev_env in platform.local_dev_envs:
             if dev_env.name == dev_env_name:
-                for task_name in dev_env.tasks:
+                for task_name in dev_env.custom_tasks:
                     if task_name.startswith(incomplete) or (incomplete == ""):
                         yield task_name
 
