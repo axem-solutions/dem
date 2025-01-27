@@ -52,6 +52,8 @@ def print_tools_info_table(dev_env: DevEnv, is_local: bool, platform: Platform =
     if is_local:
         print_status(platform, dev_env)
 
+        stdout.print(f"Tasks run as the current user: {dev_env.run_tasks_as_current_user}\n")
+
     stdout.print(tool_info_table)
 
 def print_tasks_info_table(dev_env: DevEnv) -> None:
