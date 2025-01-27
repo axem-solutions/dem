@@ -177,6 +177,9 @@ class Platform(Core):
                 except ContainerEngineError as e:
                     raise PlatformError(f"Dev Env install failed. --> {str(e)}")
 
+        if dev_env_to_install.enable_docker_network:
+            self.container_engine.create_network(dev_env_to_install.name)
+
         dev_env_to_install.is_installed = True
         self.flush_dev_env_properties()
 
@@ -217,6 +220,9 @@ class Platform(Core):
                 raise PlatformError(f"Dev Env uninstall failed. --> {str(e)}")
             else:
                 yield f"The {tool_image_name} image has been removed."
+
+        if dev_env_to_uninstall.enable_docker_network:
+            self.container_engine.remove_network(dev_env_to_uninstall.name)
             
         dev_env_to_uninstall.is_installed = False
         if self.default_dev_env_name == dev_env_to_uninstall.name:

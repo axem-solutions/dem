@@ -47,7 +47,10 @@ def compose_docker_run_task(platform: Platform, dev_env: DevEnv, docker_run_task
     if dev_env.run_tasks_as_current_user:
         command += " -u $(id -u):$(id -g)"
 
-    command += f" {docker_run_task['extra_args']} {docker_run_task['image']}"
+    if dev_env.enable_docker_network and docker_run_task['connect_to_network']:
+        command += f" --network {dev_env.name}"
+
+    command += f" --name {docker_run_task['name']} {docker_run_task['extra_args']} {docker_run_task['image']}"
 
     if docker_run_task['command'] or cmd_extra_args:
         command += f" /bin/bash -c \"{docker_run_task['command']} {cmd_extra_args}\""

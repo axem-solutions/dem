@@ -5,7 +5,7 @@ title: The basic concepts of Development Environment Management
 
 ## What is a Development Environment?
 A set of software tools used for a specific development project is called a **Development
-Environment**. These tools can include the build system, debugger, test framework, and more.
+Environment**, or DevEnv for short. These tools can include the build system, debugger, test framework, and more.
 
 ## A Container Image
 A container image is a set of **software components alongside its dependencies**, 

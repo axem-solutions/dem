@@ -3,7 +3,8 @@
 
 ## **What is DEM?**
 
-DEM (Development Environment Manager) is an **open-source command line tool for setting up, managing, and sharing Development Environments**.
+DEM (Development Environment Manager) is an **open-source command line tool for setting up, 
+managing, and sharing Development Environments**.
 
 DEM empowers developers to **create, modify, and maintain consistent Development Environments with ease**.
 
