@@ -41,6 +41,7 @@ class DevEnv():
         self.custom_tasks: list[dict] = descriptor.get("custom_tasks", [])
         self.docker_run_tasks: list[dict] = descriptor.get("docker_run_tasks", [])
         self.run_tasks_as_current_user: bool = descriptor.get("run_tasks_as_current_user", False)
+        self.enable_docker_network: bool = descriptor.get("enable_docker_network", False)
         if "True" == descriptor.get("installed", "False"):
             self.is_installed = True
         else:
@@ -113,7 +114,8 @@ class DevEnv():
             "tools": self.tool_image_descriptors,
             "custom_tasks": self.custom_tasks,
             "docker_run_tasks": self.docker_run_tasks,
-            "run_tasks_as_current_user": self.run_tasks_as_current_user
+            "run_tasks_as_current_user": self.run_tasks_as_current_user,
+            "enable_docker_network": self.enable_docker_network
         }
         
         if omit_is_installed is False:

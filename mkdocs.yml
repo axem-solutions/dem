@@ -93,6 +93,7 @@ nav:
   - 'installation.md'
   - 'basics.md'
   - 'quickstart.md'
+  - 'dev_env_settings.md'
   - Commands: 
     - 'DevEnv Management':
       - 'add-task': 'commands/#dem-add-task-dev_env_name-task_name-command'

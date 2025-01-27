@@ -116,3 +116,25 @@ class ContainerEngine(Core):
             self.user_output.msg(f"[yellow]The {image} doesn't exist. Unable to remove it.[/]\n")
         except docker.errors.APIError:
             raise ContainerEngineError(f"The {image} is used by a container. Unable to remove it.\n")
+
+    def create_network(self, network_name: str) -> None:
+        """ Create a Docker network.
+
+            Args:
+                network_name -- the name of the network
+        """
+        self._docker_client.networks.create(network_name)
+
+    def remove_network(self, network_name: str) -> None:
+        """ Remove a Docker network.
+
+            Args:
+                network_name -- the name of the network
+        """
+        try:
+            network = self._docker_client.networks.get(network_name)
+        except docker.errors.NotFound:
+            self.user_output.msg(f"[yellow]The {network_name} doesn't exist. Unable to remove it.[/]\n")
+            return
+
+        network.remove()
