@@ -101,9 +101,10 @@ Running this command will open up the Dev Env Settings Window:
 
 ![Dev Env Settings Window](wp-content/dev_env_settings_window.png)
 
-The table on the left shows the available tool types. Select the ones you want to use in the 
+The table on the left shows the available tool images. Select the ones you want to use in the 
 Development Environment. You can navigate with the :material-arrow-up: and :material-arrow-down: or 
 :material-alpha-k: and :material-alpha-j: keys.  
+Filter the tools by typing in the search bar.  
 On the right side, you can see the tool images that are selected.
 
 When the Dev Env is ready, click or press :material-keyboard-return: on the `Save` button.
@@ -344,13 +345,15 @@ List the available tools.
 
 Modify a Development Environment descriptor available from the local descriptor storage (catalog).
 
-Running this command will open up the Dev Env Settings Window, prefilled with the current selection:
+Running this command will open up the Dev Env Settings Window, prefilled with the DevEnv's actual
+state:
 
 ![Dev Env Settings Window](wp-content/dev_env_settings_window.png)
 
-The table on the left shows the available tool types. Select the ones you want to use in the 
+The table on the left shows the available tool images. Select the ones you want to use in the 
 Development Environment. You can navigate with the :material-arrow-up: and :material-arrow-down: or 
 :material-alpha-k: and :material-alpha-j: keys.  
+Filter the tools by typing in the search bar.  
 On the right side, you can see the tool images that are selected.
 
 When the Dev Env is ready, clock or press :material-keyboard-return: on the `Save` button.

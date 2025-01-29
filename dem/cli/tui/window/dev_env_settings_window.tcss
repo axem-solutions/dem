@@ -8,12 +8,22 @@ DevEnvSettingsWindow {
     grid-gutter: 1;
 }
 
-.tool_image_selector {
+.tool_image_selector_container {
+    layout: vertical;
     row-span: 2;
     height: 100%;
-    background: #1d1d1d;
-    padding: 1;
     border: solid white;
+    background: #1d1d1d;
+}
+
+.search_input {
+    height: auto;
+}
+
+.tool_image_selector {
+    height: 1fr;
+    background: #1d1d1d;
+    border: hidden $accent;
 }
 
 .dev_env_status {

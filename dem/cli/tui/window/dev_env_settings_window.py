@@ -4,12 +4,12 @@
 from textual import on
 from textual.app import App, ComposeResult
 from textual.containers import Container
-from textual.widgets import Button, Header, Label, SelectionList
+from textual.widgets import Button, Header, Label, SelectionList, Input
 from textual.widgets.selection_list import Selection
+from textual.widgets.option_list import OptionDoesNotExist
 from textual.screen import Screen
-from textual.events import Mount
 from textual.binding import Binding, BindingType
-from typing import ClassVar
+from typing import ClassVar, cast
 from rich.table import Table
 
 from dem.cli.tui.printable_tool_image import PrintableToolImage
@@ -20,6 +20,24 @@ class SelectionListVimMode(SelectionList):
         Binding("j", "cursor_down", "Vim Down", show=False),
         Binding("k", "cursor_up", "Vim Up", show=False)
     ]
+
+class ToolImageSelectorContainer(Container):
+    """ A Container for the Tool Image Selector. """
+    BORDER_TITLE = "Tool Image Selector"
+
+class SelectionWithState(Selection):
+    """ A Selection with a state. """
+    def __init__(self, prompt: str, value: str, is_selected: bool, id: int) -> None:
+        """ Initialize the SelectionWithState.
+
+        Args:
+            prompt -- the text to display
+            value -- the value of the selection
+            is_selected -- whether the selection is selected
+            id -- the id of the selection
+        """
+        super().__init__(prompt, value, is_selected, id)
+        self.is_selected = is_selected
 
 class DevEnvSettingsScreen(Screen):
     """ The Development Environment Settings Screen. """
@@ -36,28 +54,29 @@ class DevEnvSettingsScreen(Screen):
         super().__init__()
         self.printable_tool_images = printable_tool_images
         self.already_selected_tool_images = already_selected_tool_images
+        self.dev_env_selections: list[SelectionWithState] = []
 
         self._create_widgets()
 
     def _create_widgets(self) -> None:
         """ Create the widgets. """
-        dev_env_selections: list[Selection] = []
-        for tool_image in self.printable_tool_images:
+        for index, tool_image in enumerate(self.printable_tool_images):
             if tool_image.name in self.already_selected_tool_images:
                 selected = True
             else:
                 selected = False
 
-            dev_env_selections.append(Selection(tool_image.name, tool_image.name, selected))
+            self.dev_env_selections.append(SelectionWithState(tool_image.name, tool_image.name, 
+                                                              selected, index))
 
-        self.tool_image_selector_widget = SelectionListVimMode(*dev_env_selections, 
+        self.tool_image_selector_widget = SelectionListVimMode(*self.dev_env_selections, 
                                                                 id="tool_image_selector_widget", 
                                                                 classes="tool_image_selector")
-        self.tool_image_selector_widget.border_title = "Select the Tool Images for the Development Environment"
         self.dev_env_status_widget = Label("", id="dev_env_status_widget", classes="dev_env_status")
         self.dev_env_status_widget.border_title = "Selected Tool Images"
-        self.cancel_button = Button("Cancel", id=self.app.cancel_button_id, classes="cancel_button")
-        self.save_button = Button("Save", id=self.app.save_button_id, classes="save_button")
+        self.cancel_button_widget = Button("Cancel", id=self.app.cancel_button_id, classes="cancel_button")
+        self.save_button_widget = Button("Save", id=self.app.save_button_id, classes="save_button")
+        self.search_input_widget = Input(placeholder="Search tool images...", id="search_input")
 
     def compose(self) -> ComposeResult:
         """ Compose the screen. 
@@ -67,16 +86,19 @@ class DevEnvSettingsScreen(Screen):
         """
         yield Header()
         with Container(id="dev_env_settings_screen", classes="dev_env_settings_screen"):
-            yield self.tool_image_selector_widget
+            with ToolImageSelectorContainer(id="tool_image_selector_container", 
+                                            classes="tool_image_selector_container"):
+                yield self.search_input_widget
+                yield self.tool_image_selector_widget
             yield self.dev_env_status_widget
             with Container(id="cancel_container", classes="cancel_container"):
-                yield self.cancel_button
+                yield self.cancel_button_widget
             with Container(id="save_container", classes="save_container"):
-                yield self.save_button
+                yield self.save_button_widget
 
     def on_mount(self) -> None:
         """ Handle the mount event. """
-        self.set_focus(self.tool_image_selector_widget)
+        self.set_focus(self.search_input_widget)
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
         """ Handle the button pressed event.
@@ -95,16 +117,47 @@ class DevEnvSettingsScreen(Screen):
         else:
             self.app.exit()
 
-    @on(Mount)
     @on(SelectionList.SelectedChanged)
     def update_dev_env_status(self) -> None:
-        """ Update the Development Environment status. """
+        """ Update the list of selected tool images. """
         selected_tool_images_table = Table(show_header=False, show_lines=False, show_edge=False)
-        for tool_image in self.tool_image_selector_widget.selected:
-            selected_tool_images_table.add_row(tool_image)
-        self.dev_env_status_widget.update(selected_tool_images_table)
+
+        self.app.selected_tool_images = []
+        for selection in self.dev_env_selections:
+            try:
+                # Check if the selection is in the filtered widget
+                self.tool_image_selector_widget.get_option(selection.id)
+
+                # The selection is in the filtered widget, update the selection state
+                if selection.value in self.tool_image_selector_widget.selected:
+                    selection.is_selected = True
+                else:
+                    selection.is_selected = False
+            except OptionDoesNotExist:
+                # The selection is not in the filtered widget
+                pass
+
+            if selection.is_selected:
+                self.app.selected_tool_images.append(selection.value)
+                selected_tool_images_table.add_row(selection.value)
         
-        self.app.selected_tool_images = self.tool_image_selector_widget.selected
+        self.dev_env_status_widget.update(selected_tool_images_table)
+
+    @on(Input.Changed)
+    def filter_tool_images(self, event: Input.Changed) -> None:
+        """ Filter the tool images based on user input. 
+            
+            Args:
+                event -- Information about the event. Contains the user input.
+        """
+        search_text = event.value.lower()
+        self.tool_image_selector_widget.clear_options()
+
+        for selection in self.dev_env_selections:
+            if search_text in selection.value:
+                self.tool_image_selector_widget.add_option(selection)
+                if selection.is_selected:
+                    self.tool_image_selector_widget.select(selection)
 
 class ConfirmScreen(Screen):
     """ The Confirm Screen. """
@@ -170,7 +223,7 @@ class DevEnvSettingsWindow(App):
         self.printable_tool_images = printable_tool_images
         self.already_selected_tool_images = already_selected_tool_images
         self.last_button_pressed = None
-        self.selected_tool_images = []
+        self.selected_tool_images: list[str] = []
 
     def on_mount(self) -> None:
         """ Handle the mount event. """
