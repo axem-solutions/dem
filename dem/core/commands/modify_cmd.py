@@ -2,7 +2,7 @@
 # dem/cli/command/modify_cmd
 
 import copy, typer
-from dem.core.dev_env import DevEnv, DevEnv
+from dem.core.dev_env import DevEnv, convert_to_tool_descriptor
 from dem.core.tool_images import ToolImage
 from dem.core.platform import Platform
 from dem.core.exceptions import PlatformError
@@ -36,19 +36,21 @@ def remove_missing_tool_images(all_tool_images: dict[str, ToolImage],
             Exceptions:
                 typer.Abort -- if the user doesn't want the removal of the missing Tool Images
     """
-    tool_images_are_missing = False
+    missing_tool_images_to_remove: list[str] = []
 
     for already_selected_tool_image in already_selected_tool_images:
         try:
             all_tool_images[already_selected_tool_image]
         except KeyError:
             stderr.print(f"[red]The {already_selected_tool_image} is not available anymore.[/]")
-            already_selected_tool_images.remove(already_selected_tool_image)
-            tool_images_are_missing = True
+            missing_tool_images_to_remove.append(already_selected_tool_image)
     
-    if tool_images_are_missing:
+    if missing_tool_images_to_remove:
         typer.confirm("By continuing, the missing tool images will be removed from the Development Environment.", 
                     abort=True)
+
+        for missing_tool_image in missing_tool_images_to_remove:
+            already_selected_tool_images.remove(missing_tool_image)
 
 def open_dev_env_settings_window(already_selected_tool_images: list[str], 
                                 printable_tool_images: list[PrintableToolImage]) -> DevEnvSettingsWindow:
@@ -73,28 +75,6 @@ def open_dev_env_settings_window(already_selected_tool_images: list[str],
 
     return dev_env_settings_window
 
-def update_dev_env(dev_env: DevEnv, selected_tool_images: list[str]) -> None:
-    """ Update the Development Environment.
-    
-        Args:
-            dev_env -- the Development Environment
-            selected_tool_images -- the selected Tool Images
-    """
-    dev_env.tool_image_descriptors = []
-
-    for tool_image in selected_tool_images:
-        if "/" in tool_image:
-            registry, image = tool_image.split("/")
-            image_name = registry + '/' + image.split(":")[0]
-        else:
-            image = tool_image
-            image_name = image.split(":")[0]
-
-        dev_env.tool_image_descriptors.append({
-            "image_name": image_name,
-            "image_version": image.split(":")[1]
-        })
-
 def modify_with_tui(platform: Platform, dev_env: DevEnv) -> None:
     """ Modify the Dev Env with the TUI.
     
@@ -115,7 +95,7 @@ def modify_with_tui(platform: Platform, dev_env: DevEnv) -> None:
         raise typer.Abort()
     elif dev_env_settings_window.last_button_pressed == dev_env_settings_window.confirm_screen_save_as_button_id:
         new_dev_env = copy.deepcopy(dev_env)
-        update_dev_env(new_dev_env, dev_env_settings_window.selected_tool_images)
+        new_dev_env.tool_image_descriptors  = convert_to_tool_descriptor(dev_env_settings_window.selected_tool_images)
         new_dev_env.name = typer.prompt("Name of the new Development Environment")
         
         check_for_new_dev_env = platform.get_dev_env_by_name(new_dev_env.name)
@@ -126,7 +106,7 @@ def modify_with_tui(platform: Platform, dev_env: DevEnv) -> None:
             stderr.print("[red]The Development Environment already exist.")
             raise typer.Abort()
     elif dev_env_settings_window.last_button_pressed == dev_env_settings_window.confirm_screen_confirm_button_id:
-        update_dev_env(dev_env, dev_env_settings_window.selected_tool_images)
+        dev_env.tool_image_descriptors = convert_to_tool_descriptor(dev_env_settings_window.selected_tool_images)
 
     platform.flush_dev_env_properties()
 

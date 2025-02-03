@@ -101,10 +101,16 @@ Running this command will open up the Dev Env Settings Window:
 
 ![Dev Env Settings Window](wp-content/dev_env_settings_window.png)
 
-The table on the left shows the available tool images. Select the ones you want to use in the 
-Development Environment. You can navigate with the :material-arrow-up: and :material-arrow-down: or 
-:material-alpha-k: and :material-alpha-j: keys.  
-Filter the tools by typing in the search bar.  
+There are two options to add new tools to the Development Environment:
+
+1. **Add Tool Images by name**: You can add tool images by typing their name in the input field. 
+The format should be the same as one would use with the `docker pull` command 
+({registry}/{image}:{tag}).
+2. **Add Tool Images by selecting**: You can select the tool images from the tool image selector 
+table. This table contains all the available tool images from the registries that are added to DEM. 
+You can navigate with the :material-arrow-up: and :material-arrow-down: or :material-alpha-k:
+and :material-alpha-j: keys. The table can be filtered by typing in the search bar.
+
 On the right side, you can see the tool images that are selected.
 
 When the Dev Env is ready, click or press :material-keyboard-return: on the `Save` button.
@@ -350,13 +356,19 @@ state:
 
 ![Dev Env Settings Window](wp-content/dev_env_settings_window.png)
 
-The table on the left shows the available tool images. Select the ones you want to use in the 
-Development Environment. You can navigate with the :material-arrow-up: and :material-arrow-down: or 
-:material-alpha-k: and :material-alpha-j: keys.  
-Filter the tools by typing in the search bar.  
+There are two options to add new tools to the Development Environment:
+
+1. **Add Tool Images by name**: You can add tool images by typing their name in the input field. 
+The format should be the same as one would use with the `docker pull` command 
+({registry}/{image}:{tag}).
+2. **Add Tool Images by selecting**: You can select the tool images from the tool image selector 
+table. This table contains all the available tool images from the registries that are added to DEM. 
+You can navigate with the :material-arrow-up: and :material-arrow-down: or :material-alpha-k:
+and :material-alpha-j: keys. The table can be filtered by typing in the search bar.
+
 On the right side, you can see the tool images that are selected.
 
-When the Dev Env is ready, clock or press :material-keyboard-return: on the `Save` button.
+When the Dev Env is ready, click or press :material-keyboard-return: on the `Save` button.
 
 !!! info 
 

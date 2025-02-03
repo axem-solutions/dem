@@ -4,13 +4,14 @@
 from textual import on
 from textual.app import App, ComposeResult
 from textual.containers import Container
-from textual.widgets import Button, Header, Label, SelectionList, Input
+from textual.widgets import Button, Header, Label, SelectionList, Input, ListView, ListItem
 from textual.widgets.selection_list import Selection
 from textual.widgets.option_list import OptionDoesNotExist
 from textual.screen import Screen
 from textual.binding import Binding, BindingType
 from typing import ClassVar, cast
 from rich.table import Table
+from textual import events
 
 from dem.cli.tui.printable_tool_image import PrintableToolImage
 
@@ -21,9 +22,12 @@ class SelectionListVimMode(SelectionList):
         Binding("k", "cursor_up", "Vim Up", show=False)
     ]
 
+class AddToolImageByNameContainer(Container):
+    BORDER_TITLE = "Add Tool Images by name"
+
 class ToolImageSelectorContainer(Container):
     """ A Container for the Tool Image Selector. """
-    BORDER_TITLE = "Tool Image Selector"
+    BORDER_TITLE = "Select Tool Images from the list below"
 
 class SelectionWithState(Selection):
     """ A Selection with a state. """
@@ -55,28 +59,31 @@ class DevEnvSettingsScreen(Screen):
         self.printable_tool_images = printable_tool_images
         self.already_selected_tool_images = already_selected_tool_images
         self.dev_env_selections: list[SelectionWithState] = []
+        self.tool_images_added_by_name: list[str] = []
 
         self._create_widgets()
 
     def _create_widgets(self) -> None:
         """ Create the widgets. """
-        for index, tool_image in enumerate(self.printable_tool_images):
+        for tool_image in self.printable_tool_images:
             if tool_image.name in self.already_selected_tool_images:
                 selected = True
             else:
                 selected = False
 
             self.dev_env_selections.append(SelectionWithState(tool_image.name, tool_image.name, 
-                                                              selected, index))
+                                                              selected, tool_image.name))
 
         self.tool_image_selector_widget = SelectionListVimMode(*self.dev_env_selections, 
                                                                 id="tool_image_selector_widget", 
                                                                 classes="tool_image_selector")
-        self.dev_env_status_widget = Label("", id="dev_env_status_widget", classes="dev_env_status")
+        self.dev_env_status_widget = ListView(id="dev_env_status_widget", classes="dev_env_status")
         self.dev_env_status_widget.border_title = "Selected Tool Images"
         self.cancel_button_widget = Button("Cancel", id=self.app.cancel_button_id, classes="cancel_button")
         self.save_button_widget = Button("Save", id=self.app.save_button_id, classes="save_button")
-        self.search_input_widget = Input(placeholder="Search tool images...", id="search_input")
+        self.add_by_name_input_widget = Input(placeholder="Type the name of the tool image...", 
+                                              id="add_by_name_input")
+        self.search_input_widget = Input(placeholder="Type to filter images...", id="search_input")
 
     def compose(self) -> ComposeResult:
         """ Compose the screen. 
@@ -86,10 +93,14 @@ class DevEnvSettingsScreen(Screen):
         """
         yield Header()
         with Container(id="dev_env_settings_screen", classes="dev_env_settings_screen"):
-            with ToolImageSelectorContainer(id="tool_image_selector_container", 
-                                            classes="tool_image_selector_container"):
-                yield self.search_input_widget
-                yield self.tool_image_selector_widget
+            with Container(id="tool_images_container", classes="tool_images_container"):
+                with AddToolImageByNameContainer(id="add_tool_image_by_name_container",
+                                                    classes="add_tool_image_by_name_container"):
+                    yield self.add_by_name_input_widget
+                with ToolImageSelectorContainer(id="tool_image_selector_container", 
+                                                classes="tool_image_selector_container"):
+                    yield self.search_input_widget
+                    yield self.tool_image_selector_widget
             yield self.dev_env_status_widget
             with Container(id="cancel_container", classes="cancel_container"):
                 yield self.cancel_button_widget
@@ -98,7 +109,10 @@ class DevEnvSettingsScreen(Screen):
 
     def on_mount(self) -> None:
         """ Handle the mount event. """
-        self.set_focus(self.search_input_widget)
+        self.set_focus(self.add_by_name_input_widget)
+
+        for tool_image in self.already_selected_tool_images:
+            self.dev_env_status_widget.append(ListItem(Label(tool_image)))
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
         """ Handle the button pressed event.
@@ -107,22 +121,51 @@ class DevEnvSettingsScreen(Screen):
             event (Button.Pressed): Information about the event.
         """
         self.app.last_button_pressed = event.button.id
-        if (event.button.id == self.app.save_button_id) and not self.app.selected_tool_images:
-            self.notify("Please select at least one Tool Image.", title="Error", severity="error")
-            return
+        if event.button.id == self.app.save_button_id:
+            for selection in self.dev_env_selections:
+                if selection.is_selected:
+                    self.app.selected_tool_images.append(selection.value)
+            
+            for tool_image in self.tool_images_added_by_name:
+                self.app.selected_tool_images.append(tool_image)
 
-        if (event.button.id == self.app.save_button_id) and self.already_selected_tool_images:
-            # The user is about to overwrite the DevEnv
-            self.app.push_screen(ConfirmScreen("Are you sure you want to overwrite the Development Environment?"))
-        else:
-            self.app.exit()
+            if not self.app.selected_tool_images:
+                self.notify("Please select at least one Tool Image.", title="Error", severity="error")
+                return
+
+            if self.already_selected_tool_images:
+                # The user is about to overwrite the DevEnv
+                self.app.push_screen(ConfirmScreen("Are you sure you want to overwrite the Development Environment?"))
+                return
+            
+        self.app.exit()
+
+    @on(Input.Submitted, "#add_by_name_input")
+    def add_tool_image_by_name(self, event: Input.Submitted) -> None:
+        """ Add the tool image by name when Enter is pressed.
+
+        Args:
+            event -- Information about the event.
+        """
+        tool_image_name = event.value.strip()
+        if tool_image_name:
+            event.input.value = ""  # Clear the input field
+
+            # Check if the tool image is already in the list
+            for list_item in self.dev_env_status_widget.children:
+                if isinstance(list_item, ListItem):
+                    label = list_item.query_one(Label)
+                    if label and label.renderable == tool_image_name:
+                        self.notify("The Tool Image is already added.", title="Error", severity="error")
+                        return
+
+            self.tool_images_added_by_name.append(tool_image_name)
+            self.dev_env_status_widget.append(ListItem(Label(tool_image_name)))
 
     @on(SelectionList.SelectedChanged)
     def update_dev_env_status(self) -> None:
         """ Update the list of selected tool images. """
-        selected_tool_images_table = Table(show_header=False, show_lines=False, show_edge=False)
-
-        self.app.selected_tool_images = []
+        self.dev_env_status_widget.clear()
         for selection in self.dev_env_selections:
             try:
                 # Check if the selection is in the filtered widget
@@ -138,12 +181,12 @@ class DevEnvSettingsScreen(Screen):
                 pass
 
             if selection.is_selected:
-                self.app.selected_tool_images.append(selection.value)
-                selected_tool_images_table.add_row(selection.value)
-        
-        self.dev_env_status_widget.update(selected_tool_images_table)
+                self.dev_env_status_widget.append(ListItem(Label(selection.value)))
 
-    @on(Input.Changed)
+        for tool_image in self.tool_images_added_by_name:
+            self.dev_env_status_widget.append(ListItem(Label(tool_image)))
+
+    @on(Input.Changed, "#search_input")
     def filter_tool_images(self, event: Input.Changed) -> None:
         """ Filter the tool images based on user input. 
             

@@ -8,10 +8,23 @@ DevEnvSettingsWindow {
     grid-gutter: 1;
 }
 
-.tool_image_selector_container {
+.tool_images_container {
     layout: vertical;
     row-span: 2;
-    height: 100%;
+}
+
+.add_tool_image_by_name_container {
+    height: auto;
+    border: solid white;
+    background: #1d1d1d;
+}
+
+#add_by_name_input {
+    height: auto;
+}
+
+.tool_image_selector_container {
+    layout: vertical;
     border: solid white;
     background: #1d1d1d;
 }

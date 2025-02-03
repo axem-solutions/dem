@@ -2,7 +2,7 @@
 # dem/cli/command/create_cmd.py
 
 import typer
-from dem.core.dev_env import DevEnv
+from dem.core.dev_env import DevEnv, convert_to_tool_descriptor
 from dem.core.tool_images import ToolImage
 from dem.core.platform import Platform
 from dem.core.exceptions import PlatformError
@@ -29,37 +29,6 @@ def open_dev_env_settings_panel(all_tool_images: dict[str, ToolImage]) -> list[s
 
     return dev_env_settings_window.selected_tool_images
 
-def create_new_dev_env_descriptor(dev_env_name: str, selected_tool_images: list[str]) -> dict:
-    """ Create a new Development Environment descriptor.
-        
-        Args:
-            dev_env_name -- the name of the Development Environment
-            selected_tool_images -- the selected Tool Images
-
-        Returns:
-            the descriptor of the new Development Environment
-    """
-    dev_env_descriptor = {
-        "name": dev_env_name,
-        "tools": []
-    }
-
-    for tool_image in selected_tool_images:
-        if "/" in tool_image:
-            registry, image = tool_image.split("/")
-            image_name = registry + '/' + image.split(":")[0]
-        else:
-            image = tool_image
-            image_name = image.split(":")[0]
-
-        tool_descriptor = {
-            "image_name": image_name,
-            "image_version": image.split(":")[1]
-        }
-        dev_env_descriptor["tools"].append(tool_descriptor)
-
-    return dev_env_descriptor
-
 def create_new_dev_env(platform: Platform, new_dev_env_descriptor: dict) -> None:
     """ Create a new Development Environment.
         
@@ -67,7 +36,7 @@ def create_new_dev_env(platform: Platform, new_dev_env_descriptor: dict) -> None
             platform -- the platform
             new_dev_env_descriptor -- the descriptor of the new Development Environment
     """
-    dev_env = DevEnv(descriptor=new_dev_env_descriptor)
+    dev_env = DevEnv(new_dev_env_descriptor)
     dev_env.assign_tool_image_instances(platform.tool_images)
     platform.local_dev_envs.append(dev_env)
 
@@ -101,7 +70,15 @@ def create_dev_env(platform: Platform, dev_env_name: str) -> None:
                 raise typer.Abort()
 
     selected_tool_images = open_dev_env_settings_panel(platform.tool_images.all_tool_images)
-    new_dev_env_descriptor = create_new_dev_env_descriptor(dev_env_name, selected_tool_images)
+    new_dev_env_descriptor = {
+        "name": dev_env_name,
+        "tools": convert_to_tool_descriptor(selected_tool_images),
+        "custom_tasks": [],
+        "docker_run_tasks": [],
+        "run_tasks_as_current_user": False,
+        "enable_docker_network": False,
+        "installed": "False"
+    }
     
     if dev_env_original is not None:
         dev_env_original.tool_image_descriptors = new_dev_env_descriptor["tools"]

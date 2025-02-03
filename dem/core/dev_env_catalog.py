@@ -41,7 +41,7 @@ class DevEnvCatalog(Core):
 
         try:
             for dev_env_descriptor in deser_json_response.json()["development_environments"]:
-                self.dev_envs.append(DevEnv(descriptor=dev_env_descriptor))
+                self.dev_envs.append(DevEnv(dev_env_descriptor))
         except Exception as e:
             raise CatalogError(f"The {self.name} Development Environment Catalog is corrupted.\n{str(e)}")
 
