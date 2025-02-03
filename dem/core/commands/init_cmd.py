@@ -19,7 +19,7 @@ def execute(platform: Platform, project_path: str) -> None:
         return
 
     try:
-        dev_env = DevEnv(descriptor_path=f"{project_path}/.axem/dev_env_descriptor.json")
+        dev_env = DevEnv.from_descriptor_path(f"{project_path}/.axem/dev_env_descriptor.json")
     except FileNotFoundError as e:
         stderr.print(f"[red]Error: No Dev Env is assigned to this project. You can assign one with `dem assign`.")
         return

@@ -2,50 +2,45 @@
 # dem/core/dev_env.py
 
 from dem.core.tool_images import ToolImage, ToolImages
-import json, os
+import json
+import os
 
-class DevEnv():
+class DevEnv:
     """ A Development Environment. """
 
-    def __init__(self, descriptor: dict | None = None, descriptor_path: str | None = None) -> None:
-        """ Init the DevEnv class. 
-        
-            A new instance can be created:
-            - from a Dev Env descriptor
-            - from a descriptor avaialable at the given path.
+    def __init__(self, descriptor: dict) -> None:
+        """ Initialize the DevEnv class.
 
-            Only one of the arguments can be used at a time.
-        
-            Args:
-                descriptor -- the description of the Development Environment from the dev_env.json 
-                              file
-                descriptor_path -- the path of the descriptor file
-
-            Exceptions:
-                ValueError -- if more than one of the arguments is not None
+        Args:
+            descriptor -- The description of the Development Environment from the dev_env.json file.
         """
+        self.name = descriptor["name"]
+        self.tool_image_descriptors = descriptor["tools"]
+        self.tool_images = []
+        self.custom_tasks = descriptor.get("custom_tasks", [])
+        self.docker_run_tasks = descriptor.get("docker_run_tasks", [])
+        self.run_tasks_as_current_user = descriptor.get("run_tasks_as_current_user", False)
+        self.enable_docker_network = descriptor.get("enable_docker_network", False)
+        self.is_installed = descriptor.get("installed", "False") == "True"
 
-        # Only one of the arguments can be not None
-        if sum(arg is not None for arg in [descriptor, descriptor_path]) > 1:
-            raise ValueError("Only one of the arguments can be not None.")
+    @classmethod
+    def from_descriptor_path(cls, descriptor_path: str) -> "DevEnv":
+        """ Create a DevEnv instance from a descriptor path.
 
-        if descriptor_path:
-            if not os.path.exists(descriptor_path):
-                raise FileNotFoundError("dev_env_descriptor.json doesn't exist.")
-            with open(descriptor_path, "r") as file:
-                descriptor = json.load(file)
+        Args:
+            descriptor_path -- The path of the descriptor file.
 
-        self.name: str = descriptor["name"]
-        self.tool_image_descriptors: list[dict[str, str]] = descriptor["tools"]
-        self.tool_images: list[ToolImage] = []
-        self.custom_tasks: list[dict] = descriptor.get("custom_tasks", [])
-        self.docker_run_tasks: list[dict] = descriptor.get("docker_run_tasks", [])
-        self.run_tasks_as_current_user: bool = descriptor.get("run_tasks_as_current_user", False)
-        self.enable_docker_network: bool = descriptor.get("enable_docker_network", False)
-        if "True" == descriptor.get("installed", "False"):
-            self.is_installed = True
-        else:
-            self.is_installed = False
+        Returns:
+            DevEnv -- An instance of the DevEnv class.
+
+        Raises:
+            FileNotFoundError -- If the descriptor file does not exist.
+        """
+        if not os.path.exists(descriptor_path):
+            raise FileNotFoundError(f"{descriptor_path} doesn't exist.")
+        with open(descriptor_path, "r") as file:
+            descriptor = json.load(file)
+        return cls(descriptor)
 
     def assign_tool_image_instances(self, tool_images: ToolImages) -> None:
         """ Assign the Tool Images to the Development Environment.
@@ -134,3 +129,36 @@ class DevEnv():
         """
         with open(path, "w") as file:
             json.dump(self.get_deserialized(True), file, indent=4)
+
+def convert_to_tool_descriptor(tool_images: list[str]) -> list[dict]:
+    """ Convert the tool images to tool descriptors.
+    
+        Args:
+            tool_images -- the tool images
+            
+        Returns:
+            the tool descriptors
+    """
+    tool_descriptors = []
+
+    for tool_image in tool_images:
+        if "/" in tool_image:
+            registry, image = tool_image.split("/")
+            image_name = registry + '/' + image.split(":")[0]
+        else:
+            image = tool_image
+            image_name = image.split(":")[0]
+
+        try:
+            image_tag = image.split(":")[1]
+        except IndexError:
+            image_tag = "latest"
+
+        tool_descriptor = {
+            "image_name": image_name,
+            "image_version": image_tag
+        }
+
+        tool_descriptors.append(tool_descriptor)
+
+    return tool_descriptors

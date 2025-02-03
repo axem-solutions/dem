@@ -71,7 +71,7 @@ class Platform(Core):
         self._dev_env_json_version_check(int(self.version.split('.', 1)[0]))
         self.default_dev_env_name = self.dev_env_json.deserialized.get("default_dev_env", "")
         for dev_env_descriptor in self.dev_env_json.deserialized["development_environments"]:
-            self.local_dev_envs.append(DevEnv(descriptor=dev_env_descriptor))
+            self.local_dev_envs.append(DevEnv(dev_env_descriptor))
 
     def assign_tool_image_instances_to_all_dev_envs(self) -> None:
         """ Assign the ToolImage instances to all Development Environments."""
@@ -266,7 +266,7 @@ class Platform(Core):
         if not os.path.exists(descriptor_path):
             raise FileNotFoundError(f"The {descriptor_path} file does not exist.")
 
-        assigned_dev_env = DevEnv(descriptor_path=descriptor_path)
+        assigned_dev_env = DevEnv.from_descriptor_path(descriptor_path)
         assigned_dev_env.assign_tool_image_instances(self.tool_images)
         existing_dev_env = self.get_dev_env_by_name(assigned_dev_env.name)
         if existing_dev_env is not None:
