@@ -270,11 +270,8 @@ command.
 
 **Description:**
 
-Install the selected Development Environment. DEM pulls all the required containerized tools (which 
-are not yet available on the host PC) from the registry and install the Development Environment 
-locally. If the same Development Environment is already installed, but the installation is not 
-complete, the missing tool images get obtained from the registry.
-
+Install the selected Development Environment. DEM pulls all the required containerized tools to the 
+appropriate hosts defined by the assigned tasks. 
 
 **Arguments:**
 

@@ -25,9 +25,6 @@ def main() -> None:
     Core.set_user_output(TUIUserOutput())
 
     try:
-        # Load the configuration file
-        dem.cli.main.platform.config_file.update()
-
         # Configure the Development Platform
         dem.cli.main.platform.configure()
 

@@ -48,3 +48,19 @@ class CatalogError(Exception):
 
     def __init__(self, message: str) -> None:
         super().__init__(self.base_message + message)
+
+class TaskError(Exception):
+    """ Raised when there is a problem with a task. """
+
+    base_message = "Task error: "
+
+    def __init__(self, message: str) -> None:
+        super().__init__(self.base_message + message)
+
+class DevEnvError(Exception):
+    """ Raised when there is a problem with a Development Environment. """
+
+    base_message = "Development Environment error: "
+
+    def __init__(self, message: str) -> None:
+        super().__init__(self.base_message + message)

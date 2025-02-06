@@ -2,13 +2,16 @@
 # dem/core/dev_env.py
 
 from dem.core.tool_images import ToolImage, ToolImages
+from dem.core.hosts import Hosts
+from dem.core.task import DockerTask, Task
+from dem.core.exceptions import DevEnvError, ContainerEngineError
 import json
 import os
 
 class DevEnv:
     """ A Development Environment. """
 
-    def __init__(self, descriptor: dict) -> None:
+    def __init__(self, descriptor: dict, hosts: Hosts) -> None:
         """ Initialize the DevEnv class.
 
         Args:
@@ -16,12 +19,16 @@ class DevEnv:
         """
         self.name = descriptor["name"]
         self.tool_image_descriptors = descriptor["tools"]
-        self.tool_images = []
+        self.assigned_tool_images: dict[str, ToolImage] = {}
         self.custom_tasks = descriptor.get("custom_tasks", [])
-        self.docker_run_tasks = descriptor.get("docker_run_tasks", [])
+        self.docker_task_descriptors = descriptor.get("docker_tasks", [])
         self.run_tasks_as_current_user = descriptor.get("run_tasks_as_current_user", False)
         self.enable_docker_network = descriptor.get("enable_docker_network", False)
         self.is_installed = descriptor.get("installed", "False") == "True"
+
+        self.tasks: list[Task] = []
+        for task_descriptor in self.docker_task_descriptors:
+            self.tasks.append(DockerTask(task_descriptor, hosts))
 
     @classmethod
     def from_descriptor_path(cls, descriptor_path: str) -> "DevEnv":
@@ -54,11 +61,10 @@ class DevEnv:
                 Exceptions:
                     ToolImageError -- if the Tool Image name is invalid
         """
-        self.tool_images = []
         for tool_descriptor in self.tool_image_descriptors:
             tool_image_name = tool_descriptor["image_name"] + ':' + tool_descriptor["image_version"]
             tool_image = tool_images.all_tool_images.get(tool_image_name, ToolImage(tool_image_name))
-            self.tool_images.append(tool_image)
+            self.assigned_tool_images[tool_image_name] = tool_image
 
     def add_task(self, task_name: str, command: str) -> None:
         """ Add a task to the Development Environment.
@@ -88,16 +94,13 @@ class DevEnv:
     def is_installation_correct(self) -> bool:
         """ Check if the installation is correct.
 
-            Return True if the Dev Env is in installed state and all the Tool Images are available, 
-            otherwise False.
+            Installation is correct if the Tool Images are available on the hosts defined by the 
+            tasks.
         """
-        if self.is_installed:
-            for tool_image in self.tool_images:
-                if tool_image.availability == ToolImage.NOT_AVAILABLE:
-                    break
-            else:
-                return True
-        return False
+        for task in self.tasks:
+            if task.image not in task.host.container_engine.get_local_tool_images():
+                return False
+        return True
 
     def get_deserialized(self, omit_is_installed: bool = False) -> dict:
         """ Create the deserialized json. 
@@ -108,7 +111,7 @@ class DevEnv:
             "name": self.name,
             "tools": self.tool_image_descriptors,
             "custom_tasks": self.custom_tasks,
-            "docker_run_tasks": self.docker_run_tasks,
+            "docker_tasks": self.docker_task_descriptors,
             "run_tasks_as_current_user": self.run_tasks_as_current_user,
             "enable_docker_network": self.enable_docker_network
         }
@@ -129,6 +132,22 @@ class DevEnv:
         """
         with open(path, "w") as file:
             json.dump(self.get_deserialized(True), file, indent=4)
+
+    def start_engines(self) -> None:
+        """ Start the container engines of the Development Environment.  
+        
+            Raises:
+                DevEnvError -- if the container engine couldn't be started on a host
+        """
+        failed_engines: str = []
+        for task in self.tasks:
+            try: 
+                task.host.container_engine.start()
+            except ContainerEngineError:
+                failed_engines.append(task.host.name)
+
+        if failed_engines:
+            raise DevEnvError(f"Failed to start the container engine on the following hosts: {failed_engines}")
 
 def convert_to_tool_descriptor(tool_images: list[str]) -> list[dict]:
     """ Convert the tool images to tool descriptors.

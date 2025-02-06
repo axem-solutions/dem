@@ -2,7 +2,8 @@
 # dem/cli/command/install_cmd.py
 
 from dem.core.dev_env import DevEnv
-from dem.core.platform import Platform, PlatformError
+from dem.core.platform import Platform
+from dem.core.exceptions import DevEnvError, PlatformError
 from dem.cli.console import stderr, stdout
 
 def execute(platform: Platform, dev_env_name: str) -> None:
@@ -24,8 +25,9 @@ def execute(platform: Platform, dev_env_name: str) -> None:
         stderr.print(f"[red]Error: The {dev_env_name} Development Environment is already installed.[/]")
     else:
         try:
+            dev_env_to_install.start_engines()
             platform.install_dev_env(dev_env_to_install)            
-        except PlatformError as e:
+        except (PlatformError, DevEnvError) as e:
             stderr.print(f"[red]{e}[/]")
         else:
             stdout.print(f"[green]Successfully installed the {dev_env_name}![/]")

@@ -119,7 +119,7 @@ def test_DevEnv_assign_tool_image_instances() -> None:
     }
     test_dev_env = dev_env.DevEnv(test_descriptor)
     mock_previous_tool_images = MagicMock()
-    test_dev_env.tool_images = [mock_previous_tool_images]
+    test_dev_env.assigned_tool_images = [mock_previous_tool_images]
 
     mock_tool_images = MagicMock()
     mock_tool_image1 = MagicMock()
@@ -141,8 +141,8 @@ def test_DevEnv_assign_tool_image_instances() -> None:
     test_dev_env.assign_tool_image_instances(mock_tool_images)
 
     # Check expectations
-    assert len(test_dev_env.tool_images) == 3
-    for tool_image in test_dev_env.tool_images:
+    assert len(test_dev_env.assigned_tool_images) == 3
+    for tool_image in test_dev_env.assigned_tool_images:
         assert tool_image is mock_tool_images.all_tool_images[tool_image.name]
 
 def test_DevEnv_add_task() -> None:
@@ -224,7 +224,7 @@ def test_DevEnv_is_installation_correct_true(mock___init__: MagicMock) -> None:
     mock_tool_image1.availability = dev_env.ToolImage.LOCAL_AND_REGISTRY
     mock_tool_image2 = MagicMock()
     mock_tool_image2.availability = dev_env.ToolImage.LOCAL_ONLY
-    test_dev_env.tool_images = [
+    test_dev_env.assigned_tool_images = [
         mock_tool_image1,
         mock_tool_image2
     ]
@@ -249,7 +249,7 @@ def test_DevEnv_is_installation_correct_false(mock___init__: MagicMock) -> None:
     mock_tool_image1.availability = dev_env.ToolImage.NOT_AVAILABLE
     mock_tool_image2 = MagicMock()
     mock_tool_image2.availability = dev_env.ToolImage.LOCAL_ONLY
-    test_dev_env.tool_images = [
+    test_dev_env.assigned_tool_images = [
         mock_tool_image1,
         mock_tool_image2
     ]
@@ -274,7 +274,7 @@ def test_DevEnv_is_installation_correct_not_istalled(mock___init__: MagicMock) -
     mock_tool_image1.availability = dev_env.ToolImage.REGISTRY_ONLY
     mock_tool_image2 = MagicMock()
     mock_tool_image2.availability = dev_env.ToolImage.LOCAL_ONLY
-    test_dev_env.tool_images = [
+    test_dev_env.assigned_tool_images = [
         mock_tool_image1,
         mock_tool_image2
     ]

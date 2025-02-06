@@ -43,12 +43,12 @@ def test_Hosts(mock_config_file) -> None:
     test_hosts = hosts.Hosts()
 
     # Check expectations
-    assert len(test_hosts.hosts) == len(test_host_configs)
+    assert len(test_hosts.remotes) == len(test_host_configs)
 
     for index, test_host_config in enumerate(test_host_configs):
-        assert test_hosts.hosts[index].name == test_host_config["name"]
-        assert test_hosts.hosts[index].address == test_host_config["address"]
-        assert test_hosts.hosts[index].config == test_host_config
+        assert test_hosts.remotes[index].name == test_host_config["name"]
+        assert test_hosts.remotes[index].address == test_host_config["address"]
+        assert test_hosts.remotes[index].config == test_host_config
 
 @patch.object(hosts.Core, "config_file")
 @patch.object(hosts.Core, "user_output")
@@ -70,7 +70,7 @@ def test_Hosts_error(mock_Host: MagicMock, mock_user_output: MagicMock, mock_con
     test_hosts = hosts.Hosts()
 
     # Check expectations
-    assert len(test_hosts.hosts) == 0
+    assert len(test_hosts.remotes) == 0
 
     mock_Host.assert_called_once_with(test_host_config[0])
     mock_user_output.assert_has_calls([
@@ -140,14 +140,14 @@ def test_Hosts_delete_host(mock___init__: MagicMock, mock_config_file: MagicMock
     mock_host.config = test_host_config
 
     test_hosts = hosts.Hosts()
-    test_hosts.hosts = [mock_host]
+    test_hosts.remotes = [mock_host]
 
     # Run unit under test
     test_hosts.delete_host(test_host_config)
 
     # Check expectations
     assert test_host_config not in mock_config_file.hosts
-    assert mock_host not in test_hosts.hosts
+    assert mock_host not in test_hosts.remotes
 
     mock___init__.assert_called_once()
     mock_config_file.flush.assert_called_once()
