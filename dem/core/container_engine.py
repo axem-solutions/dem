@@ -3,15 +3,28 @@
 
 from dem.core.core import Core
 from dem.core.exceptions import ContainerEngineError
-import docker
+from docker import DockerClient
 import docker.errors
 
 class ContainerEngine(Core):
     """ Operations on the Docker Container Engine."""
 
-    def __init__(self) -> None:
+    def __init__(self, docker_server_url: str) -> None:
         """ Init the class."""
-        self._docker_client = docker.from_env()
+        self._docker_client: DockerClient | None = None
+        self._docker_server_url: str = docker_server_url
+    
+    def start(self) -> None:
+        """ Start the Docker client.
+
+            Raises:
+                ContainerEngineError -- if the Docker client can't be started
+        """
+        if self._docker_client is None:
+            try:
+                self._docker_client = DockerClient(base_url=self._docker_server_url, version="auto")
+            except docker.errors.DockerException as e:
+                raise ContainerEngineError(f"Unable to connect to the Docker Engine: {e}")
 
     def get_local_tool_images(self) -> list[str]:
         """ Get local tool images.

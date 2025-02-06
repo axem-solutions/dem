@@ -8,29 +8,32 @@ from rich.table import Table
 def execute(platform: Platform) -> None:
     """ List available Hosts.
     
-    Usage: dem list-host
-    
-    """
+        Usage: dem list-host
+        
+        Ideally, if 'remote_hosts' is populated, it should look something like:
+        remote_hosts = [
+                    {'name': 'host1', 'address': 'ip_address1'}
+                    {'name': 'host2', 'address': 'ip_address2'}
+                    .... and so on
+                ]
+        if there are no hosts:
+        remote_hosts = [  ]
 
-    hosts: list[dict] = platform.hosts.list_host_configs()
+        Args:
+            platform -- the platform
     """
-    Ideally, if 'hosts' is populated, it should look something like:
-    hosts = [
-                {'name': 'host1', 'address': 'ip_address1'}
-                {'name': 'host2', 'address': 'ip_address2'}
-                .... and so on
-            ]
-    if there are no hosts:
-    hosts = [  ]
-    """
+    remote_hosts: list[dict] = platform.hosts.list_host_configs()
+
+    if not remote_hosts:
+        stdout.print("[yellow]No available remote hosts![/]")
+
     table = Table()
     table.add_column("name")
     table.add_column("address")
+    table.add_row(platform.hosts.local.name, platform.hosts.local.address)
+    for host in remote_hosts:
+        table.add_row(host['name'], host['address'])
 
-    if not hosts:
-        stdout.print("[yellow]No available remote hosts![/]")
-    else:
-        for host in hosts:
-            table.add_row(host['name'], host['address'])
-
-        stdout.print(table)
+    stdout.print(table)
+    stdout.print("Note: The 'local' host is the host where the DEM Core is running," + \
+                 "and is always available.")

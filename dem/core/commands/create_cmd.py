@@ -74,7 +74,7 @@ def create_dev_env(platform: Platform, dev_env_name: str) -> None:
         "name": dev_env_name,
         "tools": convert_to_tool_descriptor(selected_tool_images),
         "custom_tasks": [],
-        "docker_run_tasks": [],
+        "docker_tasks": [],
         "run_tasks_as_current_user": False,
         "enable_docker_network": False,
         "installed": "False"

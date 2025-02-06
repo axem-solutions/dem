@@ -4,6 +4,7 @@
 from dem.core.tool_images import ToolImage
 from dem.core.dev_env import DevEnv
 from dem.core.platform import Platform
+from dem.core.exceptions import DevEnvError
 from dem.cli.console import stdout, stderr
 from rich.table import Table
 import typer
@@ -38,7 +39,7 @@ def print_tools_info_table(dev_env: DevEnv, is_local: bool, platform: Platform =
     if is_local:
         tool_info_table.add_column("Available Locally")
 
-    for tool_image in sorted(dev_env.tool_images, key=lambda x: x.name):
+    for tool_image in sorted(dev_env.assigned_tool_images.values(), key=lambda x: x.name):
         if is_local:
             if tool_image.availability == ToolImage.LOCAL_ONLY:
                 available_locally_output = "[green]\u2713[/]"
@@ -104,6 +105,11 @@ def local_info(platform: Platform, dev_env_name: str) -> None:
         stderr.print(f"[red]Error: Unknown Development Environment: {dev_env_name}[/]\n")
         raise typer.Abort()
 
+    try:
+        dev_env.start_engines()
+    except DevEnvError as e:
+        stderr.print(f"[red]{e}[/]\n")
+    
     print_local_dev_env_info(platform, dev_env)
 
 def print_cat_dev_env_info(dev_env: DevEnv, cat_name: str) -> None:
@@ -132,7 +138,11 @@ def cat_dev_env_info(platform: Platform, dev_env_name: str, selected_cats: list[
             catalog.request_dev_envs()
             dev_env = catalog.get_dev_env_by_name(dev_env_name)
             if dev_env:
-                dev_env.assign_tool_image_instances(platform.tool_images)
+                try:
+                    dev_env.start_engines()
+                    dev_env.assign_tool_image_instances(platform.tool_images)
+                except DevEnvError as e:
+                    stderr.print(f"[red]{e}[/]\n")
                 print_cat_dev_env_info(dev_env, catalog.name)
                 break
     else:

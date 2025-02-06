@@ -93,7 +93,7 @@ def execute(platform: Platform, dev_env_name: str, task_name: str, cmd_extra_arg
     if task_name in dev_env.custom_tasks:
         command = dev_env.custom_tasks[task_name]
     else:
-        for docker_run_task in dev_env.docker_run_tasks:
+        for docker_run_task in dev_env.docker_task_descriptors:
             if docker_run_task["name"] == task_name:
                 command = compose_docker_run_task(platform, dev_env, docker_run_task, cmd_extra_args)
                 break

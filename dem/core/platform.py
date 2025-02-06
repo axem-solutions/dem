@@ -5,10 +5,9 @@ import os, truststore
 from typing import Any, Generator
 from dem.core.core import Core
 from dem.core.properties import __supported_dev_env_major_version__
-from dem.core.exceptions import DataStorageError, PlatformError, ContainerEngineError
+from dem.core.exceptions import DataStorageError, PlatformError, ContainerEngineError, DevEnvError
 from dem.core.dev_env_catalog import DevEnvCatalogs
 from dem.core.data_management import LocalDevEnvJSON
-from dem.core.container_engine import ContainerEngine
 from dem.core.registry import Registries
 from dem.core.tool_images import ToolImages, ToolImage
 from dem.core.dev_env import DevEnv
@@ -20,6 +19,8 @@ class Platform(Core):
     """ Representation of the Development Platform:
         - The available tool images.
         - The available Development Environments.
+        - The available registries.
+        - The available hosts.
         - External resources.
 
         The Development Platform is a singleton class. The instance can be accessed through the
@@ -35,6 +36,12 @@ class Platform(Core):
 
             The version is stored as a string in the X.Y format.
             Raises an DataStorageError exception, if the version is not supported.
+
+            Args:
+                dev_env_json_major_version -- the major version of the dev_env.json file
+
+            Raises:
+                DataStorageError -- if the version is not supported
         """
         
         if dev_env_json_major_version != __supported_dev_env_major_version__:
@@ -46,7 +53,11 @@ class Platform(Core):
         self._tool_images = None
         self._container_engine = None
         self._registries = None
-        self._hosts = None
+
+        # Load the configuration file
+        self.config_file.update()
+
+        self.hosts: Hosts = Hosts()
         self.default_dev_env_name: str = ""
         self.local_dev_envs: list[DevEnv] = []
         self.are_tool_images_assigned: bool = False
@@ -63,7 +74,7 @@ class Platform(Core):
     def load_dev_envs(self) -> None:
         """ Load the Development Environments from the dev_env.json file.
         
-            The Dev Envs will only contain the descriptors and not the ToolImage instances.
+            After this method the Dev Envs will only contain the descriptors and not the ToolImage instances.
         """
         self.dev_env_json = LocalDevEnvJSON()
         self.dev_env_json.update()
@@ -71,13 +82,22 @@ class Platform(Core):
         self._dev_env_json_version_check(int(self.version.split('.', 1)[0]))
         self.default_dev_env_name = self.dev_env_json.deserialized.get("default_dev_env", "")
         for dev_env_descriptor in self.dev_env_json.deserialized["development_environments"]:
-            self.local_dev_envs.append(DevEnv(dev_env_descriptor))
+            self.local_dev_envs.append(DevEnv(dev_env_descriptor, self.hosts))
 
     def assign_tool_image_instances_to_all_dev_envs(self) -> None:
         """ Assign the ToolImage instances to all Development Environments."""
+        failed_dev_envs: str = []
         for dev_env in self.local_dev_envs:
-            dev_env.assign_tool_image_instances(self.tool_images)
+            try:
+                dev_env.start_engines()
+                dev_env.assign_tool_image_instances(self.tool_images)
+            except DevEnvError as e:
+                failed_dev_envs.append(dev_env.name)
+                self.user_output.msg(f"[red]Error: {e}[/]")
         self.are_tool_images_assigned = True
+
+        if failed_dev_envs:
+            self.user_output.msg(f"[red]Error: Failed to assign Tool Images to the following Development Environments: {failed_dev_envs}[/]")
 
     @property
     def tool_images(self) -> ToolImages:
@@ -86,21 +106,10 @@ class Platform(Core):
             The ToolImages() gets instantiated only at the first access.
         """
         if self._tool_images is None:
-            self._tool_images = ToolImages(self.container_engine, self.registries)
+            self._tool_images = ToolImages(self.hosts.local.container_engine, self.registries)
             self._tool_images.update(True, self.get_tool_image_info_from_registries)
         return self._tool_images
     
-    @property
-    def container_engine(self) -> ContainerEngine:
-        """ The container engine.
-
-            The ContainerEngine() gets instantiated only at the first access.
-        """
-        if self._container_engine is None:
-            self._container_engine = ContainerEngine()
-
-        return self._container_engine
-
     @property
     def registries(self) -> Registries:
         """ The registries.
@@ -122,17 +131,6 @@ class Platform(Core):
             self._dev_env_catalogs = DevEnvCatalogs()
 
         return self._dev_env_catalogs
-
-    @property
-    def hosts(self) -> Hosts:
-        """ The hosts.
-        
-            The Hosts() gets instantiated only at the first access.
-        """
-        if self._hosts is None:
-            self._hosts = Hosts()
-
-        return self._hosts
 
     def get_deserialized(self) -> dict:
             """ Create the deserialized json. 
@@ -167,18 +165,30 @@ class Platform(Core):
         
             Args:
                 dev_env_to_install -- the Development Environment to install
+
+            Raises:
+                PlatformError -- if the install fails
         """
-        for tool_image in dev_env_to_install.tool_images:
-            if tool_image.availability is ToolImage.REGISTRY_ONLY or \
-               tool_image.availability is ToolImage.NOT_AVAILABLE:
-                self.user_output.msg(f"\nPulling image {tool_image.name}", is_title=True)
-                try:                
-                    self.container_engine.pull(tool_image.name)
-                except ContainerEngineError as e:
-                    raise PlatformError(f"Dev Env install failed. --> {str(e)}")
+        for task in dev_env_to_install.docker_task_descriptors:
+            tool_image_name: str = task["image"]
+            try:
+                tool_image = dev_env_to_install.assigned_tool_images[tool_image_name]
+            except KeyError:
+                raise PlatformError(f"The {tool_image_name} Tool Image is not assigned to the Development Environment.")
+
+            host_name = task["host_name"]
+            host = self.hosts.get_host_by_name(host_name)
+            if host is None:
+                raise PlatformError(f"The {host_name} host is not available.")
+
+            self.user_output.msg(f"\nPulling image {tool_image.name}", is_title=True)
+            try:                
+                host.container_engine.pull(tool_image_name)
+            except ContainerEngineError as e:
+                raise PlatformError(f"Dev Env install failed. --> {str(e)}")
 
         if dev_env_to_install.enable_docker_network:
-            self.container_engine.create_network(dev_env_to_install.name)
+            self.hosts.local.container_engine.create_network(dev_env_to_install.name)
 
         dev_env_to_install.is_installed = True
         self.flush_dev_env_properties()
@@ -201,11 +211,11 @@ class Platform(Core):
         all_required_tool_images = set()
         for dev_env in self.local_dev_envs:
             if (dev_env is not dev_env_to_uninstall) and dev_env.is_installed:
-                for tool_image in dev_env.tool_images:
+                for tool_image in dev_env.assigned_tool_images:
                     all_required_tool_images.add(tool_image.name)
 
         tool_images_to_remove = set()
-        for tool_image in dev_env_to_uninstall.tool_images:
+        for tool_image in dev_env_to_uninstall.assigned_tool_images:
             if tool_image.availability == ToolImage.NOT_AVAILABLE or tool_image.availability == ToolImage.REGISTRY_ONLY:
                 yield f"[yellow]Warning: The {tool_image.name} image could not be removed, because it is not available locally.[/]"
                 continue
@@ -213,16 +223,16 @@ class Platform(Core):
             if tool_image.name not in all_required_tool_images:
                 tool_images_to_remove.add(tool_image.name)
 
-        for tool_image_name in tool_images_to_remove:
-            try:
-                self.container_engine.remove(tool_image_name)
-            except ContainerEngineError as e:
-                raise PlatformError(f"Dev Env uninstall failed. --> {str(e)}")
-            else:
-                yield f"The {tool_image_name} image has been removed."
+        # for tool_image_name in tool_images_to_remove:
+        #     try:
+        #         self.container_engine.remove(tool_image_name)
+        #     except ContainerEngineError as e:
+        #         raise PlatformError(f"Dev Env uninstall failed. --> {str(e)}")
+        #     else:
+        #         yield f"The {tool_image_name} image has been removed."
 
-        if dev_env_to_uninstall.enable_docker_network:
-            self.container_engine.remove_network(dev_env_to_uninstall.name)
+        # if dev_env_to_uninstall.enable_docker_network:
+        #     self.container_engine.remove_network(dev_env_to_uninstall.name)
             
         dev_env_to_uninstall.is_installed = False
         if self.default_dev_env_name == dev_env_to_uninstall.name:

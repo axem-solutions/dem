@@ -4,6 +4,7 @@
 from dem.core.platform import Platform
 from dem.core.dev_env import DevEnv
 from dem.core.dev_env_catalog import DevEnvCatalog
+from dem.core.exceptions import DevEnvError
 from dem.cli.console import stdout, stderr
 from rich.table import Table
 from typing import List
@@ -19,6 +20,10 @@ def add_dev_env_info_to_table(platform: Platform, table: Table, dev_env: DevEnv)
     installed_column = ""
     default_column = ""
     if dev_env.is_installed:
+        try:
+            dev_env.start_engines()
+        except DevEnvError as e:
+            stderr.print(f"[red]{e}[/]")
         dev_env.assign_tool_image_instances(platform.tool_images)
         installed_column = "[green]✓[/]"
         
