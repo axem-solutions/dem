@@ -20,18 +20,16 @@ class Host():
 class Hosts(Core):
     """ List of the available Hosts. """
     def __init__(self) -> None:
-        """ Init the class with the host configurations.
-
-            Args:
-                config_file -- contains the host configurations
-            """
+        """ Init the class with the host configurations. """
         self.remotes: dict[str, Host] = {}
 
+        # The local host is always available.
         local_host_config = {
             "name": "local",
             "address": "unix://var/run/docker.sock"
         }
         self.local = Host(local_host_config)
+        self.local.container_engine.start()
 
         for host_config in self.config_file.hosts:
             host = Host(host_config)
@@ -73,4 +71,7 @@ class Hosts(Core):
 
             Return with the host instance. If the host doesn't exist, return with None.
         """
-        return self.remotes.get(host_name, None)
+        if host_name == "local":
+            return self.local
+        else: 
+            return self.remotes.get(host_name, None)
