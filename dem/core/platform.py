@@ -169,17 +169,16 @@ class Platform(Core):
             Raises:
                 PlatformError -- if the install fails
         """
-        for task in dev_env_to_install.docker_task_descriptors:
-            tool_image_name: str = task["image"]
+        for task in dev_env_to_install.tasks:
+            tool_image_name: str = task.image
             try:
                 tool_image = dev_env_to_install.assigned_tool_images[tool_image_name]
             except KeyError:
                 raise PlatformError(f"The {tool_image_name} Tool Image is not assigned to the Development Environment.")
 
-            host_name = task["host_name"]
-            host = self.hosts.get_host_by_name(host_name)
+            host = self.hosts.get_host_by_name(task.host_name)
             if host is None:
-                raise PlatformError(f"The {host_name} host is not available.")
+                raise PlatformError(f"The {task.host_name} host is not available.")
 
             self.user_output.msg(f"\nPulling image {tool_image.name}", is_title=True)
             try:                
@@ -208,31 +207,30 @@ class Platform(Core):
         if not self.are_tool_images_assigned:
             self.assign_tool_image_instances_to_all_dev_envs()
 
-        all_required_tool_images = set()
-        for dev_env in self.local_dev_envs:
-            if (dev_env is not dev_env_to_uninstall) and dev_env.is_installed:
-                for tool_image in dev_env.assigned_tool_images:
-                    all_required_tool_images.add(tool_image.name)
+        all_required_tool_images: dict[str, set] = {}
 
-        tool_images_to_remove = set()
-        for tool_image in dev_env_to_uninstall.assigned_tool_images:
-            if tool_image.availability == ToolImage.NOT_AVAILABLE or tool_image.availability == ToolImage.REGISTRY_ONLY:
-                yield f"[yellow]Warning: The {tool_image.name} image could not be removed, because it is not available locally.[/]"
+        for dev_env in self.local_dev_envs:
+            if dev_env is dev_env_to_uninstall or not dev_env.is_installed:
+                continue
+            for task in dev_env.tasks:
+                required_tool_images_per_host: set = all_required_tool_images.get(task.host.name, set())
+                required_tool_images_per_host.add(task.image)
+                all_required_tool_images[task.host.name] = required_tool_images_per_host
+
+        for task in dev_env_to_uninstall.tasks:
+            if task.host.name in all_required_tool_images.keys() and \
+                task.image in all_required_tool_images[task.host.name]:
                 continue
 
-            if tool_image.name not in all_required_tool_images:
-                tool_images_to_remove.add(tool_image.name)
+            try:
+                task.host.container_engine.remove(task.image)
+            except ContainerEngineError as e:
+                raise PlatformError(f"Dev Env uninstall failed. --> {str(e)}")
+            else:
+                yield f"The {task.image} image has been removed."
 
-        # for tool_image_name in tool_images_to_remove:
-        #     try:
-        #         self.container_engine.remove(tool_image_name)
-        #     except ContainerEngineError as e:
-        #         raise PlatformError(f"Dev Env uninstall failed. --> {str(e)}")
-        #     else:
-        #         yield f"The {tool_image_name} image has been removed."
-
-        # if dev_env_to_uninstall.enable_docker_network:
-        #     self.container_engine.remove_network(dev_env_to_uninstall.name)
+        if dev_env_to_uninstall.enable_docker_network:
+            self.hosts.local.container_engine.remove_network(dev_env_to_uninstall.name)
             
         dev_env_to_uninstall.is_installed = False
         if self.default_dev_env_name == dev_env_to_uninstall.name:

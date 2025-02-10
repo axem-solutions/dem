@@ -441,8 +441,10 @@ Development Environment.
 
 Uninstall the selected Development Environment.
 
-Sets the installed flag to False. DEM checks whether 
-a tool image is required or not by any of the remaining installed local Development Environments. In case the tool image is not required anymore, the DEM tries to delete it. 
+Sets the installed flag to False. DEM checks whether a tool image of the DevEnv is required or not 
+by any of the remaining installed Development Environments on the appropriate hosts. In case the 
+tool image is not required anymore by any other DevEnv, the DEM tries to delete it from the host 
+where it is installed. 
 
 **Arguments:**
 
