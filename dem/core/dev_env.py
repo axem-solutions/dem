@@ -26,9 +26,20 @@ class DevEnv:
         self.enable_docker_network = descriptor.get("enable_docker_network", False)
         self.is_installed = descriptor.get("installed", "False") == "True"
 
-        self.tasks: list[Task] = []
+        self.tasks: dict[str, Task] = {}
         for task_descriptor in self.docker_task_descriptors:
-            self.tasks.append(DockerTask(task_descriptor, hosts))
+            if task_descriptor["connect_to_network"]:
+                task_descriptor["network"] = self.name
+            else:
+                task_descriptor["network"] = None
+
+            if self.run_tasks_as_current_user:
+                task_descriptor["run_as_current_user"] = True
+            else:
+                task_descriptor["run_as_current_user"] = False
+
+            task = DockerTask(task_descriptor, hosts)
+            self.tasks[task.name] = task
 
     @classmethod
     def from_descriptor_path(cls, descriptor_path: str) -> "DevEnv":
@@ -97,7 +108,7 @@ class DevEnv:
             Installation is correct if the Tool Images are available on the hosts defined by the 
             tasks.
         """
-        for task in self.tasks:
+        for task in self.tasks.values():
             if task.image not in task.host.container_engine.get_local_tool_images():
                 return False
         return True
@@ -140,7 +151,7 @@ class DevEnv:
                 DevEnvError -- if the container engine couldn't be started on a host
         """
         failed_engines: str = []
-        for task in self.tasks:
+        for task in self.tasks.values():
             try: 
                 task.host.container_engine.start()
             except ContainerEngineError:

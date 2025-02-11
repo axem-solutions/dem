@@ -169,7 +169,7 @@ class Platform(Core):
             Raises:
                 PlatformError -- if the install fails
         """
-        for task in dev_env_to_install.tasks:
+        for task in dev_env_to_install.tasks.values():
             tool_image_name: str = task.image
             try:
                 tool_image = dev_env_to_install.assigned_tool_images[tool_image_name]
@@ -180,7 +180,7 @@ class Platform(Core):
             if host is None:
                 raise PlatformError(f"The {task.host_name} host is not available.")
 
-            self.user_output.msg(f"\nPulling image {tool_image.name}", is_title=True)
+            self.user_output.msg(f"\nPulling image {tool_image.name} to host {task.host_name}", is_title=True)
             try:                
                 host.container_engine.pull(tool_image_name)
             except ContainerEngineError as e:
@@ -217,7 +217,7 @@ class Platform(Core):
                 required_tool_images_per_host.add(task.image)
                 all_required_tool_images[task.host.name] = required_tool_images_per_host
 
-        for task in dev_env_to_uninstall.tasks:
+        for task in dev_env_to_uninstall.tasks.values():
             if task.host.name in all_required_tool_images.keys() and \
                 task.image in all_required_tool_images[task.host.name]:
                 continue
