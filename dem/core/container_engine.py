@@ -4,7 +4,9 @@
 from dem.core.core import Core
 from dem.core.exceptions import ContainerEngineError
 from docker import DockerClient
+from docker.models.containers import Container
 import docker.errors
+from typing import Any
 
 class ContainerEngine(Core):
     """ Operations on the Docker Container Engine."""
@@ -49,70 +51,34 @@ class ContainerEngine(Core):
         resp = self._docker_client.api.pull(repository, stream=True, decode=True)
         self.user_output.progress_generator(resp)
 
-    def run(self, container_arguments: list[str]) -> None:
+    def run(self, image: str, command: str | list | None = None, stdout: bool = True, 
+            stderr: bool = True, remove: bool = True, **kwargs: dict[str, Any]) -> None:
         """ Run the container. 
         
-            The function converts the Docker CLI commands to Docker Engine API call parameters.
-
             The container always gets started in detach mode. If the -d option is enabled the 
-            function returns after the container has been started. If not enabled the DEM streams 
+            function returns after the container has been started. If not enabled DEM streams 
             the logs from the container to the user output while it is running. This effectively 
             results in the same behaviour as the docker run command's -d option.
 
             Args:
-                container_arguments -- list of arguments to pass to the API call
+                image -- the image to run
+                command -- the command to run in the container
+                stdout -- stream stdout
+                stderr -- stream stderr
+                remove -- remove the container after it has stopped
+                kwargs -- additional arguments - see the docker-py documentation for more details
         """
-        container_arguments_iter = iter(container_arguments)
+        # Run the container in detached mode
+        container: Container = self._docker_client.containers.run(image, command, detach=True, stdout=True, stderr=True,
+                                                                  **kwargs)
 
-        image = ""
-        ports = {}
-        name = ""
-        volumes = []
-        command = ""
-        privileged = False
-        auto_remove = False
-        stream_logs = True
+        # Attach to the container's logs and stream them in real-time
+        for line in container.logs(stdout=stdout, stderr=stderr, stream=True):
+            self.user_output.msg(line.decode().strip())
 
-        try:
-            for argument in container_arguments_iter:
-                if argument.startswith("-"):
-                    match argument:
-                        case "-p":
-                            port_binding = next(container_arguments_iter)
-                            try:
-                                host_port, container_port = port_binding.split(":")
-                            except ValueError:
-                                raise ContainerEngineError("The option -p has invalid argument: " + port_binding)
-                            ports[container_port] = int(host_port)
-                        case "--name":
-                            name = next(container_arguments_iter)
-                        case "-v":
-                            volumes.append(next(container_arguments_iter))
-                        case "--privileged":
-                            privileged = True
-                        case "--rm":
-                            auto_remove = True
-                        case "-d":
-                            stream_logs = False
-                        case _:
-                            raise ContainerEngineError("The input parameter " + argument + " is not supported!")
-                else:
-                    image = argument
-                    for argument in container_arguments_iter:
-                        command += argument + " "
-                    command = command[:-1]
-        except StopIteration:
-            raise ContainerEngineError("Invalid input parameter!")
-
-        run_result = self._docker_client.containers.run(image, command=command, 
-                                                        auto_remove=auto_remove, 
-                                                        privileged=privileged, volumes=volumes,
-                                                        ports=ports, name=name, stderr=True, 
-                                                        detach=True)
-
-        if stream_logs:
-            for line in run_result.logs(stream=True):
-                self.user_output.msg(line.decode().strip())
+        # Remove the container if the remove option is enabled
+        if remove:
+            container.remove()
 
     def remove(self, image: str) -> None:
         """ Remove a tool image.

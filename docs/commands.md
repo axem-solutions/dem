@@ -398,7 +398,7 @@ Rename the Development Environment.
 
 **Description:**
 
-Run the task of the Development Environment. The Dev Env must be installed.
+Run the task on the specified host. The Dev Env must be installed.
 
 If the Dev Env is not specified, the default Dev Env will be used. If the default Dev Env is not
 set, an error message will be printed.
@@ -413,7 +413,7 @@ set, an error message will be printed.
 
 | Argument         | Description                                              | Required        |
 |------------------|----------------------------------------------------------|----------------:|
-| `DEV_ENV_NAME`   | Name of the Development Environment to run the task in. If not set, the default Dev Env will be used. | 
+| `DEV_ENV_NAME`   | Name of the Development Environment. If not set, the default Dev Env will be used. | 
 | `TASK_NAME`      | The name of the task to run.                             | :material-check:|
 
 ---
