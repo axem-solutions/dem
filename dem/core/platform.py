@@ -128,7 +128,7 @@ class Platform(Core):
             The DevEnvCatalogs() gets instantiated only at the first access.
         """
         if self._dev_env_catalogs is None:
-            self._dev_env_catalogs = DevEnvCatalogs()
+            self._dev_env_catalogs = DevEnvCatalogs(self.hosts)
 
         return self._dev_env_catalogs
 
@@ -212,7 +212,7 @@ class Platform(Core):
         for dev_env in self.local_dev_envs:
             if dev_env is dev_env_to_uninstall or not dev_env.is_installed:
                 continue
-            for task in dev_env.tasks:
+            for task in dev_env.tasks.values():
                 required_tool_images_per_host: set = all_required_tool_images.get(task.host.name, set())
                 required_tool_images_per_host.add(task.image)
                 all_required_tool_images[task.host.name] = required_tool_images_per_host
@@ -274,7 +274,7 @@ class Platform(Core):
         if not os.path.exists(descriptor_path):
             raise FileNotFoundError(f"The {descriptor_path} file does not exist.")
 
-        assigned_dev_env = DevEnv.from_descriptor_path(descriptor_path)
+        assigned_dev_env = DevEnv.from_descriptor_path(descriptor_path, self.hosts)
         assigned_dev_env.assign_tool_image_instances(self.tool_images)
         existing_dev_env = self.get_dev_env_by_name(assigned_dev_env.name)
         if existing_dev_env is not None:

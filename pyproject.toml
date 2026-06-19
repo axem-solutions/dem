@@ -28,6 +28,7 @@ dem = "dem.__main__:main"
 
 [tool.poetry.dependencies]
 python = "^3.10"
+click = "<8.2"
 docker = "^7.0.0"
 readchar = "^4.0.6"
 requests = "2.31.0"

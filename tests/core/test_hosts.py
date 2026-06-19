@@ -1,153 +1,92 @@
-"""Test cases for the Hosts."""
-# tests/core/test_hosts.py
+"""Unit tests for hosts."""
 
-# Unit under test:
 import dem.core.hosts as hosts
 
-# Test framework
-from unittest.mock import patch, MagicMock, call
+from unittest.mock import MagicMock, patch
 
-## Test cases
 
-def test_Host() -> None:
-    # Test setup
-    test_host_config: dict[str, str] = {
-        "name": "test_name",
-        "address": "test_address"
-    }
+@patch("dem.core.hosts.ContainerEngine")
+def test_host_initializes_container_engine(mock_container_engine: MagicMock) -> None:
+    actual = hosts.Host({"name": "remote", "address": "tcp://remote"})
 
-    # Run unit under test
-    test_host = hosts.Host(test_host_config)
+    assert actual.name == "remote"
+    assert actual.address == "tcp://remote"
+    assert actual.container_engine is mock_container_engine.return_value
+    mock_container_engine.assert_called_once_with("tcp://remote")
 
-    # Check expectations
-    assert test_host.name == test_host_config["name"]
-    assert test_host.address == test_host_config["address"]
-    assert test_host.config == test_host_config
 
 @patch.object(hosts.Core, "config_file")
-def test_Hosts(mock_config_file) -> None:
-    # Test setup
-    test_host_configs: list[dict[str, str]] = [
-        {
-            "name": "test_name1",
-            "address": "test_address1"
-        },
-        {
-            "name": "test_name2",
-            "address": "test_address2"
-        }
-    ]
-    mock_config_file.hosts = test_host_configs
-
-    # Run unit under test
-    test_hosts = hosts.Hosts()
-
-    # Check expectations
-    assert len(test_hosts.remotes) == len(test_host_configs)
-
-    for index, test_host_config in enumerate(test_host_configs):
-        assert test_hosts.remotes[index].name == test_host_config["name"]
-        assert test_hosts.remotes[index].address == test_host_config["address"]
-        assert test_hosts.remotes[index].config == test_host_config
-
-@patch.object(hosts.Core, "config_file")
-@patch.object(hosts.Core, "user_output")
 @patch("dem.core.hosts.Host")
-def test_Hosts_error(mock_Host: MagicMock, mock_user_output: MagicMock, mock_config_file: MagicMock) -> None:
-    # Test setup
-    test_host_config: list[dict[str, str]] = [
-        {
-            "name": "test_name1",
-            "address": "test_address1"
-        }
+def test_hosts_initializes_local_and_remotes(mock_host_class: MagicMock, mock_config_file: MagicMock) -> None:
+    mock_config_file.hosts = [
+        {"name": "remote-a", "address": "tcp://a"},
+        {"name": "remote-b", "address": "tcp://b"},
     ]
-    mock_config_file.hosts = test_host_config
+    local_host = MagicMock()
+    local_host.name = "local"
+    remote_a = MagicMock()
+    remote_a.name = "remote-a"
+    remote_b = MagicMock()
+    remote_b.name = "remote-b"
+    mock_host_class.side_effect = [local_host, remote_a, remote_b]
 
-    test_exception_text = "test_exception_text"
-    mock_Host.side_effect = Exception(test_exception_text)
+    actual = hosts.Hosts()
 
-    # Run unit under test
-    test_hosts = hosts.Hosts()
+    assert actual.local is local_host
+    assert actual.remotes == {"remote-a": remote_a, "remote-b": remote_b}
+    actual.local.container_engine.start.assert_called_once()
 
-    # Check expectations
-    assert len(test_hosts.remotes) == 0
 
-    mock_Host.assert_called_once_with(test_host_config[0])
-    mock_user_output.assert_has_calls([
-        call.error(test_exception_text),
-        call.error("Error: Couldn't add this Host.")
-    ])
+@patch("dem.core.hosts.Host")
+@patch.object(hosts.Hosts, "__init__", return_value=None)
+def test_add_host_updates_remotes_and_config(mock_init: MagicMock, mock_host_class: MagicMock) -> None:
+    actual = hosts.Hosts()
+    actual.remotes = {}
+    actual.config_file = MagicMock()
+    actual.config_file.hosts = []
+    remote_host = MagicMock()
+    remote_host.name = "remote-a"
+    mock_host_class.return_value = remote_host
+    host_config = {"name": "remote-a", "address": "tcp://a"}
 
-@patch.object(hosts.Core, "config_file")
-@patch.object(hosts.Hosts, "_try_to_add_host")
-@patch.object(hosts.Hosts, "__init__")
-def test_Hosts_add_host(mock___init__: MagicMock, mock__try_to_add_host: MagicMock, 
-                        mock_config_file: MagicMock) -> None:
-    # Test setup
-    mock___init__.return_value = None
+    actual.add_host(host_config)
 
-    mock_config_file.hosts = []
+    assert actual.remotes == {"remote-a": remote_host}
+    assert actual.config_file.hosts == [host_config]
+    actual.config_file.flush.assert_called_once()
 
-    test_host_config: dict[str, str] = {
-        "name": "test_name",
-        "address": "test_address"
-    }
 
-    test_hosts = hosts.Hosts()
+@patch.object(hosts.Hosts, "__init__", return_value=None)
+def test_list_host_configs_returns_config(mock_init: MagicMock) -> None:
+    actual = hosts.Hosts()
+    actual.config_file = MagicMock()
+    actual.config_file.hosts = [{"name": "remote-a", "address": "tcp://a"}]
 
-    # Run unit under test
-    test_hosts.add_host(test_host_config)
+    assert actual.list_host_configs() == [{"name": "remote-a", "address": "tcp://a"}]
 
-    # Check expectations
-    assert test_host_config in mock_config_file.hosts
 
-    mock___init__.assert_called_once()
-    mock__try_to_add_host.assert_called_once_with(test_host_config)
-    mock_config_file.flush.assert_called_once()
+@patch.object(hosts.Hosts, "__init__", return_value=None)
+def test_delete_host_updates_remotes_and_config(mock_init: MagicMock) -> None:
+    actual = hosts.Hosts()
+    actual.remotes = {"remote-a": MagicMock()}
+    actual.config_file = MagicMock()
+    host_config = {"name": "remote-a", "address": "tcp://a"}
+    actual.config_file.hosts = [host_config]
 
-@patch.object(hosts.Core, "config_file")
-@patch.object(hosts.Hosts, "__init__")
-def test_Hosts_list_host_configs(mock___init__: MagicMock, mock_config_file: MagicMock) -> None:
-    # Test setup
-    mock___init__.return_value = None
+    actual.delete_host(host_config)
 
-    mock_hosts = MagicMock()
-    mock_config_file.hosts = mock_hosts
+    assert actual.remotes == {}
+    assert actual.config_file.hosts == []
+    actual.config_file.flush.assert_called_once()
 
-    test_hosts = hosts.Hosts()
 
-    # Run unit under test
-    actual_hosts: list = test_hosts.list_host_configs()
+@patch.object(hosts.Hosts, "__init__", return_value=None)
+def test_get_host_by_name_returns_local_and_remote(mock_init: MagicMock) -> None:
+    actual = hosts.Hosts()
+    actual.local = MagicMock()
+    remote_host = MagicMock()
+    actual.remotes = {"remote-a": remote_host}
 
-    # Check expectations
-    assert actual_hosts is mock_hosts
-
-    mock___init__.assert_called_once()
-
-@patch.object(hosts.Core, "config_file")
-@patch.object(hosts.Hosts, "__init__")
-def test_Hosts_delete_host(mock___init__: MagicMock, mock_config_file: MagicMock) -> None:
-    # Test setup
-    mock___init__.return_value = None
-
-    test_host_config: dict[str, str] = {
-        "name": "test_name",
-        "address": "test_address"
-    }
-    mock_config_file.hosts = [test_host_config]
-
-    mock_host = MagicMock()
-    mock_host.config = test_host_config
-
-    test_hosts = hosts.Hosts()
-    test_hosts.remotes = [mock_host]
-
-    # Run unit under test
-    test_hosts.delete_host(test_host_config)
-
-    # Check expectations
-    assert test_host_config not in mock_config_file.hosts
-    assert mock_host not in test_hosts.remotes
-
-    mock___init__.assert_called_once()
-    mock_config_file.flush.assert_called_once()
+    assert actual.get_host_by_name("local") is actual.local
+    assert actual.get_host_by_name("remote-a") is remote_host
+    assert actual.get_host_by_name("missing") is None

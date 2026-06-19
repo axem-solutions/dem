@@ -42,11 +42,12 @@ class DevEnv:
             self.tasks[task.name] = task
 
     @classmethod
-    def from_descriptor_path(cls, descriptor_path: str) -> "DevEnv":
+    def from_descriptor_path(cls, descriptor_path: str, hosts: Hosts) -> "DevEnv":
         """ Create a DevEnv instance from a descriptor path.
 
         Args:
             descriptor_path -- The path of the descriptor file.
+            hosts -- The available hosts to resolve docker tasks against.
 
         Returns:
             DevEnv -- An instance of the DevEnv class.
@@ -58,7 +59,7 @@ class DevEnv:
             raise FileNotFoundError(f"{descriptor_path} doesn't exist.")
         with open(descriptor_path, "r") as file:
             descriptor = json.load(file)
-        return cls(descriptor)
+        return cls(descriptor, hosts)
 
     def assign_tool_image_instances(self, tool_images: ToolImages) -> None:
         """ Assign the Tool Images to the Development Environment.

@@ -27,7 +27,7 @@ def import_dev_env_from_json(platform: Platform,path_to_dev_env: str) -> None:
             stderr.print("[red]Error: The Development Environment already exists.[/]")
             raise typer.Abort()
         else:        
-            new_dev_env: DevEnv = DevEnv(dev_env_descriptor_to_import)
+            new_dev_env: DevEnv = DevEnv(dev_env_descriptor_to_import, platform.hosts)
             platform.local_dev_envs.append(new_dev_env)
     except json.decoder.JSONDecodeError:
        stderr.print("[red]Error: invalid json format.[/]")

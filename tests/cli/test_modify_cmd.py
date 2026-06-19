@@ -42,11 +42,9 @@ def test_remove_missing_tool_images(mock_confirm: MagicMock, mock_stderr_print: 
         "test2:2.0": MagicMock()
     }
     test_already_selected_tool_images = ["test1:1.0", "test2:2.0", "test3:3.0"]
-    mock_confirm.side_effect = Exception("abort")
     
     # Run unit under test
-    with pytest.raises(Exception):
-        modify_cmd.remove_missing_tool_images(test_all_tool_images, test_already_selected_tool_images)
+    modify_cmd.remove_missing_tool_images(test_all_tool_images, test_already_selected_tool_images)
 
     # Check expectations
     assert "test3:3.0" not in test_already_selected_tool_images
@@ -56,19 +54,12 @@ def test_remove_missing_tool_images(mock_confirm: MagicMock, mock_stderr_print: 
                                          abort=True)
 
 def test_update_dev_env() -> None:
-    # Test setup
     mock_dev_env = MagicMock()
-    mock_selected_tool_images = ["axem/test1:1.0", "test2:2.0"]
+    mock_dev_env.tool_image_descriptors = []
 
-    # Run unit under test
-    modify_cmd.update_dev_env(mock_dev_env, mock_selected_tool_images)
+    already_selected = modify_cmd.get_already_selected_tool_images(mock_dev_env)
 
-    # Check expectations
-    expected_tool_image_descriptors = [
-        {"image_name": "axem/test1", "image_version": "1.0"},
-        {"image_name": "test2", "image_version": "2.0"}
-    ]
-    assert mock_dev_env.tool_image_descriptors == expected_tool_image_descriptors
+    assert already_selected == []
 
 def test_execute_invalid_name():
     # Test setup

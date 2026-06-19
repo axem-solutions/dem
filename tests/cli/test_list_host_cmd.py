@@ -20,6 +20,8 @@ def test_list_host(mock_stdout_print: MagicMock, mock_Table: MagicMock):
     # Test setup
     mock_platform = MagicMock()
     main.platform = mock_platform
+    mock_platform.hosts.local.name = "local"
+    mock_platform.hosts.local.address = "unix://var/run/docker.sock"
     test_hosts = [
         {
             "name": "test_name1",
@@ -37,18 +39,22 @@ def test_list_host(mock_stdout_print: MagicMock, mock_Table: MagicMock):
     assert runner_result.exit_code == 0
 
     mock_Table.assert_called_once()
-    calls = [call("name"), call("address")]
-    mock_table.add_column.assert_has_calls(calls)
+    mock_table.add_column.assert_has_calls([call("name"), call("address")])
 
     mock_platform.hosts.list_host_configs.assert_called_once()
     
     calls = []
+    calls = [call("local", "unix://var/run/docker.sock")]
     for host in test_hosts:
         calls.append(call(host["name"], host["address"]))
 
     mock_table.add_row.assert_has_calls(calls)
-
-    mock_stdout_print.assert_called_once_with(mock_table)
+    mock_stdout_print.assert_has_calls(
+        [
+            call(mock_table),
+            call("Note: The 'local' host is the host where the DEM Core is running,and is always available."),
+        ]
+    )
 
 @patch("dem.core.commands.list_host_cmd.Table")
 @patch("dem.core.commands.list_host_cmd.stdout.print")
@@ -57,6 +63,8 @@ def test_list_host_non_available(mock_stdout_print: MagicMock, mock_Table: Magic
     # Test setup
     mock_platform = MagicMock()
     main.platform = mock_platform
+    mock_platform.hosts.local.name = "local"
+    mock_platform.hosts.local.address = "unix://var/run/docker.sock"
 
     mock_platform.hosts.list_host_configs.return_value = []
     mock_table = MagicMock()
@@ -69,9 +77,14 @@ def test_list_host_non_available(mock_stdout_print: MagicMock, mock_Table: Magic
     assert runner_result.exit_code == 0
 
     mock_Table.assert_called_once()
-    calls = [call("name"), call("address")]
-    mock_table.add_column.assert_has_calls(calls)
+    mock_table.add_column.assert_has_calls([call("name"), call("address")])
 
     mock_platform.hosts.list_host_configs.assert_called_once()
     
-    mock_stdout_print.assert_called_once_with("[yellow]No available remote hosts![/]")
+    mock_stdout_print.assert_has_calls(
+        [
+            call("[yellow]No available remote hosts![/]"),
+            call(mock_table),
+            call("Note: The 'local' host is the host where the DEM Core is running,and is always available."),
+        ]
+    )

@@ -78,7 +78,11 @@ def test_print_tools_info_table(mock_Table: MagicMock, mock_print_status: MagicM
     mock_tool_image4 = MagicMock()
     mock_tool_image4.name = "tool4"
     mock_tool_image4.availability = info_cmd.ToolImage.NOT_AVAILABLE
-    mock_dev_env.tool_images = [mock_tool_image2, mock_tool_image4, mock_tool_image3, mock_tool_image1]
+    mock_dev_env.assigned_tool_images = {
+        tool.name: tool
+        for tool in [mock_tool_image2, mock_tool_image4, mock_tool_image3, mock_tool_image1]
+    }
+    mock_dev_env.run_tasks_as_current_user = False
 
     mock_table = MagicMock()
     mock_Table.return_value = mock_table
@@ -96,7 +100,9 @@ def test_print_tools_info_table(mock_Table: MagicMock, mock_print_status: MagicM
                                          call("tool3", "[red]\u2717[/]"),
                                          call("tool4", "[red]\u2717[/]")])
     mock_print_status.assert_called_once_with(mock_platform, mock_dev_env)
-    mock_stdout_print.assert_called_once_with(mock_table)
+    mock_stdout_print.assert_has_calls(
+        [call("Tasks run as the current user: False\n"), call(mock_table)]
+    )
 
 @patch("dem.core.commands.info_cmd.stdout.print")
 @patch("dem.core.commands.info_cmd.print_status")
@@ -117,7 +123,10 @@ def test_print_tools_info_table_catalog(mock_Table: MagicMock, mock_print_status
     mock_tool_image4 = MagicMock()
     mock_tool_image4.name = "tool4"
     mock_tool_image4.availability = info_cmd.ToolImage.NOT_AVAILABLE
-    mock_dev_env.tool_images = [mock_tool_image2, mock_tool_image4, mock_tool_image3, mock_tool_image1]
+    mock_dev_env.assigned_tool_images = {
+        tool.name: tool
+        for tool in [mock_tool_image2, mock_tool_image4, mock_tool_image3, mock_tool_image1]
+    }
 
     mock_table = MagicMock()
     mock_Table.return_value = mock_table
@@ -138,7 +147,7 @@ def test_print_tools_info_table_catalog(mock_Table: MagicMock, mock_print_status
 def test_print_tasks_info_table(mock_stdout_print: MagicMock, mock_Table: MagicMock) -> None:
     # Setup
     mock_dev_env = MagicMock()
-    mock_dev_env.tasks = {
+    mock_dev_env.custom_tasks = {
         "task1": "command1",
         "task2": "command2"
     }
@@ -163,7 +172,7 @@ def test_print_local_dev_env_info(mock_stdout_print: MagicMock,
     # Setup
     mock_dev_env = MagicMock()
     mock_dev_env.name = "test_dev_env"
-    mock_dev_env.tasks = MagicMock()
+    mock_dev_env.custom_tasks = {"task1": "command1"}
     mock_dev_env.is_installed = True
     mock_dev_env.is_installation_correct.return_value = True
 
@@ -189,7 +198,7 @@ def test_print_local_dev_env_info_incorrect_install(mock_stderr_print: MagicMock
     # Setup
     mock_dev_env = MagicMock()
     mock_dev_env.name = "test_dev_env"
-    mock_dev_env.tasks = MagicMock()
+    mock_dev_env.custom_tasks = {"task1": "command1"}
     mock_dev_env.is_installed = True
     mock_dev_env.is_installation_correct.return_value = False
 

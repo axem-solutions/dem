@@ -36,7 +36,7 @@ def create_new_dev_env(platform: Platform, new_dev_env_descriptor: dict) -> None
             platform -- the platform
             new_dev_env_descriptor -- the descriptor of the new Development Environment
     """
-    dev_env = DevEnv(new_dev_env_descriptor)
+    dev_env = DevEnv(new_dev_env_descriptor, platform.hosts)
     dev_env.assign_tool_image_instances(platform.tool_images)
     platform.local_dev_envs.append(dev_env)
 

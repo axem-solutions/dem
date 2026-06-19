@@ -4,21 +4,24 @@
 from dem.core.dev_env import DevEnv
 from dem.core.core import Core
 from dem.core.exceptions import CatalogError
+from dem.core.hosts import Hosts
 import requests
 
 class DevEnvCatalog(Core):
     """ Development Environment Catalog. """
-    def __init__(self, catalog_config: dict) -> None:
+    def __init__(self, catalog_config: dict, hosts: Hosts) -> None:
         """ Init the class. 
 
             The name of the catalog must be unique.
 
             Args:
                 catalog_config -- the catalog description
+                hosts -- the available hosts
         """
         self.config: dict = catalog_config
         self.url: str = catalog_config["url"]
         self.name: str = catalog_config["name"]
+        self.hosts: Hosts = hosts
         self.dev_envs: list[DevEnv] = []
 
     def request_dev_envs(self) -> None:
@@ -40,8 +43,9 @@ class DevEnvCatalog(Core):
                                "\nDoes the URL point to a valid Development Environment Catalog?\n")
 
         try:
+            self.dev_envs = []
             for dev_env_descriptor in deser_json_response.json()["development_environments"]:
-                self.dev_envs.append(DevEnv(dev_env_descriptor))
+                self.dev_envs.append(DevEnv(dev_env_descriptor, self.hosts))
         except Exception as e:
             raise CatalogError(f"The {self.name} Development Environment Catalog is corrupted.\n{str(e)}")
 
@@ -60,11 +64,12 @@ class DevEnvCatalog(Core):
 
 class DevEnvCatalogs(Core):
     """ List of the available Development Environment Catalogs. """
-    def __init__(self) -> None:
+    def __init__(self, hosts: Hosts) -> None:
         """ Init the class with the catalogs from the config file."""
+        self.hosts: Hosts = hosts
         self.catalogs: list[DevEnvCatalog] = []
         for catalog_config in self.config_file.catalogs:
-            self.catalogs.append(DevEnvCatalog(catalog_config))
+            self.catalogs.append(DevEnvCatalog(catalog_config, self.hosts))
 
     def add_catalog(self, name: str, url:str) -> None:
         """ Add a new catalog.
@@ -84,7 +89,7 @@ class DevEnvCatalogs(Core):
             "name": name,
             "url": url
         }
-        new_dev_env_catalog = DevEnvCatalog(catalog_config)
+        new_dev_env_catalog = DevEnvCatalog(catalog_config, self.hosts)
         # Request the Development Environments to validate the catalog.
         new_dev_env_catalog.request_dev_envs()
 

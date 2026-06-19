@@ -77,7 +77,7 @@ def test_import_dev_env_from_json(mock_open, mock_json, mock_DevEnvLocal: MagicM
     # Check expectations
     mock_open.assert_called_once_with(path, "r")
     mock_platform.get_dev_env_by_name.assert_called_once_with(test_name)
-    mock_DevEnvLocal.assert_called_once_with(test_dev_env)
+    mock_DevEnvLocal.assert_called_once_with(test_dev_env, mock_platform.hosts)
     fake_opened_file.close.assert_called() 
 
 @patch("dem.core.commands.import_cmd.open",MagicMock())

@@ -137,7 +137,7 @@ def test_autocomplete_task_name() -> None:
     mock_platform = MagicMock()
     mock_dev_env1 = MagicMock()
     mock_dev_env1.name = "dev_env_1"
-    mock_dev_env1.tasks = {
+    mock_dev_env1.custom_tasks = {
         "test": "test",
         "task": "command"
     }
@@ -155,7 +155,7 @@ def test_autocomplete_task_name() -> None:
 
     main.platform = mock_platform
 
-    expected_completions = [mock_dev_env1.tasks["test"]]
+    expected_completions = ["test"]
 
     # Run unit under test
     actual_completions = []
